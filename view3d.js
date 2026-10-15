@@ -227,7 +227,8 @@ async function loadFiles(files) {
 
 /* ---------- main view ---------- */
 function makeRenderer(container) {
-  const r = new T.WebGLRenderer({ antialias: true, alpha: true });
+  // logarithmic depth: details sit 0.05–0.2 mm in front of a face and would flicker (z-fighting) with a linear depth buffer
+  const r = new T.WebGLRenderer({ antialias: true, alpha: true, logarithmicDepthBuffer: true });
   r.setPixelRatio(Math.min(2, window.devicePixelRatio || 1)); r.setClearColor(0x000000, 0);
   if (T.sRGBEncoding) r.outputEncoding = T.sRGBEncoding;
   container.appendChild(r.domElement); return r;
@@ -250,7 +251,7 @@ async function mount(container, snap) {
   T = await P.loadThree();
   if (!R) {
     container.innerHTML = '';
-    const renderer = makeRenderer(container), scene = new T.Scene(), camera = new T.PerspectiveCamera(32, 1, 5, 6000);
+    const renderer = makeRenderer(container), scene = new T.Scene(), camera = new T.PerspectiveCamera(32, 1, 30, 6000);
     lights(scene);
     const ground = new T.Mesh(new T.CircleGeometry(420, 64), new T.MeshBasicMaterial({ color: lin(themeColors().line), transparent: true, opacity: .55 }));
     ground.rotation.x = -Math.PI / 2; ground.position.set(0, -0.5, -FRAME.depth / 2); scene.add(ground);
@@ -326,7 +327,7 @@ async function preview(container, geoms, color) {
   T = await P.loadThree();
   let pv = previews.get(container);
   if (!pv) {
-    const renderer = makeRenderer(container), scene = new T.Scene(), camera = new T.PerspectiveCamera(30, 1, 5, 5000);
+    const renderer = makeRenderer(container), scene = new T.Scene(), camera = new T.PerspectiveCamera(30, 1, 20, 5000);
     lights(scene);
     const controls = new T.OrbitControls(camera, renderer.domElement); controls.enableDamping = true;
     pv = { renderer, scene, camera, controls, group: null, alive: true };
