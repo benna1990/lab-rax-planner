@@ -5,7 +5,7 @@
 | Check | Result |
 |---|---|
 | `node tools/validate.mjs` | catalog.json valid: 507 parts, mounts and extras |
-| `node --check` on all 12 scripts | pass |
+| `node --check` on all 13 scripts | pass |
 | `tools/test-estimate.mjs` | pass |
 | `tools/test-market.mjs` | pass |
 | `tools/test-power.mjs` | pass |
@@ -23,7 +23,7 @@
 | Start empty | Empty 5U rack; readiness shows "Add your hardware" and "Pick your 3D printer"; the search field gets focus; Undo works |
 | Adding two ½U parts | The second goes to a free U on its own (no overlap) |
 | Forced ½U overlap | A warning at the top of readiness; step 2 turns red; "Show" switches to the Flat view and selects the part, with its "Move it to a free spot" action |
-| Step bar 3 and 5 | Open and scroll to Power & network and the Print list |
+| Step bar 3 and 5 | Open and scroll to Connect (with Power & network opened) and the Print list |
 | Taxonomy | Step 1 lists the frame ("Lab Rax frame, heat-set inserts, by mklements") with 26 sizes and versions; the Where bar ends with Inside (wall mounting, rails, inside parts); device rows read "Mount: …" |
 | Verification | Keystone panel: "½U ✓", preview "Height Verified (measured from the model file, 2026-10-15)", selection bar "Height verified · fit documented ?" |
 | Connect (example build) | Step 3 opens Connect: power (2 own adapters, Pi cluster noted), Pi 5 (4 × 5.1 V 5 A), fans (5 × 40 mm, 5 V, ≈ 0.5 A), PoE (52 W, unused); adding the NeoPixel logo adds the lighting card |
