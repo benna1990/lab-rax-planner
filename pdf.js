@@ -13,6 +13,15 @@ function load() {
 const clean = s => String(s == null ? '' : s).replace(/≈/g, '~').replace(/″/g, '"').replace(/✓/g, '').replace(/[^\x00-\xFF–—‘’“”•…×½]/g, '');
 const hex = c => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
 const lum = c => { const [r, g, b] = hex(c); return .2126 * r + .7152 * g + .0722 * b; };
+// a part's face as drawn by shapes.js (an SVG string, w × h mm) turned into an image for jsPDF, ppm pixels per mm
+function raster(svg, w, h, ppm, type) {
+  return new Promise((res, rej) => {
+    const pw = Math.max(1, Math.round(w * ppm)), ph = Math.max(1, Math.round(h * ppm)), img = new Image();
+    img.onload = () => { const c = document.createElement('canvas'); c.width = pw; c.height = ph; c.getContext('2d').drawImage(img, 0, 0, pw, ph); res(c.toDataURL(type, .9)); };
+    img.onerror = () => rej(new Error('could not draw a part'));
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg.replace('<svg ', '<svg width="' + pw + '" height="' + ph + '" '));
+  });
+}
 
 async function make(d) {
   const JsPDF = await load();
@@ -30,9 +39,15 @@ async function make(d) {
   doc.setFont('helvetica', 'normal'); doc.setFontSize(10.5); doc.setTextColor(...muted);
   text(d.title + '  ·  ' + d.version + '  ·  ' + new Date().toISOString().slice(0, 10), M, M + 13);
 
-  // rack drawing at 1:2.5 (1 mm on paper = 2.5 mm real)
-  const k = 1 / 2.5, U = 44.45, post = 18 * k, bay = 222 * k, fw = bay + 2 * post, bodyH = d.h * U * k;
-  const x0 = M + 8, top = M + 30, topH = 28 * k;
+  // rack drawing at 1:2.5 (1 mm on paper = 2.5 mm real), smaller when a tall top mount would push it off the page
+  const U = 44.45, tl = d.topLook && d.topLook.h > 1.5 ? d.topLook : null;
+  const k = Math.min(1 / 2.5, (BOT - M - 48) / ((tl ? tl.h : 0) + 28 + d.h * U + 12)), post = 18 * k, bay = 222 * k, fw = bay + 2 * post, bodyH = d.h * U * k;
+  const x0 = M + 8, top = M + 30 + (tl ? tl.h * k : 0), topH = 28 * k;
+  // the parts' faces as images, one per distinct face; JPEG for panels, PNG for the top mount (it stands on the paper)
+  const faces = new Map(), img = async (key, make) => { if (!faces.has(key)) faces.set(key, await make().catch(() => null)); return faces.get(key); };
+  for (const it of d.items) if (it.face) it.img = await img(it.face, () => raster(it.face, 250, it.h2 * U / 2 - .79, 4, 'image/jpeg'));
+  const topImg = tl ? await img(tl.svg, () => raster(tl.svg, tl.w, tl.h, 4, 'image/png')) : null;
+  if (topImg) doc.addImage(topImg, 'PNG', x0 + fw / 2 - tl.w * k / 2, top - tl.h * k, tl.w * k, tl.h * k, 'top', 'FAST');
   doc.setFillColor(...hex(d.frame)); doc.roundedRect(x0, top, fw, topH, 1.2, 1.2, 'F');
   doc.setFont('helvetica', 'bold'); doc.setFontSize(Math.min(14, 120 / Math.max(4, d.label.length))); doc.setTextColor(...hex(d.accent)); text(d.label, x0 + fw / 2, top + topH / 2 + 1.6, { align: 'center' });
   const by = top + topH;
@@ -43,6 +58,8 @@ async function make(d) {
   for (let i = 0; i < d.h; i++) text(String(d.h - i), x0 - 2.5, by + (i + .5) * U * k + 1, { align: 'right' });
   for (const it of d.items) {
     const y = by + it.pos2 * U / 2 * k, h = it.h2 * U / 2 * k - .3, c = hex(it.color);
+    // the part as it looks (no text on it, like the planner's front view; the layout lists what sits where)
+    if (it.img) { doc.addImage(it.img, 'JPEG', x0 + fw / 2 - 125 * k, y, 250 * k, h, 'face' + [...faces.keys()].indexOf(it.face), 'FAST'); continue; }
     doc.setFillColor(...c); doc.rect(x0 + post * .25, y, fw - post * .5, h, 'F');
     doc.setFontSize(Math.min(7.5, h * 2.4)); doc.setFont('helvetica', 'bold');
     doc.setTextColor(...(lum(it.color) < 140 ? hex(d.accent) : ink));
@@ -50,7 +67,7 @@ async function make(d) {
   }
   doc.setDrawColor(...muted); doc.setLineWidth(.2);
   const dimY = by + bodyH + 12 * k + 5; doc.line(x0 + post, dimY, x0 + post + bay, dimY); doc.line(x0 + post, dimY - 1.2, x0 + post, dimY + 1.2); doc.line(x0 + post + bay, dimY - 1.2, x0 + post + bay, dimY + 1.2);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...muted); text('222 mm clear · scale 1:2.5', x0 + fw / 2, dimY + 4, { align: 'center' });
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...muted); text('222 mm clear · scale 1:' + +(1 / k).toFixed(1), x0 + fw / 2, dimY + 4, { align: 'center' });
   const dimX = x0 + fw + 4; doc.line(dimX, by, dimX, by + bodyH); doc.line(dimX - 1.2, by, dimX + 1.2, by); doc.line(dimX - 1.2, by + bodyH, dimX + 1.2, by + bodyH);
   text((d.h * U).toFixed(1) + ' mm', dimX + 2, by + bodyH / 2, { angle: 90 });
 

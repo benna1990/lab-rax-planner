@@ -867,8 +867,8 @@ async function buildPack() {
 }
 function pdfData() {
   return { title: (state.label || 'Lab Rax') + ' · ' + state.h + 'U', h: state.h, version: state.version === 'brass' ? 'Heat-set inserts' : 'Bolted', frame: state.frame, panel: state.panel, accent: state.accent, label: state.label || 'Lab Rax',
-    top: state.top ? fullName(LIB[state.top]) : null,
-    items: byPos().map(i => { const d = info(i); return { pos: uRange(i.pos2, d.h2), pos2: i.pos2, h2: d.h2, name: fullName(d), label: i.label || '', u: uTxt(d), url: d.url || '', author: d.author || '', color: colorOf(i) }; }),
+    top: state.top ? fullName(LIB[state.top]) : null, topLook: state.top ? LS.topFor(LIB[state.top], colorsFor()) : null, // the top mount as drawn above the frame
+    items: byPos().map(i => { const d = info(i); return { pos: uRange(i.pos2, d.h2), pos2: i.pos2, h2: d.h2, name: fullName(d), label: i.label || '', u: uTxt(d), url: d.url || '', author: d.author || '', color: colorOf(i), face: faceSVG(d, colorOf(i)) }; }),
     print: printPack().map(x => ({ qty: x.qty, name: x.name, sub: x.subs.join(', '), vars: x.variants, url: x.url })), shop: orderList(), frameParts: frameParts(), notes: state.h > 5 ? [JOINER_NOTE] : [] };
 }
 
