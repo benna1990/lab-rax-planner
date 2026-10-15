@@ -25,14 +25,15 @@ const PW_KEYS = ['poe', 'poeIn', 'poeOptional', 'ports', 'eth'];
 const pwOf = o => { const r = {}; PW_KEYS.forEach(k => { if (o[k] !== undefined) r[k] = o[k]; }); return r; };
 /* What the catalog knows about a part and how, per claim (docs/audit/CATALOG_VERIFICATION.md): verified (measured or tested,
    with a method and a date), documented (the creator or maker says so), community (a builder reports it), estimated, unknown.
-   An entry's own "evidence" wins. Otherwise only what the older fields actually say counts: "estimated" is an estimate, "labrax"
-   means the model itself is made for Lab Rax (its page is the source). No flag is not evidence, so the rest stays unknown. */
+   Only an entry's own "evidence" record can make a claim verified, documented or community reported. The older fields can only
+   lower it: "estimated" and "wattsEstimated" are estimates. Everything else is unknown, also the old "labrax" flag, because nobody
+   recorded which page or test it came from. */
 const EV_LABEL = { verified: 'Verified', documented: 'Documented', community: 'Community reported', estimated: 'Estimated', unknown: 'Unknown' };
 function evidenceOf(src) {
   const e = src.evidence || {};
   return {
     height: e.height || (src.estimated ? { state: 'estimated', note: 'from the model’s title or photos' } : { state: 'unknown', note: 'where the height comes from isn’t recorded' }),
-    fit: e.fit || (src.labrax ? { state: 'documented', note: 'the model is made for Lab Rax (model page)' } : { state: 'unknown' }),
+    fit: e.fit || { state: 'unknown', note: src.labrax ? 'marked as made for Lab Rax, but the source isn’t recorded' : '' },
     power: e.power || (typeof src.watts !== 'number' ? { state: 'unknown' } : src.wattsEstimated ? { state: 'estimated', note: 'a typical figure for this kind of device' } : { state: 'unknown', note: 'where the figure comes from isn’t recorded' })
   };
 }

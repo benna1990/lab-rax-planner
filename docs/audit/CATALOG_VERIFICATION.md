@@ -51,7 +51,7 @@ Add an optional `evidence` object per entry. Old fields keep working and map ont
 "license": "CC BY-NC-SA 4.0"
 ```
 
-Mapping of today's fields (as implemented in `app.js` `evidenceOf`): `estimated: true` → `height.state = "estimated"`; `wattsEstimated: true` → `power.state = "estimated"`; `labrax: true` → `fit.state = "documented"` (the model page says it's made for Lab Rax). **A missing flag is not evidence:** a height or a power figure without an `evidence` record stays `"unknown"` ("where it comes from isn't recorded"). Measured entries (the list above) carry `evidence.height.state = "verified"` with method and date.
+Mapping of today's fields (as implemented in `app.js` `evidenceOf`): `estimated: true` → `height.state = "estimated"`; `wattsEstimated: true` → `power.state = "estimated"`; **Only an `evidence` record can raise a claim** to verified, documented or community reported. Without one, a height or power figure is `"unknown"` ("where it comes from isn't recorded"), and so is fit, even with the old `labrax: true` flag, because nobody recorded which page or test it came from. The flag still drives the "Lab Rax only" filter. Measured entries (the list above) carry `evidence.height.state = "verified"` with method and date.
 
 ## Contribution and review
 
