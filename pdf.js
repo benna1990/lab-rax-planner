@@ -46,9 +46,23 @@ function raster(svg, w, h, ppm, type, grey) {
   });
 }
 
+/* For tools/selftest.html only: when window.__pdfGeom is an array, record what gets drawn, as boxes in mm per page: each text line
+   (its real width from jsPDF, its baseline and an approximate cap height and descender), images and rectangles. */
+function geomLog(doc, log) {
+  const pg = () => doc.getCurrentPageInfo().pageNumber, wrap = (k, f) => { const o = doc[k].bind(doc); doc[k] = (...a) => { f(...a); return o(...a); }; };
+  wrap('text', (s, x, y, o) => {
+    o = o || {}; const lines = Array.isArray(s) ? s : String(s).split('\n'), mm = doc.getFontSize() * 25.4 / 72, lh = mm * (o.lineHeightFactor || doc.getLineHeightFactor());
+    lines.forEach((line, i) => { const w = doc.getTextWidth(String(line)), by = y + i * lh, l = o.align === 'right' ? x - w : o.align === 'center' ? x - w / 2 : x;
+      log.push({ k: 'text', page: pg(), s: String(line).slice(0, 40), l, r: l + w, t: by - mm * .72, b: by + mm * .22 }); });
+  });
+  wrap('addImage', (img, fmt, x, y, w, h) => log.push({ k: 'image', page: pg(), l: x, r: x + w, t: y, b: y + h }));
+  ['rect', 'roundedRect'].forEach(k => wrap(k, (x, y, w, h) => log.push({ k, page: pg(), l: Math.min(x, x + w), r: Math.max(x, x + w), t: Math.min(y, y + h), b: Math.max(y, y + h) })));
+}
+
 async function make(d) {
   const JsPDF = await load();
   const doc = new JsPDF({ unit: 'mm', format: 'a4' }), W = 210, M = 16, BOT = 275; // BOT: lowest baseline for content
+  if (Array.isArray(window.__pdfGeom)) geomLog(doc, window.__pdfGeom);
   const ink = [22, 24, 27], muted = [106, 111, 118], line = [218, 221, 216], green = [23, 130, 74], warnC = [164, 78, 34];
   const text = (s, x, y, o) => doc.text(Array.isArray(s) ? s.map(clean) : clean(s), x, y, o); // arrays are wrapped lines
   const wrap = (s, w) => doc.splitTextToSize(clean(s), w);

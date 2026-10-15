@@ -78,6 +78,15 @@
       for (const blk of s.matchAll(/\bBT\b([\s\S]*?)\bET\b/g)) { let x = 0, y = 0; // the first Td in a text block is absolute, the next ones move from the line before
         for (const m of blk[1].matchAll(/(-?[\d.]+) (-?[\d.]+) Td/g)) { n++; x += +m[1]; y += +m[2]; if (x < 0 || x > 595.3 || y < 14 || y > 841.9) bad.push(x.toFixed(1) + ',' + y.toFixed(1) + ' ' + blk[1].slice(m.index, m.index + 80).replace(/\s+/g, ' ')); } }
       return n > 50 && !bad.length ? pages + ' pages, ' + n + ' text lines inside A4' : fail(bad.length + ' of ' + n + ' text lines outside the page: ' + bad.slice(0, 2).join(' | ')); });
+    await check('PDF at 10U: every text line, image and box inside the page, and no text over text', async () => {
+      W.document.querySelector('#finalize-build').close && W.document.querySelector('#finalize-build').close(); W.__pdfGeom = [];
+      await download('pdf', /download pdf/i); const g = W.__pdfGeom; W.__pdfGeom = null;
+      const txt = g.filter(e => e.k === 'text'), out = g.filter(e => e.k === 'text' ? e.l < 4 || e.r > 206 || e.t < 4 || e.b > 293 : e.l < -.5 || e.r > 210.5 || e.t < -.5 || e.b > 297.5);
+      const over = []; for (let i = 0; i < txt.length; i++) for (let j = i + 1; j < txt.length; j++) { const a = txt[i], b = txt[j];
+        if (a.page === b.page && Math.min(a.r, b.r) - Math.max(a.l, b.l) > .6 && Math.min(a.b, b.b) - Math.max(a.t, b.t) > .6) over.push('p' + a.page + ' “' + a.s + '” × “' + b.s + '”'); }
+      const say = e => 'p' + e.page + ' ' + e.k + (e.s ? ' “' + e.s + '”' : '') + ' ' + [e.l, e.t, e.r, e.b].map(v => v.toFixed(1)).join(',');
+      return !out.length && !over.length ? txt.length + ' text lines, ' + (g.length - txt.length) + ' images and boxes, all inside; no overlap'
+        : fail((out.length ? out.length + ' outside: ' + out.slice(0, 3).map(say).join(' | ') + '. ' : '') + (over.length ? over.length + ' overlaps: ' + over.slice(0, 3).join(' | ') : '')); });
     await check('A failed PDF is reported, not silently left out of the build pack', async () => { W.document.querySelector('#finalize-build').close && W.document.querySelector('#finalize-build').close(); const make = W.LRPdf.make; W.LRPdf.make = () => Promise.reject(new Error('test failure'));
       try { const f = await download('pack', /download/i); await wait(300); const st = W.document.getElementById('status').textContent; return /PDF is missing/.test(st) ? f.name + ': ' + st.slice(0, 70) + '…' : fail('status: ' + st); } finally { W.LRPdf.make = make; } });
     await load(link.slice(link.indexOf('#'))); hook();

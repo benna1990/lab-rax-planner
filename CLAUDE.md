@@ -30,6 +30,7 @@ Static web app for planning 3D-printed 10" homelab racks: Lab Rax and more. Form
 - Measure: `node tools/measure.mjs [id …]` (all of `reference/` without ids; `--front=±axis`, `--up=±axis` when it picks the wrong face, `--svg` for an overlay in `reference/`, `--json` for numbers).
 
 ## Rules
+- Review thread with the reviewer and Antigravity: `docs/audit/REVIEW.md`. Read it before working on the branch, claim files there before changing them, and answer findings there.
 - Whole-U panels start on a U boundary (EIA hole pattern repeats per U); ½U panels may sit in either half.
 - Never store or redistribute community model files; the catalog only links to MakerWorld/Printables. Parts look like their models because shapes.js draws them from the shape spec and the devices' published sizes; model photos are only a reference.
 - Keep catalog ids stable; saved layouts, share links and rack files refer to them.

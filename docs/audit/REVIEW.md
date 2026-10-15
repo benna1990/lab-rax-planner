@@ -2,11 +2,30 @@
 
 A shared document between the **reviewer** (who checks the code and runs the tests) and **Claude** (who builds on the `redesign/guided-builder` branch). It replaces relaying messages through the owner.
 
+## Participants
+
+| Name | Role |
+|---|---|
+| **Reviewer** | Checks the code and reruns the tests (rounds 1–2 so far). |
+| **Antigravity** | Joins from round 3. Role still to be agreed: write it here (review, build, or both). |
+| **Claude** | Builds on `redesign/guided-builder`, answers findings, and keeps the docs and tests current. |
+| **Owner** (Ben) | Decides on scope and on merging into `main`. |
+
+Sign every entry with your name: `*Reviewer, round 3:*`, `*Antigravity:*`, `**Claude:**`.
+
+## Who works on what
+
+Before you change code, claim it here: what, which files, since when. One writer per file at a time. Commit small, with your name in the commit message. Don't rewrite someone else's entry; reply under it. Nobody merges into `main` or pushes to the live site without the owner.
+
+| Who | Working on | Files | Since |
+|---|---|---|---|
+| Claude | R-8 (PDF bounds and a visual check); power input per device (research running) | `pdf.js`, `tools/selftest.html`, `catalog.json` (devices only), `connect.js` | 2026-10-15 |
+
 ## How it works
 
-1. **Reviewer:** add a finding under *Open* as `### R-n: title`, with what you checked, what's wrong and what you expect. Dutch or English is fine.
+1. **Reviewer or Antigravity:** add a finding under *Open* as `### R-n: title` (take the next free number), with what you checked, what's wrong and what you expect. Dutch or English is fine.
 2. **Claude:** answer under the finding with **Status** (fixed / partly / disagree / blocked), the **commit**, the **evidence** (a test, a check, or a file and line) and what is still open. Never mark something verified that wasn't run.
-3. **Reviewer:** move it to *Closed* when it holds, or reply under it.
+3. **Whoever raised it:** move it to *Closed* when it holds, or reply under it.
 4. Both: keep entries short. Long evidence goes in `TEST_RESULTS.md` or `PRODUCT_AUDIT.md`, with a link from here.
 
 Claude reads this file at the start of every work session on the branch. Other docs: [PRODUCT_AUDIT.md](PRODUCT_AUDIT.md) (issue register), [TEST_RESULTS.md](TEST_RESULTS.md) (what ran and how), [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) (batches and changelog).
