@@ -185,7 +185,7 @@ async function make(d) {
     const n = m.temp.length, kk = Math.min(.35, 128 / (m.h * U)), postW = 18 * kk, bayW = 222 * kk, frW = bayW + 2 * postW, HU = U / 2 * kk, bodyH = n * HU, edgeH = 22 * kk;
     const FA = 36, TL = 13, xF = M, xr = M + FA + TL, xB = xr + frW + 4, BA = W - M - xB, IN = [37, 99, 201], OUT = [181, 70, 26];
     const viaTop = m.openings.some(o => o.kind === 'top' && o.in + o.out >= .5) || m.fans.some(f => f.place === 'top'), gapTop = viaTop ? 14 : 5;
-    const total = 8 + 18 + 9 + gapTop + edgeH + bodyH + 12 * kk + 12 + 24;
+    const total = 8 + 18 + 9 + gapTop + edgeH + bodyH + 12 * kk + 12 + 24 + (m.parts.some(p => p.side === 'back') ? 6 : 0);
     y = fit(y, total);
     y = head('Airflow (estimate)', y);
     // headline numbers
@@ -214,22 +214,29 @@ async function make(d) {
       const yn = by + (1 - m.neutral / m.H) * bodyH;
       doc.setDrawColor(...ink); doc.setLineWidth(.3); doc.setLineDashPattern([1.2, 1], 0); doc.line(xr + postW, yn, xr + postW + bayW, yn); doc.setLineDashPattern([], 0);
     }
-    // parts: an outline, the name and the heat; open slots say so
-    const used = new Array(n).fill(false);
-    m.parts.forEach(p => {
-      for (let s = p.pos2; s < p.pos2 + p.h2 && s < n; s++) used[s] = true;
-      const y0 = layerY(p.pos2) + .25, hh = p.h2 * HU - .5, cy = y0 + hh / 2, fs = Math.min(6.5, hh * 2.1), bh = Math.min(hh - .6, fs * .48);
-      doc.setDrawColor(70, 74, 79); doc.setLineWidth(.2); doc.rect(xr + postW + .6, y0, bayW - 1.2, hh, 'S');
+    // parts: an outline, the name and the heat; open slots say so. Parts at the back of the rack (side 'back') get a dashed
+    // outline; their label goes in the bay when no front part shares their height, else in a line under the diagram
+    const used = new Array(n).fill(false), front = m.parts.filter(p => p.side !== 'back'), rear = m.parts.filter(p => p.side === 'back'), rearLine = [];
+    front.forEach(p => { for (let s = p.pos2; s < p.pos2 + p.h2 && s < n; s++) used[s] = true; });
+    const uRng = p => { const hi = m.h - Math.floor(p.pos2 / 2), lo = m.h - Math.floor((p.pos2 + p.h2 - 1) / 2); return lo === hi ? 'U' + hi : 'U' + lo + '–' + hi; };
+    const wOf = p => p.w > 0 ? (p.est ? '~' : '') + (p.w < 10 && p.w % 1 ? p.w.toFixed(1) : Math.round(p.w)) + ' W' : '';
+    rear.forEach(p => { if (used.slice(p.pos2, p.pos2 + p.h2).some(Boolean)) rearLine.push(uRng(p) + ' ' + p.name + (p.w > 0 ? ' (' + wOf(p) + ')' : '')); });
+    front.concat(rear).forEach(p => {
+      const back = p.side === 'back', hidden = back && used.slice(p.pos2, p.pos2 + p.h2).some(Boolean);
+      const y0 = layerY(p.pos2) + .25 + (back ? .5 : 0), hh = p.h2 * HU - .5 - (back ? 1 : 0), cy = y0 + hh / 2, fs = Math.min(6.5, hh * 2.1), bh = Math.min(hh - .6, fs * .48);
+      doc.setDrawColor(70, 74, 79); doc.setLineWidth(.2); if (back) doc.setLineDashPattern([.8, .6], 0); doc.rect(xr + postW + (back ? 1.6 : .6), y0, bayW - (back ? 3.2 : 1.2), hh, 'S'); doc.setLineDashPattern([], 0);
+      if (hidden) return;
       const box = (s, x, align, bold) => { // text on a white box, x is its left or right edge
         doc.setFont('helvetica', bold ? 'bold' : 'normal'); doc.setFontSize(fs); const tw = doc.getTextWidth(s) + 2, bx = align === 'right' ? x - tw : x;
         doc.setFillColor(255, 255, 255); doc.setDrawColor(190, 193, 189); doc.roundedRect(bx, cy - bh / 2, tw, bh, .5, .5, 'FD');
         doc.setTextColor(...ink); text(s, bx + 1, cy + fs * .125); return tw;
       };
-      const wTxt = p.w > 0 ? (p.est ? '~' : '') + (p.w < 10 && p.w % 1 ? p.w.toFixed(1) : Math.round(p.w)) + ' W' : '';
+      const wTxt = wOf(p), full = clean((back ? 'Back: ' : '') + p.name);
       const ww = wTxt ? box(wTxt, xr + postW + bayW - 1.6, 'right', true) + 1.5 : 0;
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(fs); let nm = clean(p.name); while (nm.length > 3 && doc.getTextWidth(nm) + 2 > bayW - 4.5 - ww) nm = nm.slice(0, -2);
-      box(nm === clean(p.name) ? nm : nm + '…', xr + postW + 1.6, 'left');
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(fs); let nm = full; while (nm.length > 3 && doc.getTextWidth(nm) + 2 > bayW - 4.5 - ww) nm = nm.slice(0, -2);
+      box(nm === full ? nm : nm + '…', xr + postW + 1.6, 'left');
     });
+    rear.forEach(p => { for (let s = p.pos2; s < p.pos2 + p.h2 && s < n; s++) used[s] = true; });
     doc.setFont('helvetica', 'italic'); doc.setFontSize(6); doc.setTextColor(...ink);
     for (let s = 0; s < n;) { if (used[s]) { s++; continue; } let e = s; while (e < n && !used[e]) e++; text('open', xr + frW / 2, mid(s, e - 1) + .8, { align: 'center' }); s = e; }
     // arrows: towards the rack is air coming in, away from it air going out; every arrow carries its word and m³/h
@@ -262,7 +269,8 @@ async function make(d) {
       }
       s = e;
     }
-    m.fans.filter(f => f.place === 'side' || f.place === 'back').forEach(f => side(by + bodyH * (f.place === 'back' ? .25 : .5) + 6, f.in, f.out, f.place === 'side' ? 'side fans' : 'back fans', true));
+    // side fans and fans in the frame's back sit at a fixed height; a fan panel at the back of the rack at its own
+    m.fans.filter(f => f.place === 'side' || f.place === 'back').forEach(f => side(f.pos2 != null ? mid(f.pos2, f.pos2 + f.h2 - 1) : by + bodyH * (f.place === 'back' ? .25 : .5) + 6, f.in, f.out, f.place === 'side' ? 'side fans' : 'back fans', true));
     if (!fl.some(v => Math.abs(v) >= .1) && !m.fans.some(f => f.place === 'side' || f.place === 'back')) { doc.setFont('helvetica', 'italic'); doc.setFontSize(7); doc.setTextColor(...muted); text('Back closed: no air through it', xB + 1, by + bodyH / 2); }
     // top and bottom
     const ends = (end, yy, up) => {
@@ -290,6 +298,7 @@ async function make(d) {
     doc.setDrawColor(...ink); doc.setLineWidth(.3); doc.setLineDashPattern([1.2, 1], 0); doc.line(kx, ly + 11, kx + 9, ly + 11); doc.setLineDashPattern([], 0);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(...ink); text('neutral plane: in below, out above', kx + 11, ly + 12);
     ly += 16;
+    if (rearLine.length) { doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(...ink); const rl = wrap('At the back (dashed): ' + rearLine.join(' · '), W - 2 * M); text(rl, M, ly); ly += rl.length * 3.2 + 1.5; }
     doc.setFontSize(7); doc.setTextColor(...muted);
     const note = wrap('An estimate at ' + Math.round(m.room) + ' °C in the room, from typical power use and simple physics. Left: openings in the front panels; right: the open back and the side panels; ~ marks estimated heat. Most network gear and mini PCs are rated for air up to ' + m.rated[1] + ' °C.', W - 2 * M);
     text(note, M, ly);
