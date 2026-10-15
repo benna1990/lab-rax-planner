@@ -13,6 +13,11 @@ function load() {
 const clean = s => String(s == null ? '' : s).replace(/≈/g, '~').replace(/→/g, '->').replace(/″/g, '"').replace(/✓/g, '').replace(/[^\x00-\xFF–—‘’“”•…×½]/g, '');
 const hex = c => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
 const lum = c => { const [r, g, b] = hex(c); return .2126 * r + .7152 * g + .0722 * b; };
+const rgbHex = c => '#' + c.map(v => v.toString(16).padStart(2, '0')).join('');
+// the planner's heat scale (light theme): room temperature to `span` °C above it. It only gets darker, so it survives greyscale printing.
+const HEAT = ['#F6F1EC', '#FCE1CB', '#F8C29C', '#F19A66', '#C9531F', '#A33F15', '#7A2A0B'].map(hex);
+function heatRGB(dT, span) { const p = Math.max(0, Math.min(1, dT / span)) * 6, i = Math.min(5, Math.floor(p)), f = p - i; return HEAT[i].map((v, k) => Math.round(v + (HEAT[i + 1][k] - v) * f)); }
+const tC = (t, short) => (t > 60 ? '60+' : Math.round(t)) + (short ? '°' : ' °C'); // past 60 °C the exact figure means little
 // a part's face as drawn by shapes.js (an SVG string, w × h mm) turned into an image for jsPDF, ppm pixels per mm
 function raster(svg, w, h, ppm, type) {
   return new Promise((res, rej) => {
@@ -145,6 +150,125 @@ async function make(d) {
         doc.setFontSize(8); doc.setTextColor(...muted); text('Hottest air ' + t.before + ' → ' + t.after, M, y2 + tx.length * 3.8); y2 += h;
       }
     }
+  }
+  if (c && c.map) y2 = airMap(c.map, y2 + 8);
+
+  // airflow diagram: the rack front-on with every ½U layer in the colour of its air, where air comes in and goes out (front openings
+  // on the left, the open back and the sides on the right, the top above), and the heat of each part. It prints in greyscale too:
+  // the colour scale only gets darker, and every colour has its number or word next to it.
+  function airMap(m, y) {
+    const n = m.temp.length, kk = Math.min(.35, 128 / (m.h * U)), postW = 18 * kk, bayW = 222 * kk, frW = bayW + 2 * postW, HU = U / 2 * kk, bodyH = n * HU, edgeH = 22 * kk;
+    const FA = 36, TL = 13, xF = M, xr = M + FA + TL, xB = xr + frW + 4, BA = W - M - xB, IN = [37, 99, 201], OUT = [181, 70, 26];
+    const viaTop = m.openings.some(o => o.kind === 'top' && o.in + o.out >= .5) || m.fans.some(f => f.place === 'top'), gapTop = viaTop ? 14 : 5;
+    const total = 8 + 18 + 9 + gapTop + edgeH + bodyH + 12 * kk + 12 + 24;
+    y = fit(y, total);
+    y = head('Airflow (estimate)', y);
+    // headline numbers
+    const fans = m.fans.reduce((s, f) => s + f.in + f.out, 0), stats = [['Hottest air', '~ ' + tC(m.maxT)], ['Air through the rack', Math.round(m.flow) + ' m³/h'], ['Heat in the rack', (m.est ? '~ ' : '') + Math.round(m.Q) + ' W'],
+      ['Fans', m.fans.length ? m.fans.length + (m.fans.length > 1 ? ' parts, ' : ' part, ') + Math.round(fans) + ' m³/h' : 'none']];
+    stats.forEach(([a, b], i) => {
+      const x = M + i * (W - 2 * M) / 4;
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...muted); text(a, x, y);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(12.5); doc.setTextColor(...(i === 0 && m.maxT > m.rated[1] ? OUT : ink)); text(b, x, y + 6);
+    });
+    y += 18;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(...muted);
+    text('Front', xF, y); text('Back and sides', xB + 3, y); text('°C', xr - 1.5, y, { align: 'right' });
+    const top = y + gapTop, by = top + edgeH, layerY = s => by + s * HU, mid = (s0, s1) => by + (s0 + s1 + 1) / 2 * HU;
+    // frame in light grey (no big black areas on paper), the bay as layers of air
+    doc.setFillColor(214, 217, 212); doc.roundedRect(xr, top, frW, edgeH, .8, .8, 'F'); doc.rect(xr, by, postW, bodyH, 'F'); doc.rect(xr + postW + bayW, by, postW, bodyH, 'F'); doc.roundedRect(xr, by + bodyH, frW, 8 * kk, .6, .6, 'F');
+    m.temp.forEach((t, s) => { doc.setFillColor(...heatRGB(t - m.room, m.span)); doc.rect(xr + postW, layerY(s), bayW, HU + .05, 'F'); });
+    // °C per U and the U numbers
+    for (let u = 0; u < m.h; u++) {
+      const t = (m.temp[2 * u] + m.temp[2 * u + 1]) / 2, yy = by + (u + .5) * U * kk + 1.1, hot = t > m.rated[1];
+      doc.setFont('helvetica', hot ? 'bold' : 'normal'); doc.setFontSize(7.5); doc.setTextColor(...(hot ? OUT : ink)); text(tC(t, true) + (hot ? '!' : ''), xr - 1.5, yy, { align: 'right' });
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(6); doc.setTextColor(...muted); text('U' + (m.h - u), xr - TL + .5, yy);
+    }
+    // neutral plane: below it air comes in, above it goes out (drawn under the parts' labels)
+    if (m.neutral != null) {
+      const yn = by + (1 - m.neutral / m.H) * bodyH;
+      doc.setDrawColor(...ink); doc.setLineWidth(.3); doc.setLineDashPattern([1.2, 1], 0); doc.line(xr + postW, yn, xr + postW + bayW, yn); doc.setLineDashPattern([], 0);
+    }
+    // parts: an outline, the name and the heat; open slots say so
+    const used = new Array(n).fill(false);
+    m.parts.forEach(p => {
+      for (let s = p.pos2; s < p.pos2 + p.h2 && s < n; s++) used[s] = true;
+      const y0 = layerY(p.pos2) + .25, hh = p.h2 * HU - .5, cy = y0 + hh / 2, fs = Math.min(6.5, hh * 2.1), bh = Math.min(hh - .6, fs * .48);
+      doc.setDrawColor(70, 74, 79); doc.setLineWidth(.2); doc.rect(xr + postW + .6, y0, bayW - 1.2, hh, 'S');
+      const box = (s, x, align, bold) => { // text on a white box, x is its left or right edge
+        doc.setFont('helvetica', bold ? 'bold' : 'normal'); doc.setFontSize(fs); const tw = doc.getTextWidth(s) + 2, bx = align === 'right' ? x - tw : x;
+        doc.setFillColor(255, 255, 255); doc.setDrawColor(190, 193, 189); doc.roundedRect(bx, cy - bh / 2, tw, bh, .5, .5, 'FD');
+        doc.setTextColor(...ink); text(s, bx + 1, cy + fs * .125); return tw;
+      };
+      const wTxt = p.w > 0 ? (p.est ? '~' : '') + (p.w < 10 && p.w % 1 ? p.w.toFixed(1) : Math.round(p.w)) + ' W' : '';
+      const ww = wTxt ? box(wTxt, xr + postW + bayW - 1.6, 'right', true) + 1.5 : 0;
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(fs); let nm = clean(p.name); while (nm.length > 3 && doc.getTextWidth(nm) + 2 > bayW - 4.5 - ww) nm = nm.slice(0, -2);
+      box(nm === clean(p.name) ? nm : nm + '…', xr + postW + 1.6, 'left');
+    });
+    doc.setFont('helvetica', 'italic'); doc.setFontSize(6); doc.setTextColor(...ink);
+    for (let s = 0; s < n;) { if (used[s]) { s++; continue; } let e = s; while (e < n && !used[e]) e++; text('open', xr + frW / 2, mid(s, e - 1) + .8, { align: 'center' }); s = e; }
+    // arrows: towards the rack is air coming in, away from it air going out; every arrow carries its word and m³/h
+    const arrow = (x1, y1, x2, y2, col) => {
+      const a = Math.atan2(y2 - y1, x2 - x1), L = 1.8, Wd = 1.1;
+      doc.setDrawColor(...col); doc.setFillColor(...col); doc.setLineWidth(.45); doc.line(x1, y1, x2 - Math.cos(a) * L * .8, y2 - Math.sin(a) * L * .8);
+      doc.triangle(x2, y2, x2 - Math.cos(a) * L - Math.sin(a) * Wd, y2 - Math.sin(a) * L + Math.cos(a) * Wd, x2 - Math.cos(a) * L + Math.sin(a) * Wd, y2 - Math.sin(a) * L - Math.cos(a) * Wd, 'F');
+    };
+    const label = (s, x, yy, col, align) => { doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(...col); text(s, x, yy, { align: align || 'left' }); };
+    const f3 = v => Math.round(v) + ' m³/h';
+    const side = (yy, i, o, what, right) => { // one or two arrows beside the rack at height yy
+      const pairs = [i >= .5 ? [i, 1] : null, o >= .5 ? [o, -1] : null].filter(Boolean), dy = pairs.length > 1 ? 1.9 : 0;
+      pairs.forEach(([v, dir], k) => {
+        const yk = yy + (k ? dy : -dy) + (pairs.length > 1 ? 0 : 0), col = dir > 0 ? IN : OUT, word = (what ? what + ' ' : '') + (dir > 0 ? 'in ' : 'out ') + f3(v);
+        if (!right) { const a1 = xF + 1, a2 = xr - TL - 2; dir > 0 ? arrow(a1, yk, a2, yk, col) : arrow(a2, yk, a1, yk, col); label(word, a1, yk - .9, col); }
+        else { const a1 = xB + 1, a2 = Math.min(W - M, xB + 26); dir > 0 ? arrow(a2, yk, a1, yk, col) : arrow(a1, yk, a2, yk, col); label(word, a1 + 1.5, yk - .9, col); }
+      });
+    };
+    m.openings.filter(o => (o.kind === 'front' || o.kind === 'slot') && o.layers.length).forEach(o => side(mid(Math.min(...o.layers), Math.max(...o.layers)), o.in, o.out, o.kind === 'slot' ? 'open' : 'vent'));
+    m.fans.filter(f => f.place === 'front' && f.pos2 != null).forEach(f => side(mid(f.pos2, f.pos2 + f.h2 - 1), f.in, f.out, 'fan'));
+    // back and sides: per height, in or out; one bracket and arrow per run
+    const fl = new Array(n).fill(0), sides = m.openings.some(o => o.kind === 'side');
+    m.openings.filter(o => o.kind === 'back' || o.kind === 'side').forEach(o => o.layers.forEach((s, k) => { fl[s] += o.flows[k]; }));
+    for (let s = 0; s < n;) {
+      const sg = Math.abs(fl[s]) < .1 ? 0 : Math.sign(fl[s]); let e = s; while (e < n && (Math.abs(fl[e]) < .1 ? 0 : Math.sign(fl[e])) === sg) e++;
+      if (sg) {
+        const v = fl.slice(s, e).reduce((a, b) => a + Math.abs(b), 0), col = sg > 0 ? IN : OUT;
+        doc.setDrawColor(...col); doc.setLineWidth(.8); doc.line(xB - 1.5, layerY(s) + .6, xB - 1.5, layerY(e) - .6);
+        side(mid(s, e - 1), sg > 0 ? v : 0, sg < 0 ? v : 0, sides ? 'back+sides' : 'back', true);
+      }
+      s = e;
+    }
+    m.fans.filter(f => f.place === 'side' || f.place === 'back').forEach(f => side(by + bodyH * (f.place === 'back' ? .25 : .5) + 6, f.in, f.out, f.place === 'side' ? 'side fans' : 'back fans', true));
+    if (!fl.some(v => Math.abs(v) >= .1) && !m.fans.some(f => f.place === 'side' || f.place === 'back')) { doc.setFont('helvetica', 'italic'); doc.setFontSize(7); doc.setTextColor(...muted); text('Back closed: no air through it', xB + 1, by + bodyH / 2); }
+    // top and bottom
+    const ends = (end, yy, up) => {
+      let i = 0, o = 0;
+      m.openings.filter(x => x.kind === end).forEach(x => { i += x.in; o += x.out; });
+      m.fans.filter(f => f.place === 'top').forEach(f => { if (f.dir === 'cross') { if (end === 'top') o += f.out; else i += f.in; } else if (end === 'top') { i += f.in; o += f.out; } });
+      const cx = xr + frW / 2, parts = [i >= .5 ? [i, 1] : null, o >= .5 ? [o, -1] : null].filter(Boolean);
+      parts.forEach(([v, dir], k) => {
+        const x = cx + (parts.length > 1 ? (k ? 8 : -8) : 0), col = dir > 0 ? IN : OUT, far = up ? yy - 8 : yy + 8;
+        dir > 0 ? arrow(x, far, x, yy, col) : arrow(x, yy, x, far, col);
+        label((end === 'top' ? 'top ' : 'bottom ') + (dir > 0 ? 'in ' : 'out ') + f3(v), x + 2, up ? far + 2.2 : far - .4, col);
+      });
+    };
+    ends('top', top - 1, true); ends('bottom', by + bodyH + 8 * kk + 1, false);
+    // colour scale and key
+    let ly = by + bodyH + 8 * kk + 14;
+    const sx = M, sw = 76;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(...ink); text('Air temperature', sx, ly);
+    for (let i = 0; i < 38; i++) { doc.setFillColor(...heatRGB(i / 37 * m.span, m.span)); doc.rect(sx + i * sw / 38, ly + 2, sw / 38 + .05, 3.5, 'F'); }
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(...muted);
+    for (let d5 = 0; d5 <= m.span; d5 += 5) text(Math.round(m.room + d5) + (d5 === m.span ? '+ °C' : ''), sx + d5 / m.span * sw, ly + 9, { align: d5 === 0 ? 'left' : d5 === m.span ? 'right' : 'center' });
+    const kx = sx + sw + 12;
+    arrow(kx, ly + 1, kx + 9, ly + 1, IN); label('in: air coming in, m³/h', kx + 11, ly + 2, IN);
+    arrow(kx, ly + 6, kx + 9, ly + 6, OUT); label('out: air going out, m³/h', kx + 11, ly + 7, OUT);
+    doc.setDrawColor(...ink); doc.setLineWidth(.3); doc.setLineDashPattern([1.2, 1], 0); doc.line(kx, ly + 11, kx + 9, ly + 11); doc.setLineDashPattern([], 0);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(...ink); text('neutral plane: in below, out above', kx + 11, ly + 12);
+    ly += 16;
+    doc.setFontSize(7); doc.setTextColor(...muted);
+    const note = wrap('An estimate at ' + Math.round(m.room) + ' °C in the room, from typical power use and simple physics. Left: openings in the front panels; right: the open back and the side panels; ~ marks estimated heat. Most network gear and mini PCs are rated for air up to ' + m.rated[1] + ' °C.', W - 2 * M);
+    text(note, M, ly);
+    return ly + note.length * 3.2;
   }
 
   // ---- print pack and shopping list: on page 2, or straight on when page 1 already ran over ----
