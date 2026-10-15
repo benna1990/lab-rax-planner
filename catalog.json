@@ -3039,7 +3039,7 @@
      ]
     },
     {
-     "device": "Netgear GS308E",
+     "device": "Netgear GS108 / GS308E",
      "size": [158, 29, 101],
      "color": "#1C1C1E",
      "io": ["rj45x8", "power"],
@@ -3087,6 +3087,28 @@
        "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Layershift Designs",
        "url": "https://makerworld.com/en/models/1500074-netgear-gs308e-10-rack-shelf"
+      },
+      {
+       "id": "pr1381473",
+       "label": "GS108 rack mount",
+       "u": 1,
+       "estimated": true,
+       "watts": 3,
+       "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
+       "note": "Made for the GS108; the GS308E has the same 158 × 101 × 29 mm housing.",
+       "url": "https://www.printables.com/model/1381473"
+      },
+      {
+       "id": "pr702219",
+       "label": "GS108 mount with a keystone each side",
+       "u": 1,
+       "estimated": true,
+       "watts": 3,
+       "face": "switch",
+       "shape": {"row": [{"ks": 1}, {"dev": true}, {"ks": 1}], "shelf": true},
+       "note": "Made for the GS108; the GS308E has the same housing.",
+       "url": "https://www.printables.com/model/702219"
       }
      ]
     },
