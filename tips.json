@@ -1,0 +1,506 @@
+{
+ "items": [
+  {
+   "id": "rubberfeet",
+   "name": "Rubber feet, self-adhesive",
+   "spec": "Ø 10–20 mm, 3–5 mm high; stick them under the printed feet",
+   "search": "self adhesive rubber feet 20mm",
+   "pack": 8,
+   "qty": 1,
+   "group": "other",
+   "when": "always",
+   "why": "They stop the rack sliding on a shelf and keep fan and drive hum out of the furniture.",
+   "source": "https://the-diy-life.com/introducing-lab-rax-a-3d-printable-modular-10-rack-system/"
+  },
+  {
+   "id": "tpu",
+   "name": "TPU filament, 95A",
+   "spec": "1.75 mm; a small spool is plenty for four feet",
+   "search": "TPU filament 95A 1.75mm",
+   "pack": 1,
+   "qty": 1,
+   "group": "print",
+   "when": "fans",
+   "why": "Feet printed in TPU damp the vibration of fans and hard drives better than hard PETG feet.",
+   "source": "https://the-diy-life.com/introducing-lab-rax-a-3d-printable-modular-10-rack-system/"
+  },
+  {
+   "id": "gluestick",
+   "name": "Glue stick for the print bed",
+   "spec": "A thin layer works as a release on smooth PEI",
+   "search": "3D printer glue stick",
+   "pack": 1,
+   "qty": 1,
+   "group": "print",
+   "when": "always",
+   "why": "PETG can weld itself to a smooth PEI sheet; a thin glue layer lets the long parts come off without tearing the sheet.",
+   "source": "https://evezone.evetech.co.za/quick-bytes/glue-stick-or-no-glue-which-filaments-need-adhesion-help-on-each-bed"
+  },
+  {
+   "id": "drybox",
+   "name": "Airtight filament box with desiccant",
+   "spec": "Silica gel with a colour indicator",
+   "search": "filament storage box desiccant",
+   "pack": 1,
+   "qty": 1,
+   "group": "print",
+   "when": "always",
+   "why": "PETG soaks up moisture once the bag is open and then strings; dry storage keeps all ten or so plates of a frame clean.",
+   "source": "https://siraya.tech/blogs/news/how-to-dry-petg"
+  },
+  {
+   "id": "cutters",
+   "name": "Flush cutters and deburring tool",
+   "spec": "For support strips, brims and bulging first layers",
+   "search": "flush cutter deburring tool 3D printing",
+   "pack": 1,
+   "qty": 1,
+   "group": "tools",
+   "when": "always",
+   "why": "Clean edges let the side panels slide down the posts and the joints close without force.",
+   "source": "https://the-diy-life.com/introducing-lab-rax-a-3d-printable-modular-10-rack-system/"
+  },
+  {
+   "id": "calipers",
+   "name": "Digital calipers",
+   "spec": "150 mm, 0.1 mm resolution",
+   "search": "digital caliper 150mm",
+   "pack": 1,
+   "qty": 1,
+   "group": "tools",
+   "when": "always",
+   "why": "Check a device's width against the space between the posts and an insert's length against the 5.5 mm deep holes before you buy.",
+   "source": "https://the-diy-life.com/introducing-lab-rax-a-3d-printable-modular-10-rack-system/"
+  },
+  {
+   "id": "solderiron",
+   "name": "Soldering iron with temperature control",
+   "spec": "Adjustable to at least 250 °C; takes the insert tip",
+   "search": "temperature controlled soldering iron 60W",
+   "pack": 1,
+   "qty": 1,
+   "group": "tools",
+   "when": "brass",
+   "why": "Inserts only go in straight and clean at a steady temperature a little above the print temperature.",
+   "source": "https://cnckitchen.com/blog/tips-and-tricks-for-heat-set-inserts"
+  },
+  {
+   "id": "nutdriver",
+   "name": "10 mm spanner or nut driver",
+   "spec": "Fits M6 hex nuts (10 mm across flats)",
+   "search": "10mm nut driver",
+   "pack": 1,
+   "qty": 1,
+   "group": "tools",
+   "when": "bolted",
+   "why": "On the bolted frame every M6 nut has to be held while you turn its screw.",
+   "source": "https://en.wikipedia.org/wiki/ISO_metric_screw_thread"
+  },
+  {
+   "id": "tiemounts",
+   "name": "Adhesive cable tie mounts",
+   "spec": "20 × 20 mm, take Velcro or cable ties",
+   "search": "adhesive cable tie mounts 20mm",
+   "pack": 20,
+   "qty": 1,
+   "group": "other",
+   "when": "always",
+   "why": "They anchor cable bundles inside the rack so nothing hangs over vents or fan blades.",
+   "source": "https://www.comms-express.com/blog/cable-management-essentials/"
+  },
+  {
+   "id": "labels",
+   "name": "Label maker with self-laminating cable labels",
+   "spec": "Wrap-around labels with a clear protective tail",
+   "search": "label maker self laminating cable labels",
+   "pack": 1,
+   "qty": 1,
+   "group": "tools",
+   "when": "network",
+   "why": "With host and port on both ends of every cable, any later change takes minutes instead of tracing wires.",
+   "source": "https://www.cabletiesunlimited.com/blogs/learn/everything-you-need-to-know-about-cable-labels"
+  },
+  {
+   "id": "tester",
+   "name": "Network cable tester",
+   "spec": "RJ45 with a remote unit; one that flags split pairs",
+   "search": "RJ45 network cable tester split pair",
+   "pack": 1,
+   "qty": 1,
+   "group": "tools",
+   "when": "network",
+   "why": "A keystone can look right and still have a crossed or split pair; the tester shows it before the rack is closed.",
+   "source": "https://www.flukenetworks.com/blog/cabling-chronicles/wire-map-testing-it-s-not-all-about-color"
+  },
+  {
+   "id": "punchdown",
+   "name": "Punch-down tool for keystones",
+   "spec": "110 type; not needed with tool-less keystones",
+   "search": "110 punch down tool keystone",
+   "pack": 1,
+   "qty": 1,
+   "group": "tools",
+   "when": "network",
+   "why": "It seats and trims each wire in a punch-down keystone in one press.",
+   "source": "https://www.monoprice.com/product?p_id=15663"
+  },
+  {
+   "id": "sleeve",
+   "name": "Braided cable sleeve",
+   "spec": "Split type, 10–20 mm, for the power leads",
+   "search": "braided cable sleeve split 13mm",
+   "pack": 1,
+   "qty": 1,
+   "group": "other",
+   "when": "power",
+   "why": "One sleeve for the power leads keeps them together, apart from the network cables and easy to tell apart.",
+   "source": "https://lcsccable.com/blog/?p=213"
+  },
+  {
+   "id": "outletext",
+   "name": "Short power extension leads, 30 cm",
+   "spec": "Plug to socket; for bulky power bricks",
+   "search": "short power extension cord 30cm",
+   "pack": 2,
+   "qty": 1,
+   "group": "power",
+   "when": "power",
+   "why": "A brick on a short lead no longer blocks the next socket on the strip and gets air around it.",
+   "source": "https://www.radioworld.com/uncategorized/tips-on-wallwart-power-supplies-and-leftover-6-cords"
+  },
+  {
+   "id": "smartplug",
+   "name": "Smart plug with energy metering",
+   "spec": "Rated for everything on the strip; local control if you can",
+   "search": "smart plug energy monitoring",
+   "pack": 1,
+   "qty": 1,
+   "group": "power",
+   "when": "power",
+   "why": "It shows what the rack really draws, the number you need for a UPS, and lets you switch it remotely.",
+   "source": "https://homelabstarter.com/homelab-power-consumption-guide/"
+  },
+  {
+   "id": "ups",
+   "name": "Small UPS, line-interactive",
+   "spec": "Sized in watts for 60–80 % load; USB port for automatic shutdown",
+   "search": "line interactive UPS 600VA USB",
+   "pack": 1,
+   "qty": 1,
+   "group": "power",
+   "when": "power",
+   "why": "It rides out short outages and gives boards and drives time to shut down cleanly.",
+   "source": "https://simeononsecurity.com/articles/ups-runtime-sizing-shutdown-test/"
+  },
+  {
+   "id": "usbmeter",
+   "name": "USB power meter",
+   "spec": "Inline, USB-A and USB-C",
+   "search": "USB power meter tester USB C",
+   "pack": 1,
+   "qty": 1,
+   "group": "tools",
+   "when": "fans",
+   "why": "It shows how much current the fans pull from a port, so you stay under the port's limit.",
+   "source": "https://pidiylab.com/raspberry-pi-power-monitoring-via-usb/"
+  },
+  {
+   "id": "rightangle",
+   "name": "Right-angle USB-C cable, short",
+   "spec": "Instead of a straight cable where space is tight; 5 A rated for a Pi 5",
+   "search": "right angle USB C cable 30cm 5A",
+   "pack": 1,
+   "qty": 1,
+   "group": "power",
+   "when": "sbc",
+   "why": "The plug turns along the board, so the cable clears the faceplate and doesn't lever on the port.",
+   "source": "https://littlebirdelectronics.com.au/products/90-degree-right-angle-usb-c"
+  },
+  {
+   "id": "piactive",
+   "name": "Active cooler for Raspberry Pi 5",
+   "spec": "Clips onto the board; its fan plugs into the Pi's fan header",
+   "search": "Raspberry Pi 5 active cooler",
+   "pack": 1,
+   "qty": 1,
+   "group": "cooling",
+   "when": "sbc",
+   "why": "A bare Pi 5 throttles at 80–85 °C under load; with the cooler it stays around 60 °C.",
+   "source": "https://wiki-md.52pi.com/docs/ER-0056"
+  },
+  {
+   "id": "fanfilter",
+   "name": "Fan dust filter",
+   "spec": "Magnetic or clip-on mesh, same size as the fan",
+   "search": "120mm fan dust filter magnetic",
+   "pack": 1,
+   "qty": 1,
+   "group": "cooling",
+   "when": "fans",
+   "why": "A filter on each intake keeps dust off the boards; rinse it every few weeks.",
+   "source": "https://evezone.evetech.co.za/build-lab/reduce-dust-small-pc-case"
+  },
+  {
+   "id": "fangrille",
+   "name": "Fan grille (finger guard)",
+   "spec": "Wire or mesh, same size as the fan",
+   "search": "fan grille finger guard 80mm",
+   "pack": 1,
+   "qty": 1,
+   "group": "cooling",
+   "when": "fans",
+   "why": "It keeps loose cables and fingers out of the blades.",
+   "source": "https://vetco.net/products/g80-18_80mm_3-1_fan_guard"
+  },
+  {
+   "id": "fanmounts",
+   "name": "Rubber fan mounts",
+   "spec": "Silicone pins or grommets in place of fan screws",
+   "search": "rubber fan mounting pins anti vibration",
+   "pack": 16,
+   "qty": 1,
+   "group": "cooling",
+   "when": "fans",
+   "why": "They stop fan vibration reaching the printed panel, which would otherwise hum like a speaker.",
+   "source": "https://evezone.evetech.co.za/performance-pulse/anti-resonance-fan-noise-pwm-control"
+  },
+  {
+   "id": "thermo",
+   "name": "Temperature and humidity sensor",
+   "spec": "Small display or smart-home sensor; mount it near the top",
+   "search": "temperature humidity sensor",
+   "pack": 1,
+   "qty": 1,
+   "group": "cooling",
+   "when": "always",
+   "why": "It tells you whether the air at the top of the rack really stays under the planner's estimate.",
+   "source": "https://beanbag.technicalissues.us/temperature-sensing-for-jupiter-garage/"
+  },
+  {
+   "id": "hddscrews",
+   "name": "Drive screws",
+   "spec": "6-32 UNC for 3.5″ drives, M3 for 2.5″ drives, short",
+   "search": "hard drive screws 6-32 M3 set",
+   "pack": 1,
+   "qty": 1,
+   "group": "fasteners",
+   "when": "drives",
+   "why": "Drives take these two threads, and a screw that goes in too deep can damage the drive.",
+   "source": "https://support.wdc.com/knowledgebase/answer.aspx?ID=9915"
+  },
+  {
+   "id": "acryliccleaner",
+   "name": "Acrylic cleaner and microfibre cloth",
+   "spec": "Mild soap and water also works; no glass cleaner",
+   "search": "acrylic plastic cleaner microfiber cloth",
+   "pack": 1,
+   "qty": 1,
+   "group": "other",
+   "when": "acrylic",
+   "why": "Ammonia glass cleaners and solvents craze acrylic; a plastic cleaner keeps the sides clear.",
+   "source": "https://spartech.com/media/tds/How-to-Clean-Acrylic-Sheets.pdf"
+  }
+ ],
+ "tips": [
+  {
+   "step": "print",
+   "text": "The long horizontal pieces only fit diagonally on a bed of about 250 mm square, so print them one per plate (about 1.5 hours each). The main cross member does not fit a 220 mm bed.",
+   "source": "https://the-diy-life.com/introducing-lab-rax-a-3d-printable-modular-10-rack-system/"
+  },
+  {
+   "step": "print",
+   "text": "Print the frame in PETG for its heat resistance. PLA is only fine for a cool rack with a few Pis and a small switch.",
+   "source": "https://the-diy-life.com/introducing-lab-rax-a-3d-printable-modular-10-rack-system/"
+  },
+  {
+   "step": "print",
+   "text": "The designer's 5U PETG profile uses 0.2 mm layers, 2 walls and 15 % infill; the frame takes about 10 plates and a full day of printing.",
+   "source": "https://makerworld.com/en/models/1294480-lab-rax-10-server-rack-5u"
+  },
+  {
+   "step": "print",
+   "text": "If long PETG parts lift at the ends, widen the brim to 5–7 mm and keep the part-cooling fan low for the first layers. Still curling? Add a dab of glue stick under both ends.",
+   "source": "https://forum.prusa3d.com/forum/original-prusa-i3-mk3s-mk3-how-do-i-print-this-printing-help/optimize-object-to-pervent-warping-petg"
+  },
+  {
+   "step": "print",
+   "text": "On smooth PEI, PETG can bond so hard it tears the sheet. Wipe on a thin glue-stick layer as a release, or print on textured PEI.",
+   "source": "https://evezone.evetech.co.za/quick-bytes/glue-stick-or-no-glue-which-filaments-need-adhesion-help-on-each-bed"
+  },
+  {
+   "step": "print",
+   "text": "If PETG starts stringing, dry the spool at about 65 °C for 4–6 hours and keep it in a sealed box with desiccant between prints.",
+   "source": "https://siraya.tech/blogs/news/how-to-dry-petg"
+  },
+  {
+   "step": "print",
+   "text": "Turn on elephant-foot compensation (0.1–0.2 mm) in the slicer so the first layers don't bulge; slots and joints then fit without filing.",
+   "source": "https://3dprintingspace.com/t/how-to-fix-elephants-foot-on-3d-prints-7-fixes-for-a-clean-base-bambu-lab-ender/10426"
+  },
+  {
+   "step": "inserts",
+   "text": "Use M6 inserts with an 8 mm outer diameter and 4–5 mm length. The holes are 5.5 mm deep, so 6 mm inserts won't fit without damaging the print.",
+   "source": "https://the-diy-life.com/introducing-lab-rax-a-3d-printable-modular-10-rack-system/"
+  },
+  {
+   "step": "inserts",
+   "text": "Set the iron 10–20 °C above your print temperature, about 240–245 °C for PETG, and try the first insert on a spare part. Work with some ventilation: overheated plastic gives off fumes.",
+   "source": "https://cnckitchen.com/blog/tips-and-tricks-for-heat-set-inserts"
+  },
+  {
+   "step": "inserts",
+   "text": "Melt each insert about 90 % of the way in with the tip, then press it flush with a flat tool and hold it a few seconds until the plastic sets. Inserts tend to creep back out right after melting.",
+   "source": "https://cnckitchen.com/blog/tips-and-tricks-for-heat-set-inserts"
+  },
+  {
+   "step": "inserts",
+   "text": "Keep the iron square to the surface and press steadily. If an insert sinks too deep the plastic is too hot; if it won't go in, too cold.",
+   "source": "https://www.albanycountyfasteners.com/media/64/3d/5a/1764619189/heat-set-insert-specs.pdf"
+  },
+  {
+   "step": "inserts",
+   "text": "Use a proper insert tip, not a pointed soldering tip, which pushes molten plastic into the threads. Inserts with angled knurls and a lip hold best.",
+   "source": "https://the-diy-life.com/introducing-lab-rax-a-3d-printable-modular-10-rack-system/"
+  },
+  {
+   "step": "inserts",
+   "text": "Set all inserts before assembly: two per post and two per edge piece for the frame, plus the equipment holes you will use (up to six per U on each side).",
+   "source": "https://the-diy-life.com/introducing-lab-rax-a-3d-printable-modular-10-rack-system/"
+  },
+  {
+   "step": "frame",
+   "text": "Build up from the base: two side edges and two horizontals around the base panel, then the four posts. Use one screw per joint at first so the parts can still shift into line.",
+   "source": "https://the-diy-life.com/introducing-lab-rax-a-3d-printable-modular-10-rack-system/"
+  },
+  {
+   "step": "frame",
+   "text": "Slide the side panels down the posts, add the top horizontals and the top panel, and close with the last two edge pieces. Then fit the remaining screws and tighten everything.",
+   "source": "https://the-diy-life.com/introducing-lab-rax-a-3d-printable-modular-10-rack-system/"
+  },
+  {
+   "step": "frame",
+   "text": "The bolted and heat-set versions put the screws in from opposite sides, so don't mix parts from the two versions.",
+   "source": "https://the-diy-life.com/introducing-lab-rax-a-3d-printable-modular-10-rack-system/"
+  },
+  {
+   "step": "frame",
+   "text": "For a taller rack, join shorter posts with joiners (3U + 5U makes 8U) and stagger the side-panel joints from the post joints for stiffness. Above 10U, strength becomes a concern.",
+   "source": "https://the-diy-life.com/introducing-lab-rax-a-3d-printable-modular-10-rack-system/"
+  },
+  {
+   "step": "mount",
+   "text": "Check widths before you buy: 10″ gear should fit within about 210 mm, and some switches need universal ears or a shelf instead.",
+   "source": "https://github.com/geerlingguy/mini-rack"
+  },
+  {
+   "step": "mount",
+   "text": "3.5″ drives take 6-32 UNC screws and 2.5″ drives take M3. Keep the screws short (no more than about 3 mm into the drive) and only snug them.",
+   "source": "https://support.wdc.com/knowledgebase/answer.aspx?ID=9915"
+  },
+  {
+   "step": "mount",
+   "text": "Give every Raspberry Pi 5 an active cooler: without one it throttles at 80–85 °C under sustained load.",
+   "source": "https://wiki-md.52pi.com/docs/ER-0056"
+  },
+  {
+   "step": "network",
+   "text": "Put the patch panel right above or below the switch and link them with very short, slim patch cables. Slim cables bend more easily and look tidier in a 10″ rack.",
+   "source": "https://www.reddit.com/r/minilab/comments/1iwki7f/patch_cables_lengths/"
+  },
+  {
+   "step": "network",
+   "text": "Bundle network cables with Velcro, not tight zip ties, which can pinch the pairs inside Cat6.",
+   "source": "https://lcsccable.com/blog/?p=213"
+  },
+  {
+   "step": "network",
+   "text": "Run power on one side of the rack and network on the other. Where they have to cross, cross at a right angle.",
+   "source": "https://lcsccable.com/blog/?p=213"
+  },
+  {
+   "step": "network",
+   "text": "Label both ends of every cable with the device and port, and keep one list (or the switch's port names) as your map.",
+   "source": "https://www.cabletiesunlimited.com/blogs/learn/everything-you-need-to-know-about-cable-labels"
+  },
+  {
+   "step": "network",
+   "text": "Wire every keystone to the same standard (T568B) at both ends and test each one. Follow the pin diagram, not just the colours printed on the jack, to avoid split pairs.",
+   "source": "https://www.flukenetworks.com/blog/cabling-chronicles/wire-map-testing-it-s-not-all-about-color"
+  },
+  {
+   "step": "power",
+   "text": "Plug the rack's power strip straight into a wall socket. Never chain power strips or put an extension lead in between.",
+   "source": "https://misportal.jlab.org/ll/lessons/337"
+  },
+  {
+   "step": "power",
+   "text": "Use a certified, ready-made power strip. Wiring mains yourself, such as a DIY PDU or a hard-wired outlet, is a job for a qualified electrician.",
+   "source": "https://sound-au.com/psu-wiring.htm"
+  },
+  {
+   "step": "power",
+   "text": "A Pi 5 wants a 5 V 5 A USB-C PD supply and a short, decent cable. With less, it caps its USB ports and warns about under-voltage.",
+   "source": "https://support.thepihut.com/hc/en-us/articles/13852538984221-Which-power-supply-do-I-need-for-my-Raspberry-Pi-5"
+  },
+  {
+   "step": "power",
+   "text": "Power bricks get warm. Hang them on short extension leads with air around them instead of packing them together behind the rack.",
+   "source": "https://www.radioworld.com/uncategorized/tips-on-wallwart-power-supplies-and-leftover-6-cords"
+  },
+  {
+   "step": "power",
+   "text": "Size a UPS by watts, not VA: measure what the rack draws, keep it at 60–80 % of the UPS rating, and test that every device shuts down before the battery runs out.",
+   "source": "https://simeononsecurity.com/articles/ups-runtime-sizing-shutdown-test/"
+  },
+  {
+   "step": "fans",
+   "text": "Add up the fan current per port: a USB 2.0 port gives 500 mA and a USB 3.0 port 900 mA. A USB charger gives more; check its rating.",
+   "source": "https://ifi-audio.com/faqs/what-are-the-usb-output-specifications/"
+  },
+  {
+   "step": "fans",
+   "text": "Never run a fan from a Pi GPIO pin, which gives about 16 mA. The 5 V pin shares the Pi's own supply, so for more than one small fan use a separate 5 V supply and switch it with a MOSFET.",
+   "source": "https://fingers-in-the-pi.readthedocs.io/en/latest/projects/useful_info/"
+  },
+  {
+   "step": "fans",
+   "text": "Buy 5 V fans for USB power. Most 12 V fans need 6–7 V or more to start reliably, so on 5 V they may not spin up.",
+   "source": "https://forum.allaboutcircuits.com/threads/running-a-12v-fan-off-5v-usb.86971/"
+  },
+  {
+   "step": "fans",
+   "text": "Put intakes low and exhausts high, so the fans work with the rising warm air. With a single fan, make it the top exhaust and leave vents low down.",
+   "source": "https://www.budind.com/article/basics-of-enclosure-cooling-white-paper/"
+  },
+  {
+   "step": "fans",
+   "text": "Close empty rack units with blank panels, so hot exhaust air can't loop back to the intakes.",
+   "source": "https://www.42u.com/a-quick-overview-of-the-importance-of-blanking-panels/"
+  },
+  {
+   "step": "fans",
+   "text": "A bigger fan at low speed moves the same air as a small fast one, with less noise and a lower pitch.",
+   "source": "https://acinfinity.com/pages/hvac-setup/fan-speed-bearings-and-noise.html"
+  },
+  {
+   "step": "fans",
+   "text": "Slowing a 2- or 3-wire 5 V fan with PWM on its supply often makes it whine or click. Lower its voltage instead, or use a 4-pin PWM fan.",
+   "source": "https://forum.duet3d.com/post/75776"
+  },
+  {
+   "step": "finish",
+   "text": "Don't put the rack on a high shelf in a closed cupboard, where heat collects. Give the space a low inlet and a high outlet, or leave the door open.",
+   "source": "https://community.smartthings.com/t/network-closet-fans-ideas-suggestions-advice/208963"
+  },
+  {
+   "step": "finish",
+   "text": "Keep the room at about 20–25 °C, the range ASHRAE recommends for IT equipment, and put a sensor near the top of the rack to check the warmest air.",
+   "source": "https://www.nojitter.com/network-technology/keeping-the-closet-cool"
+  },
+  {
+   "step": "finish",
+   "text": "Clean acrylic sides with lukewarm water, mild soap and a microfibre cloth. Ammonia glass cleaner and solvents craze acrylic, and paper towels scratch it.",
+   "source": "https://spartech.com/media/tds/How-to-Clean-Acrylic-Sheets.pdf"
+  }
+ ]
+}
