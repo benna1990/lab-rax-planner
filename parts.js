@@ -37,17 +37,26 @@ function loadThree() {
 }
 
 /* ---------- 2D helpers ---------- */
+const SEG = 10; // curve segments, as extrude() asks for them: a corner becomes 10 straight pieces, a half circle 20
+// the outline of p as straight lines, with no point twice in a row and none closing the loop: three.js only drops exact
+// repeats, and earcut stitches across a point rounding left a hair from its neighbour (edges shared by three triangles)
+function cleanPath(T, p) {
+  const pts = [];
+  for (const q of p.getPoints(SEG)) if (!pts.length || q.distanceTo(pts[pts.length - 1]) > 1e-6) pts.push(q);
+  while (pts.length > 2 && pts[0].distanceTo(pts[pts.length - 1]) <= 1e-6) pts.pop();
+  return new T.Path(pts);
+}
 function rectPath(T, x, y, w, h, r) {
   const p = new T.Path(); r = Math.min(r || 0, w / 2, h / 2);
   p.moveTo(x + r, y); p.lineTo(x + w - r, y); if (r) p.quadraticCurveTo(x + w, y, x + w, y + r);
   p.lineTo(x + w, y + h - r); if (r) p.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
   p.lineTo(x + r, y + h); if (r) p.quadraticCurveTo(x, y + h, x, y + h - r);
   p.lineTo(x, y + r); if (r) p.quadraticCurveTo(x, y, x + r, y);
-  return p;
+  return cleanPath(T, p);
 }
 function slotPath(T, cx, cy, len, d, vertical) {
   // stadium shape; len is centre-to-centre travel
-  const r = d / 2, p = new T.Path(), seg = 16;
+  const r = d / 2, p = new T.Path();
   if (!vertical) {
     p.moveTo(cx - len / 2, cy - r); p.lineTo(cx + len / 2, cy - r);
     p.absarc(cx + len / 2, cy, r, -Math.PI / 2, Math.PI / 2, false);
@@ -59,7 +68,7 @@ function slotPath(T, cx, cy, len, d, vertical) {
     p.lineTo(cx - r, cy - len / 2);
     p.absarc(cx, cy - len / 2, r, Math.PI, Math.PI * 2, false);
   }
-  return p;
+  return cleanPath(T, p);
 }
 function circlePath(T, cx, cy, r) { // a polygon fine enough for a 116 mm fan opening, coarse for a screw hole
   const p = new T.Path(), n = Math.max(16, Math.min(96, Math.round(r * 1.6)));
@@ -97,7 +106,7 @@ function plateShape(T, u, extraHoles) {
   return s;
 }
 function extrude(T, shape, depth, z) {
-  const g = new T.ExtrudeGeometry(shape, { depth, bevelEnabled: false, curveSegments: 10 });
+  const g = new T.ExtrudeGeometry(shape, { depth, bevelEnabled: false, curveSegments: SEG });
   g.translate(0, 0, z); return g;
 }
 function box(T, w, h, d, x, y, z) { // x,y = min corner in panel coords; z = front (extends to z - d)
