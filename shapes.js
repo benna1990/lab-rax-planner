@@ -48,6 +48,8 @@ const slotP = (cx, cy, w, h) => rectP(cx - w / 2, cy - h / 2, w, h, Math.min(w, 
    text {x,y,z,s,str,c}          SVG only
    lines {segs,z,c,sw}           SVG only (bristles and such) */
 const box = (x, y, z, w, h, d, c, r) => ({ t: 'box', x, y, z, w, h, d, c, r: r || 0 });
+// ports and screens stand this far proud of a device's face: on the face itself they flicker in 3D (z-fighting)
+const IO_LIFT = .15;
 const cyl = (x, y, z, r, d, c) => ({ t: 'cyl', x, y, z, r, d, c });
 const ext = (pts, holes, z, d, c) => ({ t: 'ext', axis: 'z', pts, holes: holes || [], at: z, d, c });
 const flat = (axis, pts, holes, at, d, c) => ({ t: 'ext', axis, pts, holes: holes || [], at, d, c });
@@ -234,7 +236,7 @@ function sled(P, x, y, z, w, h, c, o) {
 }
 function fanFace(P, cx, cy, z, r, o) {
   // the duct, seven swept blades and the hub, seen through the panel
-  P.push(cyl(cx, cy, z, r, .3, C.hole));
+  P.push(cyl(cx, cy, z + .1, r, .3, C.hole)); // just proud of the fan frame, or the two flicker in 3D
   const hub = r * .38;
   for (let i = 0; i < 7; i++) {
     const a0 = i / 7 * Math.PI * 2, p = [];
@@ -280,7 +282,7 @@ function boardFront(S, kind, x, y, vertical, deep) {
     const a0 = a - pt[0] / 2;
     const [bx, by, bw, bh] = map(a0, 0, pt[0], pt[1]);
     P.push(box(bx, by, zf, bw, bh, pt[2], C.metal, .3));
-    pt[3].slice(1).forEach(([pa, pb, pw, ph, c]) => { const [qx, qy, qw, qh] = map(a0 + pa, pb, pw, ph); P.push(box(qx, qy, zf + .1, qw, qh, .2, c)); });
+    pt[3].slice(1).forEach(([pa, pb, pw, ph, c], i) => { const [qx, qy, qw, qh] = map(a0 + pa, pb, pw, ph); P.push(box(qx, qy, zf + .1 + i * .06, qw, qh, .2, c)); }); // each part a step proud of the one under it
     lo = [Math.min(lo[0], bx), Math.min(lo[1], by)]; hi = [Math.max(hi[0], bx + bw), Math.max(hi[1], by + bh)];
   });
   if (deep) P.push(vertical ? box(x + pcb, y + 6, zf - 30, 12, b.edge - 12, 40, '#2B2E33') : box(x + 6, y + pcb, zf - 30, b.edge - 12, 10, 40, '#2B2E33'));
@@ -394,9 +396,9 @@ function buildMod(S, m, x, y, z, ms, ctx) {
         P.push(box(fx, fy, zf, ms.fw, ms.fh, Math.min(d.d, ctx.maxDepth), d.color, Math.min(2.5, ms.fh / 6)));
         if (rot) { // a device standing on its side: lay its face out lying down, then turn it a quarter
           const F = [], cx0 = fx + ms.fw / 2, cy0 = fy + ms.fh / 2;
-          drawFace(F, d.io, cx0 - ms.fh / 2, cy0 - ms.fw / 2, zf, ms.fh, ms.fw, d.color);
+          drawFace(F, d.io, cx0 - ms.fh / 2, cy0 - ms.fw / 2, zf + IO_LIFT, ms.fh, ms.fw, d.color);
           F.forEach(q => P.push(turn(q, cx0, cy0)));
-        } else drawFace(P, d.io, fx, fy, zf, ms.fw, ms.fh, d.color);
+        } else drawFace(P, d.io, fx, fy, zf + IO_LIFT, ms.fw, ms.fh, d.color);
         const win = m.win || 'full';
         if (win === 'full') hole(rectP(fx - .8, fy - .8, ms.fw + 1.6, ms.fh + 1.6, 1.6));
         else if (win === 'ports') { const iw = Math.min(ms.fw - 4, num(m.ww, ms.fw * .8)), ih = Math.min(ms.fh - 2, num(m.wh, ms.fh * .7)); hole(rectP(fx + (ms.fw - iw) / 2, fy + (ms.fh - ih) / 2, iw, ih, 1.5)); }
