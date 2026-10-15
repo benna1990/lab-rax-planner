@@ -390,7 +390,8 @@
      "name": "Vent panel",
      "u": 1,
      "face": "vent",
-     "shape": {"row": [{"vent": "hex"}]},
+     "vent": 0.67,
+     "shape": {"row": [{"vent": "hex", "w": 210.8}]},
      "url": "https://makerworld.com/en/models/1293799-1u-ventilation-panel-for-10-rack",
      "author": "mklements",
      "labrax": true
@@ -417,7 +418,7 @@
      "name": "Fan holder, 2× 80 mm",
      "u": 2,
      "face": "fan",
-     "shape": {"row": [{"fan": 80, "n": 2}]},
+     "shape": {"row": [{"fan": 80, "n": 2, "gap": 30}]},
      "url": "https://makerworld.com/en/models/1385530-2u-two-80mm-cooling-fan-holder-for-10-rack",
      "author": "mklements",
      "labrax": true,
@@ -464,7 +465,7 @@
      "name": "Keystone panel, 12 ports",
      "u": 0.5,
      "face": "ks",
-     "shape": {"row": [{"ks": 12}]},
+     "shape": {"row": [{"ks": 12, "pitch": 18}]},
      "url": "https://makerworld.com/en/models/1293816-1-2u-12-port-keystone-panel-for-10-rack",
      "author": "mklements",
      "labrax": true

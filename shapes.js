@@ -62,6 +62,17 @@ function scene() {
   return S;
 }
 
+// a convex outline cut to a rectangle (Sutherland–Hodgman), and the area of an outline
+function clipRect(p, x0, y0, x1, y1) {
+  const cut = (pts, inside, at) => { const out = []; pts.forEach((a, i) => { const b = pts[(i + 1) % pts.length], ia = inside(a), ib = inside(b); if (ia) out.push(a); if (ia !== ib) out.push(at(a, b)); }); return out; };
+  const along = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+  p = cut(p, q => q[0] >= x0, (a, b) => along(a, b, (x0 - a[0]) / (b[0] - a[0])));
+  p = cut(p, q => q[0] <= x1, (a, b) => along(a, b, (x1 - a[0]) / (b[0] - a[0])));
+  p = cut(p, q => q[1] >= y0, (a, b) => along(a, b, (y0 - a[1]) / (b[1] - a[1])));
+  return cut(p, q => q[1] <= y1, (a, b) => along(a, b, (y1 - a[1]) / (b[1] - a[1])));
+}
+const polyArea = p => Math.abs(p.reduce((s, a, i) => { const b = p[(i + 1) % p.length]; return s + a[0] * b[1] - b[0] * a[1]; }, 0)) / 2;
+
 /* ---------- vent patterns: holes inside a rectangle ---------- */
 function ventHoles(pattern, x0, y0, w, h, opt) {
   const out = [], x1 = x0 + w, y1 = y0 + h, inside = p => p.every(([x, y]) => x >= x0 - .01 && x <= x1 + .01 && y >= y0 - .01 && y <= y1 + .01);
@@ -96,6 +107,14 @@ function ventHoles(pattern, x0, y0, w, h, opt) {
     }
   } else { // hex, the Lab Rax look; pointy-top cells
     const R = o.r || 7, wall = o.wall || 2.4, Rc = R + wall / Math.sqrt(3), dx = Math.sqrt(3) * Rc, dy = 1.5 * Rc;
+    if (o.clip) { // as on the Lab Rax vent panels: a cell in the middle of the field, the cells along its edges cut off by it
+      const cx = x0 + w / 2, cy = y0 + h / 2, nj = Math.ceil((h / 2 + R) / dy), ni = Math.ceil((w / 2 + R) / dx) + 1;
+      for (let j = -nj; j <= nj; j++) for (let i = -ni; i <= ni; i++) {
+        const p = clipRect(ngonP(cx + (i + (j & 1 ? .5 : 0)) * dx, cy + j * dy, R, 6, Math.PI / 6), x0, y0, x1, y1);
+        if (p.length > 2 && polyArea(p) > 1) out.push(p);
+      }
+      return out;
+    }
     const rows = Math.max(1, Math.floor((h - 2 * R) / dy + 1e-6) + 1), oy = y0 + (h - ((rows - 1) * dy + 2 * R)) / 2 + R;
     for (let j = 0; j < rows; j++) {
       const y = oy + j * dy, n = Math.floor((w - Math.sqrt(3) * R) / dx + 1e-6) + 1, ox = x0 + (w - ((n - 1) * dx + Math.sqrt(3) * R)) / 2 + Math.sqrt(3) * R / 2 + (j % 2 ? dx / 2 : 0);
@@ -250,8 +269,8 @@ function fanFace(P, cx, cy, z, r, o) {
 /* ---------- boards (single-board computers), port edge seen from the front ---------- */
 // a: along the port edge from the left, port shapes in (a, b) with b up from the top of the board
 const BOARDS = {
-  pi5: { edge: 56, len: 85, ports: [['usb2', 9], ['usb3', 27], ['rj45', 45.75]] },
-  pi4: { edge: 56, len: 85, ports: [['rj45', 10.25], ['usb3', 29], ['usb2', 47]] },
+  pi5: { edge: 56, len: 85, ports: [['rj45', 10.25], ['usb3', 29], ['usb2', 47]] }, // a: along the port edge from the left, component side up
+  pi4: { edge: 56, len: 85, ports: [['usb2', 9], ['usb3', 27], ['rj45', 45.75]] },
   pi3: { edge: 56, len: 85, ports: [['rj45', 10.25], ['usb2', 29], ['usb2', 47]] },
   zero: { edge: 65, len: 30, ports: [['mhdmi', 12.4], ['musb', 41.4], ['musb', 54]] },
   opiz3: { edge: 50, len: 55, ports: [['rj45', 12], ['usb2s', 33]] },
@@ -277,22 +296,24 @@ function boardFront(S, kind, x, y, vertical, deep) {
   const map = (a, bb, w, h) => vertical ? [x + pcb + bb, y + (b.edge - a - w), h, w] : [x + a, y + pcb + bb, w, h];
   P.push(vertical ? box(x, y, zf - 1, pcb, b.edge, b.len, C.pcb) : box(x, y, zf - 1, b.edge, pcb, b.len, C.pcb));
   let lo = [1e9, 1e9], hi = [-1e9, -1e9];
+  const rects = [];
   b.ports.forEach(([k, a]) => {
     const pt = PORT[k]; if (!pt) return;
     const a0 = a - pt[0] / 2;
     const [bx, by, bw, bh] = map(a0, 0, pt[0], pt[1]);
     P.push(box(bx, by, zf, bw, bh, pt[2], C.metal, .3));
     pt[3].slice(1).forEach(([pa, pb, pw, ph, c], i) => { const [qx, qy, qw, qh] = map(a0 + pa, pb, pw, ph); P.push(box(qx, qy, zf + .1 + i * .06, qw, qh, .2, c)); }); // each part a step proud of the one under it
-    lo = [Math.min(lo[0], bx), Math.min(lo[1], by)]; hi = [Math.max(hi[0], bx + bw), Math.max(hi[1], by + bh)];
+    lo = [Math.min(lo[0], bx), Math.min(lo[1], by)]; hi = [Math.max(hi[0], bx + bw), Math.max(hi[1], by + bh)]; rects.push([bx, by, bw, bh]);
   });
   if (deep) P.push(vertical ? box(x + pcb, y + 6, zf - 30, 12, b.edge - 12, 40, '#2B2E33') : box(x + 6, y + pcb, zf - 30, b.edge - 12, 10, 40, '#2B2E33'));
-  return { x: lo[0], y: lo[1], w: hi[0] - lo[0], h: hi[1] - lo[1], vw: vertical ? 18 : b.edge, vh: vertical ? b.edge : 18 };
+  return { x: lo[0], y: lo[1], w: hi[0] - lo[0], h: hi[1] - lo[1], vw: vertical ? 18 : b.edge, vh: vertical ? b.edge : 18, ports: rects };
 }
 
 /* ---------- modules: the things laid out across a panel ---------- */
 const MODS = ['dev', 'sbc', 'ks', 'bay', 'fan', 'vent', 'open', 'screen', 'out', 'inlet', 'rocker', 'btn', 'knob', 'oled', 'text', 'brush', 'comb', 'ring', 'hook', 'dtype', 'drawer', 'matrix', 'pcie', 'usb', 'gap', 'col', 'slot', 'tile', 'logo'];
 const kindOf = m => typeof m === 'string' ? m : MODS.find(k => m && m[k] !== undefined) || 'gap';
 const asObj = m => typeof m === 'string' ? { [m]: true } : m;
+const kindVent = m => m.vent === true || m.vent === 'hex' ? 'hex' : m.vent;
 
 function devOf(m, ctx) {
   const v = m.dev;
@@ -319,8 +340,8 @@ function measure(m, ctx, avail) {
     }
     case 'sbc': {
       const n = num(m.sbc === true ? 1 : m.sbc, 1), b = BOARDS[m.board || 'pi5'] || BOARDS.generic, vert = m.orient === 'v' && H >= b.edge + 6;
-      const pitch = num(m.pitch, vert ? (m.tray ? 30 : 22) : b.edge + 8), w = vert ? n * pitch - (pitch - (m.tray ? pitch - 2 : 18)) : n * b.edge + (n - 1) * (pitch - b.edge);
-      return { w: Math.min(w, avail), h: vert ? (m.tray ? H - 4 : b.edge) : 19, vert, pitch, b };
+      const pitch = num(m.pitch, vert ? (m.tray ? 29.7 : 22) : b.edge + 8), w = vert ? n * pitch - (pitch - (m.tray ? pitch - .7 : 18)) : n * b.edge + (n - 1) * (pitch - b.edge);
+      return { w: Math.min(w, avail), h: vert ? (m.tray ? H : b.edge) : 19, vert, pitch, b };
     }
     case 'ks': {
       const n = num(m.ks === true ? 1 : m.ks, 1), rows = clamp(num(m.rows, 1), 1, 4), per = Math.ceil(n / rows), pitch = num(m.pitch, 17.6);
@@ -341,7 +362,7 @@ function measure(m, ctx, avail) {
       const d = Math.min(num(m.fan === true ? 40 : m.fan, 40), H - 1), n = num(m.n, 1), gap = num(m.gap, n > 1 ? clamp((avail - n * d) / (n + 1), 1.5, 10) : 0);
       return { w: n * d + (n - 1) * gap, h: d, d, n, gap };
     }
-    case 'vent': return { w: m.w || 0, h: m.h || Math.max(6, H - (H < 25 ? 4 : 9)), grow: !m.w };
+    case 'vent': return { w: m.w || 0, h: m.h || (kindVent(m) === 'hex' ? Math.min(H + 2, (ctx.H || H + 4) - 4) : Math.max(6, H - (H < 25 ? 4 : 9))), grow: !m.w };
     case 'open': return { w: m.w || 0, h: m.h || H - 6, grow: !m.w };
     case 'slot': return { w: m.w || 0, h: m.h || Math.min(14, H - 8), grow: !m.w };
     case 'brush': return { w: m.w || 0, h: m.h || Math.min(18, H - 10), grow: !m.w };
@@ -409,17 +430,19 @@ function buildMod(S, m, x, y, z, ms, ctx) {
     case 'sbc': {
       const n = num(m.sbc === true ? 1 : m.sbc, 1), kind = m.board || 'pi5';
       if (ms.vert) {
-        const bh = ms.b.edge, top = y + (ms.h - bh) / 2;
+        const bh = ms.b.edge, PH = ctx.H || H;
         for (let i = 0; i < n; i++) {
-          const bx = x + i * ms.pitch, inner = m.tray ? bx + (ms.pitch - 2 - 18) / 2 : bx;
-          const win = boardFront(S, kind, inner, top, true, m.hat);
-          const wr = rectP(win.x - 1.4, win.y - 1.4, win.w + 2.8, win.h + 2.8, 1.5);
-          hole(wr);
-          if (m.tray) { // a printed blade in front of the holder, screwed on top and bottom; the holder is open behind it
-            const P = front(), bw = ms.pitch - 2.4, bx0 = bx + .2;
-            S.holes.pop(); hole(rectP(bx0 - .5, y - .5, bw + 1, ms.h + 1, 2.4));
-            P.push(ext(rectP(bx0, y, bw, ms.h, 2.2), [wr], PLATE, PLATE, ctx.trayColor || c));
-            for (const sy of [y + 4.2, y + ms.h - 4.2]) P.push(cyl(bx0 + bw / 2, sy, PLATE + .9, 2.3, .9, C.metal));
+          const bx = x + i * ms.pitch;
+          if (m.tray) { // a printed blade in front of the holder, as tall as the panel and screwed on top and bottom: a window per
+            // port, the board on a carrier behind it with its circuit board 7.2 mm from the blade's left edge (measured from mklements' 2U SBC holder)
+            const bw = ms.pitch - .7, win = boardFront(S, kind, bx + 7.2, PH / 2 - bh / 2 - 5.7, true, m.hat);
+            hole(rectP(bx + bw / 2 - (ms.pitch - 2.2) / 2, 8, ms.pitch - 2.2, PH - 16, 1.5)); // the holder's slot behind the blade
+            const P = front(), wins = win.ports.map(([qx, qy, qw, qh]) => rectP(qx - .5, qy - .7, qw + 1, qh + 1.4, .8));
+            P.push(ext(rectP(bx, 0, bw, PH, 1.2), wins, PLATE, PLATE, ctx.trayColor || c));
+            for (const sy of [4.2, PH - 4.2]) P.push(cyl(bx + bw / 2, sy, PLATE + .9, 2.3, .9, C.metal));
+          } else {
+            const win = boardFront(S, kind, bx, y + (ms.h - bh) / 2, true, m.hat);
+            hole(rectP(win.x - 1.4, win.y - 1.4, win.w + 2.8, win.h + 2.8, 1.5));
           }
         }
       } else {
@@ -477,7 +500,7 @@ function buildMod(S, m, x, y, z, ms, ctx) {
       }
       return;
     }
-    case 'vent': ventHoles(m.vent === true ? 'hex' : m.vent, x, y, ms.w, ms.h, { r: m.r, wall: m.wall }).forEach(hole); return;
+    case 'vent': { const pat = kindVent(m); ventHoles(pat, x, y, ms.w, ms.h, pat === 'hex' ? { r: m.r || 6, wall: m.wall || 1.6, clip: true } : { r: m.r, wall: m.wall }).forEach(hole); return; }
     case 'open': {
       hole(rectP(x, y, ms.w, ms.h, num(m.r, 2.5)));
       if (m.floor !== false) back().push(box(x + 2, y - 2.5, -PLATE, ms.w - 4, 2.5, ctx.maxDepth - 10, c));
@@ -673,7 +696,7 @@ function compilePart(d, opts) {
   const u = d.u || (d.h2 ? d.h2 / 2 : 1), H = panelH(u), color = opts.color || '#26282B', accent = opts.accent || '#B5CF2A';
   const shape = d.shape || defaultShape(d);
   const S = scene(), margin = H < 25 ? 2 : 3;
-  const ctx = { ih: H - 2 * margin, color, accent, device: d.device, lookup: opts.lookup, maxDepth: num(opts.maxDepth, 215), trayColor: shape.trayColor, sledColor: shape.sledColor === 'white' ? C.white : shape.sledColor };
+  const ctx = { ih: H - 2 * margin, H, color, accent, device: d.device, lookup: opts.lookup, maxDepth: num(opts.maxDepth, 215), trayColor: shape.trayColor, sledColor: shape.sledColor === 'white' ? C.white : shape.sledColor };
   const rows = shape.rows || [shape.row || []], left = -SPAN / 2, avail = SPAN;
   const rowH = (ctx.ih - (rows.length - 1) * 3) / rows.length;
   let yTop = H - margin, deepest = 0;
@@ -691,7 +714,7 @@ function compilePart(d, opts) {
     mods.forEach((m, i) => {
       const q = ms[i], yy = m.valign === 'bottom' ? y0 : m.valign === 'top' ? y0 + rh - q.h : y0 + (rh - q.h) / 2;
       buildMod(S, m, x, yy, 0, q, rctx);
-      if (q.d) deepest = Math.max(deepest, Math.min(q.d.d, ctx.maxDepth));
+      if (q.d && q.d.d) deepest = Math.max(deepest, Math.min(q.d.d, ctx.maxDepth));
       x += q.w + gap;
     });
     yTop -= rh + 3;
@@ -739,7 +762,11 @@ function compileTop(d, opts) {
     const pat = ventHoles(sh.plate === 'slots' ? 'vslots' : 'hex', -W / 2 + 10, -z0 + 10, W - 20, D - 20, { r: sh.plate === 'mesh' ? 3.6 : 6.4, wall: 2 });
     pat.forEach(p => { if (!fanAt.some(([fx, fz]) => p.some(([a, b]) => Math.hypot(a - fx, b + fz) < fd / 2 + 3))) holes.push(p); });
   }
-  if (sh.ap) holes.push(circP(0, -(zc), 18)); // cable hole under the access point
+  const tilted = sh.ap && num(sh.tilt, 0) > 0;
+  if (tilted) { // under the 45° mount: a 110 mm square of openings and four screws (measured from the Lab Rax U7 Pro mount)
+    ventHoles('grid', -55, -zc - 55, 110, 110, { r: 10, wall: 4 }).forEach(p => holes.push(p));
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) holes.push(circP(sx * 52.5, -zc + sz * 52.6, 2.25));
+  } else if (sh.ap) holes.push(circP(0, -(zc), 18)); // cable hole under the access point
   const plateP = S.obj(0, 'plate');
   plateP.push(flat('y', rectP(-W / 2, -z0, W, D, 2), holes, -3, 3, color));
   fanAt.forEach(([fx, fz]) => {
@@ -758,17 +785,14 @@ function compileTop(d, opts) {
   if (sh.ap) {
     const [dia, th] = AP[sh.ap] || AP['U7 Pro'], tilt = num(sh.tilt, 0), r = dia / 2, A = S.obj(2);
     if (tilt > 0) {
-      // two crescent arms hold the access point's mounting ring at an angle
-      const t = tilt * Math.PI / 180, cyy = 26 + r * Math.sin(t) * .62, czz = zc + 18;
-      for (const sx of [-1, 1]) {
-        const arm = [];
-        for (let k = 0; k <= 10; k++) { const a = -Math.PI / 2 + k / 10 * Math.PI * .78; arm.push([-czz + 58 * Math.cos(a) * .9 + 10, 4 + (cyy - 4) * (k / 10) + 30 * Math.sin(k / 10 * Math.PI) * .5]); }
-        for (let k = 10; k >= 0; k--) { const a = -Math.PI / 2 + k / 10 * Math.PI * .78; arm.push([-czz + 58 * Math.cos(a) * .9 + 10 + 22 * (1 - k / 10) + 6, 4 + (cyy - 4) * (k / 10) * .86]); }
-        A.push(flat('x', [[-czz - 40, 0], [-czz + 46, 0], [-czz + 46, 5], [-czz - 40, 5]], [], sx * 66 - 7, 14, frame));
-        A.push(flat('x', arm, [], sx < 0 ? -72 : 64, 8, frame));
-      }
-      A.push({ t: 'disc', x: 0, y: cyy, z: czz + 6, r: 64, d: 5, tilt, c: shade(frame, .1) });
-      A.push({ t: 'disc', x: 0, y: cyy + 4 * Math.cos(t), z: czz + 6 + 4 * Math.sin(t), r, d: th, tilt, c: '#F1F2F3', dome: true, ring: '#9CC8FF', sq: SQUARE.has(sh.ap) });
+      // two towers, 28 mm wide, carry a printed adapter at the tilt; the access point clips onto it. Measured from the Lab Rax
+      // U7 Pro 45° mount: base 94 mm deep (50 behind the plate's centre to 44 in front), 128 mm above the plate, the seat's
+      // middle 86 mm up and 7.6 mm in front of the centre, the adapter 172 mm across and 4.5 mm thick
+      const t = tilt * Math.PI / 180, sy = 86.1, sz = 7.6, top = 128.3, seatAt = zz => sy + (sz - zz) * Math.tan(t);
+      const zTop = sz - (top - sy) / Math.tan(t), prof = [[-50, 0], [44, 0], [44, Math.max(8, seatAt(44))], [Math.max(-34, zTop), top], [-36, top]];
+      for (const sx of [-1, 1]) A.push(flat('x', prof.map(([zz, yy]) => [-zc - zz, yy]), [], sx < 0 ? -74 : 46, 28, frame));
+      A.push({ t: 'disc', x: 0, y: sy, z: zc + sz, r: 86, d: 4.5, tilt, c: shade(frame, .1) });
+      A.push({ t: 'disc', x: 0, y: sy + 4.5 * Math.cos(t), z: zc + sz + 4.5 * Math.sin(t), r, d: th, tilt, c: '#F1F2F3', dome: true, ring: '#9CC8FF', sq: SQUARE.has(sh.ap) });
     } else {
       A.push(flat('y', circP(0, -zc, 70), [circP(0, -zc, 18)], 0, 4, frame));
       A.push({ t: 'disc', x: 0, y: 4, z: zc, r, d: th, tilt: 0, c: '#F1F2F3', dome: true, ring: '#9CC8FF', sq: SQUARE.has(sh.ap) });
