@@ -1,6 +1,6 @@
 /* Mini Rack Planner — 3D view (three.js r128). MIT licensed.
    Units are millimetres. x = width, y = height, z = depth (front face at z = 0, rack extends to −z).
-   FRAME holds the Lab Rax frame dimensions used for the model; adjust them here when they are re-measured. */
+   FRAME holds the Lab Rax frame dimensions used for the model; read from rack.js; update that shared source when re-measured. */
 (function () {
 'use strict';
 const P = window.LRParts, LS = window.LRShapes;
@@ -10,24 +10,8 @@ const P = window.LRParts, LS = window.LRShapes;
    horizontal and edge pieces with 45° bevels and mitred corners, the hex grille and logo on the front bevel, arched handles on the side
    edges, posts with a column of inserts (three per U) and tinted acrylic side panels. Sections marked "estimate" are read from photos
    until they are measured from the original files. */
-const FRAME = {
-  clear: 222,          // clear width between the posts (10" standard)
-  outer: 280,          // outer width = 222 + 2·26 posts + 2·3 side panels
-  depth: 240,          // outer depth front to back
-  ring: 32,            // width of the top and bottom rings seen from above (estimate)
-  top: 36,             // top ring height (estimate)
-  topBevel: 20,        // 45° bevel along the top ring; the front one carries the hex grille and logo (estimate)
-  bottom: 14,          // bottom ring height (estimate)
-  bottomBevel: 8,      // 45° bevel along the bottom ring (estimate)
-  post: 26,            // post width seen from the front; the holes sit 7.26 mm from its inner edge
-  postDepth: 20,       // post depth (estimate)
-  side: 3,             // side, top and bottom panels: 3 mm acrylic, plywood or print
-  handleLen: 0.53,     // handle length as a share of the depth (≈127 mm)
-  handleH: 34,         // handle height above the top (estimate)
-  handleW: 12,         // handle thickness; it sits on the flat strip of the top ring (estimate)
-  foot: 8              // foot height (estimate)
-};
-const HOLE_X = 236.525 / 2, HOLE_Y = [6.35, 22.225, 38.1];
+const FRAME = window.LRRack.frame;
+const HOLE_X = window.LRRack.dimensions.holeSpacing / 2, HOLE_Y = window.LRRack.dimensions.holeY;
 
 let T = null, R = null;            // three namespace, main view state
 const previews = new Map();         // container -> preview state

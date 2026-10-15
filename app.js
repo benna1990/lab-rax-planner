@@ -6,7 +6,7 @@
 const STORE = 'labrax-planner-v2';
 const THEMEKEY = 'labrax-planner-theme';
 const REPO_URL = 'https://github.com/benna1990/lab-rax-planner';
-const P = window.LRParts;
+const P = window.LRParts, RACK = window.LRRack, DIMS = RACK.dimensions;
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -353,7 +353,7 @@ function partDepth(it) {
 function clashes(it) {
   if (it.pos2 == null) return [];
   // the panels sit on the outside of the posts, so the two parts share the frame depth plus both 3 mm plates
-  const room = ((CAT.frame.dimensions || {}).depth || 240) + (frameMods().depthAdd || 0) + 2 * 3, mine = partDepth(it);
+  const room = DIMS.depth + (frameMods().depthAdd || 0) + 2 * 3, mine = partDepth(it);
   if (!mine) return [];
   return placed().filter(o => o !== it && o.id !== it.id && sideOf(o) !== sideOf(it) && o.pos2 < it.pos2 + H(it) && it.pos2 < o.pos2 + H(o))
     .map(o => ({ o, d: partDepth(o) })).filter(x => x.d && mine + x.d > room).map(x => Object.assign(x, { mine, room }));
@@ -593,8 +593,8 @@ function renderRack() {
   const air = view === 'air' ? airflow() : null;
   const avail = host.clientWidth - 24 - 34 - 60 - (air ? 56 : 0); // the Airflow view needs room on the right for the temperature scale
   const s = Math.max(.66, Math.min(1.3, avail / 274));
-  const UPX = P.U * s, HU = UPX / 2, postW = 26 * s, bayW = 222 * s, frameW = bayW + 2 * postW, bodyH = state.h * UPX;
-  const edge = Math.max(10, 14 * s), topH = Math.max(24, 36 * s), holeIn = (236.525 - 222) / 2 * s; // hole centre 7.26 mm from the inner edge
+  const UPX = P.U * s, HU = UPX / 2, postW = RACK.frame.post * s, bayW = DIMS.clearWidth * s, frameW = bayW + 2 * postW, bodyH = state.h * UPX;
+  const edge = Math.max(10, RACK.frame.bottom * s), topH = Math.max(24, RACK.frame.top * s), holeIn = (DIMS.holeSpacing - DIMS.clearWidth) / 2 * s; // hole centre 7.26 mm from the inner edge
   G = { s, UPX, HU, postW, bayW, frameW };
   let holesL = '', holesR = '';
   for (let i = 0; i < state.h; i++) for (const off of [6.35, 22.225, 38.1]) {
@@ -645,7 +645,7 @@ function renderRack() {
       '<div></div><div class="floor"' + (below ? ' style="margin-top:' + (4 + below * s).toFixed(1) + 'px"' : '') + '></div><div></div>' +
     '</div>';
   if (air) $('#meas').innerHTML = airLegend(air);
-  else $('#meas').textContent = (rear ? 'Seen from the back · ' : '') + '222 mm usable width · ' + (state.h * P.U).toFixed(1) + ' mm inner height · ' + state.h + 'U';
+  else $('#meas').textContent = (rear ? 'Seen from the back · ' : '') + DIMS.clearWidth + ' mm usable width · ' + (state.h * P.U).toFixed(1) + ' mm inner height · ' + state.h + 'U';
 }
 function showGhost(p, h2) {
   const g = $('#ghost'); if (!g) return;
@@ -783,7 +783,7 @@ function frameParts() {
    not part of the layout). Sizes in mm; ≈ ones are estimates. The horizontal pieces span the outer width and are as wide as the ring
    (FRAME in view3d.js), which agrees with the Lab Rax article: they only fit a 256 mm bed diagonally and not a 220 mm bed. Posts and
    side panels are as tall as the rack up to 5U ("5U being the largest that fits a 250 mm print bed"), edge pieces and side panels
-   are 170 mm deep and the top and bottom panels 228 × 171.5 mm (catalog frame dimensions). Catalog panels and mounts are taken as a
+   are 170 mm deep and the top and bottom panels 228 × 171.5 mm (rack.js dimensions). Catalog panels and mounts are taken as a
    full 10″ (254 mm) wide; custom parts are as parts.js makes them. */
 const PANEL_10 = 254;
 const SPLIT_FRAME = 'mw2452007'; // "5U for A1 mini (split parts)" in Frame & extras
@@ -791,11 +791,11 @@ const bedPrinter = () => window.LRPrinters.bed(ui.printer);
 // ways: the footprints a piece can lie on, [a, b, height it then stands]; size: what the lists show
 const piece = (name, ways, est, size) => ({ name, ways, est: !!est, size: size || ways[0].slice(0, 2) });
 function framePieces() {
-  const F = (window.LRView3D && window.LRView3D.FRAME) || { ring: 32, top: 36, post: 26, postDepth: 20 }, dm = CAT.frame.dimensions || {};
-  const n = Math.min(state.h, 5), tall = n * P.U, deep = dm.sideBeam || 170, tp = dm.topPanel || [228, 171.5];
+  const F = RACK.frame, dm = DIMS;
+  const n = Math.min(state.h, 5), tall = n * P.U, deep = dm.sideBeam, tp = dm.topPanel;
   const sides = (add, always) => always || state.sides !== 'acrylic' ? [piece('side panels (' + n + 'U)', [[tall, deep + add, 3]], true)] : [];
   return {
-    ring: [piece('horizontal pieces', [[dm.outerWidth || 280, F.ring, F.top]], true), piece('edge pieces', [[deep, F.ring, F.top]], true),
+    ring: [piece('horizontal pieces', [[dm.outerWidth, F.ring, F.top]], true), piece('edge pieces', [[deep, F.ring, F.top]], true),
       ...(!state.top || !state.bottom ? [piece(!state.top && !state.bottom ? 'top and bottom panels' : state.top ? 'bottom panel' : 'top panel', [[tp[0], tp[1], 3]], true)] : [])],
     posts: [piece('posts (' + n + 'U)', [[tall, F.post, F.postDepth]], true), ...sides(0)],
     top: [piece('top', [[tp[0], tp[1], 3]], true)],
@@ -976,7 +976,7 @@ function orderList() {
     out.push({ key: 'filament-' + x.c, group: 'print', name: fil.name.replace('1.75 mm', named ? cn : 'custom ' + cn) + ', 1.75 mm', spec: '≈ ' + x.grams + ' g with 10 % spare; an estimate before slicing', qty: Math.ceil(x.grams / 1000), unit: 'spool', swatch: x.c, links: shopLinks(q2), buy: shopUrl(q2) }); });
   if (state.sides === 'acrylic') { const a = CAT.hardware.acrylic || {};
     out.push({ key: 'acrylic', group: 'acrylic', name: a.name || 'Acrylic sheet, 3 mm, cut to size', spec: (a.spec || '') + '. Take the size from the printed side panel model; the planner has no measured size yet.', qty: 2, links: [], buy: null, cutters: (CAT.acrylic || []).filter(c => ['NL','BE'].includes(state.market) || /worldwide/i.test(c.note || '')) }); }
-  if (state.bottom === 'acrylic') { const a = CAT.hardware.acrylic || {}, tp = (CAT.frame.dimensions || {}).topPanel || [228, 171.5];
+  if (state.bottom === 'acrylic') { const a = CAT.hardware.acrylic || {}, tp = DIMS.topPanel;
     out.push({ key: 'acrylic-bottom', group: 'acrylic', name: 'Acrylic bottom panel, 3 mm', spec: tp[0] + ' × ' + tp[1] + ' mm, the size of the printed bottom panel; check it against the frame model before ordering', qty: 1, links: [], buy: null, cutters: (CAT.acrylic || []).filter(c => ['NL', 'BE'].includes(state.market) || /world|eu/i.test(c.note || '')) }); }
   if (state.extras.some(k => LIB[k].shape && LIB[k].shape.wall)) out.push({ key: 'wallfixings', group: 'fasteners', name: 'Wall bracket fixings', spec: 'Choose for the selected bracket, loaded rack and wall', qty: null, links: [], buy: null });
   // parts that don't list their own hardware: the panel screws are counted, anything else they need isn't known
@@ -1071,7 +1071,7 @@ const JOINER_NOTE = 'Above 5U the posts are joined. How the post joiners are fas
    seams between panels), the fans with their rated flow and direction, and the walls. */
 const RATED = [35, 40];                             // hottest air up to 35 °C is cool, up to 40 °C warm; most gear is rated for 0–40 °C
 const HEAT_SPAN = 25;                               // the colour scale runs from room temperature to 25 °C above it
-const BAY_W = .222, RACK_D = .24, SIDE_D = .17;     // m: width between the posts, rack depth, side panel depth
+const BAY_W = DIMS.clearWidth / 1000, RACK_D = DIMS.depth / 1000, SIDE_D = DIMS.sideBeam / 1000;     // m: width between the posts, rack depth, side panel depth
 const TOP_A = .216 * .176;                          // m², the opening of the top panel
 const DIR_BTN = { intake: 'In', exhaust: 'Out', cross: 'In + out' };
 const fmtT = t => t > 60 ? '60+ °C' : Math.round(t) + ' °C'; // past 60 °C the exact figure means little: gear shuts down long before
@@ -1577,7 +1577,7 @@ function renderBuild() {
 function listText() {
   const fp = frameParts(), br = state.version === 'brass', L = [];
   L.push((state.label && state.label !== 'Lab Rax' ? state.label + ' – ' : '') + 'Lab Rax ' + state.h + 'U (' + (br ? 'heat-set inserts' : 'bolted') + ')');
-  L.push((state.h * P.U).toFixed(1) + ' mm inner height · 222 mm usable width', '', 'Layout (top to bottom)');
+  L.push((state.h * P.U).toFixed(1) + ' mm inner height · ' + DIMS.clearWidth + ' mm usable width', '', 'Layout (top to bottom)');
   if (state.top) L.push('  top     ' + fullName(LIB[state.top]));
   onSide('front').forEach(i => { const d = info(i); L.push('  ' + uRange(i.pos2, d.h2).padEnd(8) + (i.label ? '[' + i.label + '] ' : '') + fullName(d) + ' (' + uTxt(d) + ')'); });
   const used = onSide('front').reduce((n, i) => n + H(i), 0); if (slots() - used > 0) L.push('  Open: ' + fmtU(slots() - used));
@@ -1729,7 +1729,7 @@ function pdfData() {
     top: state.top ? fullName(LIB[state.top]) : null, topLook: state.top ? LS.topFor(LIB[state.top], colorsFor()) : null, // the top mount as drawn above the frame
     items: byPos().map(i => { const d = info(i); return { pos: uRange(i.pos2, d.h2) + atBack(i), pos2: i.pos2, h2: d.h2, name: fullName(d), label: i.label || '', u: uTxt(d), url: d.url || '', author: d.author || '', color: colorOf(i), face: faceSVG(d, colorOf(i), upperHalf(i)), plate: plateBox(i, d), depth: partDepth(i), back: sideOf(i) === 'back' }; }),
     print: pk.map(x => ({ qty: x.qty, name: x.name, sub: x.subs.join(', '), vars: x.variants, url: x.url, bed: bedText(x.bed, true), bad: !!(x.bed && x.bed.bad.length) })),
-    printer: pk.printer ? { name: bedName(pk.printer), bad: bedBad(pk).length, turned: pk.some(x => x.bed && x.bed.turned.length), est: pk.some(x => x.bed && [...x.bed.bad, ...x.bed.turned].some(q => q.est)) } : null, shop: orderList(), guide: guide(), estimate: buildEstimate(), market: state.market, wallMounts: state.extras.filter(k => LIB[k].shape && LIB[k].shape.wall).map(k => ({ name: fullName(LIB[k]), url: LIB[k].url })), sides: state.sides, dimensions: CAT.frame.dimensions, shareUrl: TOP_WIN ? shareLink() + '&s=shop' : null, frameParts: frameParts(), notes: state.h > 5 ? [JOINER_NOTE] : [],
+    printer: pk.printer ? { name: bedName(pk.printer), bad: bedBad(pk).length, turned: pk.some(x => x.bed && x.bed.turned.length), est: pk.some(x => x.bed && [...x.bed.bad, ...x.bed.turned].some(q => q.est)) } : null, shop: orderList(), guide: guide(), estimate: buildEstimate(), market: state.market, wallMounts: state.extras.filter(k => LIB[k].shape && LIB[k].shape.wall).map(k => ({ name: fullName(LIB[k]), url: LIB[k].url })), sides: state.sides, dimensions: DIMS, shareUrl: TOP_WIN ? shareLink() + '&s=shop' : null, frameParts: frameParts(), notes: state.h > 5 ? [JOINER_NOTE] : [],
     cooling: pdfCooling(), power: pdfPower(), shareUrl: TOP_WIN ? shareLink() + '&s=shop' : null }; // the QR code opens this layout with its shopping list
 }
 function pdfPower() { // the Power & network block for the PDF; null when nothing draws power or needs a port

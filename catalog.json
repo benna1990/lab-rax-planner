@@ -76,19 +76,6 @@
    "name": "Lab Rax extension side panels & post joiners",
    "url": "https://makerworld.com/en/models/1304384-lab-rax-extension-side-panels-post-joiner",
    "author": "mklements"
-  },
-  "dimensions": {
-   "_comment": "mm; see README for sources",
-   "u": 44.45,
-   "holeSpacing": 236.525,
-   "clearWidth": 222,
-   "depth": 240,
-   "outerWidth": 280,
-   "sideBeam": 170,
-   "topPanel": [
-    228,
-    171.5
-   ]
   }
  },
  "hardware": {

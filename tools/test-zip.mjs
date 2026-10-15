@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 
 const win = {};
+new Function('window', readFileSync(new URL('../rack.js', import.meta.url), 'utf8'))(win);
 new Function('window', readFileSync(new URL('../parts.js', import.meta.url), 'utf8'))(win);
 const P = win.LRParts;
 const enc = new TextEncoder(), dec = new TextDecoder();

@@ -7,7 +7,8 @@
 (function () {
 'use strict';
 
-const U = 44.45, CLEAR = 0.79, PANEL_W = 250, HOLE_X = 236.525 / 2, SPAN = 212, PLATE = 3;
+const DIMS = window.LRRack.dimensions, FRAME = window.LRRack.frame;
+const U = DIMS.u, CLEAR = DIMS.panelClearance, PANEL_W = DIMS.panelWidth, HOLE_X = DIMS.holeSpacing / 2, SPAN = DIMS.cutoutSpan, PLATE = 3;
 const panelH = u => u * U - CLEAR;
 /* How a panel sits in its slot (the U's it takes, or half a U), in mm: height h, bottom edge `lift` above the bottom of the slot,
    `mid` the middle of the slot (y up from the panel's bottom edge, like the screw slots, the screws drawn in them and the notches
@@ -798,7 +799,7 @@ const AP = { 'U7 Pro': [206, 46.5], 'U7 Pro Max': [206, 46.5], 'U6+': [160, 32.7
 function compileTop(d, opts) {
   opts = opts || {};
   const sh = d.shape || { ap: 'U7 Pro', tilt: 45 }, S = scene(), color = opts.color || '#26282B', frame = opts.frame || color, accent = opts.accent || '#B5CF2A';
-  const W = 222, D = num(opts.depth, 240) - 58, z0 = -29, zc = z0 - D / 2;
+  const W = DIMS.clearWidth, D = num(opts.depth, DIMS.depth) - 58, z0 = -29, zc = z0 - D / 2;
   const holes = [];
   const fans = sh.fan ? [].concat(sh.fan) : [];
   const nF = num(sh.n, fans.length ? 1 : 0), fd = fans[0] || 0;
@@ -845,7 +846,7 @@ function compileTop(d, opts) {
       A.push({ t: 'disc', x: 0, y: 4, z: zc, r, d: th, tilt: 0, c: '#F1F2F3', dome: true, ring: '#9CC8FF', sq: SQUARE.has(sh.ap) });
     }
   }
-  return { top: true, objs: S.objs, w: 280, h: 0 };
+  return { top: true, objs: S.objs, w: DIMS.outerWidth, h: 0 };
 }
 
 /* ---------- frame extras ----------
@@ -885,7 +886,7 @@ function sideHoles(side, fan, depth, height) {
 function rackScene(spec, o) {
   o = o || {};
   const sp = spec || {}, frame = o.frame || '#26282B', accent = o.accent || '#B5CF2A', S = scene();
-  const u = num(sp.u, 3), W = sp.frame === 'matx' ? 304 : 280, D = 240 + num(sp.depth, 0), ih = u * U, post = 26, bot = sp.frame === 'lowprofile' ? 8 : 14, top = sp.frame === 'lowprofile' ? 18 : 36, ring = 32;
+  const u = num(sp.u, 3), W = sp.frame === 'matx' ? 304 : FRAME.outer, D = FRAME.depth + num(sp.depth, 0), ih = u * U, post = FRAME.post, bot = sp.frame === 'lowprofile' ? 8 : FRAME.bottom, top = sp.frame === 'lowprofile' ? 18 : FRAME.top, ring = FRAME.ring;
   const y0 = (sp.feet === 'casters' ? 46 : sp.feet === 'big' ? 14 : 8) + (sp.drawer ? 30 : 0), yT = y0 + bot + ih;
   const B = (x, y, z, w, h, d, c, layer) => S.obj(layer == null ? 0 : layer).push(box(x, y, z, w, h, d, c));
   // dark inside, then the rings, posts and side panels
@@ -1170,7 +1171,7 @@ function genShape(p) {
     case 'vent': return { row: [{ vent: p.pattern === 'hex' ? 'hex' : 'slots' }] };
     case 'keystone': return { row: [{ ks: (p.ports || 12) * (p.rows || 1), rows: p.rows || 1 }] };
     case 'shelf': return { row: [{ dev: { size: [p.dw || 120, p.dh || 30, p.dd || 120], color: '#3A3D42', io: ['led'] }, win: p.open === false ? 'frame' : 'full' }], shelf: true, depth: (p.dd || 120) + 6 };
-    case 'label': return { row: p.text ? [{ text: p.text, size: Math.min(14, p.u * 44.45 * .38) }] : [] };
+    case 'label': return { row: p.text ? [{ text: p.text, size: Math.min(14, p.u * U * .38) }] : [] };
     case 'fan': { // spaced as parts.js fanPitch(); a fan is drawn at most 7 mm smaller than the plate, so the gap makes up the rest
       const size = p.size || 40, n = p.fans || 1, pitch = n > 1 ? Math.min(size + 8, (SPAN - size) / (n - 1)) : 0, drawn = Math.min(size, panelH(p.u) - 7);
       return { row: [Object.assign({ fan: size, n, gap: Math.max(0, pitch - drawn) }, p.grille === 'open' ? {} : { grille: 'hex' })] };

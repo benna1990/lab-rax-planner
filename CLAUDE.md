@@ -3,11 +3,12 @@
 Static web app for planning 3D-printed 10" homelab racks: Lab Rax and more. Formerly "Lab Rax Planner": the localStorage keys (`labrax-planner-*`) keep their old names so saved layouts survive, and "Lab Rax" stays where it means the frame design. No build step, no framework. UI text is English.
 
 ## Files
+- `rack.js` — single source for shared Lab Rax geometry: rack units, hole spacing, clear/panel widths, panel clearance, frame envelope and frame shape dimensions. Loaded before parts/shapes/3D; Node tools load it too. Values retain their existing documented/estimated status; centralizing does not verify fit. `catalog.frame` contains model/assembly records, not duplicated dimensions.
 - `index.html` — markup and all CSS (light/dark tokens on `:root`, `data-theme` toggle).
 - `app.js` — state, library, 2D front view, build column, build pack ZIP, part maker dialog. Saves to localStorage (`labrax-planner-v2`); Save as file / Open file and the build pack use `.rack.json` files, the share link's compact layout with `format` and `version`.
-- `parts.js` — parametric custom parts (three.js geometry), binary STL writer, stored ZIP writer. 10" constants live at the top.
+- `parts.js` — parametric custom parts (three.js geometry), binary STL writer, stored ZIP writer. 10" dimensions come from rack.js.
 - `shapes.js` — how parts look: turns each catalog `shape` (and the device's `size`, `color`, `io`) into primitives in mm, drawn as SVG for the library and the front view and as three.js geometry for the 3D view. Also top mounts, frame extras (`frameMods`) and how each panel sits in its slot (`fit`: catalog `fit: "labrax"` parts are the measured Lab Rax size, n·44.45 − 2.45; the rest, custom parts included, EIA n·44.45 − 0.79).
-- `view3d.js` — 3D view (three.js r128 from cdnjs, OrbitControls/STLLoader/3MFLoader from jsDelivr). `FRAME` holds frame dimensions.
+- `view3d.js` — 3D view (three.js r128 from cdnjs, OrbitControls/STLLoader/3MFLoader from jsDelivr). `FRAME` aliases the shared rack.js frame dimensions.
 - `pdf.js` — build plan PDF with jsPDF 2.5.1.
 - `ready.js` — build readiness: the checks behind the step bar and the Build readiness panel (pure; `tools/test-ready.mjs`). Audit and plan: `docs/audit/`.
 - `resources.json` — the Guides → Resources list (title, https url, kind, about; validated); only sources that were actually read.
@@ -25,7 +26,7 @@ Static web app for planning 3D-printed 10" homelab racks: Lab Rax and more. Form
 
 ## Commands
 - Run: `python3 -m http.server 8000` then open http://localhost:8000 (needs a server; `fetch('catalog.json')`).
-- Check: `node tools/validate.mjs && for f in app.js parts.js shapes.js view3d.js pdf.js airflow.js power.js guide.js estimate.js market.js printers.js ready.js connect.js layout.js codec.js; do node --check $f; done && for t in tools/test-*.mjs; do node $t; done`
+- Check: `node tools/validate.mjs && for f in rack.js app.js parts.js shapes.js view3d.js pdf.js airflow.js power.js guide.js estimate.js market.js printers.js ready.js connect.js layout.js codec.js; do node --check $f; done && for t in tools/test-*.mjs; do node $t; done`
 - Browser self-test (placement, undo, share link, rack file, PDF and ZIP export in the real page): serve the folder and open `/tools/selftest.html`; it puts your saved rack back afterwards.
 - Measure: `node tools/measure.mjs [id …]` (all of `reference/` without ids; `--front=±axis`, `--up=±axis` when it picks the wrong face, `--svg` for an overlay in `reference/`, `--json` for numbers).
 

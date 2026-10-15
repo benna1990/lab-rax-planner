@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 const cat = JSON.parse(readFileSync(new URL('../catalog.json', import.meta.url), 'utf8'));
 // shapes.js knows the shape spec (how a part looks); it is a browser script, so give it a window to attach to
 const win = {};
+new Function('window', readFileSync(new URL('../rack.js', import.meta.url), 'utf8'))(win);
 new Function('window', readFileSync(new URL('../shapes.js', import.meta.url), 'utf8'))(win);
 const LS = win.LRShapes, deviceNames = new Set((cat.devices || []).flatMap(g => (g.items || []).map(d => d.device)));
 const look = (kind, o, where) => { if (o.shape != null) LS.check(kind, o.shape, n => deviceNames.has(n)).forEach(e => errors.push(`${where}: ${e}`)); };

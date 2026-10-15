@@ -9,7 +9,10 @@ import { inflateRawSync } from 'node:zlib';
 import { basename, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const U = 44.45, CLEAR = 0.79, HOLE_X = 236.525 / 2, OPEN = 111; // OPEN: half the 222 mm clear width between the posts
+const rackWindow = {};
+new Function('window', readFileSync(new URL('../rack.js', import.meta.url), 'utf8'))(rackWindow);
+const DIMS = rackWindow.LRRack.dimensions;
+const U = DIMS.u, CLEAR = DIMS.panelClearance, HOLE_X = DIMS.holeSpacing / 2, OPEN = DIMS.clearWidth / 2; // OPEN: half the 222 mm clear width between the posts
 const REF = fileURLToPath(new URL('../reference/', import.meta.url));
 const opt = {}, wanted = [];
 for (const a of process.argv.slice(2)) { const m = /^--([\w-]+)(?:=(.*))?$/.exec(a); if (m) opt[m[1]] = m[2] ?? true; else wanted.push(a); }
@@ -20,6 +23,7 @@ const span = (a, b) => `${f(a)}…${f(b)}`;
 /* ---------- catalog and shapes.js (a browser script, so give it a window) ---------- */
 const cat = JSON.parse(readFileSync(new URL('../catalog.json', import.meta.url), 'utf8'));
 const win = {};
+new Function('window', readFileSync(new URL('../rack.js', import.meta.url), 'utf8'))(win);
 new Function('window', readFileSync(new URL('../shapes.js', import.meta.url), 'utf8'))(win);
 const LS = win.LRShapes, entries = new Map(), devices = new Map();
 cat.panels.forEach(g => g.items.forEach(p => entries.set(p.id, { kind: 'panel', e: p })));
@@ -708,7 +712,7 @@ for (const file of files) {
         if (!t.faces.length) out('      no tilted faces: the device sits level');
         Object.assign(res, { plate: [+f(t.W, 1), +f(t.D, 1)], thick: +f(t.thick, 2), height: +f(t.height, 1), faces: t.faces.map(q => ({ tilt: +f(q.tilt, 1), w: +f(q.w, 1), h: +f(q.h, 1), height: +f(q.mid[2], 1), x: +f(q.mid[0], 1), y: +f(q.mid[1], 1) })) });
         if (ent && ent.kind === 'top') {
-          const sc = LS.top(ent.e, {}), discs = sc.objs.flatMap(o => o.prims).filter(q => q.t === 'disc'), tp = cat.frame.dimensions.topPanel;
+          const sc = LS.top(ent.e, {}), discs = sc.objs.flatMap(o => o.prims).filter(q => q.t === 'disc'), tp = DIMS.topPanel;
           const tilt = ent.e.shape && ent.e.shape.tilt || 0, best = t.faces.find(q => q.up) || t.faces[0];
           out(`      compared with ${id} (${ent.e.label}):`);
           out(`        plate    catalog top panel ${tp[0]} × ${tp[1]}; model ${f(t.W)} × ${f(t.D)}`);
