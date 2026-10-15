@@ -9,6 +9,26 @@ function load() {
   }
   return jsp;
 }
+// QR codes (qrcode-generator 1.4.4, loaded on demand like jsPDF)
+let qrp = null;
+function loadQR() {
+  if (!qrp) {
+    qrp = (window.qrcode ? Promise.resolve() : window.LRParts.loadScript('https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js')).then(() => window.qrcode);
+    qrp.catch(() => { qrp = null; });
+  }
+  return qrp;
+}
+const HOME = 'https://benna1990.github.io/lab-rax-planner/';
+// the layout's own link when its code stays scannable at 4 cm (version 20 or lower: modules of 0.38 mm or more, fine for a phone camera), else the planner's home page
+async function qrFor(url) {
+  const qrcode = await loadQR().catch(() => null);
+  if (!qrcode) return null;
+  const make = s => { try { const q = qrcode(0, 'L'); q.addData(s); q.make(); return q; } catch (e) { return null; } };
+  const own = url ? make(url) : null;
+  if (own && own.getModuleCount() <= 97) return { q: own, full: true };
+  const home = make(HOME);
+  return home ? { q: home, full: false, why: url ? 'long' : 'none' } : null;
+}
 // built-in PDF fonts only cover WinAnsi; map the few characters the planner uses that fall outside it
 const clean = s => String(s == null ? '' : s).replace(/≈/g, '~').replace(/→/g, '->').replace(/″/g, '"').replace(/✓/g, '').replace(/[^\x00-\xFF–—‘’“”•…×½]/g, '');
 const hex = c => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
@@ -29,13 +49,17 @@ function raster(svg, w, h, ppm, type) {
 }
 
 async function make(d) {
-  const JsPDF = await load();
+  const JsPDF = await load(), qr = await qrFor(d.shareUrl);
   const doc = new JsPDF({ unit: 'mm', format: 'a4' }), W = 210, M = 16, BOT = 297 - M; // BOT: lowest baseline for content
   const ink = [22, 24, 27], muted = [106, 111, 118], line = [218, 221, 216], green = [23, 130, 74];
   const text = (s, x, y, o) => doc.text(Array.isArray(s) ? s.map(clean) : clean(s), x, y, o); // arrays are wrapped lines
   const wrap = (s, w) => doc.splitTextToSize(clean(s), w);
   const head = (s, y) => { doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...ink); text(s, M, y); doc.setDrawColor(...line); doc.line(M, y + 2, W - M, y + 2); return y + 8; };
   const page = () => { doc.addPage(); return M + 4; };
+  const drawQR = (q, x, y, size) => { // dark modules as runs per row, with a 4-module quiet zone inside size
+    const n = q.getModuleCount(), cell = size / (n + 8); doc.setFillColor(0, 0, 0);
+    for (let r = 0; r < n; r++) for (let k = 0; k < n;) { if (!q.isDark(r, k)) { k++; continue; } let e = k; while (e < n && q.isDark(r, e)) e++; doc.rect(x + (k + 4) * cell, y + (r + 4) * cell, (e - k) * cell + .02, cell + .02, 'F'); k = e; }
+  };
   // measure a block before drawing it, and start a new page when it doesn't fit
   const fit = (y, h) => y + h > BOT ? page() : y;
 
@@ -290,23 +314,101 @@ async function make(d) {
     doc.setFont('helvetica', 'normal'); doc.setTextColor(...muted); doc.setFontSize(8);
     text(sub, M + 6, y + nameH); y += h + 6.8;
   }
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
-  const shops = d.shop.map(s => ({ s, name: wrap(s.name, W - 2 * M - 42) }));
-  y += 4; y = fit(y, 8 + (shops.length ? (shops[0].name.length - 1) * 3.8 : 0));
+  // shopping list: a QR code that opens this layout with the list, then the rows in their groups (filament with a colour swatch)
+  const QR = 40;
+  y = fit(y + 4, 8 + (qr ? QR + 4 : 10));
   y = head('Shopping list', y);
-  for (const { s, name } of shops) {
-    y = fit(y, (name.length - 1) * 3.8);
-    doc.setFontSize(9); doc.setTextColor(...ink); doc.setFont('helvetica', 'normal'); text(name, M, y);
-    doc.setFont('helvetica', 'bold'); text(s.qty == null ? 'unknown' : s.qty + '×', W - M, y, { align: 'right' });
-    const link = s.buy ? ['Buy', s.buy] : s.check ? ['Check', s.check] : null;
-    if (link) { doc.setTextColor(...green); doc.setFont('helvetica', 'normal'); doc.textWithLink(link[0], W - M - 26, y, { url: link[1] }); }
-    y += (name.length - 1) * 3.8 + 5.5;
+  if (qr) {
+    drawQR(qr.q, W - M - QR, y - 4, QR);
+    if (qr.full) doc.link(W - M - QR, y - 4, QR, QR, { url: d.shareUrl });
+    const tw = W - 2 * M - QR - 8;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(...ink);
+    const t1 = wrap(qr.full ? 'Scan to open this rack with its shopping list' : 'Scan to open the Lab Rax Planner', tw); text(t1, M, y + 2);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...muted);
+    const t2 = wrap(qr.full ? 'The code opens this exact layout in the Lab Rax Planner with the Shopping list open, so you can buy and tick things off on your phone.'
+      : qr.why === 'long' ? 'The link to this layout is too long for a code that still scans at this size. Open the planner and use Share link in Your build to send the layout to your phone.'
+      : 'Opens the Lab Rax Planner. Use Share link in Your build to send this layout to your phone.', tw);
+    text(t2, M, y + 2 + t1.length * 4.4);
+    y += QR + 2;
+  }
+  // groups in the planner's order and with its titles (shopGroups from app.js, else the same list here)
+  const SG = d.shopGroups || [['print', 'Filament'], ['fasteners', 'Screws and inserts'], ['tools', 'Tools'], ['cooling', 'Fans and fan power'], ['power', 'Power'], ['network', 'Network'], ['acrylic', 'Acrylic'], ['other', 'Handy extras']];
+  const groups = SG.map(([id, title]) => ({ id, title, rows: [] }));
+  for (const s of d.shop) { const id = s.group || 'other'; let G = groups.find(x => x.id === id); if (!G) groups.push(G = { id, title: id.charAt(0).toUpperCase() + id.slice(1), rows: [] }); G.rows.push(s); }
+  const qtyOf = r => r.qty == null ? 'check' : r.unit === 'spool' ? r.qty + (r.qty > 1 ? ' spools' : ' spool') : r.packs ? r.qty + ' · ' + r.packs + (r.packs > 1 ? ' packs' : ' pack') + ' of ' + r.pack : r.qty + '×';
+  const linksOf = r => r.links && r.links.length ? r.links : r.buy ? [{ shop: 'Buy', url: r.buy }] : [];
+  const affiliate = d.shop.some(r => [...(r.links || []), ...(r.models || []).flatMap(m => m.links || [])].some(l => l.aff));
+  const nameW = W - 2 * M - 46;
+  // a row as a list of lines, measured before drawing so it never splits across pages; a line is text, or links on one line
+  const shopRow = r => {
+    const ind = r.swatch && /^#[0-9a-f]{6}$/i.test(r.swatch) ? 7 : 0, w = nameW - ind, L = [];
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); wrap(r.name + (r.optional ? ' (optional)' : ''), w).forEach(t => L.push({ t, bold: true, size: 9, h: 3.8 }));
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+    const muted8 = s => wrap(s, w).forEach(t => L.push({ t, size: 8, h: 3.5, col: muted }));
+    if (r.spec) muted8(r.spec);
+    if (r.why) muted8(r.why);
+    (r.models || []).forEach(mo => { muted8(mo.label + ': ' + mo.name); if (mo.links && mo.links.length) L.push({ links: mo.links, h: 3.6 }); });
+    (r.cutters || []).forEach(c => { L.push({ links: [{ shop: c.name, url: c.url }], h: 3.6 }); if (c.note) muted8(c.note); });
+    if (r.check) L.push({ links: [{ shop: 'Check the model page', url: r.check }], h: 3.6 });
+    if (!(r.models && r.models.length) && linksOf(r).length) L.push({ links: linksOf(r), h: 3.6 });
+    return { r, ind, L, h: L.reduce((n, l) => n + l.h, 0) };
+  };
+  for (const G of groups) {
+    if (!G.rows.length) continue;
+    const rows = G.rows.map(shopRow);
+    y = fit(y + 2, 7 + rows[0].h);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(...muted); text(G.title.toUpperCase(), M, y);
+    doc.setDrawColor(...line); doc.setLineWidth(.2); doc.line(M, y + 1.5, W - M, y + 1.5); y += 6.5;
+    for (const { r, ind, L, h } of rows) {
+      y = fit(y, h - L[0].h);
+      if (ind) { doc.setFillColor(...hex(r.swatch)); doc.setDrawColor(...muted); doc.setLineWidth(.2); doc.roundedRect(M, y - 3.2, 4.4, 4.4, .6, .6, 'FD'); }
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...ink); text(qtyOf(r), W - M, y, { align: 'right' });
+      let yy = y;
+      L.forEach((l, i) => {
+        if (i) yy += l.h;
+        if (l.links) {
+          doc.setFont('helvetica', 'normal'); doc.setFontSize(8); let x = M + ind;
+          l.links.forEach((k, j) => {
+            if (j) { doc.setTextColor(...muted); text('·', x + .8, yy); x += 3.4; }
+            doc.setTextColor(...green); doc.textWithLink(clean(k.shop), x, yy, { url: k.url }); x += doc.getTextWidth(clean(k.shop)) + .6;
+          });
+        } else { doc.setFont('helvetica', l.bold ? 'bold' : 'normal'); doc.setFontSize(l.size); doc.setTextColor(...(l.col || ink)); text(l.t, M + ind, yy); }
+      });
+      y = yy + 6;
+    }
   }
   doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...muted);
   const foot = wrap('Community models belong to their makers and stay on MakerWorld under their own licenses; download them there as 3MF. Custom parts were generated by the Lab Rax Planner (MIT). Lab Rax is designed by Michael Klements.', W - 2 * M);
+  const shopNote = d.shopNote || (affiliate ? 'Some shop links are affiliate links: the maintainer of this planner may earn a small commission, at no cost to you.' : '');
+  if (shopNote) foot.unshift(...wrap(shopNote, W - 2 * M), '');
   if (d.notes && d.notes.length) foot.unshift(...d.notes.flatMap(n => wrap(n, W - 2 * M)), '');
   y = fit(y + 4, (foot.length - 1) * 3.5);
   text(foot, M, y);
+
+  // ---- assembly and wiring guide: its own pages; a section title stays with its first step and a step never splits ----
+  if (d.guide && d.guide.length) {
+    y = page();
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(18); doc.setTextColor(...ink); text('Assembly and wiring guide', M, y + 2);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.setTextColor(...muted); text(d.title, M, y + 9); y += 18;
+    const stepW = W - 2 * M - 10, warnRe = /^(warning|caution|safety|danger|never)\b/i, tipRe = /^tip: /i;
+    d.guide.forEach((sec, i) => {
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5);
+      const steps = (sec.steps || []).map(st => ({ st, lines: wrap(st, stepW) }));
+      y = fit(y, 9 + (steps.length ? steps[0].lines.length * 4.4 : 0));
+      doc.setFillColor(...ink); doc.circle(M + 3, y - 1.4, 3, 'F');
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(255, 255, 255); text(String(i + 1), M + 3, y - .2, { align: 'center' });
+      doc.setFontSize(12); doc.setTextColor(...ink); text(sec.title, M + 9, y); y += 8;
+      steps.forEach(({ st, lines }, j) => {
+        y = fit(y, (lines.length - 1) * 4.4);
+        const warn = warnRe.test(st);
+        if (warn) { doc.setFillColor(181, 70, 26); doc.rect(M + 8.2, y - 3.2, .9, lines.length * 4.4 - .4, 'F'); }
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(...muted); text((i + 1) + '.' + (j + 1), M + 1, y);
+        doc.setFont('helvetica', warn ? 'bold' : 'normal'); doc.setFontSize(9.5); doc.setTextColor(...(tipRe.test(st) ? muted : ink)); text(lines, M + 10, y);
+        y += lines.length * 4.4 + 2.2;
+      });
+      y += 5;
+    });
+  }
   const pages = doc.getNumberOfPages();
   if (pages > 1) for (let i = 1; i <= pages; i++) { doc.setPage(i); doc.setFontSize(8); doc.setTextColor(...muted); text(i + ' / ' + pages, W - M, 297 - 8, { align: 'right' }); }
   return new Uint8Array(doc.output('arraybuffer'));
