@@ -5,7 +5,7 @@
 
 const STORE = 'labrax-planner-v2';
 const THEMEKEY = 'labrax-planner-theme';
-const REPO_URL = ''; // set to the GitHub repository URL once it is public
+const REPO_URL = 'https://github.com/benna1990/lab-rax-planner';
 const P = window.LRParts;
 
 const $ = s => document.querySelector(s);
