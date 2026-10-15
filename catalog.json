@@ -411,7 +411,8 @@
      "shape": {"row": [{"vent": "hex"}]},
      "url": "https://makerworld.com/en/models/1304233-1-2u-ventilation-panel-for-10-rack",
      "author": "mklements",
-     "labrax": true
+     "labrax": true,
+     "fit": "labrax"
     },
     {
      "id": "vent1",
@@ -422,7 +423,8 @@
      "shape": {"row": [{"vent": "hex", "w": 210.8}]},
      "url": "https://makerworld.com/en/models/1293799-1u-ventilation-panel-for-10-rack",
      "author": "mklements",
-     "labrax": true
+     "labrax": true,
+     "fit": "labrax"
     },
     {
      "id": "fan40",
@@ -433,6 +435,7 @@
      "url": "https://makerworld.com/en/models/1293794-1u-5x40mm-fan-panel-for-10-rack",
      "author": "mklements",
      "labrax": true,
+     "fit": "labrax",
      "hardware": [
       {
        "part": "fan40",
@@ -450,6 +453,7 @@
      "url": "https://makerworld.com/en/models/1385530-2u-two-80mm-cooling-fan-holder-for-10-rack",
      "author": "mklements",
      "labrax": true,
+     "fit": "labrax",
      "hardware": [
       {
        "part": "fan80",
@@ -466,7 +470,8 @@
      "shape": {"row": []},
      "url": "https://makerworld.com/en/models/1385541-1-2u-1u-and-2u-blank-cover-plates-for-10-rack",
      "author": "mklements",
-     "labrax": true
+     "labrax": true,
+     "fit": "labrax"
     },
     {
      "id": "mw13855411",
@@ -476,7 +481,8 @@
      "shape": {"row": []},
      "url": "https://makerworld.com/en/models/1385541-1-2u-1u-and-2u-blank-cover-plates-for-10-rack",
      "author": "mklements",
-     "labrax": true
+     "labrax": true,
+     "fit": "labrax"
     },
     {
      "id": "mw13855412",
@@ -486,7 +492,8 @@
      "shape": {"row": []},
      "url": "https://makerworld.com/en/models/1385541-1-2u-1u-and-2u-blank-cover-plates-for-10-rack",
      "author": "mklements",
-     "labrax": true
+     "labrax": true,
+     "fit": "labrax"
     },
     {
      "id": "keystone",
@@ -496,7 +503,8 @@
      "shape": {"row": [{"ks": 12, "pitch": 18}]},
      "url": "https://makerworld.com/en/models/1293816-1-2u-12-port-keystone-panel-for-10-rack",
      "author": "mklements",
-     "labrax": true
+     "labrax": true,
+     "fit": "labrax"
     },
     {
      "id": "open1",
@@ -507,6 +515,7 @@
      "url": "https://makerworld.com/en/models/1297318-1u-open-shelf-for-10-rack",
      "author": "mklements",
      "labrax": true,
+     "fit": "labrax",
      "vent": 0.3
     },
     {
@@ -519,7 +528,8 @@
      "shape": {"row": [{"dev": {"size": [166, 27, 100], "color": "#1F2023", "io": ["logo", "btn", "space", "rj45x2", "gap", "rj45x3", "space", "power"]}}], "shelf": true},
      "url": "https://makerworld.com/en/models/1297329-1u-shelf-for-qnap-switch-for-10-rack",
      "author": "mklements",
-     "labrax": true
+     "labrax": true,
+     "fit": "labrax"
     },
     {
      "id": "mw2624647",
@@ -531,7 +541,8 @@
      "shape": {"row": [{"vent": "hex", "w": 78}, {"inlet": true}, {"vent": "hex", "w": 78}]},
      "url": "https://makerworld.com/en/models/2624647",
      "author": "mklements",
-     "labrax": true
+     "labrax": true,
+     "fit": "labrax"
     }
    ]
   },
@@ -2649,6 +2660,7 @@
        "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "mklements",
        "labrax": true,
+       "fit": "labrax",
        "url": "https://makerworld.com/en/models/1304250-1u-shelf-for-tp-link-switch-for-10-rack"
       },
       {
@@ -5168,6 +5180,7 @@
        "shape": {"row": [{"sbc": 7, "board": "pi5", "orient": "v", "tray": true}]},
        "author": "mklements",
        "labrax": true,
+       "fit": "labrax",
        "url": "https://makerworld.com/en/models/1293865-2u-7-sbc-holder-for-10-rack"
       },
       {
@@ -5242,6 +5255,7 @@
        "wattsEstimated": true,
        "author": "mklements",
        "labrax": true,
+       "fit": "labrax",
        "url": "https://makerworld.com/en/models/1838701-1u-pi-nas-rack-for-10-rack"
       },
       {
@@ -5272,6 +5286,7 @@
        "wattsEstimated": true,
        "author": "mklements",
        "labrax": true,
+       "fit": "labrax",
        "url": "https://makerworld.com/en/models/1838709-1u-zimaboard-2-nas-rack-for-10-rack"
       },
       {
@@ -5444,6 +5459,7 @@
        "wattsEstimated": true,
        "author": "mklements",
        "labrax": true,
+       "fit": "labrax",
        "url": "https://makerworld.com/en/models/2624645"
       },
       {
@@ -5455,6 +5471,7 @@
        "wattsEstimated": true,
        "author": "mklements",
        "labrax": true,
+       "fit": "labrax",
        "url": "https://makerworld.com/en/models/2624649"
       },
       {
@@ -5584,6 +5601,7 @@
        "shape": {"row": [{"bay": 3.5, "n": 2}]},
        "author": "mklements",
        "labrax": true,
+       "fit": "labrax",
        "url": "https://makerworld.com/en/models/1838737-1u-two-3-5-drive-rack-for-10-rack"
       },
       {
@@ -5725,6 +5743,7 @@
        "shape": {"row": [{"bay": 2.5, "n": 4, "rows": 2}]},
        "author": "mklements",
        "labrax": true,
+       "fit": "labrax",
        "url": "https://makerworld.com/en/models/1838721-1u-four-2-5-drive-rack-for-10-rack"
       },
       {

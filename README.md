@@ -105,7 +105,7 @@ Found a mount, checked a dimension or printed a working build? [Suggest a model]
 | What | Value | Source |
 |---|---|---|
 | Rack unit | 44.45 mm | 10″/19″ standard; Lab Rax article |
-| Panel height | n × 44.45 − 0.79 mm (1U = 43.66 mm) | EIA-310 clearance |
+| Panel height | n × 44.45 − 0.79 mm (1U = 43.66 mm); Lab Rax panels n × 44.45 − 2.45 mm (1U = 42, ½U = 22.6) | EIA-310 clearance; measured on mklements' models |
 | Hole pattern per U | 6.35 / 22.225 / 38.1 mm | EIA-310 |
 | Hole spacing, centre to centre | 236.525 mm | Lab Rax article |
 | Clear width between posts | 222 mm | Lab Rax article |

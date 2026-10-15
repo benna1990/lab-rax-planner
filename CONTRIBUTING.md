@@ -35,6 +35,7 @@ A new device needs `size`, `color` and `io` (see [How parts look](#how-parts-loo
 | `shape` | no | What the part looks like: see [How parts look](#how-parts-look). |
 | `author` | no | The maker's name. |
 | `labrax` | no | `true` when the page says it was made for or tested in Lab Rax. |
+| `fit` | no | `"labrax"` when the panel has the Lab Rax size instead of the EIA one: n × 44.45 − 2.45 mm high (42 for 1U), three 10 × 7 mm slots per U, and ½U panels 22.6 mm that turn over to fit the upper half of a U. Set on mklements' own Lab Rax parts; on another maker's part only when `tools/measure.mjs` says its panel is "like the Lab Rax panels". Without it the part is drawn at the EIA size, n × 44.45 − 0.79. |
 | `url` | yes | The original model page on MakerWorld or Printables. Never a mirror or re-upload. |
 | `position` | no | `top` for parts that replace the top panel. |
 | `hardware` | no | Extra parts to buy: `[{ "part": "fan80", "qty": 2 }]`. |
@@ -46,7 +47,7 @@ A new device needs `size`, `color` and `io` (see [How parts look](#how-parts-loo
 | `vent` | no | For openings: the open share of the panel, 0 to 1. A hex mesh top is about `0.5`, a vent panel `0.4`. |
 | `poe`, `poeIn`, `poeOptional`, `ports`, `eth` | no | Power and network, for the power budget: see [Power and network](#power-and-network). Usually set on the device; a mount only sets them when it differs. |
 
-Panels use `id`, `name`, `u`, `face`, `shape`, `url`, `author`, `labrax`, `estimated`, `hardware`, `watts`, `wattsEstimated`, `fanDir`, `vent` and the power fields; `watts` only when the panel makes heat (power supplies, chargers, displays). Extras use `id`, `name`, `label`, `shape`, `author`, `url`, `hardware`, `fanDir` and `vent`, plus `at`: where the extra lets air through, `side`, `back` or `top` (`top` also covers a matching bottom panel; `fanAt` when its fans sit elsewhere). For example a pair of side panels with an 80 mm fan each:
+Panels use `id`, `name`, `u`, `face`, `shape`, `url`, `author`, `labrax`, `fit`, `estimated`, `hardware`, `watts`, `wattsEstimated`, `fanDir`, `vent` and the power fields; `watts` only when the panel makes heat (power supplies, chargers, displays). Extras use `id`, `name`, `label`, `shape`, `author`, `url`, `hardware`, `fanDir` and `vent`, plus `at`: where the extra lets air through, `side`, `back` or `top` (`top` also covers a matching bottom panel; `fanAt` when its fans sit elsewhere). For example a pair of side panels with an 80 mm fan each:
 
 ```json
 { "id": "mw1460771", "name": "Side panels with an 80 mm fan", "url": "https://makerworld.com/models/1460771",

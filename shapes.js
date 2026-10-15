@@ -9,6 +9,37 @@
 
 const U = 44.45, CLEAR = 0.79, PANEL_W = 250, HOLE_X = 236.525 / 2, SPAN = 212, PLATE = 3;
 const panelH = u => u * U - CLEAR;
+/* How a panel sits in its slot (the U's it takes, or half a U), in mm: height h, bottom edge `lift` above the bottom of the slot,
+   `mid` the middle of the slot (y up from the panel's bottom edge, like the screw slots, the screws drawn in them and the notches
+   in the side edges). EIA panels are n·44.45 − 0.79 high and sit in the middle of their slot. Lab Rax panels (catalog `fit:
+   "labrax"`, measured on mklements' models) are n·44.45 − 2.45 high, also in the middle, with three 10 × 7 slots per U and a 2.4 × 4
+   notch in each side edge at every U boundary; the ½U ones are 22.6 high with one slot 4.9 mm from the edge that sits on the U's
+   outer hole, so they reach 1.8 mm past the middle of the U, and one in the upper half (upper) is the same panel turned over.
+   Custom parts (parts.js) are EIA, like their STLs. */
+const LR = { clear: 2.45, slots: [5.1, 21, 36.9], half: 22.6, halfSlot: 4.9, notch: [2.4, 4] };
+function plateFit(d, upper) {
+  const u = d.u || (d.h2 ? d.h2 / 2 : 1), slot = u * U;
+  if (d.fit !== 'labrax') { const h = slot - CLEAR; return { h, lift: CLEAR / 2, mid: h / 2, slots: [], screws: screwYs(h), notches: [] }; }
+  if (u < 1) {
+    const h = LR.half, s = upper ? h - LR.halfSlot : LR.halfSlot, lift = upper ? slot - (6.35 - LR.halfSlot) - h : 6.35 - LR.halfSlot;
+    return { h, lift, mid: slot / 2 - lift, slots: [s], screws: [s], notches: [] };
+  }
+  const h = slot - LR.clear, lift = LR.clear / 2, slots = [], screws = [], notches = [];
+  for (let k = 0; k < Math.ceil(u); k++) {
+    LR.slots.forEach((y, j) => { const yy = k * U + y; if (yy + 3.5 < h) { slots.push(yy); if (j !== 1) screws.push(yy); } });
+    if (k && k * U - lift < h) notches.push(k * U - lift);
+  }
+  return { h, lift, mid: h / 2, slots, screws, notches };
+}
+// the plate's outline: a rounded rectangle, with the notches cut into both side edges
+function plateOutline(H, notches) {
+  const p = rectP(-PANEL_W / 2, 0, PANEL_W, H, 1.2);
+  if (!notches.length) return p;
+  const [nd, nh] = LR.notch, X = PANEL_W / 2, k = p.length / 4; // four corners of k points: bottom right, top right, top left, bottom left
+  const right = notches.flatMap(y => [[X, y - nh / 2], [X - nd, y - nh / 2], [X - nd, y + nh / 2], [X, y + nh / 2]]);
+  const left = notches.slice().reverse().flatMap(y => [[-X, y + nh / 2], [-X + nd, y + nh / 2], [-X + nd, y - nh / 2], [-X, y - nh / 2]]);
+  return p.slice(0, k).concat(right, p.slice(k, 3 * k), left, p.slice(3 * k));
+}
 const C = {
   hole: '#0A0B0D', port: '#141518', metal: '#C4C9CE', steel: '#8F969D', pcb: '#1F6B3C', gold: '#C9A55A', black: '#1B1C1F', white: '#ECEEEF',
   led: '#4ADE80', amber: '#F5A524', blue: '#2F6BD8', red: '#E5484D', screen: '#0D1726', fan: '#1E2023', blade: '#33363B', drive: '#9AA1A8'
@@ -693,13 +724,15 @@ function defaultShape(d) {
 }
 function compilePart(d, opts) {
   opts = opts || {};
-  const u = d.u || (d.h2 ? d.h2 / 2 : 1), H = panelH(u), color = opts.color || '#26282B', accent = opts.accent || '#B5CF2A';
+  const F = plateFit(d, opts.upper), H = F.h, color = opts.color || '#26282B', accent = opts.accent || '#B5CF2A';
   const shape = d.shape || defaultShape(d);
   const S = scene(), margin = H < 25 ? 2 : 3;
-  const ctx = { ih: H - 2 * margin, H, color, accent, device: d.device, lookup: opts.lookup, maxDepth: num(opts.maxDepth, 215), trayColor: shape.trayColor, sledColor: shape.sledColor === 'white' ? C.white : shape.sledColor };
+  // what the panel holds sits in the middle of its slot: a ½U Lab Rax panel reaches past the middle of its U, so it has a lip there
+  const half = Math.min(F.mid, H - F.mid) - margin, top0 = F.mid + half;
+  const ctx = { ih: 2 * half, H, color, accent, device: d.device, lookup: opts.lookup, maxDepth: num(opts.maxDepth, 215), trayColor: shape.trayColor, sledColor: shape.sledColor === 'white' ? C.white : shape.sledColor };
   const rows = shape.rows || [shape.row || []], left = -SPAN / 2, avail = SPAN;
   const rowH = (ctx.ih - (rows.length - 1) * 3) / rows.length;
-  let yTop = H - margin, deepest = 0;
+  let yTop = top0, deepest = 0;
   rows.forEach(row => {
     const rctx = Object.assign({}, ctx, { ih: rows.length > 1 ? rowH : ctx.ih });
     const mods = (row || []).map(asObj);
@@ -721,7 +754,7 @@ function compilePart(d, opts) {
   });
   // whole-plate patterns fill what the modules leave free
   if (shape.plate && shape.plate !== 'solid') {
-    const taken = S.holes.map(bbox), pat = ventHoles(shape.plate, -SPAN / 2, margin + .5, SPAN, H - 2 * margin - 1, { r: shape.plateR });
+    const taken = S.holes.map(bbox), pat = ventHoles(shape.plate, -SPAN / 2, top0 - 2 * half + .5, SPAN, 2 * half - 1, { r: shape.plateR });
     pat.forEach(p => { const b = bbox(p); if (!taken.some(t => b[0] < t[2] + 2.4 && b[2] > t[0] - 2.4 && b[1] < t[3] + 2.4 && b[3] > t[1] - 2.4)) S.holes.push(p); });
   }
   // a shelf or tray behind the panel for devices
@@ -738,9 +771,9 @@ function compilePart(d, opts) {
   }
   // the plate itself with its holes, and the screws in the ears
   const plate = S.obj(1, 'plate');
-  plate.push(ext(rectP(-PANEL_W / 2, 0, PANEL_W, H, 1.2), S.holes, 0, PLATE, color));
+  plate.push(ext(plateOutline(H, F.notches), S.holes.concat(F.slots.flatMap(y => [-1, 1].map(sx => slotP(sx * HOLE_X, y, 10, 7)))), 0, PLATE, color));
   const scr = S.obj(2, 'screws');
-  for (const sx of [-1, 1]) for (const sy of screwYs(H)) scr.push(cyl(sx * HOLE_X, sy, 2.6, 5.4, 2.6, C.metal), ext(ngonP(sx * HOLE_X, sy, 1.9, 6, 0), [], 2.65, .1, '#55595E'));
+  for (const sx of [-1, 1]) for (const sy of F.screws) scr.push(cyl(sx * HOLE_X, sy, 2.6, 5.4, 2.6, C.metal), ext(ngonP(sx * HOLE_X, sy, 1.9, 6, 0), [], 2.65, .1, '#55595E'));
   return { w: PANEL_W, h: H, objs: S.objs, depth: Math.max(depth, deepest), color };
 }
 
@@ -1154,7 +1187,7 @@ function sideScene(mods, depth, height, color, out) {
   (sh.studs || []).forEach(([a, b]) => S.obj(2).push(flat('x', circP(a, b, 4.8, 14), [], out > 0 ? t : -1.8, 1.8, shade(color, .06))));
   return S;
 }
-const ckey = (d, o) => (d.key || '') + '|' + (o.color || '') + '|' + (o.accent || '') + '|' + (o.frame || '') + '|' + (o.depth || '');
+const ckey = (d, o) => (d.key || '') + '|' + (o.color || '') + '|' + (o.accent || '') + '|' + (o.frame || '') + '|' + (o.depth || '') + (o.upper ? '|^' : '');
 function sceneFor(d, o) {
   o = Object.assign({ lookup: lookupFn }, o || {});
   if (d.top) return compileTop(d, o);
@@ -1170,6 +1203,8 @@ function meshes(T, sc, mat, key) {
 /* ---------- public ---------- */
 window.LRShapes = {
   U, PANEL_W, panelH, PRESETS, BOARDS, AP, shade,
+  // how a part's panel sits in its slot: { h, lift, mid, slots, screws, notches } in mm; upper: a ½U part in the upper half of a U
+  fit: (d, upper) => plateFit(lookOf(d), upper),
   part: compilePart, top: compileTop, rack: rackScene, frameMods, sideHoles, ventHoles,
   svg, geoms, meshes, defaultShape, genShape, check, checkDevice,
   // network ports in a device's io (RJ45 and SFP), for the power and network budget

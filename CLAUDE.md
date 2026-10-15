@@ -6,7 +6,7 @@ Static web app for planning 3D-printed 10" homelab racks: Lab Rax and more. Form
 - `index.html` — markup and all CSS (light/dark tokens on `:root`, `data-theme` toggle).
 - `app.js` — state, library, 2D front view, build column, build pack ZIP, part maker dialog. Saves to localStorage (`labrax-planner-v2`); Save as file / Open file and the build pack use `.rack.json` files, the share link's compact layout with `format` and `version`.
 - `parts.js` — parametric custom parts (three.js geometry), binary STL writer, stored ZIP writer. 10" constants live at the top.
-- `shapes.js` — how parts look: turns each catalog `shape` (and the device's `size`, `color`, `io`) into primitives in mm, drawn as SVG for the library and the front view and as three.js geometry for the 3D view. Also top mounts and frame extras (`frameMods`).
+- `shapes.js` — how parts look: turns each catalog `shape` (and the device's `size`, `color`, `io`) into primitives in mm, drawn as SVG for the library and the front view and as three.js geometry for the 3D view. Also top mounts, frame extras (`frameMods`) and how each panel sits in its slot (`fit`: catalog `fit: "labrax"` parts are the measured Lab Rax size, n·44.45 − 2.45; the rest, custom parts included, EIA n·44.45 − 0.79).
 - `view3d.js` — 3D view (three.js r128 from cdnjs, OrbitControls/STLLoader/3MFLoader from jsDelivr). `FRAME` holds frame dimensions.
 - `pdf.js` — build plan PDF with jsPDF 2.5.1.
 - `printers.js` — printer presets and the print bed check: does a piece fit lying flat, straight or turned (`tools/test-printers.mjs`). app.js says what each print-list row prints (`framePieces`, `itemPieces`); the chosen printer lives in the UI settings (`labrax-planner-ui`), not in the layout.

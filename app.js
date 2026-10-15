@@ -24,7 +24,7 @@ const pwOf = o => { const r = {}; PW_KEYS.forEach(k => { if (o[k] !== undefined)
 function buildCatalog(c) {
   CAT = c; LIB = {}; SIZES = {}; PWDEV = {};
   // src: the catalog entry, for its heat, airflow and power fields
-  const add = (id, o, src) => { LIB[id] = Object.assign({ key: id, h2: o.u ? Math.round(o.u * 2) : 0 }, o, { watts: src.watts, wattsEst: !!src.wattsEstimated, fanDir: src.fanDir, vent: src.vent, at: src.at, fanAt: src.fanAt, pw: pwOf(src) }); };
+  const add = (id, o, src) => { LIB[id] = Object.assign({ key: id, h2: o.u ? Math.round(o.u * 2) : 0 }, o, { watts: src.watts, wattsEst: !!src.wattsEstimated, fanDir: src.fanDir, vent: src.vent, at: src.at, fanAt: src.fanAt, pw: pwOf(src), fit: src.fit }); };
   (c.panels || []).forEach(g => g.items.forEach(i => add(i.id, { name: i.name, label: null, u: i.u, est: !!i.estimated, face: i.face || 'blank', shape: i.shape, url: i.url || null, author: i.author || '', hardware: i.hardware || [], group: g.group, tab: 'panels' }, i)));
   (c.devices || []).forEach(g => g.items.forEach(d => {
     const dev = d.size ? { device: d.device, size: d.size, color: d.color, io: d.io } : null;
@@ -285,7 +285,11 @@ function focusSel() { const el = document.querySelector('.item[data-id="' + sel 
 /* ---------- drawing helpers ---------- */
 // a part as it looks from the front (rack view) and as a small 3D-looking drawing (library), drawn by shapes.js from its shape
 const colorsFor = c => ({ color: c || state.panel, accent: state.accent, frame: state.frame });
-const faceSVG = (d, c) => LS.frontFor(d, colorsFor(c));
+const faceSVG = (d, c, upper) => LS.frontFor(d, Object.assign(colorsFor(c), upper ? { upper } : {}));
+// a ½U part in the upper half of a U (pos2 counts half U's from the top); a ½U Lab Rax panel sits there turned over
+const upperHalf = it => H(it) === 1 && it.pos2 % 2 === 0;
+// where a part's panel sits in its slot: [mm from the top of the slot, height in mm]. Lab Rax panels are lower than EIA ones (shapes.js)
+const plateBox = (it, d) => { const f = LS.fit(d, upperHalf(it)); return [d.h2 * P.U / 2 - f.lift - f.h, f.h]; };
 const thumbSVG = d => LS.thumbFor(d, d.extra ? { accent: state.accent } : colorsFor());
 const frameMods = () => LS.frameMods(state.extras.map(k => LIB[k]));
 // seen from the front a handle is the end of an arch along the side edge: 12 mm wide, 34 mm high, centred 23 mm in from the outside;
@@ -396,10 +400,10 @@ function renderRack() {
   const rear = view === 'back';
   onSide(rear ? 'back' : 'front').forEach(it => {
     // no text on the panels, so the faces show what is placed; the name is in the tooltip and the aria-label
-    const d = info(it), c = colorOf(it), clash = clashes(it).length > 0;
+    const d = info(it), c = colorOf(it), clash = clashes(it).length > 0, [py, ph] = plateBox(it, d);
     items += '<div class="item' + (it.id === sel ? ' sel' : '') + (clash ? ' clash' : '') + '" data-id="' + it.id + '" role="button" tabindex="0" aria-label="' + esc((it.label ? it.label + ': ' : '') + fullName(d) + ', ' + uTxt(d) + ', ' + uRange(it.pos2, d.h2) + atBack(it) + (clash ? ', runs into a part on the other side' : '')) + '"' +
-      ' style="top:' + (it.pos2 * HU).toFixed(1) + 'px;height:' + (d.h2 * HU - 1).toFixed(1) + 'px;left:' + inset.toFixed(1) + 'px;right:' + inset.toFixed(1) + 'px;--c:' + c + '">' +
-      faceSVG(d, c) + '</div>';
+      ' style="top:' + (it.pos2 * HU + py * s).toFixed(1) + 'px;height:' + (ph * s).toFixed(1) + 'px;left:' + inset.toFixed(1) + 'px;right:' + inset.toFixed(1) + 'px;--c:' + c + '">' +
+      faceSVG(d, c, upperHalf(it)) + '</div>';
   });
   // the top mount, drawn above the frame at the same scale (280 mm across the outside of the frame)
   const tf = state.top ? LS.topFor(LIB[state.top], colorsFor()) : null;
@@ -817,7 +821,7 @@ function guideData() {
   return { h: state.h, version: state.version === 'brass' ? 'Heat-set inserts' : 'Bolted', sides: state.sides,
     frame: state.frame, panel: state.panel, accent: state.accent, top: state.top ? fullName(LIB[state.top]) : null,
     wallMounts: state.extras.filter(k => LIB[k].shape && LIB[k].shape.wall).map(k => ({ name: fullName(LIB[k]), url: LIB[k].url })), frameParts: frameParts(), guide: guide(), items: byPos().map(i => { const d = info(i); return {
-      pos: uRange(i.pos2, d.h2), pos2: i.pos2, h2: d.h2, name: fullName(d), label: i.label || '', back: sideOf(i) === 'back', face: faceSVG(d, colorOf(i)) }; }) };
+      pos: uRange(i.pos2, d.h2), pos2: i.pos2, h2: d.h2, name: fullName(d), label: i.label || '', back: sideOf(i) === 'back', face: faceSVG(d, colorOf(i), upperHalf(i)) }; }) };
 }
 function guideHTML() { return window.LRGuide.html(guideData()); }
 /* build-guide.html in the build pack: the guide and the shopping list with links, on one page that prints well */
@@ -1269,7 +1273,7 @@ function snapshot() {
   return {
     h: state.h, version: state.version, sides: state.sides, frame: state.frame, panel: state.panel, accent: state.accent, label: state.label || 'Lab Rax', top: state.top ? fullName(LIB[state.top]) : null,
     topPart: state.top ? LIB[state.top] : null, mods: frameMods(),
-    items: byPos().map(i => { const d = info(i); return { id: i.id, pos2: i.pos2, h2: d.h2, name: i.label || shortName(d), face: d.face, look: d, color: colorOf(i), depth: d.depth || (i.key === 'gen' && i.params.type === 'shelf' ? i.params.dd : null), gen: i.key === 'gen' ? i.params : null, sel: i.id === sel, back: sideOf(i) === 'back' }; })
+    items: byPos().map(i => { const d = info(i); return { id: i.id, pos2: i.pos2, h2: d.h2, name: i.label || shortName(d), face: d.face, look: d, color: colorOf(i), depth: d.depth || (i.key === 'gen' && i.params.type === 'shelf' ? i.params.dd : null), gen: i.key === 'gen' ? i.params : null, sel: i.id === sel, back: sideOf(i) === 'back', upper: upperHalf(i) }; })
   };
 }
 
@@ -1382,7 +1386,7 @@ function pdfData() {
   const pk = printPack();
   return { title: (state.label || 'Lab Rax') + ' · ' + state.h + 'U', h: state.h, version: state.version === 'brass' ? 'Heat-set inserts' : 'Bolted', frame: state.frame, panel: state.panel, accent: state.accent, label: state.label || 'Lab Rax',
     top: state.top ? fullName(LIB[state.top]) : null, topLook: state.top ? LS.topFor(LIB[state.top], colorsFor()) : null, // the top mount as drawn above the frame
-    items: byPos().map(i => { const d = info(i); return { pos: uRange(i.pos2, d.h2) + atBack(i), pos2: i.pos2, h2: d.h2, name: fullName(d), label: i.label || '', u: uTxt(d), url: d.url || '', author: d.author || '', color: colorOf(i), face: faceSVG(d, colorOf(i)), depth: partDepth(i), back: sideOf(i) === 'back' }; }),
+    items: byPos().map(i => { const d = info(i); return { pos: uRange(i.pos2, d.h2) + atBack(i), pos2: i.pos2, h2: d.h2, name: fullName(d), label: i.label || '', u: uTxt(d), url: d.url || '', author: d.author || '', color: colorOf(i), face: faceSVG(d, colorOf(i), upperHalf(i)), plate: plateBox(i, d), depth: partDepth(i), back: sideOf(i) === 'back' }; }),
     print: pk.map(x => ({ qty: x.qty, name: x.name, sub: x.subs.join(', '), vars: x.variants, url: x.url, bed: bedText(x.bed, true), bad: !!(x.bed && x.bed.bad.length) })),
     printer: pk.printer ? { name: bedName(pk.printer), bad: bedBad(pk).length, turned: pk.some(x => x.bed && x.bed.turned.length), est: pk.some(x => x.bed && [...x.bed.bad, ...x.bed.turned].some(q => q.est)) } : null, shop: orderList(), guide: guide(), estimate: buildEstimate(), market: state.market, wallMounts: state.extras.filter(k => LIB[k].shape && LIB[k].shape.wall).map(k => ({ name: fullName(LIB[k]), url: LIB[k].url })), sides: state.sides, dimensions: CAT.frame.dimensions, shareUrl: TOP_WIN ? shareLink() + '&s=shop' : null, frameParts: frameParts(), notes: state.h > 5 ? [JOINER_NOTE] : [],
     cooling: pdfCooling(), power: pdfPower(), shareUrl: TOP_WIN ? shareLink() + '&s=shop' : null }; // the QR code opens this layout with its shopping list
@@ -1793,7 +1797,7 @@ function previewHTML(d) {
   const size = d.device && d.device.size ? d.device.size.map(v => Math.round(v)).join(' × ') + ' mm' : '';
   let front = '';
   if (d.top) { const t = LS.topFor(d, colorsFor()); if (t.h > 1.5) front = '<div class="lp-front" style="aspect-ratio:' + t.w + '/' + t.h.toFixed(1) + '">' + t.svg + '</div>'; }
-  else if (!d.extra) front = '<div class="lp-front" style="aspect-ratio:250/' + LS.panelH(d.h2 / 2).toFixed(1) + '">' + faceSVG(d) + '</div>';
+  else if (!d.extra) front = '<div class="lp-front" style="aspect-ratio:250/' + LS.fit(d).h.toFixed(1) + '">' + faceSVG(d) + '</div>';
   return '<div class="lp-3d">' + thumbSVG(d) + '</div>' + front + (size ? '<span class="mono">' + esc(d.name) + ' · ' + size + '</span>' : '');
 }
 $('#cards').addEventListener('pointermove', e => {

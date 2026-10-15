@@ -176,7 +176,8 @@ async function buildRack(snap) {
   if (mods.wall) g.add(boxMesh(F.outer - 40, 40, 10, -F.outer / 2 + 20, y0 + inner / 2 - 20, -F.depth - 1, mat(snap.frame))); // wall cleat behind
   // equipment, screwed to the front of the posts
   for (const it of snap.items) {
-    const yBottom = y0 + inner - (it.pos2 + it.h2) * P.U / 2 + P.CLEAR / 2, ph = it.h2 * P.U / 2 - P.CLEAR;
+    // the panel's own height and place in its slot (shapes.js): Lab Rax panels are lower than EIA ones, so a seam shows between them
+    const fit = LS.fit(it.look || { h2: it.h2 }, it.upper), yBottom = y0 + inner - (it.pos2 + it.h2) * P.U / 2 + fit.lift, ph = fit.h;
     const holder = new T.Group(); holder.userData.id = it.id;
     if (it.gen) {
       const part = await genPart(it.gen), m = mat(it.color);
@@ -184,7 +185,7 @@ async function buildRack(snap) {
       part.show.forEach(s => { const me = new T.Mesh(s.g, cmat(s.c)); me.userData.cached = true; holder.add(me); });
     } else { // the panel, what is mounted in it and the device behind it, as real geometry from the part's shape (shapes.js)
       const look = it.look || { key: 'face:' + it.face, face: it.face, h2: it.h2 };
-      holder.add(LS.partMeshes(T, look, { color: it.color, accent: snap.accent, frame: snap.frame, maxDepth: F.depth - 25 }, cmat));
+      holder.add(LS.partMeshes(T, look, { color: it.color, accent: snap.accent, frame: snap.frame, maxDepth: F.depth - 25, upper: it.upper }, cmat));
     }
     // panels on the rear posts face out the back: half a turn, so what they hold reaches forward into the rack
     if (it.back) { holder.rotation.y = Math.PI; holder.position.set(0, yBottom, -F.depth - 3); }

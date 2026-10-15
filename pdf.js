@@ -64,8 +64,10 @@ async function make(d) {
   const continued = (y, h, title) => y + h + 5 > BOT ? head(title + ' / continued', page()) : y;
 
   const faces = new Map(), img = async (key, make) => { if (!faces.has(key)) faces.set(key, await make().catch(() => null)); return faces.get(key); };
-  for (const it of d.items) if (it.face) it.img = await img(it.face, () => raster(it.face, 250, it.h2 * 44.45 / 2 - .79, 4, 'image/jpeg'));
-  if (d.cooling && d.cooling.map) for (const it of d.items) if (it.face && !it.back) it.grey = await img('grey:' + it.face, () => raster(it.face, 250, it.h2 * 44.45 / 2 - .79, 4, 'image/jpeg', true));
+  // each panel at its own height in its slot, [mm from the top of the slot, height] (app.js plateBox): Lab Rax panels leave a seam
+  for (const it of d.items) if (!it.plate) it.plate = [.395, it.h2 * 44.45 / 2 - .79];
+  for (const it of d.items) if (it.face) it.img = await img(it.face, () => raster(it.face, 250, it.plate[1], 4, 'image/jpeg'));
+  if (d.cooling && d.cooling.map) for (const it of d.items) if (it.face && !it.back) it.grey = await img('grey:' + it.face, () => raster(it.face, 250, it.plate[1], 4, 'image/jpeg', true));
   const qr = await qrFor(d.shareUrl);
   // A useful first page: budget, material and navigation rather than a decorative cover.
   const navigation=[];
@@ -124,7 +126,7 @@ async function make(d) {
       const yy=topY+4+(u*U+off)*k;doc.circle(x+(w-236.525*k)/2,yy,.35,'F');doc.circle(x+(w+236.525*k)/2,yy,.35,'F');
     }
     d.items.filter(it=>!!it.back===rear).forEach(it=>{
-      const yy=topY+4+it.pos2*U/2*k, hh=it.h2*U/2*k-.15;
+      const yy=topY+4+(it.pos2*U/2+it.plate[0])*k, hh=it.plate[1]*k;
       if(it.img) doc.addImage(it.img,'JPEG',x+w/2-125*k,yy,250*k,hh,(rear?'techrear':'techfront')+[...faces.keys()].indexOf(it.face),'FAST');
       else {doc.setFillColor(...hex(it.color));doc.rect(x+post/2,yy,w-post,hh,'F');}
     });
@@ -195,7 +197,7 @@ async function make(d) {
     doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(...ink);text('Air temperature and airflow',M,y);
     doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(...muted);text('Front view. Blue arrows: air in; orange: air out (m³/h).',M,y+4.5);
     doc.setFillColor(64,70,66);doc.roundedRect(rx,ry-3,rw,bh+6,1,1,'F');doc.setFillColor(250,250,250);doc.rect(rx+post,ry,bay,bh,'F');
-    d.items.filter(it=>!it.back&&(it.grey||it.img)).forEach(it=>doc.addImage(it.grey||it.img,'JPEG',rx+rw/2-125*kk,ry+it.pos2*layerH,250*kk,it.h2*layerH-.1,'heat'+[...faces.keys()].indexOf(it.grey?'grey:'+it.face:it.face),'FAST'));
+    d.items.filter(it=>!it.back&&(it.grey||it.img)).forEach(it=>doc.addImage(it.grey||it.img,'JPEG',rx+rw/2-125*kk,ry+it.pos2*layerH+it.plate[0]*kk,250*kk,it.plate[1]*kk,'heat'+[...faces.keys()].indexOf(it.grey?'grey:'+it.face:it.face),'FAST'));
     const fade=doc.GState?new doc.GState({opacity:.5}):null;if(fade)doc.setGState(fade);
     m.temp.forEach((t,i)=>{doc.setFillColor(...heatRGB(t-m.room,SPAN));doc.rect(rx+post,ry+i*layerH,bay,layerH+.05,'F');});
     if(fade)doc.setGState(new doc.GState({opacity:1}));

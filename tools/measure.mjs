@@ -548,10 +548,12 @@ function analyseTop(body, pl) {
 }
 
 /* ---------- comparison with what the planner draws ---------- */
-function drawnPart(ent) {
-  const e = ent.e, d = { u: e.u, shape: e.shape, face: e.face, device: ent.dev, depth: e.depth };
-  const sc = LS.part(d, { lookup }), plate = sc.objs.find(o => o.key === 'plate');
-  return { holes: plate ? plate.prims[0].holes : [], H: sc.h, depth: sc.depth };
+function drawnPart(ent, upper) { // upper: a ½U panel drawn turned over, as in the upper half of a U
+  const e = ent.e, d = { u: e.u, shape: e.shape, face: e.face, device: ent.dev, depth: e.depth, fit: e.fit };
+  const sc = LS.part(d, { lookup, upper }), plate = sc.objs.find(o => o.key === 'plate');
+  // the openings, without the screw slots in the ears (the model's are listed with the screw holes)
+  const inside = h => Math.abs(h.reduce((s, q) => s + q[0], 0) / h.length) < OPEN;
+  return { holes: plate ? plate.prims[0].holes.filter(inside) : [], H: sc.h, depth: sc.depth };
 }
 function mapText(m, dm, g, W, H, ears) { // # open in both, m only in the model, d only in the drawing, o screw holes, . solid
   const cols = 100, cw = 250 / cols, rh = 5, rows = Math.max(1, Math.round(H / rh)), lines = [];
@@ -669,7 +671,8 @@ for (const file of files) {
         r.mopen = mopen;
         let dr = null;
         if (ce) {
-          dr = drawnPart(ce);
+          const screws = r.ears.filter(o => o.kind !== 'notch');
+          dr = drawnPart(ce, screws.length > 0 && screws.every(o => o.y > r.H / 2)); // the drawing turned the way the model lies
           const dm = polys(dr.holes, r.g);
           let both = 0, any = 0;
           for (let i = 0; i < dm.length; i++) if (Math.abs(px(r.g, i % r.g.nx)) <= OPEN) { both += mopen[i] && dm[i]; any += mopen[i] || dm[i]; }

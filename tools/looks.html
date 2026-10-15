@@ -13,7 +13,7 @@ h1{font-size:18px;margin:0 0 4px}p{margin:0 0 12px;color:var(--muted)}
 .c{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;min-width:0}
 .t{height:72px;border-radius:8px;background:var(--sunk);display:grid;place-items:center;overflow:hidden}
 .t svg{width:150px;height:66px}
-.f{background:#2B2D31;border-radius:6px;padding:6px;display:flex;justify-content:center}
+.f{background:#2B2D31;border-radius:6px;padding:6px;display:flex;flex-direction:column;align-items:center;gap:6px}
 .f svg{display:block}
 .n{font-weight:700;font-size:13px}.m{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
 .v3{height:260px;border-radius:8px;background:var(--sunk)}
@@ -33,11 +33,11 @@ input{font:inherit;padding:6px 10px;border-radius:999px;border:1px solid var(--l
   const cat = await (await fetch('../catalog.json', { cache: 'no-store' })).json();
   const L = window.LRShapes, sizes = {}, parts = [], colors = { color: '#26282B', accent: '#B5CF2A', frame: '#26282B' };
   // the same entries the planner builds (app.js buildCatalog)
-  (cat.panels || []).forEach(g => g.items.forEach(i => parts.push({ key: i.id, name: i.name, label: g.group, author: i.author, u: i.u, h2: i.u * 2, face: i.face || 'blank', shape: i.shape })));
+  (cat.panels || []).forEach(g => g.items.forEach(i => parts.push({ key: i.id, name: i.name, label: g.group, author: i.author, u: i.u, h2: i.u * 2, face: i.face || 'blank', shape: i.shape, fit: i.fit })));
   (cat.devices || []).forEach(g => g.items.forEach(d => {
     const dev = d.size ? { device: d.device, size: d.size, color: d.color, io: d.io } : null;
     if (dev) sizes[d.device] = dev;
-    d.mounts.forEach(m => { if (!m.ref) parts.push({ key: m.id, name: d.device, label: m.label, author: m.author, u: m.u, h2: (m.u || 0) * 2, top: m.position === 'top', face: m.face || 'shelf', shape: m.shape, device: dev, depth: m.depth }); });
+    d.mounts.forEach(m => { if (!m.ref) parts.push({ key: m.id, name: d.device, label: m.label, author: m.author, u: m.u, h2: (m.u || 0) * 2, top: m.position === 'top', face: m.face || 'shelf', shape: m.shape, device: dev, depth: m.depth, fit: m.fit }); });
   }));
   (cat.extras || []).forEach(g => g.items.forEach(i => parts.push({ key: i.id, name: i.name, label: i.label || g.group, author: i.author, extra: true, shape: i.shape })));
   // the custom part maker's types (parts.js), drawn from genShape() as the planner draws them; in 3D the printed geometry, as in the planner
@@ -55,7 +55,10 @@ input{font:inherit;padding:6px 10px;border-radius:999px;border:1px solid var(--l
       try {
         thumb = L.thumbFor(p, p.extra ? { accent: colors.accent } : colors);
         if (p.top) { const t = L.topFor(p, colors); if (t.h > 1.5) front = t.svg.replace('<svg ', '<svg style="width:' + Math.round(t.w * 1.1) + 'px;height:' + Math.round(t.h * 1.1) + 'px" '); }
-        else if (!p.extra) front = L.frontFor(p, colors).replace('<svg ', '<svg style="width:' + Math.round(250 * 1.2) + 'px;height:' + Math.round(L.panelH(p.u) * 1.2) + 'px" ');
+        else if (!p.extra) { // at the panel's own height; a ½U Lab Rax panel also turned over, as it sits in the upper half of a U
+          const at = upper => L.frontFor(p, Object.assign({ upper }, colors)).replace('<svg ', '<svg style="width:' + Math.round(250 * 1.2) + 'px;height:' + Math.round(L.fit(p, upper).h * 1.2) + 'px" ');
+          front = at(false) + (p.fit === 'labrax' && p.u < 1 ? at(true) : '');
+        }
       } catch (e) { thumb = '<span style="color:#C8372D">' + e.message + '</span>'; console.error(p.key, e); }
       el.innerHTML = '<div class="t">' + thumb + '</div>' + (front ? '<div class="f">' + front + '</div>' : '') + '<div class="n">' + p.name + '</div><div class="m">' + (p.label || '') + ' · ' + p.key + (p.u ? ' · ' + p.u + 'U' : '') + (p.author ? ' · ' + p.author : '') + (p.device ? ' · ' + p.device.size.join(' × ') + ' mm' : '') + '</div>' + (want3d && !p.extra ? '<div class="v3"></div>' : '');
       host.appendChild(el);

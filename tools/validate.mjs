@@ -81,6 +81,7 @@ for (const g of cat.panels || []) {
     if (!text(p.name)) errors.push(`${w}: needs a name`);
     if (!okU(p.u)) errors.push(`${w}: u must be 0.5–10 in steps of 0.5`);
     if (p.face && !FACES.has(p.face)) errors.push(`${w}: unknown face "${p.face}"`);
+    if (p.fit != null && p.fit !== 'labrax') errors.push(`${w}: fit can only be "labrax"`);
     url(p.url, w, false); hardware(p.hardware, w); air(p, w, false); power(p, w); look('part', p, w);
   }
 }
@@ -98,6 +99,7 @@ for (const g of cat.devices || []) {
       if (m.position && m.position !== 'top') errors.push(`${w}: position can only be "top"`);
       if (m.position !== 'top' && !okU(m.u)) errors.push(`${w}: u must be 0.5–10 in steps of 0.5`);
       if (m.face && !FACES.has(m.face)) errors.push(`${w}: unknown face "${m.face}"`);
+      if (m.fit != null && (m.fit !== 'labrax' || m.position === 'top')) errors.push(`${w}: fit can only be "labrax", on a panel`);
       hardware(m.hardware, w); air(m, w, true); power(m, w, d); look(m.position === 'top' ? 'top' : 'part', m, w);
       if (m.url) { const k = m.url.replace(/^https:\/\/(www\.)?/, '').replace(/\/en\//, '/'); if (urls.has(k + d.device)) errors.push(`${w}: same model listed twice for this device`); urls.set(k + d.device, 1); }
     }
