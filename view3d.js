@@ -149,7 +149,9 @@ async function buildRack(snap) {
     const top = LS.topMeshes(T, snap.topPart, { color: snap.panel, frame: snap.frame, accent: snap.accent, depth: F.depth }, cmat);
     top.position.set(0, topY - 3, 0); g.add(top);
   }
-  g.add(boxMesh(pw, F.side, pd, -pw / 2, y0 - 4, pz, mat(snap.frame)));
+  // the bottom: printed, 3 mm acrylic, or a top/bottom panel from the catalog turned over (mesh, a fan)
+  if (snap.bottomPart) { const b = LS.topMeshes(T, snap.bottomPart, { color: snap.panel, frame: snap.frame, accent: snap.accent, depth: F.depth }, cmat); b.rotation.x = Math.PI; b.position.set(0, y0 - 1, -F.depth); g.add(b); }
+  else g.add(boxMesh(pw, F.side, pd, -pw / 2, y0 - 4, pz, snap.bottom === 'acrylic' ? mat('#1C2127', { transparent: true, opacity: .4, roughness: .12, metalness: .1, depthWrite: false }) : mat(snap.frame)));
   // side panels: printed in the frame colour, or tinted acrylic you can see through
   // patterned side panels (hex, Kumiko, SKÅDIS, a fan…) come from the extras; otherwise printed or acrylic
   const sideM = snap.sides === 'acrylic' ? mat('#1C2127', { transparent: true, opacity: .4, roughness: .12, metalness: .1, depthWrite: false }) : mat(snap.frame);
@@ -242,13 +244,16 @@ function lights(scene) {
   const d1 = new T.DirectionalLight(0xffffff, .7); d1.position.set(300, 500, 400); scene.add(d1);
   const d2 = new T.DirectionalLight(0xffffff, .35); d2.position.set(-400, 200, -200); scene.add(d2);
 }
+// where the camera looks from for each side of the rack (app.js "Where" bar); fit(true) is the back, as before
+const FACES = { front: [.5, .34, .8], back: [-.5, .34, -.8], top: [.3, 1, .5], bottom: [.35, -.8, .6], sides: [1, .28, .2], frame: [.5, .34, .8] };
 function fit(back) {
-  // frame the whole rack from the front right (or from behind, on the left), whatever the shape of the view
+  // frame the whole rack from the front right (or from behind, on the left, or the chosen side), whatever the shape of the view
   if (!R || !R.rack) return;
   const box = new T.Box3().setFromObject(R.rack), c = new T.Vector3(), s = new T.Vector3(); box.getCenter(c); box.getSize(s);
   const v = Math.tan(R.camera.fov * Math.PI / 360), across = Math.max(s.x, s.z) * .62;
   const dist = Math.max(s.y / 2 / v, across / (v * R.camera.aspect)) * 1.3 + s.z / 2;
-  R.camera.position.copy(c).addScaledVector(new T.Vector3(back ? -.5 : .5, .34, back ? -.8 : .8).normalize(), dist);
+  const f = FACES[back === true ? 'back' : back || 'front'] || FACES.front;
+  R.camera.position.copy(c).addScaledVector(new T.Vector3(f[0], f[1], f[2]).normalize(), dist);
   R.controls.target.copy(c).add(new T.Vector3(0, -s.y * .06, 0)); R.controls.update(); // a little low, so the buttons don't cover the feet
 }
 async function mount(container, snap) {
@@ -318,6 +323,7 @@ async function action(v) {
   if (!R) return;
   if (v === 'reset') fit();
   if (v === 'back') fit(true);
+  if (typeof v === 'string' && v.startsWith('face:')) fit(v.slice(5));
   if (v === 'sides') window.LRApp.toggleSides();
   if (v === 'rotate') {
     const snap = window.LRApp.snapshot(), t = snap.items.find(i => i.sel), fm = t && fileModels.get(t.id);

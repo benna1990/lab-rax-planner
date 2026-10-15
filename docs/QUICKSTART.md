@@ -8,9 +8,9 @@ Choose **Set up a rack** to configure your own build. The initial example shows 
 
 ## 2. Choose the parts
 
-Search for your device in **Devices**. Select a mount and add it to your rack. Use the alternative-mount selector when several designs are listed. Add vents, blank panels, shelves or patch panels from **Panels**; use **Top mounts** and **Frame & extras** for other pieces.
+First pick where on the rack in the **Where** bar: **Front**, **Back**, **Top**, **Bottom**, **Sides** or **Frame**. For the front and the back, search for your device in **Devices**, select a mount and add it; use the alternative-mount selector when several designs are listed, and add vents, blank panels, shelves or patch panels from **Panels**. **Top** holds top panels and access point mounts, **Bottom** the bottom panel (printed, acrylic, mesh or with a fan) and feet, **Sides** the side panels (printed, acrylic or patterned), **Frame** other frame sizes and parts inside the rack.
 
-Arrange the parts in the front view and increase the height if needed. Whole-U parts align to U boundaries; half-U parts can occupy either half. Parts that cannot be placed need attention before printing.
+The planner opens in the **3D view**. Arrange the parts in the **Flat** view (the front or the back, as picked in the Where bar), where you can drag them, and increase the height if needed. Whole-U parts align to U boundaries; half-U parts can occupy either half. Parts that cannot be placed need attention before printing.
 
 A height marked **≈** is estimated. Open the original model page and confirm the height, compatibility and chosen variant. A matching device name alone does not establish that a mount fits your build.
 

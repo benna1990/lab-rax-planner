@@ -208,8 +208,8 @@ async function make(d) {
     const mean=(layers,flows,sign)=>{let w=0,sum=0;(flows||[]).forEach((f,i)=>{const v=sign*f;if(v>0){w+=v;sum+=v*layers[i];}});return w?{layer:sum/w,flow:w}:null;};
     const arrows=[], add=(side,layer,flow)=>{if(Math.abs(flow)<.5)return;const near=arrows.find(a=>a.side===side&&a.flow>0===flow>0&&(side==='top'||Math.abs(a.layer-layer)<=2));
       if(near){near.layer=(near.layer*Math.abs(near.flow)+layer*Math.abs(flow))/(Math.abs(near.flow)+Math.abs(flow));near.flow+=flow;}else arrows.push({side,layer,flow});};
-    const sideOf=k=>k==='top'?'top':(k==='back'||k==='side')?'right':'left';
-    (m.openings||[]).forEach(o=>{const side=sideOf(o.kind);if(side==='top'){add('top',0,(o.in||0)-(o.out||0));return;}const i=mean(o.layers,o.flows,1),out=mean(o.layers,o.flows,-1);if(i)add(side,i.layer,i.flow);if(out)add(side,out.layer,-out.flow);});
+    const sideOf=k=>k==='top'||k==='bottom'?k:(k==='back'||k==='side')?'right':'left';
+    (m.openings||[]).forEach(o=>{const side=sideOf(o.kind);if(side==='top'||side==='bottom'){add(side,0,(o.in||0)-(o.out||0));return;}const i=mean(o.layers,o.flows,1),out=mean(o.layers,o.flows,-1);if(i)add(side,i.layer,i.flow);if(out)add(side,out.layer,-out.flow);});
     (m.fans||[]).forEach(f=>{const side=sideOf(f.place);add(side,f.pos2!=null?f.pos2+(f.h2||1)/2-.5:0,(f.in||0)-(f.out||0));});
     const arrow=(x1,y1,x2,y2,c)=>{doc.setDrawColor(...c);doc.setFillColor(...c);doc.setLineWidth(.55);const a2=Math.atan2(y2-y1,x2-x1),h=1.9;doc.line(x1,y1,x2-Math.cos(a2)*h*.8,y2-Math.sin(a2)*h*.8);doc.triangle(x2,y2,x2-h*Math.cos(a2-.42),y2-h*Math.sin(a2-.42),x2-h*Math.cos(a2+.42),y2-h*Math.sin(a2+.42),'F');};
     const drawn=[];
@@ -217,12 +217,13 @@ async function make(d) {
       const inn=ar.flow>0,c=inn?blue:warm,lab=(inn?'in ':'out ')+Math.round(Math.abs(ar.flow));
       doc.setFont('helvetica','bold');doc.setFontSize(5.8);doc.setTextColor(...c);
       if(ar.side==='top'){const cx=rx+rw/2,y0=ry-4;if(inn)arrow(cx,y0-8,cx,y0-.5,c);else arrow(cx,y0-.5,cx,y0-8,c);text(lab,cx+1.5,y0-5);}
+      else if(ar.side==='bottom'){const cx=rx+rw/2,y0=ry+bh+3.5;if(inn)arrow(cx,y0+8,cx,y0+.5,c);else arrow(cx,y0+.5,cx,y0+8,c);text(lab,cx+1.5,y0+6);} // air through the bottom panel
       else{const yy=ry+(ar.layer+.5)*layerH,below=drawn.some(o=>o.side===ar.side&&Math.abs(o.yy-yy)<4);drawn.push({side:ar.side,yy});const ly=below?yy+2.9:yy-1.4; // a label near another goes under its arrow
         if(ar.side==='left'){if(inn)arrow(M,yy,rx-.6,yy,c);else arrow(rx-.6,yy,M,yy,c);text(lab,M,ly);}
         else{const x0=rx+rw+.6,x1=rx+rw+12;if(inn)arrow(x1,yy,x0,yy,c);else arrow(x0,yy,x1,yy,c);text(lab,x0+.6,ly);}}
     });
     // the scale: room temperature to +20 °C, fixed so racks compare
-    const sy=ry+bh+10;for(let i=0;i<24;i++){doc.setFillColor(...heatRGB(i/23*SPAN,SPAN));doc.rect(rx+i*rw/24,sy,rw/24+.05,3,'F');}
+    const sy=ry+bh+(arrows.some(a=>a.side==='bottom')?16:10);for(let i=0;i<24;i++){doc.setFillColor(...heatRGB(i/23*SPAN,SPAN));doc.rect(rx+i*rw/24,sy,rw/24+.05,3,'F');} // the scale goes below a bottom arrow
     doc.setFont('helvetica','normal');doc.setFontSize(6);doc.setTextColor(...muted);
     [[0,tC(m.room,true)],[.5,'+'+SPAN/2+'°'],[1,'+'+SPAN+'°']].forEach(([f,l])=>text(l,rx+f*rw,sy+6,{align:f===0?'left':f===1?'right':'center'}));
     // per U, top to bottom

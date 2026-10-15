@@ -325,6 +325,11 @@ details.abd .hint{margin-top:6px}
 .lghead[aria-expanded="true"] .chev,details.sec[open] > summary .chev{transform:rotate(90deg)}
 .lrows{display:flex;flex-direction:column;gap:2px;padding:0 0 10px}
 .lrow-wrap{display:flex;align-items:center;gap:4px}
+/* the Where bar: front, back, top, bottom, sides, frame */
+.where{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;padding:3px;margin-bottom:10px;border:1px solid var(--line-2);border-radius:12px;background:var(--sunk)}
+.where button{min-width:0;padding:7px 2px;border:0;border-radius:9px;background:none;color:var(--ink-2);font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.where button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.lhead{margin:2px 0 10px}
 /* modular parts: how many slots are used, a name per slot */
 .slotset{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding-top:8px;border-top:1px solid var(--line);margin-top:4px}
 .slotset .slab{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
@@ -464,6 +469,7 @@ dialog.askdlg::backdrop{background:rgba(10,12,14,.55)}
 <div class="app">
   <aside class="lib" aria-label="Parts library">
     <div class="side-in">
+      <div class="where" id="where" role="group" aria-label="Where on the rack"></div>
       <label class="search" for="q">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
         <input id="q" type="search" placeholder="Search mounts, panels and devices" autocomplete="off">
@@ -480,10 +486,9 @@ dialog.askdlg::backdrop{background:rgba(10,12,14,.55)}
   <section class="stagecol" aria-label="Rack">
     <div class="toolbar">
       <div class="seg" role="group" aria-label="View">
-        <button type="button" data-act="view" data-v="front" id="v-front">Front</button>
-        <button type="button" data-act="view" data-v="back" id="v-back" title="The rack seen from behind: panels on the rear posts">Back</button>
-        <button type="button" data-act="view" data-v="air" id="v-air">Airflow</button>
         <button type="button" data-act="view" data-v="3d" id="v-3d">3D view</button>
+        <button type="button" data-act="view" data-v="flat" id="v-flat" title="The flat front or back (pick it in the Where bar): for placing and dragging parts">Flat · front</button>
+        <button type="button" data-act="view" data-v="air" id="v-air">Airflow</button>
       </div>
       <div style="display:flex;align-items:center;gap:10px">
         <div class="stepper"><button type="button" data-act="hist-undo" id="hist-undo" title="Undo (⌘Z or Ctrl+Z)" aria-label="Undo" disabled>↶</button><button type="button" data-act="hist-redo" id="hist-redo" title="Redo (⇧⌘Z or Ctrl+Y)" aria-label="Redo" disabled>↷</button></div>

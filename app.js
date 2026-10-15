@@ -13,7 +13,9 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
 const mm = n => n.toFixed(1) + ' mm';
 
 const FIL = [['Black', '#26282B'], ['Grey', '#7D848B'], ['White', '#E9EBEC'], ['Blue', '#2E5E9E'], ['Orange', '#E07A2E'], ['Green', '#3E8E5A'], ['Lime', '#B5CF2A'], ['Red', '#C8372D']];
-const TABS = [['devices', 'Devices'], ['panels', 'Panels'], ['top', 'Top mounts'], ['extras', 'Frame & extras'], ['custom', 'Custom']];
+const TABS = [['devices', 'Devices'], ['panels', 'Panels'], ['custom', 'Custom']]; // for the front and the back
+// the "Where" bar: which side of the rack the library shows parts for; the front and back hold the panels, the rest have their own lists
+const WHERE = [['front', 'Front'], ['back', 'Back'], ['top', 'Top'], ['bottom', 'Bottom'], ['sides', 'Sides'], ['frame', 'Frame']];
 
 /* ---------- catalog ---------- */
 let CAT = null, LIB = {}, SIZES = {}, PWDEV = {};
@@ -44,7 +46,7 @@ function buildCatalog(c) {
 /* ---------- state ---------- */
 function defaultState() {
   let n = 1; const m = (k, p) => ({ id: n++, key: k, pos2: p });
-  return { h: 5, version: 'brass', frame: '#26282B', panel: '#26282B', accent: '#B5CF2A', label: 'Lab Rax', top: null, topDir: null, extras: [], xdir: {}, back: 'open', room: 25, sides: 'printed', done: {}, example: true,
+  return { h: 5, version: 'brass', frame: '#26282B', panel: '#26282B', accent: '#B5CF2A', label: 'Lab Rax', top: null, topDir: null, bottom: null, bottomDir: null, extras: [], xdir: {}, back: 'open', room: 25, sides: 'printed', done: {}, example: true,
     power: defaultPower(),
     items: [m('keystone', 0), m('flexmini05', 1), m('ucgmax1', 2), m('tiny1', 4), m('sbc7', 6)], nextId: n };
 }
@@ -134,6 +136,9 @@ function sanitize() {
   if (state.top && !(own(LIB, state.top) && LIB[state.top].top)) state.top = null;
   state.extras = (Array.isArray(state.extras) ? state.extras : []).filter(k => own(LIB, k) && LIB[k].extra);
   if (!FAN_DIRS.includes(state.topDir)) state.topDir = null;
+  // the bottom: null is the printed panel, 'acrylic' a 3 mm sheet, or a top/bottom panel from the catalog (mesh, a fan)
+  if (state.bottom != null && state.bottom !== 'acrylic' && !(own(LIB, state.bottom) && canBottom(LIB[state.bottom]))) state.bottom = null;
+  if (!FAN_DIRS.includes(state.bottomDir)) state.bottomDir = null;
   const xd = state.xdir && typeof state.xdir === 'object' ? state.xdir : {}; state.xdir = {};
   state.extras.forEach(k => { if (FAN_DIRS.includes(xd[k])) state.xdir[k] = xd[k]; });
   if (!state.done || typeof state.done !== 'object') state.done = {};
@@ -184,6 +189,9 @@ function slotsHTML(it) {
     '<div class="slotnames">' + Array.from({ length: md.n }, (_, i) => '<input class="field mini" type="text" data-slot="' + i + '" maxlength="16" placeholder="' + (i < k ? cap(nn[0]) + ' ' + (i + 1) : 'Blank ' + (i + 1)) + '" value="' + esc(names[i] || '') + '" aria-label="Name on slot ' + (i + 1) + '">').join('') + '</div></div>';
 }
 const H = it => info(it).h2;
+const canBottom = d => !!(d && d.top && /bottom/i.test(d.label || '')); // top panels made for the bottom too
+const bottomPart = () => state.bottom && state.bottom !== 'acrylic' && own(LIB, state.bottom) ? LIB[state.bottom] : null;
+const bottomName = () => state.bottom === 'acrylic' ? 'Acrylic, 3 mm' : bottomPart() ? fullName(bottomPart()) : 'Printed panel';
 const slots = () => state.h * 2;
 const placed = () => state.items.filter(i => i.pos2 != null);
 const byPos = () => placed().sort((a, b) => a.pos2 - b.pos2);
@@ -453,9 +461,28 @@ const UIKEY = 'labrax-planner-ui';
 const ui = (() => { try { return Object.assign({ open: {}, sec: { print: true }, lr: false }, JSON.parse(localStorage.getItem(UIKEY)) || {}); } catch (e) { return { open: {}, sec: { print: true }, lr: false }; } })();
 const saveUI = () => { try { localStorage.setItem(UIKEY, JSON.stringify(ui)); } catch (e) {} };
 const devOpen = new Set(); // devices whose other mounts are folded out
+const where = () => WHERE.some(([k]) => k === ui.where) ? ui.where : 'front';
+// an extra's side of the rack, for the Where bar
+function extraFace(d) {
+  const s = d.shape || {};
+  if (s.side || d.at === 'side' || s.handles === 'side' || s.depth) return 'sides';
+  if (s.u || s.frame || s.hl || s.wall || s.inside && d.at !== 'top') return 'frame';
+  if (s.feet || s.drawer) return 'bottom';
+  return 'top'; // logo, corners, edges, handles, fans at the top
+}
+function setWhere(w) {
+  ui.where = w; saveUI();
+  if (w === 'front' || w === 'back') { if (!TABS.some(([k]) => k === tab)) tab = 'devices'; if (view === 'front' || view === 'back') { setView(w); return renderLib(); } rackSide = w; }
+  if (view === '3d' && window.LRView3D) window.LRView3D.action('face:' + w);
+  renderControls(); renderLib();
+}
 function renderTabs() {
+  const w = where(), fb = w === 'front' || w === 'back';
+  $('#where').innerHTML = WHERE.map(([k, l]) => '<button type="button" data-act="where" data-v="' + k + '" aria-pressed="' + (w === k) + '">' + l + '</button>').join('');
+  $('#tabs').hidden = !fb && w !== 'top';
+  if (!fb) { $('#tabs').innerHTML = w === 'top' ? '<button type="button" class="pill lr" data-act="lib-lr" aria-pressed="' + ui.lr + '" title="Only parts made for or tested in Lab Rax">Lab Rax only</button>' : ''; return; }
   $('#tabs').innerHTML = TABS.map(([k, l]) => '<button type="button" class="pill" data-act="tab" data-t="' + k + '" aria-pressed="' + (tab === k) + '">' + l + '</button>').join('') +
-    (tab === 'devices' || tab === 'panels' || tab === 'top' ? '<button type="button" class="pill lr" data-act="lib-lr" aria-pressed="' + ui.lr + '" title="Only parts made for or tested in Lab Rax">Lab Rax only</button>' : '');
+    (tab === 'devices' || tab === 'panels' ? '<button type="button" class="pill lr" data-act="lib-lr" aria-pressed="' + ui.lr + '" title="Only parts made for or tested in Lab Rax">Lab Rax only</button>' : '');
 }
 function miniThumb(d) { return thumbSVG(d); }
 const inRack = key => placed().filter(i => i.key === key).length;
@@ -488,9 +515,35 @@ function markFit() {
     const f = memo[d.h2], ch = b.querySelector('.lchips'); if ((b.dataset.fit || '') !== f) { if (f) { b.dataset.fit = f; if (ch) ch.dataset.fit = f; } else { delete b.dataset.fit; if (ch) delete ch.dataset.fit; } }
   });
 }
+// the library for the top, bottom, sides or frame: choices for that side and the extras that belong there
+function faceLibHTML(w) {
+  const lr = x => !ui.lr || x.labrax, list = (title, rows) => rows.length ? '<p class="sgroup">' + title + '</p><div class="lrows">' + rows.join('') + '</div>' : '';
+  const extras = (CAT.extras || []).flatMap(g => g.items.map(i => [g, i])).filter(([g, i]) => LIB[i.id] && extraFace(LIB[i.id]) === w && matches(i.name, i.label || '', g.group, i.author || ''))
+    .map(([g, i]) => rowHTML(i.id, i.name, [i.label, i.author && 'by ' + i.author].filter(Boolean).join(' · ')));
+  const opt = (act, v, title, sub, on, thumb) => '<div class="lrow-wrap"><button type="button" class="lrow' + (on ? ' on' : '') + '" data-act="' + act + '" data-v="' + v + '" aria-pressed="' + on + '"><span class="lthumb">' + thumb + '</span><span class="ltx"><b>' + esc(title) + '</b><span class="lmeta"><span class="lchips"><span class="badge">' + (on ? '✓ chosen' : 'Choose') + '</span></span><small>' + esc(sub) + '</small></span></span></button></div>';
+  const sheet = (fill, op) => '<svg viewBox="0 0 60 36" width="60" height="36" aria-hidden="true"><path d="M5 22 L30 30 L55 21 L30 14 Z" fill="' + fill + '" fill-opacity="' + op + '" stroke="currentColor" stroke-opacity=".35"/></svg>';
+  if (w === 'top') {
+    const rows = []; (CAT.devices || []).forEach(g => g.items.forEach(d => d.mounts.forEach(m => { if (m.position === 'top' && LIB[m.id] && lr(m) && matches(d.device, m.label, m.author || '')) rows.push(rowHTML(m.id, d.device, mountSub(m))); })));
+    return '<p class="hint lhead">On top of the rack: a top panel with a fan or mesh, a mount for an access point, and extras for the top edge.</p>' + list('Top panels and mounts', rows) + list('Handles, logo, corners and edges', extras);
+  }
+  if (w === 'bottom') {
+    const bs = []; (CAT.devices || []).forEach(g => g.items.forEach(d => d.mounts.forEach(m => { if (LIB[m.id] && canBottom(LIB[m.id])) bs.push(m.id); })));
+    return '<p class="hint lhead">The bottom panel: printed, 3 mm acrylic to see inside, or a mesh or fan panel that lets air in from below.</p>' +
+      list('Bottom panel', [opt('bottom', '', 'Printed bottom panel', 'Comes with the frame, in the frame colour', !state.bottom, sheet(state.frame, 1)), opt('bottom', 'acrylic', 'Acrylic bottom panel', '3 mm sheet, about 228 × 171.5 mm', state.bottom === 'acrylic', sheet('#9ED3F0', .45))]
+        .concat(bs.map(k => opt('bottom', k, LIB[k].label, (cfmOf(LIB[k]) ? 'The fan blows in from below' : 'Lets air in from below') + (LIB[k].author ? ' · by ' + LIB[k].author : ''), state.bottom === k, miniThumb(LIB[k]))))) +
+      list('Feet, casters and drawer', extras);
+  }
+  if (w === 'sides') return '<p class="hint lhead">The side panels: printed or acrylic, or a patterned or fan panel from the list.</p>' +
+    list('Side panels', [opt('sides', 'printed', 'Printed side panels', 'Printed with the frame, in the frame colour', state.sides !== 'acrylic', sheet(state.frame, 1)), opt('sides', 'acrylic', 'Acrylic side panels', '3 mm sheets, so you can see inside', state.sides === 'acrylic', sheet('#9ED3F0', .45))]) +
+    list('Patterned, fan and deeper side panels', extras);
+  const byGroup = (CAT.extras || []).map(g => list(g.group, g.items.filter(i => LIB[i.id] && extraFace(LIB[i.id]) === 'frame' && matches(i.name, i.label || '', g.group, i.author || '')).map(i => rowHTML(i.id, i.name, [i.label, i.author && 'by ' + i.author].filter(Boolean).join(' · '))))).join('');
+  return '<p class="hint lhead">The frame itself: other sizes and versions, joining racks, wall mounting and parts that go inside the rack.</p>' + byGroup; // under the catalog's own headings
+}
 function renderLib() {
   renderTabs();
   if (!CAT) return;
+  const w = where(); if (w !== 'front' && w !== 'back') { $('#cards').innerHTML = faceLibHTML(w); return; }
+  if (!TABS.some(([k]) => k === tab)) tab = 'devices';
   let h = '', hits = 0;
   const lr = x => !ui.lr || x.labrax;
   if (tab === 'devices') {
@@ -507,14 +560,8 @@ function renderLib() {
       });
       hits += n; h += groupHTML(gid, g.group, rows, n);
     });
-  } else if (tab === 'top') {
-    const rows = [];
-    (CAT.devices || []).forEach(g => g.items.forEach(d => d.mounts.forEach(m => { if (m.position === 'top' && LIB[m.id] && lr(m) && matches(d.device, m.label, m.author || '')) rows.push(rowHTML(m.id, d.device, mountSub(m))); })));
-    hits = rows.length; h = rows.length ? '<div class="lrows">' + rows.join('') + '</div>' : '';
   } else if (tab === 'panels') {
     (CAT.panels || []).forEach(g => { const rows = g.items.filter(i => lr(i) && matches(i.name, g.group, i.author || '')).map(i => rowHTML(i.id, i.name, i.author ? 'by ' + i.author : '')); hits += rows.length; h += groupHTML('panels:' + g.group, g.group, rows); });
-  } else if (tab === 'extras') {
-    (CAT.extras || []).forEach(g => { const rows = g.items.filter(i => matches(i.name, i.label || '', g.group, i.author || '')).map(i => rowHTML(i.id, i.name, [i.label, i.author && 'by ' + i.author].filter(Boolean).join(' · '))); hits += rows.length; h += groupHTML('extras:' + g.group, g.group, rows); });
   } else {
     const gens = state.items.filter(i => i.key === 'gen');
     h = '<p class="hint">Custom parts are generated here as STL, sized to the 10" standard Lab Rax uses. Make one with the button below; it appears in the rack and in your build pack.</p>' +
@@ -702,7 +749,7 @@ function renderSettings() {
 function renderControls() {
   $('#h-out').textContent = state.h + 'U';
   $('#h-minus').disabled = state.h <= 1; $('#h-plus').disabled = state.h >= 10;
-  $('#v-front').setAttribute('aria-pressed', view === 'front'); if ($('#v-back')) $('#v-back').setAttribute('aria-pressed', view === 'back'); $('#v-air').setAttribute('aria-pressed', view === 'air'); $('#v-3d').setAttribute('aria-pressed', view === '3d');
+  $('#v-flat').setAttribute('aria-pressed', view === 'front' || view === 'back'); $('#v-flat').textContent = 'Flat · ' + (view === 'back' || (view !== 'front' && rackSide === 'back') ? 'back' : 'front'); $('#v-air').setAttribute('aria-pressed', view === 'air'); $('#v-3d').setAttribute('aria-pressed', view === '3d');
   $('#example').hidden = !state.example;
   renderSettings();
 }
@@ -731,7 +778,7 @@ function framePieces() {
   const sides = (add, always) => always || state.sides !== 'acrylic' ? [piece('side panels (' + n + 'U)', [[tall, deep + add, 3]], true)] : [];
   return {
     ring: [piece('horizontal pieces', [[dm.outerWidth || 280, F.ring, F.top]], true), piece('edge pieces', [[deep, F.ring, F.top]], true),
-      piece(state.top ? 'bottom panel' : 'top and bottom panels', [[tp[0], tp[1], 3]], true)],
+      ...(!state.top || !state.bottom ? [piece(!state.top && !state.bottom ? 'top and bottom panels' : state.top ? 'bottom panel' : 'top panel', [[tp[0], tp[1], 3]], true)] : [])],
     posts: [piece('posts (' + n + 'U)', [[tall, F.post, F.postDepth]], true), ...sides(0)],
     top: [piece('top', [[tp[0], tp[1], 3]], true)],
     // frame extras: longer edge pieces and side panels for a deeper rack, patterned or fan side panels
@@ -793,6 +840,7 @@ function printPack() {
   add(fm.name, h === 5 ? 'Complete 5U frame' + (acr ? '; skip the side panels, yours are acrylic' : ' with side panels') : 'Base frame: edges, horizontals, handles, feet', fm.url, 1, 'mw', null, h === 5 ? fp.ring.concat(fp.posts) : fp.ring);
   if (h !== 5) add(fr.sizes.name, 'Posts' + (acr ? '' : ' and side panels') + ' for ' + h + 'U', fr.sizes.url, 1, 'mw', null, fp.posts);
   if (h > 5) add(fr.extension.name, '4 joiners for ' + h + 'U', fr.extension.url, 1, 'mw');
+  if (bottomPart()) { const d = bottomPart(); add(fullName(d), 'Replaces the bottom panel', d.url, 1, 'mw', variant(d), fp.top); }
   if (state.top) { const d = LIB[state.top]; add(fullName(d), 'Replaces the top panel', d.url, 1, 'mw', variant(d), fp.top); }
   state.extras.forEach(k => { const d = LIB[k]; add(fullName(d), 'Frame extra', d.url, 1, 'mw', variant(d), fp.extra(d)); });
   let missing = 0;
@@ -832,7 +880,7 @@ function filament() {
   const g = new Map(), add = (c, n) => g.set(c, (g.get(c) || 0) + n), h = state.h;
   add(state.frame, 380 + 40 * h);                                   // frame: about 580 g for 5U (Lab Rax article)
   if (state.sides !== 'acrylic') add(state.frame, 72 * h);          // side panels: about 360 g for 5U
-  add(state.frame, 60);                                             // bottom panel
+  if (!state.bottom) add(state.frame, 60); else if (bottomPart()) add(state.panel, 120); // bottom panel: printed, a catalog panel or acrylic
   if (state.top) add(state.panel, 120); else add(state.accent, 60); // top mount, or the top panel in the accent colour
   placed().forEach(i => { const d = info(i), face = i.key === 'gen' ? genFace(i.params) : d.face; add(colorOf(i), Math.max(12, (GRAMS_PER_U[face] || 40) * d.h2 / 2)); });
   state.extras.forEach(() => add(state.frame, 60));
@@ -876,6 +924,7 @@ function orderList() {
   if (sc) { add(br ? 'm6x10' : 'm6x12', sc); add(br ? 'insert' : 'nut', sc); }
   placed().forEach(i => (info(i).hardware || []).forEach(x => add(x.part, x.qty)));
   if (state.top) (LIB[state.top].hardware || []).forEach(x => add(x.part, x.qty));
+  if (bottomPart()) (bottomPart().hardware || []).forEach(x => add(x.part, x.qty));
   state.extras.forEach(k => (LIB[k].hardware || []).forEach(x => add(x.part, x.qty)));
   if (br) add('inserttip', 1);
   add('hexkey', 1);
@@ -903,10 +952,12 @@ function orderList() {
     out.push({ key: 'filament-' + x.c, group: 'print', name: fil.name.replace('1.75 mm', named ? cn : 'custom ' + cn) + ', 1.75 mm', spec: '≈ ' + x.grams + ' g with 10 % spare; an estimate before slicing', qty: Math.ceil(x.grams / 1000), unit: 'spool', swatch: x.c, links: shopLinks(q2), buy: shopUrl(q2) }); });
   if (state.sides === 'acrylic') { const a = CAT.hardware.acrylic || {};
     out.push({ key: 'acrylic', group: 'acrylic', name: a.name || 'Acrylic sheet, 3 mm, cut to size', spec: (a.spec || '') + '. Take the size from the printed side panel model; the planner has no measured size yet.', qty: 2, links: [], buy: null, cutters: (CAT.acrylic || []).filter(c => ['NL','BE'].includes(state.market) || /worldwide/i.test(c.note || '')) }); }
+  if (state.bottom === 'acrylic') { const a = CAT.hardware.acrylic || {}, tp = (CAT.frame.dimensions || {}).topPanel || [228, 171.5];
+    out.push({ key: 'acrylic-bottom', group: 'acrylic', name: 'Acrylic bottom panel, 3 mm', spec: tp[0] + ' × ' + tp[1] + ' mm, the size of the printed bottom panel; check it against the frame model before ordering', qty: 1, links: [], buy: null, cutters: (CAT.acrylic || []).filter(c => ['NL', 'BE'].includes(state.market) || /world|eu/i.test(c.note || '')) }); }
   if (state.extras.some(k => LIB[k].shape && LIB[k].shape.wall)) out.push({ key: 'wallfixings', group: 'fasteners', name: 'Wall bracket fixings', spec: 'Choose for the selected bracket, loaded rack and wall', qty: null, links: [], buy: null });
   if (state.h > 5) out.push({ key: 'joiners', group: 'fasteners', name: 'Fasteners for the 4 post joiners', spec: 'Not confirmed yet; check the extension model page', qty: null, links: [], buy: null, check: CAT.frame.extension.url });
   // handy extras from tips.json, when they fit this rack
-  const when = { always: true, fans: f.fanParts.length > 0, acrylic: state.sides === 'acrylic', brass: br, bolted: !br, network: f.eth > 0 || f.ks > 0, sbc: f.boards > 0, drives: f.drives > 0, tall: state.h > 5, power: f.mains > 0 };
+  const when = { always: true, fans: f.fanParts.length > 0, acrylic: state.sides === 'acrylic' || state.bottom === 'acrylic', brass: br, bolted: !br, network: f.eth > 0 || f.ks > 0, sbc: f.boards > 0, drives: f.drives > 0, tall: state.h > 5, power: f.mains > 0 };
   ((TIPS && TIPS.items) || []).forEach(t => { if (!t || !t.name || !when[t.when || 'always'] || out.some(o => o.key === t.id)) return;
     out.push({ key: t.id, group: t.group || 'other', name: t.name, spec: t.spec || '', why: t.why || '', qty: t.qty || 1, pack: t.pack || null, packs: null, optional: true, links: shopLinks(t.search || t.name), buy: shopUrl(t.search || t.name) }); });
   const order = SHOP_GROUPS.map(g => g[0]);
@@ -938,7 +989,7 @@ function guide() {
     'Use an M6 insert tip at about 220–240 °C for PETG. Press straight down until the insert is flush, keep it square, and let it cool before you screw into it.',
     'In the posts, only melt inserts into the holes your parts use: see "Mount the parts" below.']);
   add('frame', 'Build the frame', [
-    'Base: put the bottom panel between two edge pieces and two horizontal pieces, one ' + screw + ' per joint.',
+    'Base: put ' + (state.bottom === 'acrylic' ? 'the 3 mm acrylic bottom panel' : bottomPart() ? fullName(bottomPart()) + ' as the bottom panel' : 'the bottom panel') + ' between two edge pieces and two horizontal pieces, one ' + screw + ' per joint.',
     'Stand the four posts on the base, one screw per joint' + (fp.joiners ? ', and join them to ' + state.h + 'U with the post joiners' : '') + '.',
     'Slide the ' + (acr ? '3 mm acrylic ' : '') + 'side panels into the slots between the posts' + (fp.joiners ? '; turn them the opposite way to the posts so the seams don’t line up' : '') + '.',
     'Add the top horizontal pieces, then ' + (state.top ? 'the ' + fullName(LIB[state.top]) : 'the top panel') + ', and close the top with the last two edge pieces.',
@@ -1014,24 +1065,26 @@ const toM3h = cfm => cfm * 1.699;
 function fanLine(d) { const c = cfmOf(d); return fanSpecs(d).map(f => (f.qty > 1 ? f.qty + '× ' : '') + f.mm + ' mm').join(' + ') + ' · ' + Math.round(c) + ' CFM · ' + fmtF(toM3h(c)); }
 // where a part's fans sit and which way they blow: the builder's choice, else the catalog's, else in at the front and sides, out at the top and back.
 // A pair in an extra can also go one in, one out: across the side panels, or in at the bottom and out at the top.
-const fanPlace = (d, kind, it) => kind === 'item' ? sideOf(it) : kind === 'top' ? 'top' : d.fanAt || d.at || 'side';
+const fanPlace = (d, kind, it) => kind === 'item' ? sideOf(it) : kind === 'top' ? 'top' : kind === 'bottom' ? 'bottom' : d.fanAt || d.at || 'side';
 const canCross = (d, place, kind) => kind === 'extra' && (place === 'side' || place === 'top') && fanSpecs(d).reduce((n, f) => n + f.qty, 0) >= 2;
 function dirFor(d, chosen, place, kind) {
   const ok = v => v === 'intake' || v === 'exhaust' || (v === 'cross' && canCross(d, place, kind));
   // a fan panel on the rear posts blows out by default, so the air goes front to back whatever the catalog suggests for the front
-  return ok(chosen) ? chosen : kind === 'item' && place === 'back' ? 'exhaust' : ok(d.fanDir) ? d.fanDir : place === 'top' || place === 'back' ? 'exhaust' : 'intake';
+  return ok(chosen) ? chosen : kind === 'bottom' ? 'intake' : kind === 'item' && place === 'back' ? 'exhaust' : ok(d.fanDir) ? d.fanDir : place === 'top' || place === 'back' ? 'exhaust' : 'intake';
 }
 const dirText = (dir, place) => dir === 'intake' ? 'blows in' : dir === 'exhaust' ? 'blows out' : place === 'top' ? 'blows in at the bottom and out at the top' : 'blows in on one side and out on the other';
 function fanParts() { // every part in the rack with fans
   const out = [], add = (ref, d, kind, chosen, name, it) => { const place = fanPlace(d, kind, it); out.push({ ref, d, it, kind, place, dir: dirFor(d, chosen, place, kind), name, where: it ? uRange(it.pos2, d.h2) + atBack(it) : place === 'side' ? 'sides' : place }); };
   byPos().forEach(it => { const d = info(it); if (cfmOf(d)) add('i' + it.id, d, 'item', it.dir, it.label || fullName(d), it); });
   if (state.top && cfmOf(LIB[state.top])) add('top', LIB[state.top], 'top', state.topDir, fullName(LIB[state.top]));
+  if (bottomPart() && cfmOf(bottomPart())) add('bottom', bottomPart(), 'bottom', state.bottomDir, fullName(bottomPart()) + ' (bottom)');
   state.extras.forEach(k => { if (cfmOf(LIB[k])) add('x' + k, LIB[k], 'extra', state.xdir[k], fullName(LIB[k])); });
   return out;
 }
 // reassigns rather than edits, so predict() can put the old values back
 function setFanDir(ref, v) {
   if (ref === 'top') state.topDir = v;
+  else if (ref === 'bottom') state.bottomDir = v;
   else if (ref[0] === 'x') state.xdir = Object.assign({}, state.xdir, { [ref.slice(1)]: v });
   else state.items = state.items.map(i => 'i' + i.id === ref ? Object.assign({}, i, { dir: v }) : i);
 }
@@ -1069,6 +1122,7 @@ function rackModel() {
   const back = state.back !== 'closed', top = state.top ? LIB[state.top] : null, topVent = top && top.vent || 0;
   if (back && occB.some(o => !o)) { const g = group('back', occB.some(o => o) ? 'Open part of the back' : 'Open back', 'back'); for (let s = 0; s < n; s++) if (!occB[s]) hole(g, BAY_W * dz, s); }
   if (topVent) hole(group('top', fullName(top), 'top'), TOP_A * topVent, 0, 'top');
+  const bot = bottomPart(); if (bot && bot.vent) hole(group('bottom', fullName(bot) + ' (bottom)', 'bottom'), TOP_A * bot.vent, 0, 'bottom');
   state.extras.forEach(k => { const d = LIB[k]; if (d.at === 'side' && d.vent) { const g = group('side', fullName(d), 'both sides'); for (let s = 0; s < n; s++) hole(g, 2 * SIDE_D * dz * d.vent, s); } });
   const seams = group('seams', 'Seams between panels', 'everywhere');
   for (let s = 0; s < n; s++) hole(seams, K.leak, s);
@@ -1078,6 +1132,7 @@ function rackModel() {
     let layers;
     if (f.it) { const lay = [], end = Math.min(n, f.it.pos2 + f.d.h2); for (let s = f.it.pos2; s < end; s++) lay.push(s); layers = lay.map(s => ({ layer: s, share: 1 / lay.length })); } // a fan panel, front or back
     else if (f.place === 'top') layers = [{ at: 'top', share: 1 }];
+    else if (f.place === 'bottom') layers = [{ at: 'bottom', share: 1 }];
     else { // side fans sit halfway up, back fans in the upper part; a fan covers as many ½U layers as it is wide
       const mm = Math.max(...fanSpecs(f.d).map(x => x.mm)), c = Math.max(1, Math.min(n, Math.round(mm / 1000 / dz)));
       const s0 = Math.max(0, Math.min(n - c, Math.round((f.place === 'back' ? n / 4 : n / 2) - c / 2)));
@@ -1099,7 +1154,7 @@ function rackModel() {
 }
 const airMemo = new Map();
 function airflow() {
-  const sig = JSON.stringify([state.h, state.items.map(i => [i.key, i.pos2, i.watts, i.dir, i.params, i.side, i.fill]), state.top, state.topDir, state.extras, state.xdir, state.back, state.room]);
+  const sig = JSON.stringify([state.bottom, state.bottomDir, state.h, state.items.map(i => [i.key, i.pos2, i.watts, i.dir, i.params, i.side, i.fill]), state.top, state.topDir, state.extras, state.xdir, state.back, state.room]);
   if (airMemo.has(sig)) return airMemo.get(sig);
   const m = rackModel(), r = window.LRAir.solve(m.model), flow = {};
   r.openings.forEach(o => { flow[o.id] = o.flow; }); r.fans.forEach(f => { flow[f.id] = f.flow; });
@@ -1117,7 +1172,7 @@ function airflow() {
 const airLevel = a => !a.Q ? ['No heat', ''] : a.maxT <= RATED[0] ? ['Cool', ''] : a.maxT <= RATED[1] ? ['Warm', ' est'] : ['Hot', ' hot'];
 // the airflow after a change; change() only reassigns fields of state (never edits an item in place), so they can be put back
 function predict(change) {
-  const keep = {}; ['h', 'top', 'topDir', 'back', 'items', 'extras', 'xdir'].forEach(k => { keep[k] = state[k]; });
+  const keep = {}; ['h', 'top', 'topDir', 'bottom', 'bottomDir', 'back', 'items', 'extras', 'xdir'].forEach(k => { keep[k] = state[k]; });
   try { change(); return airflow(); } finally { Object.assign(state, keep); }
 }
 function fillInto(k1, k05) { // every open slot filled, on a copy of the items list
@@ -1376,8 +1431,8 @@ function renderBuild() {
     '<dt>Vertical posts</dt><dd>' + fp.posts + '</dd>' + (fp.joiners ? '<dt>Post joiners</dt><dd>4</dd>' : '') +
     '<dt>Side panels</dt><dd>' + fp.sides + (state.sides === 'acrylic' ? ' acrylic' : '') + '</dd>' + (state.sides === 'acrylic' ? '<div class="note">Acrylic sides: 3 mm, cut to the size of the printed side panel. Take it from that model; the planner has no measured size yet.</div>' : '') + (fp.joiners && fp.b !== 5 ? '<div class="note">Fit the side panels the opposite way to the posts so the seams don’t line up.</div>' : '') +
     '<dt>Horizontal pieces</dt><dd>4</dd><dt>Edge pieces</dt><dd>4</dd><dt>Handles · feet</dt><dd>2 · 4</dd>' +
-    (top ? '<dt>Top</dt><dd>' + esc(top.name) + '</dd><div class="note">' + esc(top.label || '') + (top.note ? '. ' + esc(top.note) : '') + ' <button type="button" class="lnk btn small ghost" data-act="top-off">Use regular top panel</button></div><dt>Bottom panel</dt><dd>1</dd>'
-         : '<dt>Top + bottom panel</dt><dd>1 + 1</dd>') +
+    (top ? '<dt>Top</dt><dd>' + esc(top.name) + '</dd><div class="note">' + esc(top.label || '') + (top.note ? '. ' + esc(top.note) : '') + ' <button type="button" class="lnk btn small ghost" data-act="top-off">Use regular top panel</button></div><dt>Bottom</dt><dd>' + esc(bottomName()) + '</dd>'
+         : state.bottom ? '<dt>Top panel</dt><dd>1</dd><dt>Bottom</dt><dd>' + esc(bottomName()) + '</dd>' : '<dt>Top + bottom panel</dt><dd>1 + 1</dd>') +
     '<div class="note">The horizontal pieces need a print bed of about 250 mm; they don’t fit on 220 mm beds.' + (h > 5 ? ' Above 10U the printed frame gets too weak for a full rack, so the planner stops at 10U.' : '') + '</div></dl>');
 
   html += '<div class="actions"><button type="button" class="btn small" data-act="copy">Copy list</button><button type="button" class="btn small" data-act="share">Share link</button>' +
@@ -1394,7 +1449,7 @@ function listText() {
   const used = onSide('front').reduce((n, i) => n + H(i), 0); if (slots() - used > 0) L.push('  Open: ' + fmtU(slots() - used));
   if (onSide('back').length) { L.push('', 'Back (top to bottom)'); onSide('back').forEach(i => { const d = info(i); L.push('  ' + uRange(i.pos2, d.h2).padEnd(8) + (i.label ? '[' + i.label + '] ' : '') + fullName(d) + ' (' + uTxt(d) + ')'); }); }
   L.push('', 'Frame', '- Vertical posts: ' + fp.posts); if (fp.joiners) L.push('- Post joiners: 4');
-  L.push('- Side panels: ' + fp.sides + (state.sides === 'acrylic' ? ' (3 mm acrylic)' : ''), '- Horizontal pieces: 4', '- Edge pieces: 4', '- Handles · feet: 2 · 4', state.top ? '- Top: ' + fullName(LIB[state.top]) + '\n- Bottom panel: 1' : '- Top + bottom panel: 1 + 1');
+  L.push('- Side panels: ' + fp.sides + (state.sides === 'acrylic' ? ' (3 mm acrylic)' : ''), '- Horizontal pieces: 4', '- Edge pieces: 4', '- Handles · feet: 2 · 4', '- Bottom: ' + bottomName(), state.top ? '- Top: ' + fullName(LIB[state.top]) + '\n- Bottom panel: 1' : '- Top + bottom panel: 1 + 1');
   const pk = printPack();
   L.push('', 'Print pack' + (pk.printer ? ', checked against your ' + bedName(pk.printer) : ''));
   pk.forEach(x => { L.push('- ' + x.qty + '× ' + x.name + (x.variants ? ' (' + x.variants + ')' : '') + (x.url ? '  ' + x.url : '  (custom STL in build pack)')); if (x.bed) L.push('  ' + bedText(x.bed)); });
@@ -1424,7 +1479,7 @@ function render() { renderControls(); renderRack(); renderSel(); renderUnplaced(
 function snapshot() {
   return {
     h: state.h, version: state.version, sides: state.sides, frame: state.frame, panel: state.panel, accent: state.accent, label: state.label || 'Lab Rax', top: state.top ? fullName(LIB[state.top]) : null,
-    topPart: state.top ? LIB[state.top] : null, mods: frameMods(),
+    topPart: state.top ? LIB[state.top] : null, bottom: state.bottom, bottomPart: bottomPart(), mods: frameMods(),
     items: byPos().map(i => { const d = info(i); return { id: i.id, pos2: i.pos2, h2: d.h2, name: i.label || shortName(d), face: d.face, look: d, color: colorOf(i), depth: d.depth || (i.key === 'gen' && i.params.type === 'shelf' ? i.params.dd : null), gen: i.key === 'gen' ? i.params : null, sel: i.id === sel, back: sideOf(i) === 'back', upper: upperHalf(i) }; })
   };
 }
@@ -1783,6 +1838,8 @@ document.addEventListener('click', async e => {
   switch (act) {
     case 'theme': cycleTheme(); break;
     case 'tab': tab = a.dataset.t; renderLib(); break;
+    case 'where': setWhere(a.dataset.v); break;
+    case 'bottom': state.bottom = a.dataset.v || null; if (!bottomPart()) state.bottomDir = null; touch(); render(); say('Bottom: ' + bottomName() + '.'); break;
     case 'lib-group': { const g = a.dataset.g; if (ui.open[g]) delete ui.open[g]; else ui.open[g] = true; saveUI(); renderLib(); break; }
     case 'lib-more': { const d = a.dataset.dev; if (devOpen.has(d)) devOpen.delete(d); else devOpen.add(d); renderLib(); break; }
     case 'lib-lr': ui.lr = !ui.lr; saveUI(); renderLib(); break;
@@ -2017,7 +2074,8 @@ function copyText(text, okMsg) {
 
 /* ---------- view switching ---------- */
 async function setView(v) {
-  const from = view;
+  if (v === 'flat') v = where() === 'back' ? 'back' : 'front';
+  const from = view; ui.lastView = v === 'back' ? 'front' : v; saveUI();
   view = v; if (v !== '3d') rackSide = v === 'back' ? 'back' : 'front';
   if (sel != null && (v === 'front' || v === 'back') && find(sel) && sideOf(find(sel)) !== v) sel = null; // the selected part is on the other side
   renderControls(); renderSel(); if (CAT) renderBuild(); hideTip();
@@ -2026,7 +2084,7 @@ async function setView(v) {
   $('#view3d').hidden = !on3d; $('#rackHost').style.visibility = on3d ? 'hidden' : ''; $('#meas').style.visibility = on3d ? 'hidden' : '';
   if (on3d) {
     if (!window.LRView3D) { $('#view3d').innerHTML = '<div class="v3d-msg">The 3D view is not available.</div>'; return; }
-    try { await window.LRView3D.mount($('#view3d'), snapshot()); if (from === 'back') window.LRView3D.action('back'); } // coming from the Back view: look at the back
+    try { await window.LRView3D.mount($('#view3d'), snapshot()); window.LRView3D.action(from === 'back' ? 'back' : 'face:' + where()); } // look at the side chosen in the Where bar
     catch (e) { $('#view3d').innerHTML = '<div class="v3d-msg">The 3D library could not be loaded. Check your connection and try again.</div>'; }
   } else if (window.LRView3D) window.LRView3D.pause();
 }
@@ -2048,7 +2106,7 @@ function cycleTheme() { theme = THEMES[(THEMES.indexOf(theme) + 1) % 3]; try { l
 /* ---------- share link (own page only) and rack file ---------- */
 // share links: "#c=" + base64url of the compact layout, [settings that differ from the defaults, parts as [key, pos2, other fields]],
 // short enough for a QR code; old "#l=" links (the whole state) still open. A rack file holds the same compact layout.
-const SHARE_KEYS = ['h', 'version', 'frame', 'panel', 'accent', 'label', 'top', 'topDir', 'extras', 'xdir', 'market', 'costs', 'back', 'sides', 'room', 'power'];
+const SHARE_KEYS = ['h', 'version', 'frame', 'panel', 'accent', 'label', 'top', 'topDir', 'extras', 'xdir', 'market', 'costs', 'back', 'sides', 'room', 'power', 'bottom', 'bottomDir'];
 function compactLayout() {
   const d = Object.assign(defaultState(), { market: 'NL', costs: window.LREstimate.settings() }), same = (x, y) => JSON.stringify(x) === JSON.stringify(y), st = {}; // sanitize() fills in the defaults
   SHARE_KEYS.forEach(k => { if (state[k] !== undefined && !same(state[k], d[k])) st[k] = state[k]; });
@@ -2128,6 +2186,7 @@ fetch('catalog.json', { cache: 'no-cache' })
     fetch('tips.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).then(t => { if (t && (Array.isArray(t.items) || Array.isArray(t.tips))) { TIPS = t; renderBuild(); } }).catch(() => {});
     sanitize();
     if (!loadShared()) { renderLib(); render(); }
+    setView(ui.lastView === 'front' || ui.lastView === 'air' ? ui.lastView : '3d'); // 3D the first time
     window.addEventListener('hashchange', loadShared);
     let rw = 0;
     try { new ResizeObserver(en => { const w = Math.round(en[0].contentRect.width); if (w !== rw) { rw = w; renderRack(); } }).observe($('#stage')); }
