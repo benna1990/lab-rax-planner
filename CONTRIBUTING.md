@@ -132,7 +132,7 @@ Run `node tools/validate.mjs`, then open a pull request.
 
 ## Custom part types
 
-The parametric parts live in `parts.js` under `BUILDERS`. A new builder gets `(THREE, params)` and returns `{ geoms, size, note }` in millimetres, with the front face at z = 0 and the part extending to −z. Use `plateShape()` so the screw holes follow the 10″ hole pattern, and add the type to the select in `index.html` and to `mkOptions()` in `app.js`.
+The parametric parts live in `parts.js` under `BUILDERS`. A new builder gets `(THREE, params)` and returns `{ geoms, size, note }` in millimetres, with the front face at z = 0 and the part extending to −z; add `u` when the part sets its own height (a shelf for a tall device, a fan panel from its fan size) and `show` for geometry only the 3D view draws (the fans behind a fan panel). Use `plateShape()` so the screw holes follow the 10″ hole pattern. In `app.js`, add the type to `GEN_NAMES`, `genLabel()`, `cleanParams()` (shared links are checked there), `mkParams()`, `mkOptions()` and, when it only comes in some heights, `mkHeights()`; add it to the select in `index.html`; draw it in `genShape()` in `shapes.js` and check it in `tools/looks.html?ids=gen`. A part that holds fans lists them in `genHardware()`, so the cooling estimate and the shopping list count them.
 
 ## Code
 

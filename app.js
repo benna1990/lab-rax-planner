@@ -63,6 +63,9 @@ function cleanParams(p) {
   if (p.type === 'keystone') { o.ports = Math.round(num(p.ports, 1, 12, 12)); o.rows = Math.round(num(p.rows, 1, 4, 1)); }
   if (p.type === 'shelf') { o.dw = num(p.dw, 20, 212, 120); o.dh = num(p.dh, 5, 400, 30); o.dd = num(p.dd, 20, 240, 120); o.open = p.open !== false; }
   if (p.type === 'label') o.text = String(p.text == null ? '' : p.text).slice(0, 24);
+  if (p.type === 'fan') { o.size = own(P.FANS, String(p.size)) ? +p.size : 40; const f = P.FANS[o.size]; o.u = f.u; o.fans = Math.round(num(p.fans, 1, f.max, f.max)); o.grille = p.grille === 'open' ? 'open' : 'hex'; }
+  if (p.type === 'dtype') { o.u = p.u >= 2 ? 2 : 1; o.ports = Math.round(num(p.ports, 1, 7, 6)); }
+  if (p.type === 'pass') { o.u = p.u >= 1 ? 1 : 0.5; o.width = Math.round(num(p.width, 30, 200, 120)); o.style = p.style === 'brush' ? 'brush' : 'slot'; }
   return o;
 }
 /* power settings: PoE devices outside the rack (fed by the rack's switches), the UPS size, and whether the top mount runs on PoE */
@@ -126,7 +129,7 @@ let rackSide = 'front'; // the side new parts go to: the back while the Back vie
 
 const info = it => {
   if (it.key === 'custom') return { custom: true, name: it.name, h2: it.h2, face: 'custom', url: it.url || null, hardware: [] };
-  if (it.key === 'gen') return { gen: true, name: it.name, label: genLabel(it.params), h2: Math.round(it.params.u * 2), face: genFace(it.params), params: it.params, url: null, hardware: [] };
+  if (it.key === 'gen') return { gen: true, name: it.name, label: genLabel(it.params), h2: Math.round(it.params.u * 2), face: genFace(it.params), params: it.params, url: null, hardware: genHardware(it.params) };
   return LIB[it.key];
 };
 const H = it => info(it).h2;
@@ -145,15 +148,20 @@ const uTxt = d => (d.est ? '≈' : '') + fmtU(d.h2);
 const shortName = d => d.name;
 const fullName = d => d.label ? d.name + ' – ' + d.label : d.name;
 function uRange(p, h2) { const hi = state.h - Math.floor(p / 2), lo = state.h - Math.floor((p + h2 - 1) / 2); return lo === hi ? 'U' + hi : 'U' + lo + '–' + hi; }
-const GEN_NAMES = { blank: 'Blank panel', vent: 'Vent panel', keystone: 'Keystone panel', shelf: 'Shelf', label: 'Label plate' };
+const GEN_NAMES = { blank: 'Blank panel', vent: 'Vent panel', keystone: 'Keystone panel', shelf: 'Shelf', label: 'Label plate', fan: 'Fan panel', dtype: 'D-type panel', pass: 'Cable pass-through' };
 function genLabel(p) {
   if (p.type === 'keystone') return (p.ports || 12) * (p.rows || 1) + ' ports';
   if (p.type === 'shelf') return p.dw + ' × ' + p.dh + ' × ' + p.dd + ' mm';
   if (p.type === 'vent') return p.pattern === 'hex' ? 'hexagon' : 'slots';
   if (p.type === 'label') return '“' + (p.text || '') + '”';
+  if (p.type === 'fan') return p.fans + '× ' + p.size + ' mm' + (p.grille === 'open' ? ', open' : '');
+  if (p.type === 'dtype') return p.ports * p.u + ' D-type';
+  if (p.type === 'pass') return p.width + ' mm ' + (p.style === 'brush' ? 'brush' : 'slot');
   return 'custom';
 }
-function genFace(p) { return { blank: 'blank', vent: 'vent', keystone: 'ks', shelf: 'cut', label: 'blank' }[p.type] || 'blank'; }
+function genFace(p) { return { blank: 'blank', vent: 'vent', keystone: 'ks', shelf: 'cut', label: 'blank', fan: 'fan', dtype: 'd', pass: 'blank' }[p.type] || 'blank'; }
+// a generated fan panel holds catalog fans, so the airflow estimate, the shopping list and the fan wiring count them like a catalog fan panel's
+const genHardware = p => p.type === 'fan' && CAT.hardware['fan' + p.size] ? [{ part: 'fan' + p.size, qty: p.fans }] : [];
 
 /* ---------- placement ---------- */
 /* The 10" hole pattern (6.35 / 22.225 / 38.1 mm) repeats per whole U, so panels of 1U and taller must start on a U boundary; ½U panels fit either half. */
@@ -629,7 +637,7 @@ function shopLinks(q) { return q ? window.LRMarket.links(q,state.market,(CAT && 
 const shopUrl = q => (shopLinks(q)[0] || {}).url || null;
 const affiliate = () => { const S = (CAT && CAT.shops) || {}; return Object.keys(S).some(k => S[k] && (S[k].tag || S[k].wrap)); };
 // grams of filament per U, by face: a rough estimate before slicing
-const GRAMS_PER_U = { blank: 22, vent: 20, ks: 25, fan: 30, sbc: 60, drv2: 70, drv4: 70, switch: 45, shelf: 45, cut: 45 };
+const GRAMS_PER_U = { blank: 22, vent: 20, ks: 25, fan: 30, d: 25, sbc: 60, drv2: 70, drv4: 70, switch: 45, shelf: 45, cut: 45 };
 function filament() {
   const g = new Map(), add = (c, n) => g.set(c, (g.get(c) || 0) + n), h = state.h;
   add(state.frame, 380 + 40 * h);                                   // frame: about 580 g for 5U (Lab Rax article)
@@ -843,7 +851,8 @@ function frontVent(it, d) { // m² of free area in a part's front plate
     const p = it.params, m = d.h2 === 1 ? 4.5 : 6.5;
     if (p.type === 'vent') return (p.pattern === 'hex' ? .64 : .55) * 196 * Math.max(0, ph - 2 * m) / 1e6; // matches parts.js
     if (p.type === 'shelf' && p.open !== false) return .2 * Math.min(p.dw, 212) * Math.min(p.dh, ph) / 1e6;  // the device fills most of the cut-out
-    return 0;
+    if (p.type === 'pass') { const sh = P.passH(p.u); return (p.style === 'brush' ? .3 * p.width * sh : .5 * ((p.width - sh) * sh + Math.PI * sh * sh / 4)) / 1e6; } // cables fill half the slot; the fingers close most of a brush slot
+    return 0; // a fan panel's openings belong to its fans; the D-type cut-outs are filled by their connectors
   }
   if (d.vent) return d.vent * 200 * ph / 1e6;
   return d.face === 'vent' ? .4 * 200 * Math.max(0, ph - 13) / 1e6 : 0; // slots over 200 mm, a 6.5 mm rim, 40 % open
@@ -1377,12 +1386,33 @@ function mkParams() {
   if (type === 'keystone') { p.ports = +(v('mk-ports') || 12); p.rows = +(v('mk-rows') || 1); }
   if (type === 'shelf') { p.dw = +(v('mk-dw') || 120); p.dh = +(v('mk-dh') || 30); p.dd = +(v('mk-dd') || 120); p.open = true; }
   if (type === 'label') p.text = (v('mk-text') || state.label || 'LAB RAX').slice(0, 24);
+  const lim = (x, lo, hi, d) => isFinite(x) && x > 0 ? Math.max(lo, Math.min(hi, Math.round(x))) : d;
+  if (type === 'fan') { p.size = P.FANS[v('mk-size')] ? +v('mk-size') : 40; const f = P.FANS[p.size]; p.u = f.u; p.fans = lim(+v('mk-fans'), 1, f.max, f.max); p.grille = v('mk-grille') === 'open' ? 'open' : 'hex'; }
+  if (type === 'dtype') p.ports = lim(+v('mk-ports'), 1, 7, 6);
+  if (type === 'pass') { p.width = lim(+v('mk-width'), 30, 200, 120); p.style = v('mk-style') === 'brush' ? 'brush' : 'slot'; }
   return p;
+}
+// the heights a part type comes in; a fan panel takes its height from the fan size, a D-type flange needs 1U
+function mkHeights(u) {
+  const t = $('#mk-type').value, el = $('#mk-u'), cur = u || +el.value, size = $('#mk-size') && +$('#mk-size').value;
+  const list = t === 'fan' ? [P.FANS[size] ? P.FANS[size].u : 1] : t === 'dtype' ? [1, 2] : t === 'pass' ? [0.5, 1] : [0.5, 1, 1.5, 2, 3, 4];
+  if (list.length > 2 && okU(cur) && !list.includes(cur)) list.push(cur), list.sort((a, b) => a - b); // a shelf that grew to fit its device, e.g. 2½U
+  const pick = list.includes(cur) ? cur : list.find(x => x >= 1) || list[0];
+  el.innerHTML = list.map(x => '<option value="' + x + '"' + (x === pick ? ' selected' : '') + '>' + P.fmtU(x) + '</option>').join('');
+  el.disabled = list.length < 2;
 }
 function mkOptions(p) {
   const t = $('#mk-type').value, o = $('#mk-opts');
   const inp = (id, label, val, attrs) => '<label for="' + id + '">' + label + '<input id="' + id + '" ' + attrs + ' value="' + esc(val) + '"></label>';
-  if (t === 'vent') o.innerHTML = '<label for="mk-pattern">Pattern<select id="mk-pattern"><option value="slots">Slots</option><option value="hex"' + (p && p.pattern === 'hex' ? ' selected' : '') + '>Hexagons</option></select></label>';
+  const sel = (id, label, opts, val) => '<label for="' + id + '">' + label + '<select id="' + id + '">' + opts.map(([v, l]) => '<option value="' + v + '"' + (String(val) === String(v) ? ' selected' : '') + '>' + l + '</option>').join('') + '</select></label>';
+  if (t === 'fan') {
+    const size = p && P.FANS[p.size] ? p.size : 40, f = P.FANS[size];
+    o.innerHTML = '<div class="mk-row">' + sel('mk-size', 'Fan size', Object.keys(P.FANS).map(k => [k, k + ' mm · ' + P.fmtU(P.FANS[k].u)]), size) + inp('mk-fans', 'Fans', p ? p.fans : f.max, 'type="number" min="1" max="' + f.max + '" step="1"') +
+      sel('mk-grille', 'Front', [['hex', 'Grille'], ['open', 'Open ring']], p ? p.grille : 'hex') + '</div><p class="hint" style="margin:0">Counts as a fan in the cooling estimate: in at the front, out at the back, or as you set it.</p>';
+  }
+  else if (t === 'dtype') o.innerHTML = inp('mk-ports', 'Cut-outs per row (2U has two rows)', p ? p.ports : 6, 'type="number" min="1" max="7" step="1"');
+  else if (t === 'pass') o.innerHTML = '<div class="mk-row" style="grid-template-columns:1fr 1fr">' + sel('mk-style', 'Opening', [['slot', 'Slot'], ['brush', 'Brush slot']], p ? p.style : 'slot') + inp('mk-width', 'Width (mm)', p ? p.width : 120, 'type="number" min="30" max="200" step="5"') + '</div>';
+  else if (t === 'vent') o.innerHTML = '<label for="mk-pattern">Pattern<select id="mk-pattern"><option value="slots">Slots</option><option value="hex"' + (p && p.pattern === 'hex' ? ' selected' : '') + '>Hexagons</option></select></label>';
   else if (t === 'keystone') o.innerHTML = '<div class="mk-row" style="grid-template-columns:1fr 1fr">' + inp('mk-ports', 'Ports per row', p ? p.ports : 12, 'type="number" min="1" max="12" step="1"') + inp('mk-rows', 'Rows (1U and up)', p ? p.rows : 1, 'type="number" min="1" max="4" step="1"') + '</div>';
   else if (t === 'shelf') o.innerHTML = '<p class="hint" style="margin:0">Device size in mm. The shelf gets a matching front opening, a floor, side walls and a rear stop.</p><div class="mk-row">' + inp('mk-dw', 'Width', p ? p.dw : 120, 'type="number" min="20" max="212" step="1"') + inp('mk-dh', 'Height', p ? p.dh : 30, 'type="number" min="5" max="400" step="1"') + inp('mk-dd', 'Depth', p ? p.dd : 120, 'type="number" min="20" max="240" step="1"') + '</div>';
   else if (t === 'label') o.innerHTML = inp('mk-text', 'Text', p ? p.text : (state.label || 'LAB RAX'), 'type="text" maxlength="24"');
@@ -1392,11 +1422,17 @@ function openMaker(item) {
   mkEdit = item || null;
   const p = item ? item.params : { type: 'blank', u: 1 };
   $('#mk-type').value = p.type;
-  $('#mk-u').innerHTML = [0.5, 1, 1.5, 2, 3, 4].map(u => '<option value="' + u + '"' + (u === p.u ? ' selected' : '') + '>' + P.fmtU(u) + '</option>').join('');
   mkOptions(p);
+  mkHeights(p.u);
   $('#mk-name').value = item ? item.name : '';
   document.querySelector('[data-act="maker-add"]').textContent = item ? 'Update part' : 'Add to rack';
   const dlg = $('#maker'); if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+  mkPreview();
+}
+// a field in the part maker changed: a new type brings its own fields and heights, a new fan size its fan count and height
+function mkChange(id) {
+  if (id === 'mk-type') { mkOptions(null); mkHeights(); }
+  if (id === 'mk-size') { const f = P.FANS[$('#mk-size').value], el = $('#mk-fans'); if (f && el) { el.max = f.max; el.value = f.max; } mkHeights(); }
   mkPreview();
 }
 async function mkPreview() {
@@ -1407,7 +1443,7 @@ async function mkPreview() {
       const part = await P.build(p);
       $('#mk-dims').textContent = part.size.w.toFixed(0) + ' × ' + part.size.h.toFixed(1) + ' × ' + part.size.d.toFixed(1) + ' mm · ' + P.fmtU(part.u);
       $('#mk-note').textContent = part.note || '';
-      if (part.u !== p.u) $('#mk-u').value = String(part.u);
+      if (part.u !== p.u) mkHeights(part.u);
       if (window.LRView3D) window.LRView3D.preview($('#mk-3d'), part.geoms, state.panel);
     } catch (e) { $('#mk-note').textContent = 'The 3D library could not be loaded, so the preview is unavailable. You can still add the part.'; }
   }, 120);
@@ -1671,7 +1707,7 @@ document.addEventListener('input', e => {
   if (id === 'sel-color') { const it = find(sel); if (!it || !HEX.test(e.target.value)) return; it.color = e.target.value; touch(); renderRack(); save(); if (view === '3d' && window.LRView3D) window.LRView3D.update(snapshot()); return; }
   if (id === 'sel-watts') { const it = find(sel); if (!it) return; const v = e.target.value.trim(); if (v === '' || isNaN(+v)) delete it.watts; else it.watts = Math.max(0, Math.min(500, Math.round(+v))); touch(); save(); renderBuild(); if (view === 'air') renderRack(); hideTip(); return; }
   if (id === 'sel-label') { const it = find(sel); if (!it) return; it.label = e.target.value.slice(0, 24) || undefined; touch(); renderRack(); save(); return; }
-  if (id && id.indexOf('mk-') === 0 && id !== 'mk-name') { if (id === 'mk-type') mkOptions(null); mkPreview(); }
+  if (id && id.indexOf('mk-') === 0 && id !== 'mk-name') mkChange(id);
 });
 document.addEventListener('change', e => {
   const t = e.target;
@@ -1690,7 +1726,7 @@ document.addEventListener('change', e => {
   if (t.dataset.poeBudget != null) { const id = +t.dataset.poeBudget, v = t.value.trim() === '' ? null : Math.round(+t.value);
     state.items = state.items.map(i => { if (i.id !== id) return i; const c = Object.assign({}, i); if (v != null && v >= 0 && v <= 1000) c.poeBudget = v; else delete c.poeBudget; return c; });
     touch(); render(); return; }
-  if (e.target.id === 'sel-color') { render(); return; } if (e.target.id === 'mk-type' || e.target.id === 'mk-u' || e.target.id === 'mk-pattern') { if (e.target.id === 'mk-type') mkOptions(null); mkPreview(); } });
+  if (e.target.id === 'sel-color') { render(); return; } if (/^mk-(type|u|pattern|size|grille|style)$/.test(e.target.id)) mkChange(e.target.id); });
 document.addEventListener('toggle', e => { const d = e.target; if (d.matches && d.matches('details.sec, details.abd')) { ui.sec[d.dataset.sec] = d.open; saveUI(); } }, true);
 document.addEventListener('focusout', e => { if (e.target.id === 'rack-name') renderSettings(); });
 

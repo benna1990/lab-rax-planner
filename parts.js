@@ -13,6 +13,11 @@ const PANEL_W = 250;               // printed panel width; fits on a 256 mm bed 
 const HOLE_D = 6.6;                // M6 clearance
 const SLOT_L = 9;                  // horizontal slot length for tolerance
 const KS_W = 14.9, KS_H = 16.4;    // keystone cut-out (module face is 14.5 × 16.0 mm)
+const SPAN = 212;                  // width for cut-outs and what sits behind them, 5 mm in from each post
+// fans by size: panel height, screw spacing (centre to centre), screw hole (M3 for 40 mm, fan screws or M4 above), fans across, frame depth
+const FANS = { 40: { u: 1, holes: 32, screw: 3.4, max: 5, d: 10 }, 80: { u: 2, holes: 71.5, screw: 4.4, max: 2, d: 25 }, 120: { u: 3, holes: 105, screw: 4.4, max: 1, d: 25 } };
+const D_HOLE = 24, D_SX = 19, D_SY = 24, D_SCREW = 3.2, D_W = 26, D_H = 31, D_PITCH = 31; // Neutrik D-series: Ø24 cut-out, M3 holes 19 × 24 mm apart, 26 × 31 mm flange
+const passH = u => u >= 1 ? 26 : 12; // cable pass-through: slot height in a 1U or ½U panel
 
 const panelH = u => u * U - CLEAR;
 
@@ -55,6 +60,11 @@ function slotPath(T, cx, cy, len, d, vertical) {
     p.absarc(cx, cy - len / 2, r, Math.PI, Math.PI * 2, false);
   }
   return p;
+}
+function circlePath(T, cx, cy, r) { // a polygon fine enough for a 116 mm fan opening, coarse for a screw hole
+  const p = new T.Path(), n = Math.max(16, Math.min(96, Math.round(r * 1.6)));
+  for (let k = 0; k < n; k++) { const a = k / n * Math.PI * 2; k ? p.lineTo(cx + r * Math.cos(a), cy + r * Math.sin(a)) : p.moveTo(cx + r, cy); }
+  p.closePath(); return p;
 }
 function hexPath(T, cx, cy, r) {
   const p = new T.Path();
@@ -150,8 +160,70 @@ const BUILDERS = {
     geoms.push(...textGeoms(T, txt, Math.min(h * 0.62, 14), 0.8, h));
     // the text stands proud of the front, so this part prints face-up
     return { geoms, faceUp: true, size: { w: PANEL_W, h, d: t + 0.8 }, note: 'Raised text, 0.8 mm. Prints face-up; swap filament at the text layer for a two-colour label.' };
+  },
+  fan(T, p) {
+    // the fan size sets the height: 40 mm fits 1U, 80 mm needs 2U, 120 mm 3U. The fans screw to the back of the plate.
+    const size = FANS[p.size] ? +p.size : 40, f = FANS[size], u = f.u, h = panelH(u), t = 3;
+    const n = Math.max(1, Math.min(f.max, Math.round(p.fans || f.max))), pitch = fanPitch(size, n), r = size / 2 - 1, holes = [], show = [];
+    for (let i = 0; i < n; i++) {
+      const cx = (i - (n - 1) / 2) * pitch, cy = h / 2;
+      if (p.grille === 'open') holes.push(circlePath(T, cx, cy, r));
+      else { // a honeycomb grille over the fan: whole cells inside the opening
+        const R = Math.max(3, size / 16), Rc = R + 1.6 / Math.sqrt(3), dx = Math.sqrt(3) * Rc, dy = 1.5 * Rc, nj = Math.ceil(r / dy), nk = Math.ceil(r / dx) + 1;
+        for (let j = -nj; j <= nj; j++) for (let k = -nk; k <= nk; k++) {
+          const x = cx + k * dx + (j & 1 ? dx / 2 : 0), y = cy + j * dy;
+          if (Math.hypot(x - cx, y - cy) + R <= r) holes.push(hexPath(T, x, y, R));
+        }
+      }
+      for (const sx of [-1, 1]) for (const sy of [-1, 1]) holes.push(circlePath(T, cx + sx * f.holes / 2, cy + sy * f.holes / 2, f.screw / 2));
+      show.push(...fanBody(T, cx, cy, size, f.d, -t));
+    }
+    return { geoms: [extrude(T, plateShape(T, u, holes), t, -t)], show, u, size: { w: PANEL_W, h, d: t }, fans: n,
+      note: n + '× ' + size + ' mm fan' + (n > 1 ? 's' : '') + ' (' + fmtU(u) + '), screw holes ' + f.holes + ' mm apart for ' + (size === 40 ? 'M3' : 'fan screws or M4') + '. ' +
+        (p.grille === 'open' ? 'Open rings: add a finger guard where hands come near.' : 'Honeycomb grille, 1.6 mm bars.') + ' Fit the fans with the arrow pointing the way the air should go.' };
+  },
+  dtype(T, p) {
+    // a D-series flange is 31 mm tall, so it needs at least 1U; a 2U panel takes a row in each U
+    const u = p.u >= 2 ? 2 : 1, h = panelH(u), t = 3, n = Math.max(1, Math.min(7, Math.round(p.ports || 6))), holes = [];
+    for (let row = 0; row < u; row++) for (let i = 0; i < n; i++) {
+      const cx = (i - (n - 1) / 2) * D_PITCH, cy = row * U + U / 2 - CLEAR / 2;
+      holes.push(circlePath(T, cx, cy, D_HOLE / 2));
+      for (const sx of [-1, 1]) for (const sy of [-1, 1]) holes.push(circlePath(T, cx + sx * D_SX / 2, cy + sy * D_SY / 2, D_SCREW / 2)); // all four corners, so either diagonal fits
+    }
+    const rw = Math.min(200, (n - 1) * D_PITCH + D_W + 10), geoms = [extrude(T, plateShape(T, u, holes), t, -t)];
+    geoms.push(box(T, rw, 2.4, 8, -rw / 2, 0, -t), box(T, rw, 2.4, 8, -rw / 2, h - 2.4, -t));
+    return { geoms, u, size: { w: PANEL_W, h, d: t + 8 }, ports: n * u,
+      note: n * u + ' Neutrik D-series cut-outs (Ø' + D_HOLE + ' mm, M3 holes ' + D_SX + ' × ' + D_SY + ' mm; all four, so either diagonal fits) for XLR, RJ45, USB, HDMI and more. Fix them with M3 × 10 screws and nuts.' +
+        (u !== p.u ? ' A D-series flange is ' + D_H + ' mm tall, so it needs ' + fmtU(u) + '.' : '') };
+  },
+  pass(T, p) {
+    const u = p.u >= 1 ? 1 : 0.5, h = panelH(u), t = 3, sh = passH(u), w = Math.max(30, Math.min(200, Math.round(p.width || 120))), y0 = (h - sh) / 2, brush = p.style === 'brush';
+    const geoms = [extrude(T, plateShape(T, u, [brush ? rectPath(T, -w / 2, y0, w, sh, 1.5) : slotPath(T, 0, h / 2, w - sh, sh, false)]), t, -t)], rib = Math.min(8, h / 3);
+    geoms.push(box(T, 200, 2.4, rib, -100, 0, -t), box(T, 200, 2.4, rib, -100, h - 2.4, -t));
+    if (brush) { // thin fingers from the top and bottom edge, in the front layers; cables push them aside
+      const fw = 1.2, gap = 1, ft = .8, len = sh / 2 - .5, k = Math.floor((w - 4 + gap) / (fw + gap)), x0 = -(k * (fw + gap) - gap) / 2;
+      for (let i = 0; i < k; i++) { const x = x0 + i * (fw + gap); geoms.push(box(T, fw, len + 1, ft, x, y0 - 1, 0), box(T, fw, len + 1, ft, x, y0 + sh - len, 0)); }
+    }
+    return { geoms, u, size: { w: PANEL_W, h, d: t + rib },
+      note: brush ? 'Brush slot ' + w + ' × ' + sh + ' mm: 0.8 mm fingers print as the first layers, face-down. PETG or TPU gives them more give than PLA.'
+        : 'Cable slot ' + w + ' × ' + sh + ' mm with round ends.' };
   }
 };
+// centre-to-centre spacing of n fans across the panel, as close as their frames allow with a little air between
+function fanPitch(size, n) { return n > 1 ? Math.min(size + 8, (SPAN - size) / (n - 1)) : 0; }
+// a fan behind the plate, for the 3D view only (never in the STL): the frame, the hub and seven blades. z is the back of the plate.
+function fanBody(T, cx, cy, size, d, z) {
+  const a = size / 2, frame = new T.Shape(rectPath(T, cx - a, cy - a, size, size, size * .06).getPoints());
+  frame.holes.push(circlePath(T, cx, cy, a - 1.5));
+  const out = [{ g: extrude(T, frame, d, z - d), c: '#1E2023' }], hr = a * .36, hub = new T.CylinderGeometry(hr, hr, d - 2, 24);
+  hub.rotateX(Math.PI / 2); hub.translate(cx, cy, z - d / 2); out.push({ g: hub, c: '#2A2C30' });
+  for (let k = 0; k < 7; k++) {
+    const L = a - 2.5 - hr, b = new T.BoxGeometry(L, size * .2, 1);
+    b.rotateX(.5); b.translate(hr + L / 2, 0, 0); b.rotateZ(k / 7 * Math.PI * 2); b.translate(cx, cy, z - d / 2);
+    out.push({ g: b, c: '#33363B' });
+  }
+  return out;
+}
 
 /* Raised text from a canvas bitmap: each run of filled pixels becomes a box. Works offline with any loaded font. */
 function textGeoms(T, text, capH, raise, plateH) {
@@ -242,5 +314,5 @@ function zip(files) {
   return new Blob([...chunks, ...central, new Uint8Array(end.buffer)], { type: 'application/zip' });
 }
 
-window.LRParts = { U, CLEAR, HOLE_X, CLEAR_W, PANEL_W, KS_W, KS_H, panelH, fmtU, loadThree, loadScript, build, toSTL, zip, crc32 };
+window.LRParts = { U, CLEAR, HOLE_X, CLEAR_W, PANEL_W, KS_W, KS_H, SPAN, FANS, panelH, passH, fanPitch, fmtU, loadThree, loadScript, build, toSTL, zip, crc32 };
 })();

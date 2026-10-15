@@ -16,7 +16,7 @@ A height marked **≈** is estimated. Open the original model page and confirm t
 
 ## 3. Make a custom part
 
-Open the custom part maker and select a blank, vent, keystone or label panel, or a shelf. Adjust the parameters and preview the result. Add it to the rack or use **Download STL**.
+Open the custom part maker and select a blank, vent, keystone, label, fan or Neutrik D-type panel, a cable pass-through or a shelf. Adjust the parameters and preview the result. Add it to the rack or use **Download STL**. A fan panel counts as a fan in the cooling estimate.
 
 Check the printer bed size, hole fit and clearances before printing. Slice the exported STL using settings suitable for your material and intended load.
 
