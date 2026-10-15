@@ -11,6 +11,7 @@ Status on 15 October 2026 and what comes next. Written so a new session (for exa
 - Custom part generator with STL export: blank, vent (slots/hex), keystone (1–12 ports, 1–2 rows), label plate, shelf sized to a device.
 - Build pack ZIP: custom STLs, PDF build plan, print list and shopping list (CSV), README.
 - Shopping list with Amazon search links and an affiliate tag setting.
+- Airflow estimate: heat per part (rule of thumb, catalog `watts` or the user's value), stack and fan flow, air temperature rise, recommendations with their expected effect, and an Airflow view. Hover tooltips replace text on the panels; the build pack has a download list.
 - Public repo at https://github.com/benna1990/lab-rax-planner, live on GitHub Pages at https://benna1990.github.io/lab-rax-planner/, with the catalog validator as a GitHub Action.
 
 ## Next
@@ -22,3 +23,4 @@ Status on 15 October 2026 and what comes next. Written so a new session (for exa
 5. **Depth per device.** Add `depth` to common mounts so the 3D view shows real devices behind the panels.
 6. **Rear view and cabling** in 3D.
 7. **Catalog gaps.** The first October sweep found RB5009, Cloud Key Gen2+, UNVR Instant and HDHomeRun (with a Pi 5). The second sweep added 64 parts: PDUs and power strips, keystone, fibre and Neutrik D-type patch panels, shelf drawers, IKEA Dirigera, Starlink Gen 2, thin clients (Wyse 3040/5070, HP t620/t630/t640, Futro S740), firewall boxes (Topton/CWWK, Qotom, Protectli VP2420, Firewalla Gold) and obibi's bolted +50 mm sides (2350077). Still none for UDR/UDR7, mini UPS units (Printables 1208746 fits an APC Back-UPS 650, height unknown), TP-Link Deco, Starlink Gen 3/Mini, GL.iNet Flint 2, Netgate, Futro S920/S940 or HP t730/t740; the USW Pro Max is 281 mm wide and doesn't fit. The "Lab Rax U7 Pro mount remix" lead is Loonie Merker's 3217818, already listed. Open leads seen by title but without an id: matataa's "Lab Rax PWN controller top panel with 120mm fan", zaqu's "Neutrik D Series and Keystone 10-inch Panel" (a remix of 825894), Janjd's "Labrax 10" Rack mount for HP ThinClient (t620Plus)", and 1U drawers by Patrick and by usefulhobbies. No D-type panel by mklements turned up.
+8. **Real heat figures.** Add `watts` to common devices in `catalog.json` (gateways, PoE switches, mini PCs, NAS) so the airflow estimate uses measured values instead of rules of thumb, and check the estimate against a thermometer in a real rack.

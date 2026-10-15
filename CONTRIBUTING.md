@@ -36,8 +36,9 @@ Find the device's group under `devices`, then add a mount to the device, or add 
 | `hardware` | no | Extra parts to buy: `[{ "part": "fan80", "qty": 2 }]`. |
 | `note` | no | One sentence the builder should know. |
 | `depth` | no | Device depth in mm, used by the 3D view. |
+| `watts` | no | Typical heat the device gives off in W, used by the airflow estimate. Without it the planner guesses from the kind of device. |
 
-Panels use `id`, `name`, `u`, `face`, `url`, `author`, `labrax`, `estimated` and `hardware`. Extras use `id`, `name`, `label`, `author` and `url`.
+Panels use `id`, `name`, `u`, `face`, `url`, `author`, `labrax`, `estimated`, `hardware` and `watts`. Extras use `id`, `name`, `label`, `author` and `url`.
 
 Run `node tools/validate.mjs`, then open a pull request.
 

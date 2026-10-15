@@ -7,8 +7,9 @@ Plan your 3D-printed [Lab Rax](https://the-diy-life.com/introducing-lab-rax-a-3d
 - **Pick from ~500 community parts**: device mounts (UniFi, TP-Link, MikroTik, Netgear, Zyxel, mini PCs, thin clients, firewall boxes, Mac mini, Raspberry Pi, Mini-ITX, NAS and drive bays…), panels (power, keystone and D-type patch panels, fans, shelves), top mounts and frame mods, each linked to its model page.
 - **Lay it out** at real scale. Whole-U panels snap to the hole pattern; ½U panels fit either half of a U.
 - **Look around in 3D**, and load your own downloaded STL or 3MF files onto a part to see them in place. Those files never leave your browser.
+- **Check the airflow**: an estimate of the heat in the rack and how warm the air inside gets, with suggestions for fans, vent panels, a mesh top or blank panels, each with its expected effect. The Airflow view colours the rack from cool to hot; enter a part's real watts for a better estimate.
 - **Make custom parts**: blank, vent (slots or hexagons), keystone and label panels, and a shelf sized to your device. They export as STL, ready to print without supports: panels and shelves face-down, label plates face-up.
-- **Download a build pack**: one ZIP with your custom STL files, a PDF build plan, a print list with links and a shopping list.
+- **Download a build pack**: one ZIP with your custom STL files, a PDF build plan, a download list to click through the community models, a print list with links and a shopping list.
 - Light and dark theme. Your layout is saved in your browser; share it with a link (Share link in Your build).
 
 It is a static site with no build step: `index.html`, `app.js`, `parts.js`, `view3d.js`, `pdf.js` and `catalog.json`. three.js r128 and jsPDF 2.5.1 load from cdnjs/jsDelivr when the 3D view or PDF export is first used.

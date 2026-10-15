@@ -78,7 +78,8 @@ function grilleTex(frameColor, accent, label) {
   });
 }
 function faceTex(item, accent) {
-  const hpx = Math.max(32, Math.round(item.h2 * 48));
+  // 4 px per mm both ways (250 mm wide panel), so circles stay round
+  const hpx = Math.max(32, Math.round((item.h2 * P.U / 2 - P.CLEAR) * 4));
   return canvasTex(1000, hpx, (ctx, w, h) => {
     ctx.fillStyle = item.color; ctx.fillRect(0, 0, w, h);
     const lightFace = (parseInt(item.color.slice(1), 16) >> 16) > 140;
@@ -158,8 +159,8 @@ async function buildRack(snap) {
     for (const sx of [-1, 1]) g.add(boxMesh(14, 63, 14, sx * 50 - 7, topY - 3, -hd + 7, mat(snap.frame)));
   }
   g.add(boxMesh(pw, F.side, pd, -pw / 2, y0 - 4, pz, mat(snap.frame)));
-  // side panels: tinted acrylic you can see through, or printed panels in the frame colour
-  const sideM = R && R.sides ? mat(snap.frame) : mat('#1C2127', { transparent: true, opacity: .4, roughness: .12, metalness: .1, depthWrite: false });
+  // side panels: printed in the frame colour, or tinted acrylic you can see through
+  const sideM = snap.sides === 'acrylic' ? mat('#1C2127', { transparent: true, opacity: .4, roughness: .12, metalness: .1, depthWrite: false }) : mat(snap.frame);
   for (const sx of [-1, 1]) g.add(boxMesh(F.side, inner + 8, F.depth - 2 * F.postDepth + 8, sx < 0 ? -hw : hw - F.side, y0 - 4, -F.postDepth + 4, sideM));
   // handles on the flat strip of the side edges, feet under the bottom edges
   const hx = hw - (t + F.topBevel) / 2 - F.handleW / 2;
@@ -253,7 +254,7 @@ async function mount(container, snap) {
       '<button type="button" class="btn small" data-act="v3d" data-v="rotate">Rotate model</button><label class="btn small" style="cursor:pointer">Load STL/3MF<input type="file" accept=".stl,.3mf" hidden id="v3d-file"></label>';
     container.appendChild(ui);
     ui.querySelector('#v3d-file').addEventListener('change', e => { if (e.target.files.length) loadFiles(e.target.files); e.target.value = ''; });
-    R = { container, renderer, scene, camera, controls, ground, rack: null, running: false, sides: false, fitted: false, down: null };
+    R = { container, renderer, scene, camera, controls, ground, rack: null, running: false, fitted: false, down: null };
     if (window.ResizeObserver) new ResizeObserver(() => resize()).observe(container); else window.addEventListener('resize', resize);
     // a click selects a part; a drag that orbits the view does not. Hovering a part shows its name.
     renderer.domElement.addEventListener('pointerdown', e => { R.down = [e.clientX, e.clientY]; window.LRApp.tip(null); });
@@ -288,6 +289,7 @@ async function rebuild(snap) {
   if (building !== my) { dispose(g); return; }
   if (R.rack) { R.scene.remove(R.rack); dispose(R.rack); }
   R.rack = g; R.scene.add(g);
+  const sb = R.container.querySelector('[data-v="sides"]'); if (sb) sb.textContent = snap.sides === 'acrylic' ? 'Acrylic sides' : 'Printed sides';
 }
 function hitId(e) {
   if (!R.rack) return null;
@@ -304,7 +306,7 @@ function theme() { if (R) R.ground.material.color.copy(lin(themeColors().line));
 async function action(v) {
   if (!R) return;
   if (v === 'reset') fit();
-  if (v === 'sides') { R.sides = !R.sides; await rebuild(window.LRApp.snapshot()); }
+  if (v === 'sides') window.LRApp.toggleSides();
   if (v === 'rotate') {
     const snap = window.LRApp.snapshot(), t = snap.items.find(i => i.sel), fm = t && fileModels.get(t.id);
     if (!fm) { window.LRApp.say('Load a model file on the selected part first.'); return; }

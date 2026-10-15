@@ -20,12 +20,12 @@ let CAT = null, LIB = {};
 function buildCatalog(c) {
   CAT = c; LIB = {};
   const add = (id, o) => { LIB[id] = Object.assign({ key: id, h2: o.u ? Math.round(o.u * 2) : 0 }, o); };
-  (c.panels || []).forEach(g => g.items.forEach(i => add(i.id, { name: i.name, label: null, u: i.u, est: !!i.estimated, face: i.face || 'blank', url: i.url || null, author: i.author || '', hardware: i.hardware || [], group: g.group, tab: 'panels' })));
+  (c.panels || []).forEach(g => g.items.forEach(i => add(i.id, { name: i.name, label: null, u: i.u, est: !!i.estimated, face: i.face || 'blank', url: i.url || null, author: i.author || '', hardware: i.hardware || [], watts: i.watts, group: g.group, tab: 'panels' })));
   (c.devices || []).forEach(g => g.items.forEach(d => d.mounts.forEach(m => {
     if (m.ref) { m.key = m.ref; return; }
     m.key = m.id;
     const top = m.position === 'top';
-    add(m.id, { name: d.device, label: m.label, u: top ? 0 : m.u, top, est: !!m.estimated, face: m.face || 'shelf', url: m.url || null, author: m.author || '', hardware: m.hardware || [], note: m.note, depth: m.depth, group: g.group, tab: top ? 'top' : 'devices' });
+    add(m.id, { name: d.device, label: m.label, u: top ? 0 : m.u, top, est: !!m.estimated, face: m.face || 'shelf', url: m.url || null, author: m.author || '', hardware: m.hardware || [], watts: m.watts, note: m.note, depth: m.depth, group: g.group, tab: top ? 'top' : 'devices' });
   })));
   (c.extras || []).forEach(g => g.items.forEach(i => add(i.id, { name: i.name, label: i.label || null, u: 0, extra: true, url: i.url, author: i.author || '', note: i.note, group: g.group, tab: 'extras' })));
 }
@@ -33,7 +33,7 @@ function buildCatalog(c) {
 /* ---------- state ---------- */
 function defaultState() {
   let n = 1; const m = (k, p) => ({ id: n++, key: k, pos2: p });
-  return { h: 5, version: 'brass', frame: '#26282B', panel: '#26282B', accent: '#B5CF2A', label: 'Lab Rax', top: null, extras: [], done: {}, example: true,
+  return { h: 5, version: 'brass', frame: '#26282B', panel: '#26282B', accent: '#B5CF2A', label: 'Lab Rax', top: null, extras: [], back: 'open', sides: 'printed', done: {}, example: true,
     items: [m('keystone', 0), m('flexmini05', 1), m('ucgmax1', 2), m('tiny1', 4), m('sbc7', 6)], nextId: n };
 }
 function load() {
@@ -57,6 +57,8 @@ function sanitize() {
   const d = defaultState();
   if (!Number.isInteger(state.h) || state.h < 1 || state.h > 10) state.h = d.h;
   if (state.version !== 'bolted') state.version = 'brass';
+  if (state.back !== 'closed') state.back = 'open';
+  if (state.sides !== 'acrylic') state.sides = 'printed';
   for (const k of ['frame', 'panel', 'accent']) if (!HEX.test(state[k])) state[k] = d[k];
   state.label = typeof state.label === 'string' ? state.label.slice(0, 16) : d.label;
   state.items = (Array.isArray(state.items) ? state.items : []).filter(i => i && typeof i === 'object' && (
@@ -66,8 +68,10 @@ function sanitize() {
   const ids = new Set();
   state.items.forEach(i => {
     if (i.key === 'gen') { i.params = cleanParams(i.params); i.name = String(i.name || GEN_NAMES[i.params.type]).slice(0, 24); }
-    if (i.key === 'custom') { i.name = String(i.name || 'Own device').slice(0, 40); if (!HEX.test(i.color)) i.color = state.panel; if (typeof i.url !== 'string' || !/^https:\/\//.test(i.url)) delete i.url; }
+    if (i.color != null && !HEX.test(i.color)) delete i.color;
+    if (i.key === 'custom') { i.name = String(i.name || 'Own device').slice(0, 40); if (typeof i.url !== 'string' || !/^https:\/\//.test(i.url)) delete i.url; }
     if (i.label != null && typeof i.label !== 'string') delete i.label;
+    if (i.watts != null && !(typeof i.watts === 'number' && i.watts >= 0 && i.watts <= 500)) delete i.watts;
     if (i.pos2 != null && !Number.isInteger(i.pos2)) i.pos2 = 0;
     if (!Number.isInteger(i.id) || i.id < 1 || ids.has(i.id)) i.id = null; else ids.add(i.id);
   });
@@ -93,7 +97,8 @@ const slots = () => state.h * 2;
 const placed = () => state.items.filter(i => i.pos2 != null);
 const byPos = () => placed().sort((a, b) => a.pos2 - b.pos2);
 const find = id => state.items.find(i => i.id === id);
-const colorOf = it => it.key === 'custom' ? it.color : state.panel;
+const colorOf = it => it.color || state.panel; // a part's own colour, or the default panel colour
+const colorName = c => (FIL.find(f => f[1].toLowerCase() === c.toLowerCase()) || [c.toUpperCase()])[0];
 function fmtU(h2) { const w = Math.floor(h2 / 2), h = h2 % 2; return (w || !h ? w : '') + (h ? '½' : '') + 'U'; }
 const uTxt = d => (d.est ? '≈' : '') + fmtU(d.h2);
 const shortName = d => d.name;
@@ -144,15 +149,16 @@ function setHeight(h) {
   touch(); render();
   say(lost ? lost + (lost > 1 ? ' parts no longer fit' : ' part no longer fits') + ' in ' + h + 'U. See below.' : 'The rack is now ' + h + 'U (' + mm(h * P.U) + ' inner height).');
 }
-function fillGaps() {
+function fillGaps(keys, noun) {
+  const [k1, k05] = keys || ['vent1', 'vent05']; noun = noun || 'vent panel';
   let n = 0, p = 0;
   while (p < slots()) {
-    if (isFree(p, 2)) { state.items.push({ id: state.nextId++, key: 'vent1', pos2: p }); n++; p += 2; }
-    else if (isFree(p, 1)) { state.items.push({ id: state.nextId++, key: 'vent05', pos2: p }); n++; p += 1; }
+    if (isFree(p, 2)) { state.items.push({ id: state.nextId++, key: k1, pos2: p }); n++; p += 2; }
+    else if (isFree(p, 1)) { state.items.push({ id: state.nextId++, key: k05, pos2: p }); n++; p += 1; }
     else p++;
   }
   if (!n) { say('There are no open slots.'); return; }
-  touch(); render(); say(n + (n > 1 ? ' vent panels' : ' vent panel') + ' added to the open slots.');
+  touch(); render(); say(n + ' ' + noun + (n > 1 ? 's' : '') + ' added to the open slots.');
 }
 function focusSel() { const el = document.querySelector('.item[data-id="' + sel + '"]'); if (el) el.focus({ preventScroll: true }); }
 
@@ -235,7 +241,8 @@ function renderLib() {
 /* ---------- render: rack (front view) ---------- */
 function renderRack() {
   if (!CAT) return;
-  const host = $('#stage'), avail = host.clientWidth - 24 - 34 - 60;
+  const host = $('#stage'); if (!host) return;
+  const avail = host.clientWidth - 24 - 34 - 60;
   const s = Math.max(.66, Math.min(1.3, avail / 274));
   const UPX = P.U * s, HU = UPX / 2, postW = 26 * s, bayW = 222 * s, frameW = bayW + 2 * postW, bodyH = state.h * UPX;
   const edge = Math.max(10, 14 * s), topH = Math.max(24, 36 * s), holeIn = (236.525 - 222) / 2 * s; // hole centre 7.26 mm from the inner edge
@@ -250,11 +257,12 @@ function renderRack() {
   for (let i = 0; i < state.h; i++) labels += '<span style="top:' + (i * UPX).toFixed(1) + 'px;height:' + UPX.toFixed(1) + 'px">' + (state.h - i) + '</span>';
   const inset = (137 - P.PANEL_W / 2) * s; // printed panels are 250 mm wide, the frame 274 mm across the posts
   let items = '';
+  const air = view === 'air' ? airflow() : null, hm = air ? heatMap(air) : null;
   byPos().forEach(it => {
     // no text on the panels, so the faces show what is placed; the name is in the tooltip and the aria-label
     const d = info(it), c = colorOf(it);
-    items += '<div class="item' + (it.id === sel ? ' sel' : '') + '" data-id="' + it.id + '" role="button" tabindex="0" aria-label="' + esc((it.label ? it.label + ': ' : '') + fullName(d) + ', ' + uTxt(d) + ', ' + uRange(it.pos2, d.h2)) + '"' +
-      ' style="top:' + (it.pos2 * HU).toFixed(1) + 'px;height:' + (d.h2 * HU - 1).toFixed(1) + 'px;left:' + inset.toFixed(1) + 'px;right:' + inset.toFixed(1) + 'px;padding:0 ' + (5 * s).toFixed(1) + 'px;--c:' + c + ';--hole:' + holeFor(c) + '">' +
+    items += '<div class="item' + (it.id === sel ? ' sel' : '') + (hm ? ' heat' : '') + '" data-id="' + it.id + '" role="button" tabindex="0" aria-label="' + esc((it.label ? it.label + ': ' : '') + fullName(d) + ', ' + uTxt(d) + ', ' + uRange(it.pos2, d.h2)) + '"' +
+      ' style="top:' + (it.pos2 * HU).toFixed(1) + 'px;height:' + (d.h2 * HU - 1).toFixed(1) + 'px;left:' + inset.toFixed(1) + 'px;right:' + inset.toFixed(1) + 'px;padding:0 ' + (5 * s).toFixed(1) + 'px;--c:' + c + ';--hole:' + holeFor(c) + (hm ? ';--heat:' + heatColor(hm.get(it.id)) : '') + '">' +
       '<i class="screw"></i><span class="face">' + faceHTML(d.face) + '</span><i class="screw"></i></div>';
   });
   const ap = state.top ? '<span class="ap" title="' + esc(fullName(LIB[state.top])) + '"><i class="disc"></i><i class="leg" style="left:30%"></i><i class="leg" style="right:30%"></i></span>' : '';
@@ -268,12 +276,13 @@ function renderRack() {
         '<div class="post" style="left:0;width:' + postW.toFixed(1) + 'px">' + holesL + '</div>' +
         '<div class="bay" style="left:' + postW.toFixed(1) + 'px;width:' + bayW.toFixed(1) + 'px"></div>' +
         '<div class="post" style="right:0;width:' + postW.toFixed(1) + 'px">' + holesR + '</div>' +
-        '<div class="mount" id="mount">' + items + '<div class="ghost" id="ghost" hidden></div></div>' +
+        '<div class="mount" id="mount">' + items + '<div class="dropghost" id="ghost" hidden></div></div>' +
       '</div><div></div>' +
       '<div></div><div class="edge bot"><i class="foot" style="left:3%"></i><i class="foot" style="right:3%"></i></div><div></div>' +
       '<div></div><div class="floor"></div><div></div>' +
     '</div>';
-  $('#meas').textContent = '222 mm usable width · ' + (state.h * P.U).toFixed(1) + ' mm inner height · ' + state.h + 'U';
+  $('#meas').textContent = air ? (air.Q ? 'Air ≈ room + ' + Math.round(air.rise) + ' °C · ' + (air.est ? '≈ ' : '') + Math.round(air.Q) + ' W · blue is cool, red is hot (air at that height)' : 'Nothing in the rack makes heat yet')
+    : '222 mm usable width · ' + (state.h * P.U).toFixed(1) + ' mm inner height · ' + state.h + 'U';
 }
 function showGhost(p, h2) {
   const g = $('#ghost'); if (!g) return;
@@ -284,10 +293,10 @@ function showGhost(p, h2) {
 
 /* ---------- hover tooltip: what a part is, without text on the panels ---------- */
 function tipHTML(it) {
-  const d = info(it);
+  const d = info(it), hw = heatOf(it);
   return '<b>' + esc(it.label || d.name) + '</b>' +
     (it.label ? '<span>' + esc(fullName(d)) + '</span>' : d.label ? '<span>' + esc(d.label) + '</span>' : '') +
-    '<span class="mono">' + uTxt(d) + ' · ' + uRange(it.pos2, d.h2) + '</span>' + (d.author ? '<span>by ' + esc(d.author) + '</span>' : '');
+    '<span class="mono">' + uTxt(d) + ' · ' + uRange(it.pos2, d.h2) + (hw.w ? ' · ' + (hw.est ? '≈ ' : '') + hw.w + ' W' : '') + '</span>' + (d.author ? '<span>by ' + esc(d.author) + '</span>' : '');
 }
 function showTip(id, x, y) {
   const it = find(id), t = $('#tip');
@@ -304,12 +313,16 @@ function hideTip() { const t = $('#tip'); if (t && !t.hidden) { t.hidden = true;
 function renderSel() {
   const it = sel != null ? find(sel) : null, bar = $('#selbar');
   if (!it || it.pos2 == null) { bar.innerHTML = '<span class="hint">Click a part in the rack to move, label or remove it. Drag it, or use the arrow keys to move by ½U.</span>'; return; }
-  const d = info(it);
+  const d = info(it), auto = heatOf(Object.assign({}, it, { watts: undefined }));
   bar.innerHTML = '<div class="who"><b>' + esc(fullName(d)) + '</b><span class="hint">' + uTxt(d) + ' · ' + uRange(it.pos2, d.h2) + (d.author ? ' · by ' + esc(d.author) : '') + '</span></div>' +
     '<input class="field" id="sel-label" type="text" maxlength="24" aria-label="Label on the panel" placeholder="Label, e.g. Pi 5" value="' + esc(it.label || '') + '">' +
+    '<label class="watts" title="Heat this part gives off, for the airflow estimate">Heat <input class="field" id="sel-watts" type="number" min="0" max="500" step="1" inputmode="numeric" placeholder="' + (auto.w ? (auto.est ? '≈' : '') + auto.w : '0') + '" value="' + (typeof it.watts === 'number' ? it.watts : '') + '"> W</label>' +
     '<button type="button" class="btn small" data-act="up" aria-label="Move up">↑</button><button type="button" class="btn small" data-act="down" aria-label="Move down">↓</button>' +
     (it.key === 'gen' ? '<button type="button" class="btn small" data-act="edit-gen" data-id="' + it.id + '">Edit part</button>' : d.url ? '<a class="btn small" href="' + esc(d.url) + '" target="_blank" rel="noopener" style="text-decoration:none;color:inherit">Model ↗</a>' : '') +
-    '<button type="button" class="btn small" data-act="dup">Duplicate</button><button type="button" class="btn small danger" data-act="del">Remove</button>';
+    '<button type="button" class="btn small" data-act="dup">Duplicate</button><button type="button" class="btn small danger" data-act="del">Remove</button>' +
+    '<div class="selcolor"><span>Colour</span><div class="swatches">' + FIL.map(([n, c]) => '<button type="button" class="sw" style="--c:' + c + '" data-act="part-color" data-c="' + c + '" aria-label="' + n + '" title="PETG ' + n.toLowerCase() + '" aria-pressed="' + (it.color === c) + '"></button>').join('') + '</div>' +
+    '<input type="color" id="sel-color" value="' + colorOf(it) + '" aria-label="Any colour" title="Any colour">' +
+    '<button type="button" class="btn small ghost" data-act="part-color" data-c=""' + (it.color ? '' : ' disabled') + '>Use default (' + esc(colorName(state.panel)) + ')</button></div>';
 }
 function renderUnplaced() {
   const un = state.items.filter(i => i.pos2 == null), box = $('#unplaced');
@@ -325,15 +338,16 @@ function renderSettings() {
   if (nameFocused) return;
   $('#settings').innerHTML =
     '<div class="set"><span>Frame</span><div class="seg small" role="group" aria-label="Frame version">' + [['brass', 'Heat-set inserts'], ['bolted', 'Bolted']].map(([v, l]) => '<button type="button" data-act="ver" data-v="' + v + '" aria-pressed="' + (state.version === v) + '">' + l + '</button>').join('') + '</div></div>' +
+    '<div class="set"><span>Sides</span><div class="seg small" role="group" aria-label="Side panels">' + [['printed', 'Printed'], ['acrylic', 'Acrylic']].map(([v, l]) => '<button type="button" data-act="sides" data-v="' + v + '" aria-pressed="' + (state.sides === v) + '">' + l + '</button>').join('') + '</div></div>' +
     '<div class="set"><span>Frame colour</span>' + sw('frame', state.frame) + '</div>' +
-    '<div class="set"><span>Panels</span>' + sw('panel', state.panel) + '</div>' +
+    '<div class="set"><span title="For parts without their own colour; pick a part to give it one">Default panel</span>' + sw('panel', state.panel) + '</div>' +
     '<div class="set"><span>Accent</span>' + sw('acc', state.accent) + '</div>' +
     '<div class="set"><label for="rack-name">Name</label><input class="field" id="rack-name" type="text" maxlength="16" placeholder="Lab Rax" value="' + esc(state.label) + '" style="width:150px"></div>';
 }
 function renderControls() {
   $('#h-out').textContent = state.h + 'U';
   $('#h-minus').disabled = state.h <= 1; $('#h-plus').disabled = state.h >= 10;
-  $('#v-front').setAttribute('aria-pressed', view === 'front'); $('#v-3d').setAttribute('aria-pressed', view === '3d');
+  $('#v-front').setAttribute('aria-pressed', view === 'front'); $('#v-air').setAttribute('aria-pressed', view === 'air'); $('#v-3d').setAttribute('aria-pressed', view === '3d');
   $('#example').hidden = !state.example;
   renderSettings();
 }
@@ -353,17 +367,19 @@ function printPack() {
     out.push({ id: n++, k, name, subs: sub ? [sub] : [], url, qty, kind });
   };
   const fm = br ? fr.brass : fr.bolted;
-  add(fm.name, h === 5 ? 'Complete 5U frame with side panels' : 'Base frame: edges, horizontals, handles, feet', fm.url, 1, 'mw');
-  if (h !== 5) add(fr.sizes.name, 'Posts and side panels for ' + h + 'U', fr.sizes.url, 1, 'mw');
+  const acr = state.sides === 'acrylic';
+  add(fm.name, h === 5 ? 'Complete 5U frame' + (acr ? '; skip the side panels, yours are acrylic' : ' with side panels') : 'Base frame: edges, horizontals, handles, feet', fm.url, 1, 'mw');
+  if (h !== 5) add(fr.sizes.name, 'Posts' + (acr ? '' : ' and side panels') + ' for ' + h + 'U', fr.sizes.url, 1, 'mw');
   if (h > 5) add(fr.extension.name, '4 joiners for ' + h + 'U', fr.extension.url, 1, 'mw');
   if (state.top) { const d = LIB[state.top]; add(fullName(d), 'Replaces the top panel', d.url, 1, 'mw'); }
   state.extras.forEach(k => { const d = LIB[k]; add(fullName(d), 'Frame extra', d.url, 1, 'mw'); });
   let missing = 0;
   byPos().forEach(i => {
     const d = info(i);
-    if (i.key === 'gen') { add(i.name, genLabel(i.params) + ' · ' + uRange(i.pos2, d.h2) + ' · in the build pack', null, 1, 'gen'); return; }
+    const col = i.color ? ' · ' + colorName(i.color) : '';
+    if (i.key === 'gen') { add(i.name, genLabel(i.params) + ' · ' + uRange(i.pos2, d.h2) + col + ' · in the build pack', null, 1, 'gen'); return; }
     if (!d.url) { if (d.custom) missing++; return; }
-    add(fullName(d), (i.label || shortName(d)) + ' · ' + uRange(i.pos2, d.h2), d.url, 1, 'mw');
+    add(fullName(d), (i.label || shortName(d)) + ' · ' + uRange(i.pos2, d.h2) + col, d.url, 1, 'mw');
   });
   out.missing = missing;
   return out;
@@ -382,6 +398,127 @@ function orderList() {
   placed().forEach(i => (info(i).hardware || []).forEach(x => add(x.part, x.qty)));
   if (state.top) (LIB[state.top].hardware || []).forEach(x => add(x.part, x.qty));
   return [...m].map(([p, q]) => { const hw = CAT.hardware[p] || {}; return { name: hw.name || p, qty: q, buy: hw.buy || shopUrl(hw.search) }; });
+}
+
+/* ---------- airflow ---------- */
+/* An estimate, not a simulation. Heat per part comes from what you entered, the catalog ("watts") or a rule of thumb per kind of device.
+   Air needed:    V = Q / (ρ·cp·ΔT), with ρ·cp of air ≈ 1.2 kg/m³ × 1005 J/(kg·K).
+   Natural flow:  the open back acts as one tall opening, V = Cd/3 · W · √(g·H³·ΔT/T). Openings high up (front, top, sides) add
+                  chimney flow, V = Cd · A · √(2·g·h·ΔT/T), with the low openings (front, sides, lower half of an open back) in series.
+   Fans:          60 % of the rated flow, for grilles and back pressure. Walls: about 4 W/(m²·K) through the panels.
+   Solving Q = ΔT · (ρ·cp · (V_fans + k·√ΔT) + U·A) gives how much warmer the air in the rack gets than the room. */
+const AIR = { rhoCp: 1.2 * 1005, g: 9.81, T: 298, cd: .6, wall: 4, target: 10, cfm: 0.000471947, fan: { fan40: 5, fan80: 25, fan92: 35, fan120: 40, fan140: 55 } };
+const FAN_MM = { 40: 5, 80: 25, 92: 35, 120: 40, 140: 55, 180: 80, 200: 90 };
+const HEAT_RULES = [ // tested on the device name and mount label; the first match wins
+  [/power supply|\bpsu\b|brick|charger/i, 5],
+  [/mini-itx|\bitx\b/i, 60], [/mac (mini|studio)/i, 15],
+  [/cluster|blade|for \d+ (boards|pis?)|\d+ ?pis\b/i, t => 5 * (+(t.match(/(\d+)\s*(?:×\s*)?(?:boards|pis?\b|raspberry)/i) || [])[1] || 6)],
+  [/tiny|elitedesk|prodesk|elite mini|optiplex|micro\b|nuc|minisforum|ms-0|beelink|gmktec|mini pc|zimacube/i, 25],
+  [/raspberry|\bpi\b|zero|zimab|orange pi|rock ?pi|\bsbc\b|arduino|jetson/i, 6],
+  [/hdd|3\.5|2\.5|drive|disk|easystore/i, t => 6 * (+(t.match(/(\d+)\s*(?:×|x\b|-bay|-tray| bays?| trays?)/i) || [])[1] || 2)],
+  [/unvr|unas|\bnas\b|synology|terramaster|qnap|asustor/i, 30],
+  [/ucg-max|uxg|ucg-fiber|udr|dream/i, 20], [/poe/i, 20],
+  [/ucg-ultra|express|ux7|cloud key|router|er605|er7|edgerouter|rb5009|firewalla|protectli|slate|beryl|flint|\bhex\b|\bhap\b|gateway/i, 10],
+  [/modem|fritz|arris|motorola|\bont\b|surfboard|starlink/i, 10],
+  [/home assistant|zigbee|hue|dirigera|hdhomerun|kvm|comet|tuner/i, 5],
+  [/usw|switch|gs\d|sg\d|tl-s|css\d|crs\d|zyxel|cisco|netgear|omada|flex|ugreen/i, 8]
+];
+function heatOf(it) {
+  if (typeof it.watts === 'number') return { w: it.watts, est: false };
+  const d = info(it);
+  if (typeof d.watts === 'number') return { w: d.watts, est: false };
+  if (it.key === 'gen') return it.params.type === 'shelf' ? { w: 10, est: true } : { w: 0, est: false };
+  if (d.custom) return { w: 10, est: true };
+  const t = d.name + ' ' + (d.label || '');
+  if (d.tab === 'panels') { const w = /\bpsu\b|power supply|charger|usb-c pd/i.test(t) ? 10 : /display|lcd|screen|oled|cyd|nextion/i.test(t) ? 3 : 0; return { w, est: w > 0 }; }
+  for (const [re, w] of HEAT_RULES) if (re.test(t)) return { w: typeof w === 'function' ? w(t) : w, est: true };
+  return { w: { drv2: 12, drv4: 24, sbc: 25, switch: 8 }[d.face] || 10, est: true };
+}
+function fansOf(d) { // rated flow in CFM, from the part's hardware or else from its name
+  let c = 0; (d.hardware || []).forEach(x => { if (AIR.fan[x.part]) c += AIR.fan[x.part] * x.qty; });
+  const t = d.name + ' ' + (d.label || '');
+  if (!c && /fan/i.test(t) && !/controller/i.test(t)) { const m = t.match(/(40|80|92|120|140|180|200) ?mm/); c = m ? FAN_MM[m[1]] : 20; }
+  return c;
+}
+function airflow() {
+  const W = .222, Hm = state.h * P.U / 1000, mid = slots() / 2, parts = [], open = [];
+  let Q = 0, est = false, cfm = 0, low = 0, high = 0;
+  const area = (p2, h2, a) => { for (let s = p2; s < p2 + h2; s++) { if (s >= mid) low += a / h2; else high += a / h2; } }; // pos2 counts from the top
+  byPos().forEach(it => {
+    const d = info(it), h = heatOf(it), face = it.key === 'gen' ? genFace(it.params) : d.face, ph = d.h2 * P.U / 2 - P.CLEAR;
+    Q += h.w; if (h.est && h.w) est = true;
+    parts.push({ it, w: h.w, est: h.est });
+    if (face === 'vent') area(it.pos2, d.h2, .2 * Math.max(0, ph - 13) / 1000 * (it.key === 'gen' ? .5 : .4));
+    if (face === 'fan' || (d.hardware || []).some(x => AIR.fan[x.part])) cfm += fansOf(d);
+  });
+  for (let s = 0; s < slots(); s++) if (!placed().some(o => s >= o.pos2 && s < o.pos2 + H(o))) { open.push(s); area(s, 1, W * P.U / 2000); }
+  const top = state.top ? LIB[state.top] : null, tt = top ? fullName(top) : '';
+  let topA = 0;
+  let fanHole = 0; // a fan top's own opening, which can't also be the inlet for that fan
+  if (top) { cfm += fansOf(top); topA = .216 * .176 * (/mesh|hex|vent/i.test(tt) ? .45 : /fan/i.test(tt) ? .1 : 0); if (fansOf(top) && !/mesh|hex|vent/i.test(tt)) fanHole = topA; }
+  high += topA;
+  state.extras.map(k => LIB[k]).filter(x => /side/i.test(x.name + ' ' + (x.label || ''))).forEach(x => {
+    const t = x.name + ' ' + (x.label || '');
+    if (/fan/i.test(t)) cfm += fansOf(x) * (/left \+ right|both/i.test(t) ? 2 : 1);
+    else if (/vent|hex|mesh|kumiko|pattern|generator|honeycomb/i.test(t)) { low += .3 * .2 * Hm; high += .3 * .2 * Hm; }
+  });
+  const back = state.back !== 'closed';
+  let k = back ? AIR.cd / 3 * W * Math.sqrt(AIR.g * Hm ** 3 / AIR.T) : 0;
+  const inlet = low + (back ? W * Hm / 2 : 0); // with high openings, the lower half of an open back feeds the chimney too
+  if (inlet > 0 && high > 0) k += AIR.cd / Math.sqrt(1 / inlet ** 2 + 1 / high ** 2) * Math.sqrt(2 * AIR.g * (topA ? .8 : .5) * Hm / AIR.T);
+  // fans need somewhere for air to come from: without other openings only the gaps between panels leak a little
+  const vf = cfm * .6 * AIR.cfm * (back || low + high - fanHole > .002 ? 1 : .15), ua = AIR.wall * (2 * (Hm + .05) * .24 + 2 * .28 * .24 + .28 * (Hm + .05));
+  let lo = 0, hi = 120;
+  for (let i = 0; i < 50; i++) { const m = (lo + hi) / 2; if (m * (AIR.rhoCp * (vf + k * Math.sqrt(m)) + ua) < Q) lo = m; else hi = m; }
+  return { Q, est, rise: Q ? (lo + hi) / 2 : 0, need: Q / (AIR.rhoCp * AIR.target), passive: k * Math.sqrt(AIR.target), vf, cfm, open, parts, back };
+}
+function heatMap(a) { // air temperature rise at each part's height: the air warms as it rises past the heat below it
+  const m = new Map(); let cum = 0;
+  [...a.parts].sort((x, y) => y.it.pos2 - x.it.pos2).forEach(p => { cum += p.w / 2; m.set(p.it.id, a.Q ? a.rise * (.4 + 1.2 * cum / a.Q) : 0); cum += p.w / 2; });
+  return m;
+}
+const heatColor = t => 'hsl(' + Math.round(Math.max(0, 200 - 10 * t)) + ' 85% 52%)';
+// what the rise would be after a change; only top, back and the items list are touched, and they are put back
+function predict(change) { const keep = { top: state.top, back: state.back, items: state.items.slice() }; change(); const r = airflow().rise; Object.assign(state, keep); return r; }
+const blankKeys = () => LIB.mw13855411 && LIB.mw1385541 ? ['mw13855411', 'mw1385541'] : ['vent1', 'vent05'];
+function airTips(a) {
+  if (!a.Q) return [{ text: 'Nothing in the rack makes heat yet.' }];
+  const tips = [], warm = a.rise > 8, fans = a.cfm > 0;
+  const lowest = h2 => { for (let p = slots() - h2; p >= 0; p--) if (isFree(p, h2)) return p; return null; };
+  if (warm && !state.top && LIB.mw1875867) tips.push({ text: 'Put a 120 mm fan in the top panel, blowing out: warm air rises, so it leaves fastest there.', act: 'air-top', key: 'mw1875867', label: 'Use fan top', r: predict(() => { state.top = 'mw1875867'; }) });
+  if (warm && !fans && LIB.fan40) { const p = lowest(2); if (p != null) tips.push({ text: 'Add a 5× 40 mm fan panel low in the rack, blowing in, at ' + uRange(p, 2) + '.', act: 'air-add', key: 'fan40', pos: p, label: 'Add fan panel', r: predict(() => { state.items.push({ id: -1, key: 'fan40', pos2: p }); }) }); }
+  if (warm && !state.top && LIB.mw1896816) tips.push({ text: 'Or swap the solid top panel for a hex mesh top, so warm air can rise out without a fan.', act: 'air-top', key: 'mw1896816', label: 'Use mesh top', r: predict(() => { state.top = 'mw1896816'; }) });
+  if (warm && !a.back) tips.push({ text: 'Leave the back open: with a closed back only the panels let air through.', act: 'air-back', v: 'open', label: 'Open back', r: predict(() => { state.back = 'open'; }) });
+  const ps = a.parts.slice().sort((x, y) => x.it.pos2 - y.it.pos2), nm = p => p.it.label || shortName(info(p.it));
+  for (let i = 0; i + 1 < ps.length; i++) { const x = ps[i], y = ps[i + 1]; if (x.w >= 15 && y.w >= 15 && x.it.pos2 + H(x.it) === y.it.pos2) tips.push({ text: 'There is no gap between ' + nm(x) + ' and ' + nm(y) + ', and both run warm. Leave ½U between them, ideally with a vent panel.' }); }
+  ps.filter(p => /drv/.test(info(p.it).face || '') || /hdd|3\.5″|drive|disk/i.test(fullName(info(p.it)))).forEach(dp => {
+    const below = ps.find(p => p !== dp && p.w >= 15 && p.it.pos2 > dp.it.pos2);
+    if (below) tips.push({ text: 'Drives last longer when they stay cool: move ' + nm(dp) + ' below ' + nm(below) + ', where the air is cooler.' });
+  });
+  if (a.open.length) {
+    const where = 'open ' + fmtU(a.open.length);
+    if (fans) tips.push({ text: 'Close the ' + where + ' with blank panels: with fans running, open gaps let the air go around the gear instead of through it.', act: 'air-blank', label: 'Fill with blanks' });
+    else if (warm) tips.push({ text: 'Keep the ' + where + ' breathing: fill it with vent panels rather than blanks.', act: 'fill', label: 'Fill with vents' });
+    else if (a.rise < 5) tips.push({ text: 'Cooling has room to spare, so you can close the ' + where + ' with blank panels for a tidy front.', act: 'air-blank', label: 'Fill with blanks' });
+  }
+  if (a.parts.some(p => p.est && /poe/i.test(fullName(info(p.it))))) tips.push({ text: 'A PoE switch also warms up from the power it sends to your devices. Set its real heat once you know the load.' });
+  const out = tips.filter(t => t.r == null || t.r < a.rise - .5); // only suggest changes that help
+  if (!out.length) out.push({ text: a.rise > 15 ? 'This rack runs hot: add fans or more openings.' : 'Cooling looks fine for this layout.' });
+  return out;
+}
+function airHTML() {
+  const a = airflow(), tips = airTips(a), m3h = v => Math.round(v * 3600) + ' m³/h';
+  const lvl = !a.Q ? ['No heat', ''] : a.rise <= 8 ? ['Cool', ''] : a.rise <= 15 ? ['Warm', ' est'] : ['Hot', ' hot'];
+  return '<div class="boxcard air"><div class="air-head"><h3 class="sub">Airflow</h3><span class="badge' + lvl[1] + '">' + lvl[0] + '</span></div>' +
+    (a.Q ? '<p class="air-big">Air in the rack ≈ room + ' + (a.rise >= 60 ? '60+' : Math.round(a.rise)) + ' °C</p>' : '') +
+    '<dl class="kv"><dt>Heat</dt><dd>' + (a.est ? '≈ ' : '') + Math.round(a.Q) + ' W</dd>' +
+    '<dt>Air needed for +' + AIR.target + ' °C</dt><dd>' + m3h(a.need) + '</dd>' +
+    '<dt>Natural airflow at +' + AIR.target + ' °C</dt><dd>' + m3h(a.passive) + '</dd>' +
+    '<dt>Fans</dt><dd>' + (a.cfm ? m3h(a.vf) : 'none') + '</dd>' +
+    '<dt>Back of the rack</dt><dd><span class="seg small" role="group" aria-label="Back of the rack">' + [['open', 'Open'], ['closed', 'Closed']].map(([v, l]) => '<button type="button" data-act="air-back" data-v="' + v + '" aria-pressed="' + (state.back === v) + '">' + l + '</button>').join('') + '</span></dd></dl>' +
+    '<ul class="tips">' + tips.map(t => '<li><span>' + esc(t.text) + (t.r != null ? ' <em>→ about +' + Math.round(t.r) + ' °C</em>' : '') + '</span>' +
+      (t.act ? '<button type="button" class="btn small" data-act="' + t.act + '"' + (t.key ? ' data-key="' + t.key + '"' : '') + (t.pos != null ? ' data-pos="' + t.pos + '"' : '') + (t.v ? ' data-v="' + t.v + '"' : '') + '>' + t.label + '</button>' : '') + '</li>').join('') + '</ul>' +
+    '<p class="hint">An estimate from typical power use and rough physics. Click a part to enter its real heat; the Airflow view colours the rack by air temperature.</p></div>';
 }
 
 /* ---------- render: build column ---------- */
@@ -403,6 +540,8 @@ function renderBuild() {
     (pk.missing ? '<p class="hint">' + pk.missing + ' own device' + (pk.missing > 1 ? 's' : '') + ' without a link.</p>' : '') +
     '<p class="hint">Download community models from MakerWorld as 3MF to keep their print profiles. Your build pack has the custom parts and a download list to click through the rest.</p>';
 
+  html += airHTML();
+
   const ol = orderList(), tagged = CAT.shops && CAT.shops.amazon && CAT.shops.amazon.en && CAT.shops.amazon.en.tag;
   html += '<div class="boxcard"><h3 class="sub">Shopping list</h3><dl class="kv">' +
     ol.map(x => '<dt>' + esc(x.name) + '</dt><dd>' + x.qty + '×' + (x.buy ? '<a class="buy" href="' + esc(x.buy) + '" target="_blank" rel="noopener sponsored">Buy</a>' : '') + '</dd>').join('') +
@@ -412,14 +551,13 @@ function renderBuild() {
   const top = state.top ? LIB[state.top] : null;
   html += '<details class="boxcard"><summary style="cursor:pointer;font-weight:700">Frame parts</summary><dl class="kv" style="margin-top:8px">' +
     '<dt>Vertical posts</dt><dd>' + fp.posts + '</dd>' + (fp.joiners ? '<dt>Post joiners</dt><dd>4</dd>' : '') +
-    '<dt>Side panels</dt><dd>' + fp.sides + '</dd>' + (fp.joiners && fp.b !== 5 ? '<div class="note">Fit the side panels the opposite way to the posts so the seams don’t line up.</div>' : '') +
+    '<dt>Side panels</dt><dd>' + fp.sides + (state.sides === 'acrylic' ? ' acrylic' : '') + '</dd>' + (state.sides === 'acrylic' ? '<div class="note">Acrylic sides: 3 mm, cut to the size of the printed side panel. Take it from that model; the planner has no measured size yet.</div>' : '') + (fp.joiners && fp.b !== 5 ? '<div class="note">Fit the side panels the opposite way to the posts so the seams don’t line up.</div>' : '') +
     '<dt>Horizontal pieces</dt><dd>4</dd><dt>Edge pieces</dt><dd>4</dd><dt>Handles · feet</dt><dd>2 · 4</dd>' +
     (top ? '<dt>Top</dt><dd>' + esc(top.name) + '</dd><div class="note">' + esc(top.label || '') + (top.note ? '. ' + esc(top.note) : '') + ' <button type="button" class="lnk btn small ghost" data-act="top-off">Use regular top panel</button></div><dt>Bottom panel</dt><dd>1</dd>'
          : '<dt>Top + bottom panel</dt><dd>1 + 1</dd>') + '</dl></details>';
 
   const notes = [];
   if (placed().some(i => info(i).est)) notes.push('Parts marked ≈ have an estimated height. Check it in the model before printing.');
-  if (free > 0) notes.push(fmtU(free) + ' is still open. Close it with blanking or vent panels for clean airflow.');
   if (h > 5) notes.push('Above 10U the printed frame gets too weak for a full rack, so the planner stops at 10U.');
   notes.push('The horizontal pieces need a print bed of about 250 mm; they don’t fit on 220 mm beds.');
   html += '<ul class="notes">' + notes.map(n => '<li>' + esc(n) + '</li>').join('') + '</ul>' +
@@ -435,9 +573,11 @@ function listText() {
   byPos().forEach(i => { const d = info(i); L.push('  ' + uRange(i.pos2, d.h2).padEnd(8) + (i.label ? '[' + i.label + '] ' : '') + fullName(d) + ' (' + uTxt(d) + ')'); });
   const used = placed().reduce((n, i) => n + H(i), 0); if (slots() - used > 0) L.push('  Open: ' + fmtU(slots() - used));
   L.push('', 'Frame', '- Vertical posts: ' + fp.posts); if (fp.joiners) L.push('- Post joiners: 4');
-  L.push('- Side panels: ' + fp.sides, '- Horizontal pieces: 4', '- Edge pieces: 4', '- Handles · feet: 2 · 4', state.top ? '- Top: ' + fullName(LIB[state.top]) + '\n- Bottom panel: 1' : '- Top + bottom panel: 1 + 1');
+  L.push('- Side panels: ' + fp.sides + (state.sides === 'acrylic' ? ' (3 mm acrylic)' : ''), '- Horizontal pieces: 4', '- Edge pieces: 4', '- Handles · feet: 2 · 4', state.top ? '- Top: ' + fullName(LIB[state.top]) + '\n- Bottom panel: 1' : '- Top + bottom panel: 1 + 1');
   L.push('', 'Print pack'); printPack().forEach(x => L.push('- ' + x.qty + '× ' + x.name + (x.url ? '  ' + x.url : '  (custom STL in build pack)')));
   L.push('', 'Shopping list'); orderList().forEach(x => L.push('- ' + x.qty + '× ' + x.name));
+  const a = airflow();
+  if (a.Q) { L.push('', 'Airflow (estimate)', '- Heat: ' + (a.est ? '≈ ' : '') + Math.round(a.Q) + ' W; air in the rack ≈ room + ' + Math.round(a.rise) + ' °C'); airTips(a).forEach(t => L.push('- ' + t.text)); }
   return L.join('\n');
 }
 function csv(rows) { return '﻿' + rows.map(r => r.map(v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(',')).join('\n'); }
@@ -447,7 +587,7 @@ function render() { renderControls(); renderRack(); renderSel(); renderUnplaced(
 /* ---------- 3D snapshot for view3d.js ---------- */
 function snapshot() {
   return {
-    h: state.h, version: state.version, frame: state.frame, panel: state.panel, accent: state.accent, label: state.label || 'Lab Rax', top: state.top ? fullName(LIB[state.top]) : null,
+    h: state.h, version: state.version, sides: state.sides, frame: state.frame, panel: state.panel, accent: state.accent, label: state.label || 'Lab Rax', top: state.top ? fullName(LIB[state.top]) : null,
     items: byPos().map(i => { const d = info(i); return { id: i.id, pos2: i.pos2, h2: d.h2, name: i.label || shortName(d), face: d.face, color: colorOf(i), depth: d.depth || (i.key === 'gen' && i.params.type === 'shelf' ? i.params.dd : null), gen: i.key === 'gen' ? i.params : null, sel: i.id === sel }; })
   };
 }
@@ -575,6 +715,138 @@ async function mkPreview() {
   }, 120);
 }
 
+/* ---------- set-up wizard ---------- */
+/* Five steps: look, build, name, hardware, result. The result is an ordinary layout: patch panel on top, then network, compute
+   and storage, power at the bottom; ½U vent gaps between warm parts; the airflow estimate decides on a fan when asked to. */
+const PRESETS = [['Lab Rax', '#26282B', '#26282B', '#B5CF2A'], ['Stealth', '#26282B', '#26282B', '#7D848B'], ['Arctic', '#E9EBEC', '#E9EBEC', '#2E5E9E'],
+  ['Contrast', '#26282B', '#E9EBEC', '#E07A2E'], ['Forest', '#26282B', '#3E8E5A', '#E9EBEC'], ['Signal', '#7D848B', '#26282B', '#C8372D']];
+const WZ_STEPS = ['Look', 'Build', 'Name', 'Hardware', 'Your rack'];
+const ROLES = [[/gateway|switch|tp-link|omada|netgear|mikrotik|modem|fibre|firewall/i, 1], [/smart home|kvm|tuner/i, 2], [/mini pc|apple|itx|motherboard/i, 3],
+  [/raspberry|single-board/i, 4], [/storage|nas/i, 6], [/power/i, 8]];
+const roleOf = group => (ROLES.find(([re]) => re.test(group)) || [0, 5])[1];
+let wz = null, DEVS = null;
+function wzDevices() { // every device with at least one front mount, flattened
+  if (DEVS) return DEVS;
+  DEVS = [];
+  (CAT.devices || []).forEach((g, gi) => g.items.forEach((d, di) => {
+    const mounts = d.mounts.filter(m => m.position !== 'top' && LIB[m.id]);
+    if (mounts.length) DEVS.push({ id: gi + '.' + di, group: g.group, device: d.device, mounts });
+  }));
+  return DEVS;
+}
+// the mount to suggest: one for this device alone (not a combination with other gear), then made for Lab Rax, a known height, the lowest
+const combo = m => /\+|together|with .*(switch|router|kvm|zero|nas)/i.test(m.label);
+const bestMount = dev => dev.mounts.slice().sort((a, b) => (combo(a) - combo(b)) || (!!b.labrax - !!a.labrax) || (!!a.estimated - !!b.estimated) || (a.u - b.u))[0].id;
+function lowestFree(h2) { for (let p = slots() - h2; p >= 0; p--) if (isFree(p, h2)) return p; return null; }
+function planLayout(w) {
+  const look = PRESETS[w.preset], half = w.fans === 'none' || !LIB.mw1385541 ? 'vent05' : 'mw1385541', list = [], items = [];
+  if (w.patch && LIB.keystone) list.push({ key: 'keystone', role: 0 });
+  w.picks.forEach(p => { for (let i = 0; i < p.qty; i++) list.push({ key: p.mount, role: roleOf(p.group) }); });
+  if (w.power && LIB.mw2010724) list.push({ key: 'mw2010724', role: 9 });
+  list.sort((a, b) => a.role - b.role);
+  let p = 0, id = 1, prevHot = false;
+  const put = (key, at) => items.push({ id: id++, key, pos2: at });
+  list.forEach(x => {
+    const h2 = LIB[x.key].h2, hot = heatOf({ key: x.key }).w >= 15;
+    let gap = prevHot && hot ? 1 : 0;                                  // let two warm parts breathe
+    if (h2 > 1 && (p + gap) % 2) gap++;                                // whole-U parts start on a U boundary
+    if (gap === 2 && !(p % 2)) { put('vent1', p); p += 2; }            // one 1U vent rather than two halves
+    else for (let i = 0; i < gap; i++) { put(prevHot && hot ? 'vent05' : half, p); p += 1; }
+    put(x.key, p); p += h2; prevHot = hot;
+  });
+  const cand = Object.assign(defaultState(), { h: Math.min(10, Math.max(1, Math.ceil(p / 2) + w.spare)), version: w.version, sides: w.sides, frame: look[1], panel: look[2], accent: look[3],
+    label: (w.label || 'Lab Rax').slice(0, 16), top: w.fans === 'top' && LIB.mw1875867 ? 'mw1875867' : null, extras: [], back: 'open', items, nextId: id, example: false, done: {} });
+  const keep = state; state = cand;
+  try {
+    placed().forEach(i => { if (i.pos2 + H(i) > slots()) i.pos2 = null; }); // more than 10U: these wait below the rack
+    let a = airflow();
+    if (w.fans === 'auto' && a.rise > 8 && LIB.mw1875867) { state.top = 'mw1875867'; a = airflow(); }
+    if (w.fans !== 'none' && a.rise > 15 && LIB.fan40) {
+      if (lowestFree(2) == null && state.h < 10) state.h++;
+      const q = lowestFree(2); if (q != null) { state.items.push({ id: state.nextId++, key: 'fan40', pos2: q }); a = airflow(); }
+    }
+    const [k1, k05] = a.cfm > 0 ? blankKeys() : ['vent1', 'vent05']; // close the rest: blanks with fans, vents without
+    for (let s = 0; s < slots();) { if (isFree(s, 2)) { state.items.push({ id: state.nextId++, key: k1, pos2: s }); s += 2; } else if (isFree(s, 1)) { state.items.push({ id: state.nextId++, key: k05, pos2: s }); s += 1; } else s++; }
+    a = airflow();
+    return { state: cand, a, unplaced: cand.items.filter(i => i.pos2 == null).length };
+  } finally { state = keep; }
+}
+function openWizard() {
+  if (!CAT) return;
+  if (!wz) {
+    const pi = PRESETS.findIndex(p => p[1] === state.frame && p[2] === state.panel && p[3] === state.accent);
+    wz = { step: 0, preset: Math.max(0, pi), version: state.version, sides: state.sides, fans: 'auto', label: state.label || 'Lab Rax', q: '', picks: [], patch: true, power: false, spare: 1 };
+  }
+  wz.step = 0; renderWizard();
+  const dlg = $('#wizard'); if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+}
+function closeWizard() { const dlg = $('#wizard'); if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); }
+function miniRack(st) { // a small static front view of a layout
+  const s = 10;
+  return '<div class="wz-rack" style="--frame:' + st.frame + ';--acc:' + st.accent + '"><span class="wz-rack-top">' + esc(st.label || 'Lab Rax') + '</span><div class="wz-rack-body" style="height:' + st.h * 2 * s + 'px">' +
+    st.items.filter(i => i.pos2 != null).map(i => { const d = LIB[i.key], c = i.color || st.panel;
+      return '<div class="item" style="top:' + i.pos2 * s + 'px;height:' + (d.h2 * s - 1) + 'px;left:5px;right:5px;padding:0 4px;cursor:default;--c:' + c + ';--hole:' + holeFor(c) + '"><span class="face">' + faceHTML(d.face) + '</span></div>'; }).join('') + '</div></div>';
+}
+function wzOption(key, title, opts) {
+  return '<fieldset class="wz-opt"><legend>' + title + '</legend><div class="wz-cards">' + opts.map(([v, l, t]) =>
+    '<button type="button" class="wz-card" data-act="wz-set" data-k="' + key + '" data-v="' + v + '" aria-pressed="' + (wz[key] === v) + '"><b>' + l + '</b><span>' + t + '</span></button>').join('') + '</div></fieldset>';
+}
+function wzResults() {
+  const q = wz.q.toLowerCase().replace(/[\s-]/g, ''), picked = new Set(wz.picks.map(p => p.dev));
+  const hits = wzDevices().filter(d => !picked.has(d.id) && (!q || (d.device + d.group + d.mounts.map(m => m.label).join('')).toLowerCase().replace(/[\s-]/g, '').includes(q)));
+  if (!hits.length) return '<p class="hint">No device found for “' + esc(wz.q) + '”. You can add your own later with a custom shelf.</p>';
+  let h = '', last = '';
+  hits.forEach(d => { if (d.group !== last) { h += '<p class="grouphead">' + esc(d.group) + '</p>'; last = d.group; } h += '<button type="button" class="wz-dev" data-act="wz-add" data-dev="' + d.id + '">+ ' + esc(d.device) + '</button>'; });
+  return h;
+}
+function wzPicked() {
+  if (!wz.picks.length) return '<p class="hint">Nothing picked yet. Search below and add your devices.</p>';
+  return wz.picks.map((p, i) => { const dev = wzDevices().find(d => d.id === p.dev);
+    return '<div class="wz-pick"><b>' + esc(dev.device) + '</b><select data-i="' + i + '" class="wz-mount" aria-label="Mount for ' + esc(dev.device) + '">' +
+      dev.mounts.map(m => '<option value="' + m.id + '"' + (m.id === p.mount ? ' selected' : '') + '>' + esc(m.label) + ' · ' + uTxt(LIB[m.id]) + (m.labrax && !/lab ?rax/i.test(m.label) ? ' · Lab Rax' : '') + '</option>').join('') + '</select>' +
+      '<span class="stepper small"><button type="button" data-act="wz-qty" data-i="' + i + '" data-d="-1" aria-label="One less">−</button><output>' + p.qty + '</output><button type="button" data-act="wz-qty" data-i="' + i + '" data-d="1" aria-label="One more">+</button></span></div>'; }).join('');
+}
+function renderWizard() {
+  const st = wz.step, look = PRESETS[wz.preset];
+  let body = '';
+  if (st === 0) body = '<h3 class="wz-h">Pick a look</h3><p class="hint">Frame, panels and accent. You can change every colour later, also per part.</p><div class="wz-presets">' +
+    PRESETS.map((p, i) => '<button type="button" class="wz-preset" data-act="wz-preset" data-i="' + i + '" aria-pressed="' + (wz.preset === i) + '"><span class="wz-mini" style="--f:' + p[1] + ';--p:' + p[2] + ';--a:' + p[3] + '"><i></i><i></i><i></i></span><b>' + p[0] + '</b></button>').join('') + '</div>';
+  else if (st === 1) body = '<h3 class="wz-h">How do you build it?</h3>' +
+    wzOption('version', 'Frame', [['brass', 'Heat-set inserts', 'Brass inserts you melt in with a soldering iron. Neat, and the screws go straight in.'], ['bolted', 'Bolted', 'M6 or #10-32 screws with nuts. No inserts, no soldering iron.']]) +
+    wzOption('sides', 'Side panels', [['printed', 'Printed', 'Printed with the frame, in the frame colour.'], ['acrylic', 'Acrylic', '3 mm acrylic cut to size, so you can see inside.']]) +
+    wzOption('fans', 'Fans', [['auto', 'Only if needed', 'The planner checks the airflow and adds a fan when the rack would get warm.'], ['top', 'Top fan', 'A 120 mm fan in the top panel, blowing out.'], ['none', 'No fans', 'Quiet: vent panels instead of fans.']]);
+  else if (st === 2) body = '<h3 class="wz-h">Give it a name</h3><p class="hint">It goes on the front of the rack, like the Lab Rax logo.</p>' +
+    '<input class="field wz-name" id="wz-name" type="text" maxlength="16" value="' + esc(wz.label) + '" placeholder="Lab Rax" aria-label="Rack name">' +
+    '<div class="wz-logo" style="--f:' + look[1] + ';--a:' + look[3] + '"><span id="wz-logo">' + esc(wz.label || 'Lab Rax') + '</span></div>';
+  else if (st === 3) body = '<h3 class="wz-h">What goes in it?</h3><p class="hint">Add your devices. For each one the planner picks a mount, preferring ones made for Lab Rax; you can change it.</p>' +
+    '<div id="wz-picked" class="wz-picked">' + wzPicked() + '</div>' +
+    '<label class="search" for="wz-q"><input id="wz-q" type="search" placeholder="Search devices, e.g. UCG-Max, Pi 5, Mac mini" autocomplete="off" value="' + esc(wz.q) + '"></label>' +
+    '<div id="wz-results" class="wz-results">' + wzResults() + '</div>' +
+    '<div class="wz-extras"><label><input type="checkbox" id="wz-patch"' + (wz.patch ? ' checked' : '') + '> Keystone patch panel on top (½U, 12 ports)</label>' +
+    '<label><input type="checkbox" id="wz-power"' + (wz.power ? ' checked' : '') + '> Power strip at the bottom (1U PDU)</label>' +
+    '<label>Room to grow <select id="wz-spare">' + [0, 1, 2].map(n => '<option value="' + n + '"' + (wz.spare === n ? ' selected' : '') + '>' + (n ? n + 'U' : 'none') + '</option>').join('') + '</select></label></div>';
+  else {
+    const r = planLayout(wz), a = r.a, lvl = !a.Q ? 'no heat' : a.rise <= 8 ? 'cool' : a.rise <= 15 ? 'warm' : 'hot', s = r.state;
+    body = '<h3 class="wz-h">Your rack</h3><div class="wz-result">' + miniRack(s) + '<div class="wz-sum">' +
+      '<p><b>' + s.h + 'U</b> · ' + s.items.filter(i => i.pos2 != null).length + ' parts · ' + (s.version === 'brass' ? 'heat-set inserts' : 'bolted') + ' · ' + s.sides + ' sides</p>' +
+      (a.Q ? '<p>Air in the rack ≈ room + ' + Math.round(a.rise) + ' °C (' + lvl + ')' + (s.top ? ', with a 120 mm fan in the top' : '') + (s.items.some(i => i.key === 'fan40') ? ' and a fan panel' : '') + '.</p>' : '') +
+      (r.unplaced ? '<p class="wz-warn">' + r.unplaced + (r.unplaced > 1 ? ' parts don’t' : ' part doesn’t') + ' fit in 10U. Take some hardware out, or place them later.</p>' : '') +
+      (wz.picks.length ? '' : '<p class="wz-warn">No hardware picked, so this is an empty frame with panels.</p>') +
+      '<ul class="wz-list">' + wz.picks.map(p => { const d = LIB[p.mount]; return '<li>' + (p.qty > 1 ? p.qty + '× ' : '') + esc(fullName(d)) + ' <span class="muted">' + uTxt(d) + '</span>' + (d.url ? ' <a href="' + esc(d.url) + '" target="_blank" rel="noopener">↗</a>' : '') + '</li>'; }).join('') + '</ul>' +
+      '<p class="hint">After you create it, everything stays editable: move, swap, recolour or remove parts. Undo brings back your current layout.</p></div></div>';
+  }
+  $('#wz-steps').innerHTML = WZ_STEPS.map((l, i) => '<li' + (i === st ? ' aria-current="step"' : '') + (i < st ? ' class="done"' : '') + '>' + (i + 1) + ' ' + l + '</li>').join('');
+  $('#wz-body').innerHTML = body;
+  $('#wz-foot').innerHTML = (st ? '<button type="button" class="btn" data-act="wz-back">Back</button>' : '<span></span>') +
+    (st < 4 ? '<button type="button" class="btn primary" data-act="wz-next">' + (st === 3 ? 'Show my rack' : 'Next') + '</button>' : '<button type="button" class="btn primary" data-act="wz-create">Create rack</button>');
+}
+function wzCreate() {
+  const r = planLayout(wz);
+  undo = JSON.stringify(state); state = r.state; sel = null; sanitize();
+  closeWizard(); render(); renderLib();
+  say('Your rack is ready. Change anything you like.', true);
+}
+
 /* ---------- events ---------- */
 document.addEventListener('click', async e => {
   const a = e.target.closest('[data-act]');
@@ -590,6 +862,7 @@ document.addEventListener('click', async e => {
     case 'ver': state.version = a.dataset.v; touch(); render(); break;
     case 'frame': state.frame = a.dataset.c; touch(); render(); break;
     case 'panel': state.panel = a.dataset.c; touch(); render(); break;
+    case 'part-color': { const it = find(sel); if (!it) break; if (a.dataset.c) it.color = a.dataset.c; else delete it.color; touch(); render(); break; }
     case 'acc': state.accent = a.dataset.c; touch(); render(); break;
     case 'lib': {
       const k = a.dataset.key, d = LIB[k];
@@ -612,6 +885,20 @@ document.addEventListener('click', async e => {
     }
     case 'done': { const k = a.dataset.k; if (state.done[k]) delete state.done[k]; else state.done[k] = true; renderBuild(); save(); break; }
     case 'fill': fillGaps(); break;
+    case 'sides': state.sides = a.dataset.v === 'acrylic' ? 'acrylic' : 'printed'; touch(); render(); break;
+    case 'wizard': openWizard(); break;
+    case 'wz-close': closeWizard(); break;
+    case 'wz-next': wz.step = Math.min(4, wz.step + 1); renderWizard(); break;
+    case 'wz-back': wz.step = Math.max(0, wz.step - 1); renderWizard(); break;
+    case 'wz-preset': wz.preset = +a.dataset.i; renderWizard(); break;
+    case 'wz-set': wz[a.dataset.k] = a.dataset.v; renderWizard(); break;
+    case 'wz-add': { const dev = wzDevices().find(d => d.id === a.dataset.dev); if (dev) wz.picks.push({ dev: dev.id, group: dev.group, mount: bestMount(dev), qty: 1 }); $('#wz-picked').innerHTML = wzPicked(); $('#wz-results').innerHTML = wzResults(); break; }
+    case 'wz-qty': { const i = +a.dataset.i, p = wz.picks[i]; p.qty = Math.min(8, p.qty + +a.dataset.d); if (p.qty < 1) wz.picks.splice(i, 1); $('#wz-picked').innerHTML = wzPicked(); $('#wz-results').innerHTML = wzResults(); break; }
+    case 'wz-create': wzCreate(); break;
+    case 'air-blank': fillGaps(blankKeys(), 'blank panel'); break;
+    case 'air-add': addItem({ key: a.dataset.key }, +a.dataset.pos); break;
+    case 'air-top': if (LIB[a.dataset.key]) { state.top = a.dataset.key; touch(); render(); renderLib(); say(fullName(LIB[a.dataset.key]) + ' now sits on top of the rack.'); } break;
+    case 'air-back': state.back = a.dataset.v === 'closed' ? 'closed' : 'open'; touch(); render(); break;
     case 'clear': undo = JSON.stringify(state); state.items = []; state.top = null; state.extras = []; sel = null; touch(); render(); renderLib(); say('Rack cleared.', true); break;
     case 'undo': if (undo) { state = JSON.parse(undo); undo = null; render(); renderLib(); say('Restored.'); } break;
     case 'copy': copyText(listText(), 'List copied.'); break;
@@ -652,10 +939,19 @@ document.addEventListener('input', e => {
   const id = e.target.id;
   if (id === 'q') { query = e.target.value.trim(); renderLib(); return; }
   if (id === 'rack-name') { state.label = e.target.value.slice(0, 16); touch(); renderRack(); save(); if (view === '3d' && window.LRView3D) window.LRView3D.update(snapshot()); return; }
+  if (id === 'wz-q') { wz.q = e.target.value.trim(); $('#wz-results').innerHTML = wzResults(); return; }
+  if (id === 'wz-name') { wz.label = e.target.value.slice(0, 16); $('#wz-logo').textContent = wz.label || 'Lab Rax'; return; }
+  if (id === 'sel-color') { const it = find(sel); if (!it || !HEX.test(e.target.value)) return; it.color = e.target.value; touch(); renderRack(); save(); if (view === '3d' && window.LRView3D) window.LRView3D.update(snapshot()); return; }
+  if (id === 'sel-watts') { const it = find(sel); if (!it) return; const v = e.target.value.trim(); if (v === '' || isNaN(+v)) delete it.watts; else it.watts = Math.max(0, Math.min(500, Math.round(+v))); touch(); save(); renderBuild(); if (view === 'air') renderRack(); hideTip(); return; }
   if (id === 'sel-label') { const it = find(sel); if (!it) return; it.label = e.target.value.slice(0, 24) || undefined; touch(); renderRack(); save(); return; }
   if (id && id.indexOf('mk-') === 0 && id !== 'mk-name') { if (id === 'mk-type') mkOptions(null); mkPreview(); }
 });
-document.addEventListener('change', e => { if (e.target.id === 'mk-type' || e.target.id === 'mk-u' || e.target.id === 'mk-pattern') { if (e.target.id === 'mk-type') mkOptions(null); mkPreview(); } });
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.id === 'wz-patch' || t.id === 'wz-power') { wz[t.id.slice(3)] = t.checked; return; }
+  if (t.id === 'wz-spare') { wz.spare = +t.value; return; }
+  if (t.classList.contains('wz-mount')) { wz.picks[+t.dataset.i].mount = t.value; return; }
+  if (e.target.id === 'sel-color') { render(); return; } if (e.target.id === 'mk-type' || e.target.id === 'mk-u' || e.target.id === 'mk-pattern') { if (e.target.id === 'mk-type') mkOptions(null); mkPreview(); } });
 document.addEventListener('focusout', e => { if (e.target.id === 'rack-name') renderSettings(); });
 
 const host = $('#rackHost');
@@ -712,6 +1008,7 @@ function copyText(text, okMsg) {
 async function setView(v) {
   view = v; renderControls(); hideTip();
   const on3d = v === '3d';
+  if (!on3d && CAT) renderRack();
   $('#view3d').hidden = !on3d; $('#rackHost').style.visibility = on3d ? 'hidden' : ''; $('#meas').style.visibility = on3d ? 'hidden' : '';
   if (on3d) {
     if (!window.LRView3D) { $('#view3d').innerHTML = '<div class="v3d-msg">The 3D view is not available.</div>'; return; }
@@ -736,7 +1033,7 @@ function cycleTheme() { theme = THEMES[(THEMES.indexOf(theme) + 1) % 3]; try { l
 
 /* ---------- share link (own page only) ---------- */
 function shareLink() {
-  const o = { h: state.h, version: state.version, frame: state.frame, panel: state.panel, accent: state.accent, label: state.label, top: state.top, extras: state.extras, items: state.items, nextId: state.nextId };
+  const o = { h: state.h, version: state.version, frame: state.frame, panel: state.panel, accent: state.accent, label: state.label, top: state.top, extras: state.extras, back: state.back, sides: state.sides, items: state.items, nextId: state.nextId };
   const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   return location.origin + location.pathname + location.search + '#l=' + b64;
 }
@@ -774,5 +1071,5 @@ fetch('catalog.json', { cache: 'no-cache' })
   })
   .catch(() => { $('#cards').innerHTML = '<p class="hint">The parts catalog could not be loaded. Reload the page to try again.</p>'; });
 
-window.LRApp = { snapshot, select: id => { sel = id; render(); }, say, tip: (id, x, y) => id == null ? hideTip() : showTip(id, x, y) };
+window.LRApp = { snapshot, select: id => { sel = id; render(); }, say, toggleSides: () => { state.sides = state.sides === 'acrylic' ? 'printed' : 'acrylic'; touch(); render(); }, tip: (id, x, y) => id == null ? hideTip() : showTip(id, x, y) };
 })();
