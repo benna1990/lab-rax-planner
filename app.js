@@ -1747,7 +1747,7 @@ async function mkPreview() {
    and storage, power at the bottom; ½U vent gaps between warm parts; the airflow estimate decides on a fan when asked to. */
 const PRESETS = [['Lab Rax', '#26282B', '#26282B', '#B5CF2A'], ['Stealth', '#26282B', '#26282B', '#7D848B'], ['Arctic', '#E9EBEC', '#E9EBEC', '#2E5E9E'],
   ['Contrast', '#26282B', '#E9EBEC', '#E07A2E'], ['Forest', '#26282B', '#3E8E5A', '#E9EBEC'], ['Signal', '#7D848B', '#26282B', '#C8372D']];
-const WZ_STEPS = ['Look', 'Build', 'Name', 'Hardware', 'Your rack'];
+const WZ_STEPS = ['Hardware', 'Build', 'Look', 'Name', 'Your rack'], WZ_BODY = [3, 1, 0, 2, 4]; // hardware first: what goes in decides the rack; the look comes later
 const ROLES = [[/gateway|switch|tp-link|omada|netgear|mikrotik|modem|fibre|firewall/i, 1], [/smart home|kvm|tuner/i, 2], [/mini pc|apple|itx|motherboard/i, 3],
   [/raspberry|single-board/i, 4], [/storage|nas/i, 6], [/power/i, 8]];
 const roleOf = group => (ROLES.find(([re]) => re.test(group)) || [0, 5])[1];
@@ -1835,7 +1835,7 @@ function wzPicked() {
       '<span class="stepper small"><button type="button" data-act="wz-qty" data-i="' + i + '" data-d="-1" aria-label="One less">−</button><output>' + p.qty + '</output><button type="button" data-act="wz-qty" data-i="' + i + '" data-d="1" aria-label="One more">+</button></span></div>'; }).join('');
 }
 function renderWizard() {
-  const st = wz.step, look = PRESETS[wz.preset];
+  const at = wz.step, st = WZ_BODY[at], look = PRESETS[wz.preset]; // at: the position in the wizard, st: which page it shows
   let body = '';
   if (st === 0) body = '<h3 class="wz-h">Pick a look</h3><p class="hint">Frame, panels and accent. You can change every colour later, also per part.</p><div class="wz-presets">' +
     PRESETS.map((p, i) => '<button type="button" class="wz-preset" data-act="wz-preset" data-i="' + i + '" aria-pressed="' + (wz.preset === i) + '"><span class="wz-mini" style="--f:' + p[1] + ';--p:' + p[2] + ';--a:' + p[3] + '"><i></i><i></i><i></i></span><b>' + p[0] + '</b></button>').join('') + '</div>';
@@ -1865,10 +1865,10 @@ function renderWizard() {
       '<ul class="wz-list">' + wz.picks.map(p => { const d = LIB[p.mount]; return '<li>' + (p.qty > 1 ? p.qty + '× ' : '') + esc(fullName(d)) + ' <span class="muted">' + uTxt(d) + '</span>' + (d.url ? ' <a href="' + esc(d.url) + '" target="_blank" rel="noopener">↗</a>' : '') + '</li>'; }).join('') + '</ul>' +
       '<p class="hint">After you create it, everything stays editable: move, swap, recolour or remove parts. Undo brings back your current layout.</p></div></div>';
   }
-  $('#wz-steps').innerHTML = WZ_STEPS.map((l, i) => '<li' + (i === st ? ' aria-current="step"' : '') + (i < st ? ' class="done"' : '') + '>' + (i + 1) + ' ' + l + '</li>').join('');
+  $('#wz-steps').innerHTML = WZ_STEPS.map((l, i) => '<li' + (i === at ? ' aria-current="step"' : '') + (i < at ? ' class="done"' : '') + '>' + (i + 1) + ' ' + l + '</li>').join('');
   $('#wz-body').innerHTML = body;
-  $('#wz-foot').innerHTML = (st ? '<button type="button" class="btn" data-act="wz-back">Back</button>' : '<span></span>') +
-    (st < 4 ? '<button type="button" class="btn primary" data-act="wz-next">' + (st === 3 ? 'Show my rack' : 'Next') + '</button>' : '<button type="button" class="btn primary" data-act="wz-create">Create rack</button>');
+  $('#wz-foot').innerHTML = (at ? '<button type="button" class="btn" data-act="wz-back">Back</button>' : '<span></span>') +
+    (at < 4 ? '<button type="button" class="btn primary" data-act="wz-next">' + (at === 3 ? 'Show my rack' : 'Next') + '</button>' : '<button type="button" class="btn primary" data-act="wz-create">Create rack</button>');
 }
 function wzCreate() {
   const r = planLayout(wz);
