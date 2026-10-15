@@ -59,7 +59,7 @@ for (const g of cat.devices || []) {
 }
 for (const g of cat.extras || []) {
   if (!text(g.group)) errors.push('extras: every group needs a name');
-  for (const x of g.items || []) { const w = `extra ${x.id}`; claim(x.id, w); if (!text(x.name)) errors.push(`${w}: needs a name`); url(x.url, w, true); }
+  for (const x of g.items || []) { const w = `extra ${x.id}`; claim(x.id, w); if (!text(x.name)) errors.push(`${w}: needs a name`); url(x.url, w, true); hardware(x.hardware, w); }
 }
 
 if (errors.length) { console.error(`catalog.json has ${errors.length} problem(s):\n- ` + errors.join('\n- ')); process.exit(1); }
