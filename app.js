@@ -196,46 +196,74 @@ function thumbHTML(d) {
 function logoSize(fw, th) { const n = Math.max(4, (state.label || 'Lab Rax').length); return Math.min(th * .64, fw * .8 / (n * .74)); }
 
 /* ---------- render: library ---------- */
+/* One compact row per device (its best mount; the other mounts fold out), in groups that fold. While searching every matching
+   group is open. Which groups are open, which sections of Your build are open and the Lab Rax filter are remembered per browser. */
+const UIKEY = 'labrax-planner-ui';
+const ui = (() => { try { return Object.assign({ open: {}, sec: { print: true }, lr: false }, JSON.parse(localStorage.getItem(UIKEY)) || {}); } catch (e) { return { open: {}, sec: { print: true }, lr: false }; } })();
+const saveUI = () => { try { localStorage.setItem(UIKEY, JSON.stringify(ui)); } catch (e) {} };
+const devOpen = new Set(); // devices whose other mounts are folded out
 function renderTabs() {
-  $('#tabs').innerHTML = TABS.map(([k, l]) => '<button type="button" class="pill" data-act="tab" data-t="' + k + '" aria-pressed="' + (tab === k) + '">' + l + '</button>').join('');
+  $('#tabs').innerHTML = TABS.map(([k, l]) => '<button type="button" class="pill" data-act="tab" data-t="' + k + '" aria-pressed="' + (tab === k) + '">' + l + '</button>').join('') +
+    (tab === 'devices' || tab === 'panels' || tab === 'top' ? '<button type="button" class="pill lr" data-act="lib-lr" aria-pressed="' + ui.lr + '" title="Only parts made for or tested in Lab Rax">Lab Rax only</button>' : '');
 }
-function cardHTML(key, name, label) {
-  const d = LIB[key], placedHere = (d.top && state.top === key) || (d.extra && state.extras.includes(key));
-  const badge = d.top ? (state.top === key ? '✓ on top' : 'Top') : d.extra ? (placedHere ? '✓ added' : 'Add') : uTxt(d);
-  return '<div style="position:relative"><button type="button" class="card' + (placedHere ? ' on' : '') + '" draggable="' + !(d.top || d.extra) + '" data-act="lib" data-key="' + key + '" style="width:100%">' +
-    '<span class="thumb">' + thumbHTML(d) + '</span><span class="nm">' + esc(name) + '</span>' + (label ? '<span class="mt">' + esc(label) + '</span>' : '') +
-    '<span class="ft"><span class="by">' + (d.author ? 'by ' + esc(d.author) : '&nbsp;') + '</span><span class="badge' + (d.est ? ' est' : '') + '"' + (d.est ? ' title="Height estimated; check the model"' : '') + '>' + badge + '</span></span></button>' +
-    (d.url ? '<a class="ext" href="' + esc(d.url) + '" target="_blank" rel="noopener" aria-label="Open model page for ' + esc(fullName(d)) + '" title="Open model page">↗</a>' : '') + '</div>';
+function miniThumb(d) {
+  if (d.top) return '<span class="disc-mini"></span>';
+  if (d.extra) return '<svg width="30" height="22" viewBox="0 0 54 40" fill="none" stroke="var(--muted)" stroke-width="2.4" aria-hidden="true"><rect x="6" y="4" width="42" height="32" rx="3"/><path d="M12 4v32M42 4v32"/></svg>';
+  return '<span class="item mini" style="height:' + Math.max(9, Math.min(26, d.h2 * 6 + 3)) + 'px;--c:#26282B;--hole:rgba(255,255,255,.18)"><span class="face">' + faceHTML(d.face) + '</span></span>';
+}
+const inRack = key => placed().filter(i => i.key === key).length;
+function rowHTML(key, name, sub, extra) {
+  const d = LIB[key], on = (d.top && state.top === key) || (d.extra && state.extras.includes(key)), n = d.top || d.extra ? 0 : inRack(key);
+  const badge = d.top ? (on ? '✓ on top' : 'Top') : d.extra ? (on ? '✓ added' : 'Add') : uTxt(d);
+  return '<div class="lrow-wrap"><button type="button" class="lrow' + (on || n ? ' on' : '') + '" draggable="' + !(d.top || d.extra) + '" data-act="lib" data-key="' + key + '" title="' + esc(fullName(d)) + (d.author ? ' · by ' + esc(d.author) : '') + '">' +
+    '<span class="lthumb">' + miniThumb(d) + '</span><span class="ltx"><b>' + esc(name) + '</b>' + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span>' +
+    (n ? '<span class="inrack" title="In your rack">' + n + '×</span>' : '') + '<span class="badge' + (d.est ? ' est' : '') + '"' + (d.est ? ' title="Height estimated; check the model"' : '') + '>' + badge + '</span></button>' +
+    (extra || '') + (d.url ? '<a class="lext" href="' + esc(d.url) + '" target="_blank" rel="noopener" aria-label="Open model page for ' + esc(fullName(d)) + '" title="Open model page">↗</a>' : '') + '</div>';
+}
+const mountSub = m => m.label + (m.labrax && !/lab ?rax/i.test(m.label) ? ' · Lab Rax' : '') + (m.author ? ' · ' + m.author : '');
+const groupOpen = id => !!query || !!ui.open[id];
+function groupHTML(id, title, rows, n) { // rows is only built for open groups; n is the count either way
+  n = n == null ? rows.length : n;
+  if (!n) return '';
+  return '<section class="lgroup"><button type="button" class="lghead" data-act="lib-group" data-g="' + esc(id) + '" aria-expanded="' + groupOpen(id) + '"><span>' + esc(title) + '</span><span class="count">' + n + '</span><span class="chev" aria-hidden="true">›</span></button>' +
+    (groupOpen(id) ? '<div class="lrows">' + rows.join('') + '</div>' : '') + '</section>';
 }
 function matches(...s) { if (!query) return true; const q = query.toLowerCase().replace(/[\s-]/g, ''); return s.join(' ').toLowerCase().replace(/[\s-]/g, '').includes(q); }
 function renderLib() {
   renderTabs();
   if (!CAT) return;
   let h = '', hits = 0;
-  const group = (title, cards) => { if (!cards.length) return; hits += cards.length; h += '<p class="grouphead">' + esc(title) + '</p><div class="cards">' + cards.join('') + '</div>'; };
-  if (tab === 'devices' || tab === 'top') {
-    (CAT.devices || []).forEach(g => {
-      const cards = [];
-      g.items.forEach(d => d.mounts.forEach(m => {
-        const it = LIB[m.key]; if (!it) return;
-        if ((tab === 'top') !== !!it.top) return;
-        if (!matches(d.device, g.group, m.ref ? it.name : m.label, it.author)) return;
-        cards.push(cardHTML(m.key, d.device, m.ref ? it.name : m.label));
-      }));
-      group(g.group, cards);
+  const lr = x => !ui.lr || x.labrax;
+  if (tab === 'devices') {
+    (CAT.devices || []).forEach((g, gi) => {
+      const rows = [], gid = 'devices:' + g.group, gOpen = groupOpen(gid);
+      let n = 0;
+      g.items.forEach((d, di) => {
+        const ms = d.mounts.filter(m => m.position !== 'top' && LIB[m.id] && lr(m));
+        if (!ms.length || !matches(d.device, g.group, ms.map(m => m.label + ' ' + (m.author || '')).join(' '))) return;
+        n++; if (!gOpen) return;
+        const id = gi + '.' + di, best = ms.find(m => m.id === bestMount({ mounts: ms })), open = devOpen.has(id);
+        const more = ms.length > 1 ? '<button type="button" class="lmore" data-act="lib-more" data-dev="' + id + '" aria-expanded="' + open + '" title="Other mounts for this device">' + ms.length + ' ' + (open ? '▴' : '▾') + '</button>' : '';
+        rows.push(rowHTML(best.id, d.device, mountSub(best), more) + (open ? '<div class="lsub">' + ms.filter(m => m !== best).map(m => rowHTML(m.id, m.label, (m.author ? 'by ' + m.author : '') + (m.labrax && !/lab ?rax/i.test(m.label) ? ' · Lab Rax' : ''))).join('') + '</div>' : ''));
+      });
+      hits += n; h += groupHTML(gid, g.group, rows, n);
     });
+  } else if (tab === 'top') {
+    const rows = [];
+    (CAT.devices || []).forEach(g => g.items.forEach(d => d.mounts.forEach(m => { if (m.position === 'top' && LIB[m.id] && lr(m) && matches(d.device, m.label, m.author || '')) rows.push(rowHTML(m.id, d.device, mountSub(m))); })));
+    hits = rows.length; h = rows.length ? '<div class="lrows">' + rows.join('') + '</div>' : '';
   } else if (tab === 'panels') {
-    (CAT.panels || []).forEach(g => group(g.group, g.items.filter(i => matches(i.name, g.group, i.author)).map(i => cardHTML(i.id, i.name, null))));
+    (CAT.panels || []).forEach(g => { const rows = g.items.filter(i => lr(i) && matches(i.name, g.group, i.author || '')).map(i => rowHTML(i.id, i.name, i.author ? 'by ' + i.author : '')); hits += rows.length; h += groupHTML('panels:' + g.group, g.group, rows); });
   } else if (tab === 'extras') {
-    (CAT.extras || []).forEach(g => group(g.group, g.items.filter(i => matches(i.name, i.label || '', g.group, i.author)).map(i => cardHTML(i.id, i.name, i.label))));
+    (CAT.extras || []).forEach(g => { const rows = g.items.filter(i => matches(i.name, i.label || '', g.group, i.author || '')).map(i => rowHTML(i.id, i.name, [i.label, i.author && 'by ' + i.author].filter(Boolean).join(' · '))); hits += rows.length; h += groupHTML('extras:' + g.group, g.group, rows); });
   } else {
     const gens = state.items.filter(i => i.key === 'gen');
     h = '<p class="hint">Custom parts are generated here as STL, sized to the 10" standard Lab Rax uses. Make one with the button below; it appears in the rack and in your build pack.</p>' +
-      (gens.length ? '<div class="cards" style="margin-top:10px">' + gens.map(i => '<button type="button" class="card" data-act="edit-gen" data-id="' + i.id + '"><span class="thumb">' + thumbHTML(info(i)) + '</span><span class="nm">' + esc(i.name) + '</span><span class="mt">' + esc(genLabel(i.params)) + '</span><span class="ft"><span class="by">Edit</span><span class="badge">' + fmtU(H(i)) + '</span></span></button>').join('') + '</div>' : '');
+      (gens.length ? '<div class="lrows">' + gens.map(i => '<div class="lrow-wrap"><button type="button" class="lrow" data-act="edit-gen" data-id="' + i.id + '"><span class="lthumb">' + miniThumb(info(i)) + '</span><span class="ltx"><b>' + esc(i.name) + '</b><small>' + esc(genLabel(i.params)) + ' · edit</small></span><span class="badge">' + fmtU(H(i)) + '</span></button></div>').join('') + '</div>' : '');
     hits = 1;
   }
-  if (!hits) h = '<p class="hint">Nothing found for “' + esc(query) + '”. Make a custom part below, or add your own device from the Custom tab.</p>';
-  else if (tab === 'devices') h += '<p class="hint" style="margin-top:10px">≈ means the height is estimated from the device. Check the model before printing.</p>';
+  if (!hits) h = '<p class="hint">Nothing found' + (query ? ' for “' + esc(query) + '”' : '') + (ui.lr ? ' made for Lab Rax' : '') + '. Make a custom part below, or set up a rack with the wizard.</p>';
+  else if (tab === 'devices') h += '<p class="hint lfoot">Click a device to add its best mount; ▾ shows the others. ≈ means the height is estimated.</p>';
   $('#cards').innerHTML = h;
 }
 
@@ -524,29 +552,32 @@ function airTips(a) {
   if (!out.length) out.push({ text: a.rise > 15 ? 'This rack runs hot: add fans or more openings.' : 'Cooling looks fine for this layout.' });
   return out;
 }
-function airHTML() {
+function airParts() { // the Airflow section: a one-line summary and the details
   const a = airflow(), tips = airTips(a), m3h = v => Math.round(v * 3600) + ' m³/h';
   const lvl = !a.Q ? ['No heat', ''] : a.rise <= 8 ? ['Cool', ''] : a.rise <= 15 ? ['Warm', ' est'] : ['Hot', ' hot'];
-  return '<div class="boxcard air"><div class="air-head"><h3 class="sub">Airflow</h3><span class="badge' + lvl[1] + '">' + lvl[0] + '</span></div>' +
-    (a.Q ? '<p class="air-big">Air in the rack ≈ room + ' + (a.rise >= 60 ? '60+' : Math.round(a.rise)) + ' °C</p>' : '') +
-    '<dl class="kv"><dt>Heat</dt><dd>' + (a.est ? '≈ ' : '') + Math.round(a.Q) + ' W</dd>' +
+  const acts = tips.filter(t => t.act).length;
+  const sum = '<span class="badge' + lvl[1] + '">' + lvl[0] + '</span>' + (a.Q ? '<span>room + ' + (a.rise >= 60 ? '60+' : Math.round(a.rise)) + ' °C</span>' : '') + (acts ? '<span class="muted">' + acts + (acts > 1 ? ' tips' : ' tip') + '</span>' : '');
+  const body = '<dl class="kv"><dt>Heat</dt><dd>' + (a.est ? '≈ ' : '') + Math.round(a.Q) + ' W</dd>' +
     '<dt>Air needed for +' + AIR.target + ' °C</dt><dd>' + m3h(a.need) + '</dd>' +
     '<dt>Natural airflow at +' + AIR.target + ' °C</dt><dd>' + m3h(a.passive) + '</dd>' +
     '<dt>Fans</dt><dd>' + (a.cfm ? m3h(a.vf) : 'none') + '</dd>' +
     '<dt>Back of the rack</dt><dd><span class="seg small" role="group" aria-label="Back of the rack">' + [['open', 'Open'], ['closed', 'Closed']].map(([v, l]) => '<button type="button" data-act="air-back" data-v="' + v + '" aria-pressed="' + (state.back === v) + '">' + l + '</button>').join('') + '</span></dd></dl>' +
     '<ul class="tips">' + tips.map(t => '<li><span>' + esc(t.text) + (t.r != null ? ' <em>→ about +' + Math.round(t.r) + ' °C</em>' : '') + '</span>' +
       (t.act ? '<button type="button" class="btn small" data-act="' + t.act + '"' + (t.key ? ' data-key="' + t.key + '"' : '') + (t.pos != null ? ' data-pos="' + t.pos + '"' : '') + (t.v ? ' data-v="' + t.v + '"' : '') + '>' + t.label + '</button>' : '') + '</li>').join('') + '</ul>' +
-    '<p class="hint">An estimate from typical power use and rough physics. Click a part to enter its real heat; the Airflow view colours the rack by air temperature.</p></div>';
+    '<p class="hint">An estimate from typical power use and rough physics. Click a part to enter its real heat; the Airflow view colours the rack by air temperature.</p>';
+  return { sum, body };
 }
 
 /* ---------- render: build column ---------- */
+/* Sections fold to one line each, so the column stays short; the open ones are remembered. */
+const sec = (id, title, sum, body) => '<details class="sec" data-sec="' + id + '"' + (ui.sec[id] ? ' open' : '') + '><summary><span class="sec-t">' + title + '</span><span class="sec-s">' + sum + '</span><span class="chev" aria-hidden="true">›</span></summary><div class="sec-b">' + body + '</div></details>';
 function renderBuild() {
   if (!CAT) return;
   const h = state.h, used = placed().reduce((n, i) => n + H(i), 0), free = slots() - used, fp = frameParts(), br = state.version === 'brass';
   const pk = printPack(), done = pk.filter(x => state.done[x.k]).length, count = placed().length + (state.top ? 1 : 0);
-  let html = '<div><h2 class="title">Your build</h2><span class="muted">' + h + 'U · ' + count + (count === 1 ? ' part · ' : ' parts · ') + (free ? fmtU(free) + ' open' : 'no open slots') + '</span></div>' +
-    '<div style="display:flex;justify-content:space-between;font-size:13px" class="muted"><span>Print progress</span><span>' + done + ' of ' + pk.length + ' printed</span></div>' +
-    '<div class="progress" aria-hidden="true"><i style="width:' + (pk.length ? done / pk.length * 100 : 0) + '%"></i></div>' +
+  let html = '<div><h2 class="title">Your build</h2><span class="muted">' + h + 'U · ' + count + (count === 1 ? ' part · ' : ' parts · ') + (free ? fmtU(free) + ' open' : 'no open slots') + '</span></div>';
+
+  html += sec('print', 'Print list', '<span>' + done + ' of ' + pk.length + ' printed</span><span class="minibar" aria-hidden="true"><i style="width:' + (pk.length ? done / pk.length * 100 : 0) + '%"></i></span>',
     '<ul class="plist">' + pk.map(x => {
       const ok = !!state.done[x.k];
       return '<li class="prow"><button type="button" class="tick" data-act="done" data-k="' + esc(x.k) + '" aria-pressed="' + ok + '" aria-label="Mark ' + esc(x.name) + ' as printed">' +
@@ -556,30 +587,28 @@ function renderBuild() {
         (x.url ? '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">Open</a>' : '<span class="badge">STL</span>') + '</li>';
     }).join('') + '</ul>' +
     (pk.missing ? '<p class="hint">' + pk.missing + ' own device' + (pk.missing > 1 ? 's' : '') + ' without a link.</p>' : '') +
-    '<p class="hint">Download community models from MakerWorld as 3MF to keep their print profiles. Your build pack has the custom parts and a download list to click through the rest.</p>';
+    (placed().some(i => info(i).est) ? '<p class="hint">Parts marked ≈ have an estimated height. Check it in the model before printing.</p>' : '') +
+    '<p class="hint">Download community models from MakerWorld as 3MF to keep their print profiles. Your build pack has the custom parts and a download list to click through the rest.</p>');
 
-  html += airHTML();
+  const air = airParts();
+  html += sec('air', 'Airflow', air.sum, air.body);
 
   const ol = orderList(), tagged = CAT.shops && CAT.shops.amazon && CAT.shops.amazon.en && CAT.shops.amazon.en.tag;
-  html += '<div class="boxcard"><h3 class="sub">Shopping list</h3><dl class="kv">' +
+  html += sec('shop', 'Shopping list', '<span>' + ol.length + (ol.length === 1 ? ' item' : ' items') + '</span>', '<dl class="kv">' +
     ol.map(x => '<dt>' + esc(x.name) + '</dt><dd>' + (x.qty == null ? 'unknown' : x.qty + '×') + (x.buy ? '<a class="buy" href="' + esc(x.buy) + '" target="_blank" rel="noopener sponsored">Buy</a>' : x.check ? '<a class="buy" href="' + esc(x.check) + '" target="_blank" rel="noopener">Check</a>' : '') + '</dd>').join('') +
     '<div class="note">Mounting screws: 2 per side per panel, 1 per side for ½U panels.' + (br ? ' Inserts max 5 mm long; the hole is 5.5 mm deep.' : '') + '</div>' + (h > 5 ? '<div class="note">' + esc(JOINER_NOTE) + '</div>' : '') +
-    (tagged ? '<div class="note">As an Amazon Associate the maintainer of this planner earns from qualifying purchases.</div>' : '') + '</dl></div>';
+    (tagged ? '<div class="note">As an Amazon Associate the maintainer of this planner earns from qualifying purchases.</div>' : '') + '</dl>');
 
   const top = state.top ? LIB[state.top] : null;
-  html += '<details class="boxcard"><summary style="cursor:pointer;font-weight:700">Frame parts</summary><dl class="kv" style="margin-top:8px">' +
+  html += sec('frame', 'Frame parts', '<span>' + (br ? 'Heat-set inserts' : 'Bolted') + ' · ' + (state.sides === 'acrylic' ? 'acrylic' : 'printed') + ' sides</span>', '<dl class="kv">' +
     '<dt>Vertical posts</dt><dd>' + fp.posts + '</dd>' + (fp.joiners ? '<dt>Post joiners</dt><dd>4</dd>' : '') +
     '<dt>Side panels</dt><dd>' + fp.sides + (state.sides === 'acrylic' ? ' acrylic' : '') + '</dd>' + (state.sides === 'acrylic' ? '<div class="note">Acrylic sides: 3 mm, cut to the size of the printed side panel. Take it from that model; the planner has no measured size yet.</div>' : '') + (fp.joiners && fp.b !== 5 ? '<div class="note">Fit the side panels the opposite way to the posts so the seams don’t line up.</div>' : '') +
     '<dt>Horizontal pieces</dt><dd>4</dd><dt>Edge pieces</dt><dd>4</dd><dt>Handles · feet</dt><dd>2 · 4</dd>' +
     (top ? '<dt>Top</dt><dd>' + esc(top.name) + '</dd><div class="note">' + esc(top.label || '') + (top.note ? '. ' + esc(top.note) : '') + ' <button type="button" class="lnk btn small ghost" data-act="top-off">Use regular top panel</button></div><dt>Bottom panel</dt><dd>1</dd>'
-         : '<dt>Top + bottom panel</dt><dd>1 + 1</dd>') + '</dl></details>';
+         : '<dt>Top + bottom panel</dt><dd>1 + 1</dd>') +
+    '<div class="note">The horizontal pieces need a print bed of about 250 mm; they don’t fit on 220 mm beds.' + (h > 5 ? ' Above 10U the printed frame gets too weak for a full rack, so the planner stops at 10U.' : '') + '</div></dl>');
 
-  const notes = [];
-  if (placed().some(i => info(i).est)) notes.push('Parts marked ≈ have an estimated height. Check it in the model before printing.');
-  if (h > 5) notes.push('Above 10U the printed frame gets too weak for a full rack, so the planner stops at 10U.');
-  notes.push('The horizontal pieces need a print bed of about 250 mm; they don’t fit on 220 mm beds.');
-  html += '<ul class="notes">' + notes.map(n => '<li>' + esc(n) + '</li>').join('') + '</ul>' +
-    '<div class="actions"><button type="button" class="btn small" data-act="copy">Copy list</button><button type="button" class="btn small" data-act="share">Share link</button><button type="button" class="btn small" data-act="fill"' + (free ? '' : ' disabled') + '>Fill open slots</button><button type="button" class="btn small danger" data-act="clear"' + (state.items.length ? '' : ' disabled') + '>Clear rack</button></div><div id="copyfall"></div>';
+  html += '<div class="actions"><button type="button" class="btn small" data-act="copy">Copy list</button><button type="button" class="btn small" data-act="share">Share link</button><button type="button" class="btn small" data-act="fill"' + (free ? '' : ' disabled') + '>Fill open slots</button><button type="button" class="btn small danger" data-act="clear"' + (state.items.length ? '' : ' disabled') + '>Clear rack</button></div><div id="copyfall"></div>';
   $('#build').innerHTML = html;
 }
 
@@ -600,7 +629,7 @@ function listText() {
 }
 function csv(rows) { return '﻿' + rows.map(r => r.map(v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(',')).join('\n'); }
 
-function render() { renderControls(); renderRack(); renderSel(); renderUnplaced(); renderBuild(); save(); if (view === '3d' && window.LRView3D) window.LRView3D.update(snapshot()); }
+function render() { renderControls(); renderRack(); renderSel(); renderUnplaced(); renderBuild(); renderLib(); save(); if (view === '3d' && window.LRView3D) window.LRView3D.update(snapshot()); }
 
 /* ---------- 3D snapshot for view3d.js ---------- */
 function snapshot() {
@@ -877,6 +906,9 @@ document.addEventListener('click', async e => {
   switch (act) {
     case 'theme': cycleTheme(); break;
     case 'tab': tab = a.dataset.t; renderLib(); break;
+    case 'lib-group': { const g = a.dataset.g; if (ui.open[g]) delete ui.open[g]; else ui.open[g] = true; saveUI(); renderLib(); break; }
+    case 'lib-more': { const d = a.dataset.dev; if (devOpen.has(d)) devOpen.delete(d); else devOpen.add(d); renderLib(); break; }
+    case 'lib-lr': ui.lr = !ui.lr; saveUI(); renderLib(); break;
     case 'view': setView(a.dataset.v); break;
     case 'h-': setHeight(state.h - 1); break;
     case 'h+': setHeight(state.h + 1); break;
@@ -973,6 +1005,7 @@ document.addEventListener('change', e => {
   if (t.id === 'wz-spare') { wz.spare = +t.value; return; }
   if (t.classList.contains('wz-mount')) { wz.picks[+t.dataset.i].mount = t.value; return; }
   if (e.target.id === 'sel-color') { render(); return; } if (e.target.id === 'mk-type' || e.target.id === 'mk-u' || e.target.id === 'mk-pattern') { if (e.target.id === 'mk-type') mkOptions(null); mkPreview(); } });
+document.addEventListener('toggle', e => { const d = e.target; if (d.matches && d.matches('details.sec')) { ui.sec[d.dataset.sec] = d.open; saveUI(); } }, true);
 document.addEventListener('focusout', e => { if (e.target.id === 'rack-name') renderSettings(); });
 
 const host = $('#rackHost');
@@ -1090,7 +1123,7 @@ fetch('catalog.json', { cache: 'no-cache' })
     try { new ResizeObserver(en => { const w = Math.round(en[0].contentRect.width); if (w !== rw) { rw = w; renderRack(); } }).observe($('#stage')); }
     catch (e) { window.addEventListener('resize', renderRack); }
   })
-  .catch(() => { $('#cards').innerHTML = '<p class="hint">The parts catalog could not be loaded. Reload the page to try again.</p>'; });
+  .catch(e => { console.error(e); $('#cards').innerHTML = '<p class="hint">The parts catalog could not be loaded. Reload the page to try again.</p>'; });
 
 window.LRApp = { snapshot, select: id => { sel = id; render(); }, say, toggleSides: () => { state.sides = state.sides === 'acrylic' ? 'printed' : 'acrylic'; touch(); render(); }, tip: (id, x, y) => id == null ? hideTip() : showTip(id, x, y) };
 })();
