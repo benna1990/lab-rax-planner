@@ -107,6 +107,7 @@ for (const g of cat.devices || []) {
 }
 for (const g of cat.extras || []) {
   if (!text(g.group)) errors.push('extras: every group needs a name');
+  if (g.kind != null && g.kind !== 'rack' && g.kind !== 'addon') errors.push(`extras group ${g.group}: kind must be rack (rack systems and variants) or addon`);
   for (const x of g.items || []) { const w = `extra ${x.id}`; claim(x.id, w); if (!text(x.name)) errors.push(`${w}: needs a name`); url(x.url, w, true); hardware(x.hardware, w); air(x, w, false); look('extra', x, w); }
 }
 

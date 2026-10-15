@@ -245,7 +245,7 @@ function lights(scene) {
   const d2 = new T.DirectionalLight(0xffffff, .35); d2.position.set(-400, 200, -200); scene.add(d2);
 }
 // where the camera looks from for each side of the rack (app.js "Where" bar); fit(true) is the back, as before
-const FACES = { front: [.5, .34, .8], back: [-.5, .34, -.8], top: [.3, 1, .5], bottom: [.35, -.8, .6], sides: [1, .28, .2], frame: [.5, .34, .8] };
+const FACES = { front: [.5, .34, .8], back: [-.5, .34, -.8], top: [.3, 1, .5], bottom: [.35, -.8, .6], sides: [1, .28, .2], inside: [.5, .34, .8], frame: [.5, .34, .8] };
 function fit(back) {
   // frame the whole rack from the front right (or from behind, on the left, or the chosen side), whatever the shape of the view
   if (!R || !R.rack) return;

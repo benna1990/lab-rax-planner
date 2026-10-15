@@ -15,7 +15,7 @@ const mm = n => n.toFixed(1) + ' mm';
 const FIL = [['Black', '#26282B'], ['Grey', '#7D848B'], ['White', '#E9EBEC'], ['Blue', '#2E5E9E'], ['Orange', '#E07A2E'], ['Green', '#3E8E5A'], ['Lime', '#B5CF2A'], ['Red', '#C8372D']];
 const TABS = [['devices', 'Devices'], ['panels', 'Panels'], ['custom', 'Custom']]; // for the front and the back
 // the "Where" bar: which side of the rack the library shows parts for; the front and back hold the panels, the rest have their own lists
-const WHERE = [['front', 'Front'], ['back', 'Back'], ['top', 'Top'], ['bottom', 'Bottom'], ['sides', 'Sides'], ['frame', 'Frame']];
+const WHERE = [['front', 'Front'], ['back', 'Back'], ['top', 'Top'], ['bottom', 'Bottom'], ['sides', 'Sides'], ['inside', 'Inside']]; // rack systems and variants live in step 1, Rack
 
 /* ---------- catalog ---------- */
 let CAT = null, LIB = {}, SIZES = {}, PWDEV = {};
@@ -39,7 +39,7 @@ function buildCatalog(c) {
       add(m.id, { name: d.device, label: m.label, u: top ? 0 : m.u, top, est: !!m.estimated, face: m.face || 'shelf', shape: m.shape, device: dev, pwDev, url: m.url || null, author: m.author || '', hardware: m.hardware || [], note: m.note, depth: m.depth, group: g.group, tab: top ? 'top' : 'devices' }, m);
     });
   }));
-  (c.extras || []).forEach(g => g.items.forEach(i => add(i.id, { name: i.name, label: i.label || null, u: 0, extra: true, shape: i.shape, url: i.url, author: i.author || '', hardware: i.hardware || [], note: i.note, group: g.group, tab: 'extras' }, i)));
+  (c.extras || []).forEach(g => g.items.forEach(i => add(i.id, { name: i.name, label: i.label || null, u: 0, extra: true, shape: i.shape, url: i.url, author: i.author || '', hardware: i.hardware || [], note: i.note, group: g.group, tab: 'extras', rack: g.kind === 'rack' }, i)));
   LS.devices(n => SIZES[n] || null);
 }
 
@@ -461,12 +461,13 @@ const UIKEY = 'labrax-planner-ui';
 const ui = (() => { try { return Object.assign({ open: {}, sec: { print: true }, lr: false }, JSON.parse(localStorage.getItem(UIKEY)) || {}); } catch (e) { return { open: {}, sec: { print: true }, lr: false }; } })();
 const saveUI = () => { try { localStorage.setItem(UIKEY, JSON.stringify(ui)); } catch (e) {} };
 const devOpen = new Set(); // devices whose other mounts are folded out
-const where = () => WHERE.some(([k]) => k === ui.where) ? ui.where : 'front';
+const where = () => ui.where === 'frame' ? 'inside' : WHERE.some(([k]) => k === ui.where) ? ui.where : 'front'; // 'frame' was the old name
 // an extra's side of the rack, for the Where bar
 function extraFace(d) {
   const s = d.shape || {};
+  if (d.rack) return 'rack'; // a rack system or variant: step 1
   if (s.side || d.at === 'side' || s.handles === 'side' || s.depth) return 'sides';
-  if (s.u || s.frame || s.hl || s.wall || s.inside && d.at !== 'top') return 'frame';
+  if (s.u || s.frame || s.hl || s.wall || s.inside && d.at !== 'top') return 'inside';
   if (s.feet || s.drawer) return 'bottom';
   return 'top'; // logo, corners, edges, handles, fans at the top
 }
@@ -497,7 +498,7 @@ function rowHTML(key, name, sub, extra) {
     (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span></span></button>' +
     (extra || '') + (d.url ? '<a class="lext" href="' + esc(d.url) + '" target="_blank" rel="noopener" aria-label="Open model page for ' + esc(fullName(d)) + '" title="Open model page">↗</a>' : '') + '</div>';
 }
-const mountSub = m => m.label + (m.labrax && !/lab ?rax/i.test(m.label) ? ' · Lab Rax' : '') + (m.author ? ' · ' + m.author : '');
+const mountSub = m => 'Mount: ' + m.label + (m.labrax && !/lab ?rax/i.test(m.label) ? ' · Lab Rax' : '') + (m.author ? ' · ' + m.author : '');
 const groupOpen = id => !!query || !!ui.open[id];
 function groupHTML(id, title, rows, n) { // rows is only built for open groups; n is the count either way
   n = n == null ? rows.length : n;
@@ -536,8 +537,8 @@ function faceLibHTML(w) {
   if (w === 'sides') return '<p class="hint lhead">The side panels: printed or acrylic, or a patterned or fan panel from the list.</p>' +
     list('Side panels', [opt('sides', 'printed', 'Printed side panels', 'Printed with the frame, in the frame colour', state.sides !== 'acrylic', sheet(state.frame, 1)), opt('sides', 'acrylic', 'Acrylic side panels', '3 mm sheets, so you can see inside', state.sides === 'acrylic', sheet('#9ED3F0', .45))]) +
     list('Patterned, fan and deeper side panels', extras);
-  const byGroup = (CAT.extras || []).map(g => list(g.group, g.items.filter(i => LIB[i.id] && extraFace(LIB[i.id]) === 'frame' && matches(i.name, i.label || '', g.group, i.author || '')).map(i => rowHTML(i.id, i.name, [i.label, i.author && 'by ' + i.author].filter(Boolean).join(' · '))))).join('');
-  return '<p class="hint lhead">The frame itself: other sizes and versions, joining racks, wall mounting and parts that go inside the rack.</p>' + byGroup; // under the catalog's own headings
+  const byGroup = (CAT.extras || []).map(g => list(g.group, g.items.filter(i => LIB[i.id] && extraFace(LIB[i.id]) === 'inside' && matches(i.name, i.label || '', g.group, i.author || '')).map(i => rowHTML(i.id, i.name, [i.label, i.author && 'by ' + i.author].filter(Boolean).join(' · '))))).join('');
+  return '<p class="hint lhead">Inside the rack and around it: cable management, holders for devices that don’t fit a panel, motherboard mounts, rails and wall mounting. Other frame sizes and versions are under step 1, Rack.</p>' + byGroup; // under the catalog's own headings
 }
 function renderLib() {
   renderTabs();
@@ -738,7 +739,13 @@ function renderSettings() {
   const sw = (act, cur) => '<div class="swatches">' + FIL.map(([n, c]) => '<button type="button" class="sw" style="--c:' + c + '" data-act="' + act + '" data-c="' + c + '" aria-label="' + n + '" title="PETG ' + n.toLowerCase() + '" aria-pressed="' + (c === cur) + '"></button>').join('') + '</div>';
   const nameFocused = document.activeElement && document.activeElement.id === 'rack-name';
   if (nameFocused) return;
+  const fm = CAT ? (state.version === 'brass' ? CAT.frame.brass : CAT.frame.bolted) : null, vars = CAT ? (CAT.extras || []).filter(g => g.kind === 'rack') : []; // drawn once before the catalog loads
+  const on = vars.flatMap(g => g.items).filter(i => state.extras.includes(i.id)), nv = vars.reduce((n, g) => n + g.items.length, 0);
   $('#settings').innerHTML =
+    (fm ? '<div class="set rackset"><span>Rack</span><div class="rsys"><b>' + esc(fm.name) + '</b><span class="muted">' + (fm.author ? 'by ' + esc(fm.author) + ' · ' : '') + '1–5U, joined above 5U</span>' +
+      (on.length ? '<span class="rvon">' + on.map(i => '<span class="badge">' + esc(i.name) + '</span>').join('') + '</span>' : '') +
+      '<a class="btn small" href="' + esc(fm.url) + '" target="_blank" rel="noopener">Model ↗</a><button type="button" class="btn small" data-act="rack-variants" aria-expanded="' + !!ui.rackOpen + '">Other sizes & versions (' + nv + ')</button></div></div>' : '') +
+    (ui.rackOpen ? '<div class="rvariants">' + vars.map(g => '<p class="sgroup">' + esc(g.group) + '</p><div class="lrows">' + g.items.filter(i => LIB[i.id]).map(i => rowHTML(i.id, i.name, [i.label, i.author && 'by ' + i.author].filter(Boolean).join(' · '))).join('') + '</div>').join('') + '</div>' : '') +
     '<div class="set"><span>Frame' + qm('insert') + '</span><div class="seg small" role="group" aria-label="Frame version">' + [['brass', 'Heat-set inserts'], ['bolted', 'Bolted']].map(([v, l]) => '<button type="button" data-act="ver" data-v="' + v + '" aria-pressed="' + (state.version === v) + '">' + l + '</button>').join('') + '</div></div>' +
     '<div class="set"><span>Sides</span><div class="seg small" role="group" aria-label="Side panels">' + [['printed', 'Printed'], ['acrylic', 'Acrylic']].map(([v, l]) => '<button type="button" data-act="sides" data-v="' + v + '" aria-pressed="' + (state.sides === v) + '">' + l + '</button>').join('') + '</div></div>' +
     '<div class="set"><span>Frame colour</span>' + sw('frame', state.frame) + '</div>' +
@@ -1902,6 +1909,7 @@ document.addEventListener('click', async e => {
     case 'tab': tab = a.dataset.t; renderLib(); break;
     case 'where': setWhere(a.dataset.v); break;
     case 'go-step': goStep(+a.dataset.step); break;
+    case 'rack-variants': ui.rackOpen = !ui.rackOpen; saveUI(); renderSettings(); break;
     case 'explain': { const t = TERMS[a.dataset.k]; if (t) askUser(t[0], t[1], [['', 'Got it', 'primary']]); } break;
     case 'go-printer': ui.sec.print = true; saveUI(); renderBuild(); { const p = document.querySelector('#build select[id$="-printer"]'); if (p) { p.scrollIntoView({ behavior: 'smooth', block: 'center' }); p.focus({ preventScroll: true }); } } break;
     case 'go-unplaced': { const u = $('#unplaced'); if (u) u.scrollIntoView({ behavior: 'smooth', block: 'center' }); } break;
