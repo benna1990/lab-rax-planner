@@ -141,6 +141,7 @@ h3.sub{font-size:14px;font-weight:700;margin:0}
 .ulab span{position:absolute;right:8px;display:flex;align-items:center;font-family:var(--f-mono);font-size:11px;color:var(--muted)}
 .rframe{position:relative}
 .edge{position:relative;background:var(--frame)}
+.edge.top{background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(0,0,0,.1)),var(--frame)} /* lit from above, like the 3D view */
 .edge.top{border-radius:3px 3px 0 0;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
 /* the top ring is bevelled at 45° and mitred, so seen from the front its corners are cut off */
 .edge.top::before,.edge.top::after{content:"";position:absolute;top:0;width:var(--bev);height:var(--bev);background:var(--stage);z-index:1}
@@ -152,12 +153,12 @@ h3.sub{font-size:14px;font-weight:700;margin:0}
 .hexgrill{position:absolute;left:5%;top:17%;width:90%;height:68%;display:block} /* an <svg> keeps its 300×150 default unless sized explicitly */
 .logo{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--f-logo);color:var(--acc);white-space:nowrap;line-height:1;text-shadow:0 0 1px #000,0 0 2px #000;pointer-events:none}
 .foot{position:absolute;top:100%;width:11%;height:6px;background:var(--frame);border-radius:0 0 3px 3px;filter:brightness(.85)}
-.post{position:absolute;top:0;bottom:0;background:var(--frame)}
-.hole{position:absolute;left:50%;width:var(--hs);height:var(--hs);margin:calc(var(--hs) / -2) 0 0 calc(var(--hs) / -2);border-radius:50%;background:#070809}
-.rack.brass .hole{box-shadow:0 0 0 calc(var(--hs) * .2) #C9A55A}
+.post{position:absolute;top:0;bottom:0;background:linear-gradient(90deg,rgba(255,255,255,.06),transparent 22%,transparent 78%,rgba(0,0,0,.2)),var(--frame)}
+.hole{position:absolute;left:50%;width:var(--hs);height:var(--hs);margin:calc(var(--hs) / -2) 0 0 calc(var(--hs) / -2);border-radius:50%;background:#070809;box-shadow:0 .5px 0 rgba(255,255,255,.1)}
+.rack.brass .hole{box-shadow:0 0 0 calc(var(--hs) * .2) #C9A55A,inset 0 1px 1px rgba(0,0,0,.6)}
 .bay{position:absolute;top:0;bottom:0;background:#0C0D0F}
 .mount{position:absolute;inset:0}
-.item{position:absolute;display:flex;align-items:center;gap:7px;background:var(--c);border-radius:2px;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -1px 0 rgba(0,0,0,.3);cursor:grab;touch-action:none;overflow:hidden}
+.item{position:absolute;display:flex;align-items:center;gap:7px;background:var(--c);border-radius:2px;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -1px 0 rgba(0,0,0,.3),0 1.5px 2px rgba(0,0,0,.45);cursor:grab;touch-action:none;overflow:hidden}
 .item:hover{filter:brightness(1.07)}
 .item.sel{outline:2px solid var(--accent);outline-offset:1px;z-index:2}
 .item.clash{outline:2px dashed var(--warn);outline-offset:1px}
@@ -165,6 +166,7 @@ h3.sub{font-size:14px;font-weight:700;margin:0}
 .item.drag{z-index:3;opacity:.94;cursor:grabbing;box-shadow:0 10px 24px rgba(0,0,0,.4)}
 /* each part's face is an SVG drawn by shapes.js at the part's real size */
 .item > svg.pf{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
+.item::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(0,0,0,.1));pointer-events:none} /* light from above */
 .tip{position:fixed;z-index:40;max-width:280px;padding:8px 11px;border-radius:10px;background:var(--ink);color:var(--bg);font-size:12.5px;line-height:1.35;display:flex;flex-direction:column;gap:1px;pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.28)}
 .tip b{font-weight:700}
 .tip span{opacity:.82}

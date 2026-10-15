@@ -903,15 +903,22 @@ function toSVG(sc, mode, o) {
   const poly = (pts3, fill, extra) => { out.push('<path d="' + ring(pts3.map(p => prj(p[0], p[1], p[2]))) + '" fill="' + fill + '"' + (extra || '') + '/>'); };
   const topS = c => shade(c, .16), sideS = c => shade(c, -.24);
   const tiny = obl ? num(o.tiny, .9) : num(o.tiny, .25);
+  /* Seen straight on there are no sides to shade, so the front view lights from above, like the 3D view: raised edges catch a
+     highlight on top and a shade below, round heads get a darker rim, parts in front of the plate cast a soft shadow on it, and
+     the plate shades the top of each window. o.lit === false draws flat. */
+  const lit = !obl && o.lit !== false;
+  const edge = (a, b, y, z, c, w) => { const q0 = prj(a, y, z), q1 = prj(b, y, z); out.push('<path d="M' + f1(q0[0]) + ' ' + f1(q0[1]) + 'H' + f1(q1[0]) + '" stroke="' + c + '" stroke-width="' + f1(w) + '"/>'); };
   const drawPrim = p => {
     if ((p.t === 'box' && p.w < tiny && p.h < tiny) || (p.t === 'cyl' && p.r * 2 < tiny)) return;
     if (p.t === 'box') {
       const x0 = p.x, x1 = p.x + p.w, y0 = p.y, y1 = p.y + p.h, zf = p.z, zb = p.z - p.d;
       if (obl && p.d > .8) { poly([[x1, y0, zf], [x1, y0, zb], [x1, y1, zb], [x1, y1, zf]], sideS(p.c)); poly([[x0, y1, zf], [x1, y1, zf], [x1, y1, zb], [x0, y1, zb]], topS(p.c)); }
       poly(p.r ? rectP(x0, y0, p.w, p.h, p.r).map(q => [q[0], q[1], zf]) : [[x0, y0, zf], [x1, y0, zf], [x1, y1, zf], [x0, y1, zf]], p.c);
+      if (lit && p.d > .8 && p.w > 3 && p.h > 3) { const r = Math.min(p.r, p.w / 2, p.h / 2), e = Math.min(.6, p.h * .06); edge(x0 + r, x1 - r, y1 - e / 2, zf, shade(p.c, .2), e); edge(x0 + r, x1 - r, y0 + e / 2, zf, shade(p.c, -.3), e); }
     } else if (p.t === 'cyl') {
       if (obl && p.d > .8) { const f = circP(p.x, p.y, p.r, 16), b = f.map(q => [q[0], q[1], p.z - p.d]); out.push('<path d="' + ring(hull(f.map(q => prj(q[0], q[1], p.z)).concat(b.map(q => prj(q[0], q[1], q[2]))))) + '" fill="' + sideS(p.c) + '"/>'); }
-      poly(circP(p.x, p.y, p.r).map(q => [q[0], q[1], p.z]), p.c);
+      if (lit && p.d > .8 && p.r > 1.5) { poly(circP(p.x, p.y, p.r).map(q => [q[0], q[1], p.z]), shade(p.c, -.3)); poly(circP(p.x, p.y + p.r * .06, p.r * .84).map(q => [q[0], q[1], p.z]), shade(p.c, -.1)); } // a round head: dark rim, lit face, a little darker than flat, as in 3D
+      else poly(circP(p.x, p.y, p.r).map(q => [q[0], q[1], p.z]), p.c);
     } else if (p.t === 'ext') {
       const to3 = p.axis === 'z' ? (q, front) => [q[0], q[1], front ? p.at : p.at - p.d] : p.axis === 'y' ? (q, top) => [q[0], top ? p.at + p.d : p.at, -q[1]] : (q, right) => [right ? p.at + p.d : p.at, q[1], -q[0]];
       if (!obl && p.axis !== 'z') { // seen edge-on from the front: draw its front edge
@@ -956,10 +963,14 @@ function toSVG(sc, mode, o) {
   };
   const objs = sc.objs.map((ob, i) => ({ ob, i, k: key(ob) })).sort((a, b) => a.ob.layer - b.ob.layer || (obl ? a.k - b.k : 0) || a.i - b.i);
   if (o.backdrop) { const q0 = prj(-sc.w / 2, sc.h, 0), q1 = prj(sc.w / 2, 0, 0); out.push('<rect x="' + f1(q0[0]) + '" y="' + f1(q0[1]) + '" width="' + f1(q1[0] - q0[0]) + '" height="' + f1(q1[1] - q0[1]) + '" fill="' + o.backdrop + '"/>'); }
+  // a part standing out in front of the plate drops a soft shadow down and to the right
+  const drawLit = p => { const n = out.length; drawPrim(p); if (lit && p.d > .8 && out.length > n && out[n].startsWith('<path')) out.splice(n, 0, out[n].replace(/ fill="[^"]*"/, ' fill="#000"').replace('<path ', '<path opacity=".3" transform="translate(.4 .9)" ')); };
   objs.forEach(({ ob }) => {
+    // the plate's shadow along the top of each window: the window minus itself moved down (the plate covers what falls outside)
+    if (lit && ob.layer === 1) ob.prims.forEach(p => { if (p.t === 'ext' && p.axis === 'z' && p.holes.length) out.push('<path fill-rule="evenodd" fill="#000" opacity=".42" d="' + p.holes.map(h => ring(h.map(q => prj(q[0], q[1], p.at))) + ring(h.map(q => prj(q[0], q[1] - 1.6, p.at)))).join('') + '"/>'); });
     // seen straight on, things standing out from the panel in its own colour need an edge to show
-    if (!obl && ob.layer === 2 && sc.color) { const n = out.length; ob.prims.forEach(drawPrim); for (let i = n; i < out.length; i++) if (out[i].indexOf('fill="' + sc.color + '"') > 0) out[i] = out[i].replace('fill="' + sc.color + '"', 'fill="' + shade(sc.color, lum(sc.color) > .5 ? -.05 : .07) + '" stroke="#000" stroke-opacity=".5" stroke-width=".4"'); }
-    else ob.prims.forEach(drawPrim);
+    if (!obl && ob.layer === 2 && sc.color) { const n = out.length; ob.prims.forEach(drawLit); for (let i = n; i < out.length; i++) if (out[i].indexOf('fill="' + sc.color + '"') > 0) out[i] = out[i].replace('fill="' + sc.color + '"', 'fill="' + shade(sc.color, lum(sc.color) > .5 ? -.05 : .07) + '" stroke="#000" stroke-opacity=".5" stroke-width=".4"'); }
+    else ob.prims.forEach(ob.layer === 2 ? drawLit : drawPrim);
   });
   let vb;
   if (o.view) vb = o.view; // [x, y, w, h] in projected units
