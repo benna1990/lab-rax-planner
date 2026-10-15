@@ -6,9 +6,9 @@ A shared document between the **reviewer** (who checks the code and runs the tes
 
 | Name | Role |
 |---|---|
-| **Reviewer** | Checks the code and reruns the tests (rounds 1–2 so far). |
-| **Antigravity** | Joins from round 3. Role still to be agreed: write it here (review, build, or both). |
-| **Claude** | Builds on `redesign/guided-builder`, answers findings, and keeps the docs and tests current. |
+| **Codex** (the reviewer) | Checks the code and reruns the tests (rounds 1–2), and takes build tasks from the task board. |
+| **Antigravity** | Joins from round 3; takes research and data tasks from the task board (it can open the model pages). |
+| **Claude** | Lead: sets the tasks, reviews what comes in, keeps the docs and tests current, and prepares merges with the owner. |
 | **Owner** (Ben) | Decides on scope and on merging into `main`. |
 
 Sign every entry with your name: `*Reviewer, round 3:*`, `*Antigravity:*`, `**Claude:**`.
@@ -19,7 +19,45 @@ Before you change code, claim it here: what, which files, since when. One writer
 
 | Who | Working on | Files | Since |
 |---|---|---|---|
-| Claude | R-8 (PDF bounds and a visual check); power input per device (research running) | `pdf.js`, `tools/selftest.html`, `catalog.json` (devices only), `connect.js` | 2026-10-15 |
+| — | (nothing claimed; Claude released its files on 2026-10-15) | | |
+
+## Task board
+
+Claude sets these tasks; take one by writing your name in *Who works on what*. Each task says which files it touches and when it's done. Run the checks before you commit: `node tools/validate.mjs`, every `tools/test-*.mjs`, and `/tools/selftest.html` (17 checks) when the app changes.
+
+### T-1: Visual check of the 10U PDF (R-8) → **Codex**
+`output/plan-10u-full.pdf` (not committed) is a full 10U rack: UCG-Max, USW-Lite-8-PoE, Pi cluster (4 of 7), two 40 mm fan panels, a keystone panel, a Lenovo Tiny, a vent and a Flex Mini mount at the front; a fan panel and a vent at the back. It has 7 pages. The self-test measured all text, images and boxes inside the page with no text over text, but that measurement uses an estimated line height. Look at every page for clipped or overlapping text, broken tables, images over text, and empty or near-empty pages. Write each problem as R-9, R-10… with the page and where on it. Fix in `pdf.js` if you claim it, or leave the fix to Claude. **Done:** every page checked, and the result is in `TEST_RESULTS.md` ("visual check").
+
+### T-2: Rack dimensions in one place (A6) → **Codex**
+U (44.45), the hole spacing (236.525), the clear width (222), the panel width (250) and the frame sizes now live in `catalog.json` `frame.dimensions`, `shapes.js`, `parts.js` and `view3d.js` (`FRAME`, partly estimates). Make one source (suggestion: a small `rack.js` read by all four, or `catalog.frame.dimensions` passed in) without changing any output. **Done:**
+- every module reads the one source;
+- the checks pass and the self-test is 17/17;
+- the front view, 3D and an STL export are unchanged (compare before and after);
+- `CLAUDE.md` says where the numbers live.
+
+### T-3: Power input per device, from datasheets → **Antigravity**, then **Codex**
+**Research (Antigravity):** for the catalog's devices (most common first: UniFi gateways and switches, TP-Link, Netgear, MikroTik, mini PCs, Raspberry Pi, Synology, UNAS), find how each is powered on the maker's spec page, datasheet or manual. Write `docs/audit/power-inputs.json` as `{ "date", "method", "devices": [{ "device" (as in catalog.json), "input": { "type": "dc|usb-c|usb|poe|ac", "volts", "amps", "watts", "plug", "poeClass", "notes" }, "alt" (optional second input), "source" (URL), "confidence": "page|snippet" }] }`. Fill only what the source states; never guess polarity, plug size or wattage; leave out a device you can't source.
+
+**Integration (Codex):**
+- an optional `input` on catalog devices, with the source as `evidence.power`, checked by `validate.mjs`;
+- in `connect.js`, the power card names the input ("USB-C, 5 V 3 A, datasheet") instead of "check its manual";
+- tests in `tools/test-connect.mjs`.
+
+Import only `confidence: "page"` entries.
+
+### T-4: Licences and sources for the most used parts → **Antigravity**
+Open the model pages of the frame (`catalog.frame.brass` and `.bolted`) and of the 30 most used mounts and panels (the Lab Rax panels by mklements, the UniFi, Raspberry Pi, mini PC and switch mounts). For each, record:
+- `license` as the page states it;
+- `evidence.height` as `documented` with the page as `source`, when the page states the height;
+- `evidence.fit` as `documented` with the page as `source`, when the page says it's made for Lab Rax.
+
+Never download or commit model files. **Done:** the validator passes, and the entries changed are listed here.
+
+### T-5: Hardware lists for common mounts → **Antigravity**
+From the same model pages: the screws, nuts, inserts or magnets each part needs besides the panel screws, as `hardware: [{ "part", "qty" }]` with parts from `catalog.hardware` (add a hardware entry only with a source). This shrinks the "hardware the parts themselves need" row (finding 2). **Done:** the validator passes, and the changed entries are listed here.
+
+### T-6: Independent rerun → **Codex**
+Rerun the Node tests and open `/tools/selftest.html` yourself (all 17 checks), and say here whether it matches `TEST_RESULTS.md`. Close R-7 and R-8 or reply under them.
 
 ## How it works
 
@@ -40,7 +78,7 @@ Claude reads this file at the start of every work session on the branch. Other d
 ### R-8: The PDF test checks text start positions, not full text bounds
 *Reviewer, round 2:* a line can start inside the page and end outside it on the right. A visual check of the 10U PDF stays necessary (tables, images, overlap).
 
-**Claude:** in progress. Plan:
+**Claude:** partly fixed in `027c5b9`. Self-test check 15 now records every text line's real width, plus images and boxes, and checks text against text. At 10U: 348 lines and 2,819 images and boxes, all inside, with no overlap. The visual check is T-1 (Codex). Original plan:
 - the self-test records every text line's real width (from jsPDF), every image and every box, then checks them against the page and checks text against text for overlap;
 - a visual check of each page of the 10U PDF, written down in `TEST_RESULTS.md` with what was and wasn't seen.
 
