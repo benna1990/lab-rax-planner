@@ -1017,7 +1017,12 @@ function pdfCooling() { // the Cooling section for the PDF; null when nothing in
   const perU = []; for (let s = 0; s + 1 < a.temp.length; s += 2) perU.push({ u: uRange(s, 2), t: fmtT((a.temp[s] + a.temp[s + 1]) / 2) });
   return { room: a.room + ' °C', heat: (a.est ? '≈ ' : '') + fmtW(a.Q), hottest: '≈ ' + fmtT(a.maxT), flow: fmtF(a.flow) + ' · ' + Math.round(a.flow / 1.699) + ' CFM', perU,
     fans: a.fans.map(f => ({ name: f.name, where: f.where, spec: fanLine(f.d), dir: dirText(f.dir, f.place) })),
-    tips: airTips(a).filter(t => t.after).map(t => ({ text: t.text, before: fmtT(a.maxT), after: fmtT(t.after.maxT) })) };
+    tips: airTips(a).filter(t => t.after).map(t => ({ text: t.text, before: fmtT(a.maxT), after: fmtT(t.after.maxT) })),
+    // the airflow diagram in the PDF: temp is °C per ½U layer, top first; flows are m³/h, positive into the rack
+    map: { room: a.room, span: HEAT_SPAN, rated: RATED, maxT: a.maxT, flow: a.flow, Q: a.Q, est: a.est, h: state.h, H: a.r.H, neutral: a.r.neutral, temp: a.temp,
+      parts: a.parts.map(p => ({ pos2: p.it.pos2, h2: p.d.h2, w: p.w, est: p.est, t: p.T, name: p.it.label || shortName(p.d) })),
+      openings: a.groups.filter(g => g.kind !== 'seams').map(g => ({ kind: g.kind, name: g.name, layers: g.layers, flows: g.flows, in: g.in, out: g.out })),
+      fans: a.fans.map(f => ({ name: f.name, place: f.place, dir: f.dir, pos2: f.it ? f.it.pos2 : null, h2: f.it ? f.d.h2 : null, in: f.in, out: f.out, rated: f.rated, spec: fanLine(f.d) })) } };
 }
 
 /* ---------- custom part maker ---------- */
