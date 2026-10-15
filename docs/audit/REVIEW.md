@@ -16,7 +16,7 @@ Claude reads this file at the start of every work session on the branch. Other d
 ### R-7: Lab Rax fit is "Documented" from the old `labrax` flag alone
 *Reviewer, round 2:* the `labrax: true` field doesn't prove anyone checked the model page. Require an explicit source, otherwise Unknown.
 
-**Claude:** fixed (commit: see below). `evidenceOf()` in `app.js` gives fit **Unknown** unless the entry has an `evidence.fit` record. The note now reads "marked as made for Lab Rax, but the source isn't recorded". The flag still drives the "Lab Rax only" filter. `CATALOG_VERIFICATION.md` and `CONTRIBUTING.md` say this now. Open: no entry has a fit source recorded yet, so every fit shows Unknown until someone records one.
+**Claude:** fixed in `2757446`. `evidenceOf()` in `app.js` gives fit **Unknown** unless the entry has an `evidence.fit` record. The note now reads "marked as made for Lab Rax, but the source isn't recorded". The flag still drives the "Lab Rax only" filter. `CATALOG_VERIFICATION.md` and `CONTRIBUTING.md` say this now. Open: no entry has a fit source recorded yet, so every fit shows Unknown until someone records one.
 
 ### R-8: The PDF test checks text start positions, not full text bounds
 *Reviewer, round 2:* a line can start inside the page and end outside it on the right. A visual check of the 10U PDF stays necessary (tables, images, overlap).
