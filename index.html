@@ -325,6 +325,9 @@ details.abd .hint{margin-top:6px}
 .lghead[aria-expanded="true"] .chev,details.sec[open] > summary .chev{transform:rotate(90deg)}
 .lrows{display:flex;flex-direction:column;gap:2px;padding:0 0 10px}
 .lrow-wrap{display:flex;align-items:center;gap:4px}
+/* a "?" after a word: opens a short explanation */
+.qm{display:inline-grid;place-items:center;width:17px;height:17px;margin-left:5px;padding:0;border-radius:50%;border:1px solid var(--line-2);background:none;color:var(--muted);font-size:10.5px;font-weight:700;line-height:1;vertical-align:1px;cursor:pointer}
+.qm:hover{color:var(--ink);border-color:var(--accent)}
 /* the six steps under the header: where each part of the work happens, with a dot from the readiness check */
 .steps{display:flex;gap:4px;overflow-x:auto;padding:8px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line);background:var(--panel);scrollbar-width:none}
 .steps .step{flex:none;display:inline-flex;align-items:center;gap:7px;padding:6px 12px 6px 7px;border-radius:999px;border:1px solid transparent;background:none;color:var(--ink-2);font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap}
@@ -533,7 +536,7 @@ dialog.askdlg::backdrop{background:rgba(10,12,14,.55)}
       </div>
       <div style="display:flex;align-items:center;gap:10px">
         <div class="stepper"><button type="button" data-act="hist-undo" id="hist-undo" title="Undo (⌘Z or Ctrl+Z)" aria-label="Undo" disabled>↶</button><button type="button" data-act="hist-redo" id="hist-redo" title="Redo (⇧⌘Z or Ctrl+Y)" aria-label="Redo" disabled>↷</button></div>
-        <span class="muted" style="font-weight:600">Height</span>
+        <span class="muted" style="font-weight:600">Height<button type="button" class="qm" data-act="explain" data-k="u" aria-label="What is a rack unit?" title="What is this?">?</button></span>
         <div class="stepper"><button type="button" data-act="h-" id="h-minus" aria-label="Make the rack 1U lower">−</button><output id="h-out">5U</output><button type="button" data-act="h+" id="h-plus" aria-label="Make the rack 1U taller">+</button></div>
       </div>
     </div>

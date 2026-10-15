@@ -44,4 +44,6 @@ Work happens on the `redesign/guided-builder` branch. `main` (the live site) sta
 | Date | Change | Commit |
 |---|---|---|
 | 2026-10-15 | Audit documents (this folder) | 12e208f |
-| 2026-10-15 | Batch 1: step bar, Build readiness (`ready.js` + test), start screen, an example that passes its checks, export buttons and the country choice in readiness | (next commit) |
+| 2026-10-15 | Batch 1: step bar, Build readiness (`ready.js` + test), start screen, an example that passes its checks, export buttons and the country choice in readiness | a66ffbc |
+| 2026-10-15 | Batch 2 (part): the setup wizard asks for hardware first | 0a612b7 |
+| 2026-10-15 | Batch 2 (part): plain-language "?" explanations for U, depth, PoE, airflow, heat-set inserts, keystones and estimates | (next commit) |

@@ -739,7 +739,7 @@ function renderSettings() {
   const nameFocused = document.activeElement && document.activeElement.id === 'rack-name';
   if (nameFocused) return;
   $('#settings').innerHTML =
-    '<div class="set"><span>Frame</span><div class="seg small" role="group" aria-label="Frame version">' + [['brass', 'Heat-set inserts'], ['bolted', 'Bolted']].map(([v, l]) => '<button type="button" data-act="ver" data-v="' + v + '" aria-pressed="' + (state.version === v) + '">' + l + '</button>').join('') + '</div></div>' +
+    '<div class="set"><span>Frame' + qm('insert') + '</span><div class="seg small" role="group" aria-label="Frame version">' + [['brass', 'Heat-set inserts'], ['bolted', 'Bolted']].map(([v, l]) => '<button type="button" data-act="ver" data-v="' + v + '" aria-pressed="' + (state.version === v) + '">' + l + '</button>').join('') + '</div></div>' +
     '<div class="set"><span>Sides</span><div class="seg small" role="group" aria-label="Side panels">' + [['printed', 'Printed'], ['acrylic', 'Acrylic']].map(([v, l]) => '<button type="button" data-act="sides" data-v="' + v + '" aria-pressed="' + (state.sides === v) + '">' + l + '</button>').join('') + '</div></div>' +
     '<div class="set"><span>Frame colour</span>' + sw('frame', state.frame) + '</div>' +
     '<div class="set"><span title="For parts without their own colour; pick a part to give it one">Default panel</span>' + sw('panel', state.panel) + '</div>' +
@@ -1381,6 +1381,20 @@ function powerParts() { // the Power & network section: a one-line summary and t
 
 /* ---------- render: build column ---------- */
 /* Sections fold to one line each, so the column stays short; the open ones are remembered. */
+/* ---------- plain-language help for the words the planner uses ---------- */
+// [title, explanation]; a "?" button (qm) opens it. Only standard or measured facts here; no guesses.
+const TERMS = {
+  u: ['Rack units (U)', 'Rack height is counted in units: 1U is 44.45 mm (1.75 inch). A 5U rack holds five of them. Mounting holes repeat every U, so whole-U panels start on a U line; a ½U panel uses half of one. A printed ½U Lab Rax panel is a little taller than half a U (measured from the model), so two of them don’t fit in one U.'],
+  depth: ['Depth', 'How far a part reaches into the rack. Parts on the front posts and parts on the back posts at the same height share the depth between them; if together they’re deeper than the inside of the rack, one of them has to move.'],
+  poe: ['PoE (Power over Ethernet)', 'A PoE switch powers devices through the network cable, such as access points or a Raspberry Pi with a PoE HAT. The standards: 802.3af gives up to 15.4 W at the switch port (12.95 W at the device), 802.3at (PoE+) 30 W (25.5 W) and 802.3bt (PoE++) 60 or 90 W (51 or 71.3 W). A switch also has a total PoE budget shared by all its ports.'],
+  airflow: ['Airflow: intake and exhaust', 'Intake fans blow room air in, exhaust fans blow warm air out. Warm air rises, so air in low at the front and out at the top or back works with it. The planner estimates the air temperature around your parts from their typical heat; it is an estimate, not a measurement of the parts themselves.'],
+  insert: ['Heat-set inserts or bolted', 'Heat-set inserts are small threaded brass sleeves you press into the printed holes with a soldering iron; the screws then go into metal threads. A bolted frame uses screws with nuts instead, so you don’t need a soldering iron.'],
+  keystone: ['Keystone', 'A keystone is a standard snap-in jack (network, HDMI, USB and more) that clips into the square openings of a keystone panel. You buy the jacks; the panel is printed.'],
+  estimate: ['Estimated (≈)', 'A value marked ≈ hasn’t been checked against the model or the real part. It comes from the model’s title, photos or a similar part. Check it on the model page, or print one test piece, before you print everything.']
+};
+const qm = k => TERMS[k] ? '<button type="button" class="qm" data-act="explain" data-k="' + k + '" aria-label="What is ' + esc(TERMS[k][0]) + '?" title="What is this?">?</button>' : '';
+const TERM_OF = { overlap: 'u', clash: 'depth', cooling: 'airflow', estimated: 'estimate', frame: 'estimate' };
+
 /* ---------- build readiness and the six steps (ready.js holds the checks) ---------- */
 const STEPS = [[1, 'Rack'], [2, 'Hardware'], [3, 'Connect'], [4, 'Check'], [5, 'Print & assemble'], [6, 'Export']];
 let READY = [];
@@ -1402,7 +1416,7 @@ function readyHTML(pk) {
     : '<button type="button" class="btn small" data-act="' + c.fix.act + '"' + (c.fix.step ? ' data-step="' + c.fix.step + '"' : '') + (c.fix.id != null ? ' data-id="' + c.fix.id + '"' : '') + '>' + esc(c.fix.label) + '</button>';
   return '<section class="ready' + (s.ready ? ' ok' : '') + '" id="ready" aria-labelledby="ready-h"><h3 id="ready-h"><span class="rdot" aria-hidden="true"></span>' + esc(head) + '</h3>' +
     '<p class="hint">' + (s.ready ? 'Everything checks out. The notes below are what the planner can’t confirm for you.' : 'What still stands between this plan and a rack you can build.') + '</p>' +
-    '<ul class="rlist">' + READY.slice().sort((x, y) => order[x.state] - order[y.state]).map(c => '<li class="rk rk-' + c.state + '"><span class="rki" aria-hidden="true">' + icon[c.state] + '</span><div class="rkt"><b>' + esc(c.title) + '</b>' + (c.why ? '<small>' + esc(c.why) + '</small>' : '') + '</div>' + fix(c) + '</li>').join('') + '</ul>' +
+    '<ul class="rlist">' + READY.slice().sort((x, y) => order[x.state] - order[y.state]).map(c => '<li class="rk rk-' + c.state + '"><span class="rki" aria-hidden="true">' + icon[c.state] + '</span><div class="rkt"><b>' + esc(c.title) + qm(TERM_OF[c.id] || (/^power\d/.test(c.id) ? 'poe' : '')) + '</b>' + (c.why ? '<small>' + esc(c.why) + '</small>' : '') + '</div>' + fix(c) + '</li>').join('') + '</ul>' +
     '<div class="rexport" id="export"><button type="button" class="btn small primary" data-act="pdf">Build plan PDF</button><button type="button" class="btn small" data-act="pack">Build pack (ZIP)</button><button type="button" class="btn small" data-act="share">Copy share link</button><button type="button" class="btn small" data-act="save-file">Save rack file</button></div></section>';
 }
 function renderSteps() {
@@ -1888,6 +1902,7 @@ document.addEventListener('click', async e => {
     case 'tab': tab = a.dataset.t; renderLib(); break;
     case 'where': setWhere(a.dataset.v); break;
     case 'go-step': goStep(+a.dataset.step); break;
+    case 'explain': { const t = TERMS[a.dataset.k]; if (t) askUser(t[0], t[1], [['', 'Got it', 'primary']]); } break;
     case 'go-printer': ui.sec.print = true; saveUI(); renderBuild(); { const p = document.querySelector('#build select[id$="-printer"]'); if (p) { p.scrollIntoView({ behavior: 'smooth', block: 'center' }); p.focus({ preventScroll: true }); } } break;
     case 'go-unplaced': { const u = $('#unplaced'); if (u) u.scrollIntoView({ behavior: 'smooth', block: 'center' }); } break;
     case 'go-part': { const id = +a.dataset.id; if (find(id)) { sel = id; if (view === '3d' || view === 'air') await setView(sideOf(find(id))); render(); const el = document.querySelector('#rack .item[data-id="' + id + '"]'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } } break;
