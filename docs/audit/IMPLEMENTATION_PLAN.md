@@ -43,4 +43,5 @@ Work happens on the `redesign/guided-builder` branch. `main` (the live site) sta
 
 | Date | Change | Commit |
 |---|---|---|
-| 2026-10-15 | Audit documents (this folder) | (see git log) |
+| 2026-10-15 | Audit documents (this folder) | 12e208f |
+| 2026-10-15 | Batch 1: step bar, Build readiness (`ready.js` + test), start screen, an example that passes its checks, export buttons and the country choice in readiness | (next commit) |

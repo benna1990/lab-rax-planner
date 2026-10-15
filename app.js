@@ -48,7 +48,7 @@ function defaultState() {
   let n = 1; const m = (k, p) => ({ id: n++, key: k, pos2: p });
   return { h: 5, version: 'brass', frame: '#26282B', panel: '#26282B', accent: '#B5CF2A', label: 'Lab Rax', top: null, topDir: null, bottom: null, bottomDir: null, extras: [], xdir: {}, back: 'open', room: 25, sides: 'printed', done: {}, example: true,
     power: defaultPower(),
-    items: [m('keystone', 0), m('flexmini05', 1), m('ucgmax1', 2), m('tiny1', 4), m('sbc7', 6)], nextId: n };
+    items: [m('ucgmax1', 0), m('mw2117690', 2), Object.assign(m('sbc7', 4), { fill: 4, names: ['Pi 1', 'Pi 2', 'Pi 3', 'Pi 4'] }), m('fan40', 8)], nextId: n }; // the example passes the readiness checks
 }
 function load() {
   try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && Array.isArray(s.items) && s.h >= 1 && s.h <= 10 && s.nextId) return Object.assign({ accent: '#B5CF2A', label: 'Lab Rax', top: null, extras: [], done: {} }, s); } catch (e) {}
@@ -1381,12 +1381,59 @@ function powerParts() { // the Power & network section: a one-line summary and t
 
 /* ---------- render: build column ---------- */
 /* Sections fold to one line each, so the column stays short; the open ones are remembered. */
+/* ---------- build readiness and the six steps (ready.js holds the checks) ---------- */
+const STEPS = [[1, 'Rack'], [2, 'Hardware'], [3, 'Connect'], [4, 'Check'], [5, 'Print & assemble'], [6, 'Export']];
+let READY = [];
+function readyFacts(pk) {
+  const pl = placed(), cl = pl.filter(i => clashes(i).length), ov = pl.filter(i => overlaps(i).length), a = airflow();
+  return {
+    parts: pl.length, unplaced: state.items.length - pl.length, clashes: cl.length, clashId: cl[0] && cl[0].id, overlaps: ov.length, overlapId: ov[0] && ov[0].id,
+    printer: pk.printer ? { name: bedName(pk.printer), bad: bedBad(pk).length, turned: pk.some(x => x.bed && x.bed.turned.length) } : null,
+    cooling: { level: !a.Q ? 'none' : a.maxT <= RATED[0] ? 'cool' : a.maxT <= RATED[1] ? 'warm' : 'hot', maxT: a.maxT },
+    power: window.LRPower.issues(powerModel()), estimated: pl.filter(i => info(i).est).length,
+    market: (window.LRMarket.regions[state.market] || {}).name
+  };
+}
+function readyHTML(pk) {
+  READY = window.LRReady.checks(readyFacts(pk));
+  const s = window.LRReady.summary(READY), order = { warn: 0, todo: 1, info: 2, ok: 3 }, icon = { warn: '!', todo: '○', info: 'i', ok: '✓' };
+  const head = s.ready ? 'Ready to build' : [s.warn ? s.warn + (s.warn > 1 ? ' problems' : ' problem') : '', s.todo ? s.todo + (s.todo > 1 ? ' things' : ' thing') + ' to do' : ''].filter(Boolean).join(' · ');
+  const fix = c => !c.fix ? '' : c.fix.act === 'go-country' ? '<select class="field mini" id="ready-market" aria-label="Country for the shop links">' + Object.entries(window.LRMarket.regions).map(([k, r]) => '<option value="' + k + '"' + (state.market === k ? ' selected' : '') + '>' + esc(r.name) + '</option>').join('') + '</select>'
+    : '<button type="button" class="btn small" data-act="' + c.fix.act + '"' + (c.fix.step ? ' data-step="' + c.fix.step + '"' : '') + (c.fix.id != null ? ' data-id="' + c.fix.id + '"' : '') + '>' + esc(c.fix.label) + '</button>';
+  return '<section class="ready' + (s.ready ? ' ok' : '') + '" id="ready" aria-labelledby="ready-h"><h3 id="ready-h"><span class="rdot" aria-hidden="true"></span>' + esc(head) + '</h3>' +
+    '<p class="hint">' + (s.ready ? 'Everything checks out. The notes below are what the planner can’t confirm for you.' : 'What still stands between this plan and a rack you can build.') + '</p>' +
+    '<ul class="rlist">' + READY.slice().sort((x, y) => order[x.state] - order[y.state]).map(c => '<li class="rk rk-' + c.state + '"><span class="rki" aria-hidden="true">' + icon[c.state] + '</span><div class="rkt"><b>' + esc(c.title) + '</b>' + (c.why ? '<small>' + esc(c.why) + '</small>' : '') + '</div>' + fix(c) + '</li>').join('') + '</ul>' +
+    '<div class="rexport" id="export"><button type="button" class="btn small primary" data-act="pdf">Build plan PDF</button><button type="button" class="btn small" data-act="pack">Build pack (ZIP)</button><button type="button" class="btn small" data-act="share">Copy share link</button><button type="button" class="btn small" data-act="save-file">Save rack file</button></div></section>';
+}
+function renderSteps() {
+  const el = $('#steps'); if (!el) return;
+  el.innerHTML = STEPS.map(([n, label]) => { const sm = window.LRReady.summary(READY), st = n === 6 ? '' : n === 4 ? (sm.warn ? 'warn' : sm.todo ? 'todo' : 'ok') : window.LRReady.stepState(READY, n);
+    return '<button type="button" class="step' + (st ? ' s-' + st : '') + '" data-act="go-step" data-step="' + n + '"' + (st ? ' title="' + (st === 'ok' ? 'Done' : st === 'warn' ? 'Needs attention' : 'To do') + '"' : '') + '><span class="sn">' + n + '</span>' + label + '</button>'; }).join('');
+}
+// jump to where a step's work happens, with a short flash so the eye finds it
+function goStep(n) {
+  const at = el => { if (!el) return; el.scrollIntoView({ behavior: 'smooth', block: 'start' }); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); };
+  if (n === 1) return at($('#settings'));
+  if (n === 2) { if (where() !== 'front' && where() !== 'back') setWhere('front'); at($('.lib')); setTimeout(() => { const q = $('#q'); if (q) q.focus({ preventScroll: true }); }, 400); return; }
+  const id = { 3: 'power', 5: 'print' }[n];
+  if (id) { ui.sec[id] = true; if (n === 3) ui.sec.air = true; saveUI(); renderBuild(); return at($('[data-sec="' + id + '"]')); }
+  at($(n === 6 ? '#export' : '#ready'));
+}
+// the first visit: four ways in, over the rack
+function renderStart() {
+  const el = $('#startcard'); if (!el) return;
+  const show = !!state.example && !ui.started; el.hidden = !show; if (!show) return;
+  const opt = (v, t, d, cls) => '<button type="button" class="sc-opt' + (cls ? ' ' + cls : '') + '" data-act="start" data-v="' + v + '"><b>' + t + '</b><span>' + d + '</span></button>';
+  el.innerHTML = '<div class="sc-in"><h2>Plan a 10-inch rack you can actually build</h2><p>Pick your hardware, see it in 3D, check that it fits, stays cool and gets power, then take the print list, shopping list and build plan with you.</p><div class="sc-opts">' +
+    opt('guide', 'Guide me', 'A few questions about your hardware, then a suggested layout', 'primary') + opt('empty', 'Start empty', 'A 5U Lab Rax; add the parts yourself') +
+    opt('example', 'Explore the example', 'A gateway, a PoE switch, four Pis and a fan') + opt('file', 'Open a build file', 'A .rack.json you saved before') + '</div></div>';
+}
 const sec = (id, title, sum, body) => '<details class="sec" data-sec="' + id + '"' + (ui.sec[id] ? ' open' : '') + '><summary><span class="sec-t">' + title + '</span><span class="sec-s">' + sum + '</span><span class="chev" aria-hidden="true">›</span></summary><div class="sec-b">' + body + '</div></details>';
 function renderBuild() {
   if (!CAT) return;
   const h = state.h, used = onSide(rackSide).reduce((n, i) => n + H(i), 0), free = slots() - used, fp = frameParts(), br = state.version === 'brass';
   const pk = printPack(), done = pk.filter(x => state.done[x.k]).length, count = placed().length + (state.top ? 1 : 0);
-  let html = '<div><h2 class="title">Your build</h2><span class="muted">' + h + 'U · ' + count + (count === 1 ? ' part · ' : ' parts · ') + (free ? fmtU(free) + ' open' : 'no open slots') + '</span></div>';
+  let html = '<div><h2 class="title">Your build</h2><span class="muted">' + h + 'U · ' + count + (count === 1 ? ' part · ' : ' parts · ') + (free ? fmtU(free) + ' open' : 'no open slots') + '</span></div>' + readyHTML(pk);
 
   const rowAir = {}, ra = url => rowAir[url] || (rowAir[url] = { w: 0, est: false, fans: [] }); // heat and fans per model page
   byPos().forEach(i => { const d = info(i), hw = heatOf(i); if (d.url && hw.w) { const r = ra(d.url); r.w += hw.w; r.est = r.est || hw.est; } });
@@ -1438,6 +1485,7 @@ function renderBuild() {
   html += '<div class="actions"><button type="button" class="btn small" data-act="copy">Copy list</button><button type="button" class="btn small" data-act="share">Share link</button>' +
     '<button type="button" class="btn small" data-act="save-file" title="Download this layout as a .rack.json file">Save as file</button><button type="button" class="btn small" data-act="open-file" title="Open a .rack.json file">Open file</button><button type="button" class="btn small" data-act="fill"' + (free ? '' : ' disabled') + '>Fill open slots' + (rackSide === 'back' ? ' at the back' : '') + '</button><button type="button" class="btn small danger" data-act="clear"' + (state.items.length ? '' : ' disabled') + '>Clear rack</button></div><div id="copyfall"></div>';
   $('#build').innerHTML = html;
+  renderSteps();
 }
 
 function listText() {
@@ -1473,7 +1521,7 @@ function listText() {
 }
 function csv(rows) { return '﻿' + rows.map(r => r.map(v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(',')).join('\n'); }
 
-function render() { renderControls(); renderRack(); renderSel(); renderUnplaced(); renderBuild(); renderLib(); save(); if (view === '3d' && window.LRView3D) window.LRView3D.update(snapshot()); }
+function render() { renderStart(); renderControls(); renderRack(); renderSel(); renderUnplaced(); renderBuild(); renderLib(); save(); if (view === '3d' && window.LRView3D) window.LRView3D.update(snapshot()); }
 
 /* ---------- 3D snapshot for view3d.js ---------- */
 function snapshot() {
@@ -1839,6 +1887,15 @@ document.addEventListener('click', async e => {
     case 'theme': cycleTheme(); break;
     case 'tab': tab = a.dataset.t; renderLib(); break;
     case 'where': setWhere(a.dataset.v); break;
+    case 'go-step': goStep(+a.dataset.step); break;
+    case 'go-printer': ui.sec.print = true; saveUI(); renderBuild(); { const p = document.querySelector('#build select[id$="-printer"]'); if (p) { p.scrollIntoView({ behavior: 'smooth', block: 'center' }); p.focus({ preventScroll: true }); } } break;
+    case 'go-unplaced': { const u = $('#unplaced'); if (u) u.scrollIntoView({ behavior: 'smooth', block: 'center' }); } break;
+    case 'go-part': { const id = +a.dataset.id; if (find(id)) { sel = id; if (view === '3d' || view === 'air') await setView(sideOf(find(id))); render(); const el = document.querySelector('#rack .item[data-id="' + id + '"]'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } } break;
+    case 'start': { ui.started = true; saveUI(); const v = a.dataset.v;
+      if (v === 'guide') openWizard();
+      else if (v === 'empty') { undo = JSON.stringify(state); state = Object.assign(defaultState(), { items: [], nextId: 1, example: false }); sel = null; sanitize(); renderLib(); render(); say('An empty 5U rack. Add your hardware from the library.', true); goStep(2); }
+      else if (v === 'file') $('#rackfile').click();
+      renderStart(); break; }
     case 'bottom': state.bottom = a.dataset.v || null; if (!bottomPart()) state.bottomDir = null; touch(); render(); say('Bottom: ' + bottomName() + '.'); break;
     case 'lib-group': { const g = a.dataset.g; if (ui.open[g]) delete ui.open[g]; else ui.open[g] = true; saveUI(); renderLib(); break; }
     case 'lib-more': { const d = a.dataset.dev; if (devOpen.has(d)) devOpen.delete(d); else devOpen.add(d); renderLib(); break; }
@@ -1934,6 +1991,8 @@ document.addEventListener('click', async e => {
     case 'v3d': if (window.LRView3D) window.LRView3D.action(a.dataset.v); break;
   }
 });
+// the shop country, from the readiness list
+document.addEventListener('change', e => { if (e.target.id === 'ready-market' && own(window.LRMarket.regions, e.target.value)) { state.market = e.target.value; touch(); render(); } });
 document.addEventListener('change', e => {
   if(e.target.id!=='final-market'&&e.target.id!=='final-currency')return;
   const dialog=$('#finalize-build'),format=dialog.dataset.format;
