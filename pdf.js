@@ -169,6 +169,21 @@ async function make(d) {
   doc.setFont('helvetica','normal');doc.setFontSize(8);
   for(const [a,b] of frameRows){doc.setTextColor(...muted);text(a,M,y2);doc.setTextColor(...ink);text(b,M+50,y2);y2+=6;}
   doc.setTextColor(...muted);text(wrap('~ = estimated outer envelope. Verify top mounts, clearances and acrylic contours against the actual model. Not a cutting or load-rated drawing.',W-2*M),M,y2+3);
+  // Power & network: four figures and what needs attention. It goes under the frame when it fits there, else after the
+  // cooling overview, else on a page of its own before the assembly steps.
+  const pw=d.power;
+  doc.setFont('helvetica','normal');doc.setFontSize(8.5);
+  const pwLines=pw?pw.lines.slice(0,8).map(s=>wrap(s.replace(/^! /,''),W-2*M)):[], pwH=pw?13+29+pwLines.reduce((n,l)=>n+l.length*3.7+1.8,0):0;
+  function powerBlock(y){
+    section('Power & network','Draw, PoE budget, network ports, UPS');
+    y=head('Power & network',y);
+    pw.tiles.forEach(([name,value],i)=>{const x=M+i*45.5;doc.setFillColor(243,246,243);doc.roundedRect(x,y,41.5,21,2,2,'F');doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(...muted);text(name,x+4,y+7);doc.setFontSize(14);doc.setTextColor(...(i===1&&pw.short&&/\//.test(value)?[164,78,34]:ink));text(value,x+4,y+16);});
+    y+=29;doc.setFont('helvetica','normal');doc.setFontSize(8.5);
+    pwLines.forEach((l,i)=>{doc.setTextColor(...(/^! /.test(pw.lines[i])?[164,78,34]:ink));text(l,M,y);y+=l.length*3.7+1.8;});
+    return y;
+  }
+  let pwDone=false;
+  if(pw&&y2+14+pwH+5<=BOT){powerBlock(y2+14);pwDone=true;}
   function airMap(m, y) {
     section('Cooling overview', 'Temperature by U, airflow and selected fans');
     y=head('Cooling overview',y);
@@ -260,7 +275,9 @@ async function make(d) {
       doc.setFont('helvetica','normal');doc.setFontSize(9);
       for(const note of notes){const lines=wrap(note,W-2*M-8);y2=fit(y2,lines.length*4+6);doc.setTextColor(...ink);text(lines,M+4,y2);y2+=lines.length*4+6;}
     }
+    if(pw&&!pwDone&&y2+8+pwH+5<=BOT){powerBlock(y2+8);pwDone=true;}
   }
+  if(pw&&!pwDone)powerBlock(page());
 
   // Illustrated steps: one action per card, at most three cards per page.
   if (d.guide && d.guide.length && window.LRGuide) {

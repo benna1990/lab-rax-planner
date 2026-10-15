@@ -1166,6 +1166,8 @@ window.LRShapes = {
   U, PANEL_W, panelH, PRESETS, BOARDS, AP, shade,
   part: compilePart, top: compileTop, rack: rackScene, frameMods, sideHoles, ventHoles,
   svg, geoms, meshes, defaultShape, genShape, check, checkDevice,
+  // network ports in a device's io (RJ45 and SFP), for the power and network budget
+  netPorts: io => (io || []).map(parseTok).filter(t => t && (t.k === 'rj45' || t.k === 'sfp')).reduce((n, t) => n + t.n, 0),
   // the app tells us how to find a device by name (for shapes like { "dev": "JetKVM" })
   devices(fn) { lookupFn = fn; drawCache.clear(); geomCache.clear(); },
   scene: sceneFor,

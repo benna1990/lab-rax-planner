@@ -16,21 +16,25 @@ const FIL = [['Black', '#26282B'], ['Grey', '#7D848B'], ['White', '#E9EBEC'], ['
 const TABS = [['devices', 'Devices'], ['panels', 'Panels'], ['top', 'Top mounts'], ['extras', 'Frame & extras'], ['custom', 'Custom']];
 
 /* ---------- catalog ---------- */
-let CAT = null, LIB = {}, SIZES = {};
+let CAT = null, LIB = {}, SIZES = {}, PWDEV = {};
 const LS = window.LRShapes; // how parts look: shapes.js
+// power and network fields (see the power budget below): pw on a part or mount, pwDev on the device it holds (PWDEV: those per device name)
+const PW_KEYS = ['poe', 'poeIn', 'poeOptional', 'ports', 'eth'];
+const pwOf = o => { const r = {}; PW_KEYS.forEach(k => { if (o[k] !== undefined) r[k] = o[k]; }); return r; };
 function buildCatalog(c) {
-  CAT = c; LIB = {}; SIZES = {};
-  // src: the catalog entry, for its heat and airflow fields
-  const add = (id, o, src) => { LIB[id] = Object.assign({ key: id, h2: o.u ? Math.round(o.u * 2) : 0 }, o, { watts: src.watts, wattsEst: !!src.wattsEstimated, fanDir: src.fanDir, vent: src.vent, at: src.at, fanAt: src.fanAt }); };
+  CAT = c; LIB = {}; SIZES = {}; PWDEV = {};
+  // src: the catalog entry, for its heat, airflow and power fields
+  const add = (id, o, src) => { LIB[id] = Object.assign({ key: id, h2: o.u ? Math.round(o.u * 2) : 0 }, o, { watts: src.watts, wattsEst: !!src.wattsEstimated, fanDir: src.fanDir, vent: src.vent, at: src.at, fanAt: src.fanAt, pw: pwOf(src) }); };
   (c.panels || []).forEach(g => g.items.forEach(i => add(i.id, { name: i.name, label: null, u: i.u, est: !!i.estimated, face: i.face || 'blank', shape: i.shape, url: i.url || null, author: i.author || '', hardware: i.hardware || [], group: g.group, tab: 'panels' }, i)));
   (c.devices || []).forEach(g => g.items.forEach(d => {
     const dev = d.size ? { device: d.device, size: d.size, color: d.color, io: d.io } : null;
     if (dev) SIZES[d.device] = dev;
+    const pwDev = PWDEV[d.device] = Object.assign({ name: d.device, group: g.group, io: d.io || [] }, pwOf(d));
     d.mounts.forEach(m => {
       if (m.ref) { m.key = m.ref; return; }
       m.key = m.id;
       const top = m.position === 'top';
-      add(m.id, { name: d.device, label: m.label, u: top ? 0 : m.u, top, est: !!m.estimated, face: m.face || 'shelf', shape: m.shape, device: dev, url: m.url || null, author: m.author || '', hardware: m.hardware || [], note: m.note, depth: m.depth, group: g.group, tab: top ? 'top' : 'devices' }, m);
+      add(m.id, { name: d.device, label: m.label, u: top ? 0 : m.u, top, est: !!m.estimated, face: m.face || 'shelf', shape: m.shape, device: dev, pwDev, url: m.url || null, author: m.author || '', hardware: m.hardware || [], note: m.note, depth: m.depth, group: g.group, tab: top ? 'top' : 'devices' }, m);
     });
   }));
   (c.extras || []).forEach(g => g.items.forEach(i => add(i.id, { name: i.name, label: i.label || null, u: 0, extra: true, shape: i.shape, url: i.url, author: i.author || '', hardware: i.hardware || [], note: i.note, group: g.group, tab: 'extras' }, i)));
@@ -41,6 +45,7 @@ function buildCatalog(c) {
 function defaultState() {
   let n = 1; const m = (k, p) => ({ id: n++, key: k, pos2: p });
   return { h: 5, version: 'brass', frame: '#26282B', panel: '#26282B', accent: '#B5CF2A', label: 'Lab Rax', top: null, topDir: null, extras: [], xdir: {}, back: 'open', room: 25, sides: 'printed', done: {}, example: true,
+    power: defaultPower(),
     items: [m('keystone', 0), m('flexmini05', 1), m('ucgmax1', 2), m('tiny1', 4), m('sbc7', 6)], nextId: n };
 }
 function load() {
@@ -58,6 +63,17 @@ function cleanParams(p) {
   if (p.type === 'keystone') { o.ports = Math.round(num(p.ports, 1, 12, 12)); o.rows = Math.round(num(p.rows, 1, 4, 1)); }
   if (p.type === 'shelf') { o.dw = num(p.dw, 20, 212, 120); o.dh = num(p.dh, 5, 400, 30); o.dd = num(p.dd, 20, 240, 120); o.open = p.open !== false; }
   if (p.type === 'label') o.text = String(p.text == null ? '' : p.text).slice(0, 24);
+  return o;
+}
+/* power settings: PoE devices outside the rack (fed by the rack's switches), the UPS size, and whether the top mount runs on PoE */
+function defaultPower() { return { ext: [], ups: { size: null, unit: 'VA' }, topPoe: null }; }
+function cleanPower(p) {
+  const o = defaultPower(), num = (v, lo, hi) => typeof v === 'number' && Number.isFinite(v) && v >= lo && v <= hi;
+  if (!p || typeof p !== 'object') return o;
+  o.ext = (Array.isArray(p.ext) ? p.ext : []).filter(x => x && typeof x === 'object').slice(0, 12)
+    .map(x => ({ name: String(x.name == null ? 'PoE device' : x.name).slice(0, 32) || 'PoE device', n: num(x.n, 1, 48) ? Math.round(x.n) : 1, w: num(x.w, .5, 100) ? Math.round(x.w * 10) / 10 : 10 }));
+  if (p.ups && typeof p.ups === 'object') { if (num(p.ups.size, 1, 100000)) o.ups.size = Math.round(p.ups.size); if (p.ups.unit === 'Wh') o.ups.unit = 'Wh'; }
+  if (typeof p.topPoe === 'boolean') o.topPoe = p.topPoe;
   return o;
 }
 /* Layouts come from this browser or from a shared link, so everything that ends up in the page is checked here. */
@@ -85,6 +101,8 @@ function sanitize() {
     if (i.label != null && typeof i.label !== 'string') delete i.label;
     if (i.watts != null && !(typeof i.watts === 'number' && i.watts >= 0 && i.watts <= 500)) delete i.watts;
     if (i.dir != null && !FAN_DIRS.includes(i.dir)) delete i.dir;
+    if (i.poe != null && typeof i.poe !== 'boolean') delete i.poe; // on PoE or on its own power supply, for parts that can run on PoE
+    if (i.poeBudget != null && !(typeof i.poeBudget === 'number' && i.poeBudget >= 0 && i.poeBudget <= 1000)) delete i.poeBudget; // a PoE switch's budget with the builder's power adapter
     if (i.pos2 != null && !Number.isInteger(i.pos2)) i.pos2 = 0;
     if (i.side !== 'back') delete i.side;
     if (!Number.isInteger(i.id) || i.id < 1 || ids.has(i.id)) i.id = null; else ids.add(i.id);
@@ -97,6 +115,7 @@ function sanitize() {
   const xd = state.xdir && typeof state.xdir === 'object' ? state.xdir : {}; state.xdir = {};
   state.extras.forEach(k => { if (FAN_DIRS.includes(xd[k])) state.xdir[k] = xd[k]; });
   if (!state.done || typeof state.done !== 'object') state.done = {};
+  state.power = cleanPower(state.power);
   // older layouts could place whole-U panels on a half U, and a shared link could overlap parts; move them onto free slots
   byPos().forEach(i => { const p = i.pos2; i.pos2 = null; i.pos2 = isFree(p, H(i), i.id) ? p : nearest(p, H(i), i.id); });
 }
@@ -566,15 +585,16 @@ function estimateHTML(includeSummary = true) {
 }
 const modsOf = d => { const s = d && d.shape; return s ? [].concat(...(s.rows || [s.row || []])).filter(m => m && typeof m === 'object') : []; };
 function facts() { // what the layout holds, for the shopping list and the guide
-  const f = { ks: 0, pi5: 0, pi4: 0, boards: 0, eth: 0, mains: 0, drives: 0, strip: false, gateway: false, fanParts: [], fans: new Map(), amps: 0 };
+  const f = { ks: 0, pi5: 0, pi4: 0, poePi5: 0, poePi4: 0, boards: 0, eth: 0, mains: 0, drives: 0, strip: false, gateway: false, fanParts: [], fans: new Map(), amps: 0 };
   const fanPart = d => { let n = 0; (d.hardware || []).forEach(x => { const hw = CAT.hardware[x.part]; if (hw && hw.mm) { n += x.qty; f.fans.set(x.part, (f.fans.get(x.part) || 0) + x.qty); f.amps += x.qty * (hw.amp || .15); } }); if (n) f.fanParts.push({ name: fullName(d), n }); };
   placed().forEach(i => {
     const d = info(i), mods = modsOf(d), name = fullName(d);
     mods.forEach(m => { if (typeof m.ks === 'number') f.ks += m.ks; });
     if (i.key === 'gen' && i.params.type === 'keystone') f.ks += (i.params.ports || 12) * (i.params.rows || 1);
-    let boards = 0; mods.forEach(m => { if (m.sbc) { const n = typeof m.sbc === 'number' ? m.sbc : 1; boards += n; if (/pi4/.test(m.board || '')) f.pi4 += n; else if (/pi/.test(m.board || 'pi5')) f.pi5 += n; } });
-    if (!boards && d.tab === 'devices' && /raspberry|\bpi ?[345]\b/i.test(name)) { boards = 1; if (/pi ?4/i.test(name)) f.pi4++; else f.pi5++; }
-    f.boards += boards;
+    let boards = 0, pi5 = 0, pi4 = 0; mods.forEach(m => { if (m.sbc) { const n = typeof m.sbc === 'number' ? m.sbc : 1; boards += n; if (/pi4/.test(m.board || '')) pi4 += n; else if (/pi/.test(m.board || 'pi5')) pi5 += n; } });
+    if (!boards && d.tab === 'devices' && /raspberry|\bpi ?[345]\b/i.test(name)) { boards = 1; if (/pi ?4/i.test(name)) pi4++; else pi5++; }
+    f.boards += boards; f.pi5 += pi5; f.pi4 += pi4;
+    if (onPoe(i, powerOf(d, i))) { f.poePi5 += pi5; f.poePi4 += pi4; } // Pis on PoE get a PoE+ HAT instead of a USB-C supply
     if (/drv/.test(d.face || '') || mods.some(m => m.bay)) f.drives++;
     if (d.group && /gateway/i.test(d.group)) f.gateway = true;
     if (d.tab === 'panels' && /strip|pdu|outlet/i.test(name)) f.strip = true;
@@ -598,8 +618,12 @@ function orderList() {
   if (f.boards) add('m25kit', 1);
   // fans: each fan part gets a USB-to-fan cable, a splitter when it holds more than one fan, and a USB port
   if (f.fanParts.length) { add('fanusb', f.fanParts.length); add('fansplit', f.fanParts.filter(p => p.n > 1).length); add('usbpower', Math.ceil(f.fanParts.length / 2)); add('fanspeed', 1); }
-  if (f.pi5) { add('pi5psu', f.pi5); add('usbc', f.pi5); }
-  if (f.pi4) { add('pi4psu', f.pi4); add('usbc', f.pi4); }
+  if (f.pi5 > f.poePi5) { add('pi5psu', f.pi5 - f.poePi5); add('usbc', f.pi5 - f.poePi5); }
+  if (f.pi4 > f.poePi4) { add('pi4psu', f.pi4 - f.poePi4); add('usbc', f.pi4 - f.poePi4); }
+  add('poehat5', f.poePi5); add('poehat4', f.poePi4);
+  // PoE devices that no switch in the rack can power: an injector each (the Power section also suggests a bigger switch)
+  const off = powerModel().poe.unpowered, bt = off.filter(p => p.need === 'bt').length;
+  add('poeinj', off.length - bt); add('poeinjbt', bt);
   if (f.mains && !f.strip) add('powerstrip', Math.ceil((f.mains + (f.fanParts.length ? 1 : 0)) / 6));
   if (f.ks) add('keystone', f.ks);
   if (f.eth) add('patch', f.eth + Math.min(f.ks, f.eth));
@@ -607,6 +631,9 @@ function orderList() {
   const out = [...m].map(([p, q]) => { const hw = CAT.hardware[p], q2 = hw.search || hw.name, packs = hw.pack > 1 ? Math.ceil(q / hw.pack) : null;
     return { key: p, group: hw.group || 'other', name: hw.name, spec: hw.spec || '', qty: q, pack: hw.pack || null, packs, links: shopLinks(q2), buy: hw.buy || shopUrl(q2),
       models: (hw.models || []).map(([label, s]) => ({ label, name: s, links: shopLinks(s) })) }; });
+  out.forEach(r => { if (r.key !== 'poeinj' && r.key !== 'poeinjbt') return; // say which devices the injectors are for
+    const who = [...new Set(off.filter(p => (p.need === 'bt') === (r.key === 'poeinjbt')).map(p => p.name))];
+    r.spec = (r.spec ? r.spec + '. ' : '') + 'For ' + who.join(', ') + '; or a bigger PoE switch, see Power & network'; });
   const fil = CAT.hardware.filament || { name: 'PETG filament, 1.75 mm', search: 'PETG filament 1.75mm {colour} 1kg' };
   filament().forEach(x => { const cn = colorName(x.c), named = cn[0] !== '#', q2 = fil.search.replace('{colour}', named ? cn.toLowerCase() : '').replace(/\s+/g, ' ');
     out.push({ key: 'filament-' + x.c, group: 'print', name: fil.name.replace('1.75 mm', named ? cn : 'custom ' + cn) + ', 1.75 mm', spec: '≈ ' + x.grams + ' g with 10 % spare; an estimate before slicing', qty: Math.ceil(x.grams / 1000), unit: 'spool', swatch: x.c, links: shopLinks(q2), buy: shopUrl(q2) }); });
@@ -660,8 +687,10 @@ function guide() {
     'Keep network cables on one side of the rack and power cables on the other, and bundle them with velcro ties.']);
   add('power', 'Connect the power', [
     f.mains ? 'Plug the power supplies of your ' + f.mains + ' device' + (f.mains > 1 ? 's' : '') + ' into ' + (f.strip ? 'the power strip in the rack' : 'one certified power strip with overload protection') + '. Don’t plug one power strip into another.' : null,
-    f.pi5 ? 'Each Raspberry Pi 5 gets its own 27 W USB-C supply (5.1 V, 5 A); a weaker supply limits the USB ports and can make the Pi unstable.' : null,
-    f.pi4 ? 'Each Raspberry Pi 4 gets a 15 W USB-C supply (5.1 V, 3 A).' : null,
+    f.pi5 > f.poePi5 ? 'Each Raspberry Pi 5 gets its own 27 W USB-C supply (5.1 V, 5 A); a weaker supply limits the USB ports and can make the Pi unstable.' : null,
+    f.pi4 > f.poePi4 ? 'Each Raspberry Pi 4 gets a 15 W USB-C supply (5.1 V, 3 A).' : null,
+    f.poePi5 + f.poePi4 > 1 ? 'The ' + (f.poePi5 + f.poePi4) + ' Raspberry Pis on PoE get a PoE+ HAT each and take their power from a PoE+ switch port: no USB-C supply.' :
+      f.poePi5 + f.poePi4 ? 'The Raspberry Pi on PoE gets a PoE+ HAT and takes its power from a PoE+ switch port: no USB-C supply.' : null,
     f.pi5 + f.pi4 > 2 ? 'With several Pis, a PoE switch with PoE HATs, or one multi-port USB-C charger with enough watts per port, is tidier than one supply per Pi.' : null,
     'Wiring mains inside the rack (DIY outlets, inlets or switches) is only for someone qualified to do it. A certified power strip in a holder is the safe choice.']);
   if (f.fanParts.length) add('fans', 'Connect the fans safely', [
@@ -904,6 +933,132 @@ function airParts() { // the Cooling section: a one-line summary and the breakdo
   return { sum, body };
 }
 
+/* ---------- power and network ---------- */
+/* A planning estimate; power.js holds the model and its assumptions. Here the rack is described for it: what each part draws
+   (the same watts as the cooling estimate), which parts give PoE and which run on it, and the network ports each part needs
+   and offers. The catalog's poe, poeIn and poeOptional count per device; a device's ports and eth too, a mount's for the
+   whole mount. */
+const SWITCH_GROUP = /switch|gateway|omada/i;        // devices here offer the RJ45 and SFP ports in their io, unless they set ports
+const OWN_BOARDS = /^(pi5|pi4)$/;                    // single-board computers that are the mount's own device (they can take a PoE HAT)
+const NO_LAN = /^(zero|uno)$/;                       // boards without an Ethernet port
+const provPorts = rec => rec.ports != null ? rec.ports : SWITCH_GROUP.test(rec.group || '') ? LS.netPorts(rec.io) : 0;
+// what one part means for power and network: { eth: switch ports it needs, provs: ports each switch or router in it offers,
+// modem, poe: [one per source], poeIn: { w, n, optional } }
+function powerOf(d, it) {
+  const r = { eth: 0, provs: [], modem: false, poe: [], poeIn: null };
+  if (!d) return r;
+  if (d.custom || (d.gen && it && it.params.type === 'shelf')) { r.eth = 1; return r; }
+  if (d.gen) return r;
+  const dev = d.pwDev || {}, m = d.pw || {}, f = k => m[k] !== undefined ? m[k] : dev[k];
+  const mods = modsOf(d), own = mods.filter(x => x.dev === true).reduce((n, x) => n + (x.n || 1), 0), extraProvs = [];
+  let boards = 0, extra = 0;
+  mods.forEach(x => {
+    if (x.sbc) { const n = typeof x.sbc === 'number' ? x.sbc : 1, b = x.board || 'pi5'; if (NO_LAN.test(b)) return; if (!own && OWN_BOARDS.test(b)) boards += n; else extra += n; }
+    else if (typeof x.dev === 'string' && PWDEV[x.dev]) { const o = PWDEV[x.dev], n = x.n || 1, p = provPorts(o); for (let k = 0; k < n; k++) if (p) extraProvs.push(p); else extra += o.eth != null ? o.eth : 1; }
+  });
+  const n = own || boards || 1, isDev = !!d.pwDev, poeIn = f('poeIn'), ports = isDev ? provPorts(dev) : 0;
+  const eth = ports ? 0 : dev.eth != null ? dev.eth : !isDev ? 0 : d.top ? (poeIn ? 1 : 0) : 1;
+  r.provs = m.ports !== undefined ? (m.ports ? [m.ports] : []) : Array(ports ? n : 0).fill(ports).concat(extraProvs);
+  r.eth = m.eth !== undefined ? m.eth : eth * n + extra;
+  r.modem = r.provs.length > 0 && /modem/i.test(d.group || '');
+  const poe = f('poe'); if (poe) for (let k = 0; k < n; k++) r.poe.push(poe);
+  if (poeIn) r.poeIn = { w: poeIn, n, optional: !!f('poeOptional') };
+  return r;
+}
+// a part that can run on PoE does so when the builder says so, else unless the catalog calls PoE optional for it
+const onPoe = (chosen, p) => !!(p.poeIn && (typeof chosen === 'boolean' ? chosen : typeof chosen === 'object' && chosen && typeof chosen.poe === 'boolean' ? chosen.poe : !p.poeIn.optional));
+function powerModel() {
+  const draws = [], sources = [], pds = [], prov = [], rows = [], f = facts(); let need = 0;
+  const part = (ref, it, d, where, name, chosen) => {
+    const p = powerOf(d, it), hw = heatOf(it || { key: d.key }), on = onPoe(chosen, p), sn = (it && it.label) || shortName(d); // sn: the device's own name, for PoE and ports
+    draws.push({ name, w: hw.w, est: hw.est });
+    p.poe.forEach((s, k) => sources.push({ id: ref + ':' + k, ref, name: sn + (p.poe.length > 1 ? ' #' + (k + 1) : ''), where, std: s.std || 'at', ports: s.ports, spec: s.budget,
+      budget: it && typeof it.poeBudget === 'number' ? it.poeBudget : s.budget }));
+    if (on) for (let k = 0; k < p.poeIn.n; k++) pds.push({ id: ref + ':' + k, ref, name: sn, w: p.poeIn.w, typ: hw.w / p.poeIn.n });
+    p.provs.forEach((ports, k) => prov.push({ name: sn, ports, modem: p.modem && !k }));
+    need += p.eth;
+    rows.push({ ref, it, d, name, where, w: hw.w, est: hw.est, own: !!hw.own, p, on });
+  };
+  byPos().forEach(it => { const d = info(it); part('i' + it.id, it, d, uRange(it.pos2, d.h2) + atBack(it), it.label || fullName(d), it); });
+  if (state.top) part('top', null, LIB[state.top], 'top', fullName(LIB[state.top]), state.power.topPoe);
+  state.extras.forEach(k => { if (LIB[k].watts > 0) part('x' + k, null, LIB[k], 'frame', fullName(LIB[k])); });
+  if (f.amps) draws.push({ name: 'Fans', w: f.amps * 5, est: true });
+  const ext = state.power.ext;
+  ext.forEach((x, i) => { draws.push({ name: x.name, w: x.n * x.w, est: true }); for (let k = 0; k < x.n; k++) pds.push({ id: 'e' + i + ':' + k, ref: 'e' + i, name: x.name, w: x.w, typ: x.w }); });
+  const outside = ext.reduce((n, x) => n + x.n, 0);
+  const r = window.LRPower.compute({ draws, sources, pds, net: { need: need + outside, extern: outside, providers: prov, keystones: f.ks }, ups: state.power.ups });
+  return Object.assign(r, { rows, fans: f.amps * 5, outside });
+}
+const fmtMin = m => m >= 90 ? (m / 60).toFixed(1) + ' h' : Math.round(m) + ' min';
+const kwhYear = r => r.total * 8.76; // kWh in a year of running all the time
+function energyText(r) {
+  const s = window.LREstimate.settings(state.costs), kwh = kwhYear(r);
+  return '≈ ' + Math.round(kwh) + ' kWh' + (s.kwhPrice != null ? ' · ' + window.LREstimate.money(kwh * s.kwhPrice, s.currency) : '');
+}
+// PoE devices outside the rack to pick from: the catalog's access points, then common ones (their maximum draw in W)
+function poePresets() {
+  return Object.values(PWDEV).filter(d => d.poeIn && /access point/i.test(d.group)).map(d => [d.name + ' access point', d.poeIn])
+    .concat([['Wi-Fi 6 access point', 13], ['PoE camera', 7], ['VoIP phone', 5], ['Raspberry Pi with PoE+ HAT', 15], ['Other PoE device', 10]]);
+}
+function powerParts() { // the Power & network section: a one-line summary and the breakdown
+  const L = window.LRPower, r = powerModel(), P = r.poe, N = r.ports, iss = L.issues(r);
+  const short = iss.some(i => i.level === 'short'), tight = iss.some(i => i.level === 'tight'), any = r.total > 0 || P.sources.length || P.load || N.need;
+  const sub = (id, title, n, list, dflt) => '<details class="abd" data-sec="' + id + '"' + ((ui.sec[id] == null ? dflt : ui.sec[id]) ? ' open' : '') + '><summary>' + title + ' <span class="muted">' + n + '</span></summary>' + list + '</details>';
+  const row = (name, sub, right) => '<li class="arow"><span class="an"><b>' + esc(name) + '</b>' + (sub ? '<small>' + sub + '</small>' : '') + '</span>' + right + '</li>';
+  const sum = (any ? '<span class="badge' + (short ? ' hot' : tight ? ' est' : '') + '">' + (short ? 'Short' : tight ? 'Tight' : 'OK') + '</span>' : '') +
+    '<span>' + (r.total ? (r.est ? '≈ ' : '') + fmtW(r.total) : 'Nothing draws power yet') + '</span>' +
+    (P.sources.length || P.load ? '<span class="muted">PoE ' + Math.round(P.load) + ' / ' + Math.round(P.budget) + ' W</span>' : '') +
+    (N.providers.length ? '<span class="muted">' + (N.need + N.linkPorts) + ' / ' + N.offered + ' ports</span>' : '') + (r.ups ? '<span class="muted">UPS ≈ ' + fmtMin(r.ups.minutes) + '</span>' : '');
+  let body = '<dl class="kv"><dt>Draw from the wall</dt><dd>' + (r.est ? '≈ ' : '') + fmtW(r.total) + '</dd>' +
+    (r.loss ? '<div class="note">Includes ≈ ' + fmtW(r.loss) + ' lost in the PoE switches’ power supplies.</div>' : '') +
+    '<dt>Running all year</dt><dd>' + energyText(r) + '</dd></dl>';
+  if (iss.length) body += '<ul class="tips">' + iss.map(i => '<li class="' + i.level + '"><span>' + esc(i.text) + '</span></li>').join('') + '</ul>';
+  const src = r.rows.filter(x => x.w > 0).sort((x, y) => y.w - x.w);
+  if (src.length || r.fans || r.outside) body += sub('pw-parts', 'Draw per part', (r.est ? '≈ ' : '') + fmtW(r.draw), '<ul>' +
+    src.map(x => row(x.name, esc(x.where) + (x.own ? ' · your value' : '') + (x.on ? ' · on PoE' : ''), wChip(x.w, x.est))).join('') +
+    (r.fans ? row('Fans', 'at 5 V, the current printed on them', wChip(r.fans, true)) : '') +
+    state.power.ext.map(x => row(x.name + (x.n > 1 ? ' ×' + x.n : ''), 'outside the rack, on PoE from it', wChip(x.n * x.w, true))).join('') + '</ul>' +
+    '<p class="hint">Typical draw, as in the cooling estimate; click a part in the rack to enter its real value. Devices on PoE count here with their own draw.</p>', false);
+  // PoE: the sources with their load, every part that can run on PoE, and devices elsewhere fed from the rack
+  const poeRows = r.rows.filter(x => x.p.poeIn), owner = new Map(); P.sources.forEach(s => s.pds.forEach(p => owner.set(p.id, s)));
+  const fedBy = ref => [...new Set([...owner].filter(([id]) => id.split(':')[0] === ref).map(([, s]) => s.name))];
+  const unp = ref => P.unpowered.filter(p => p.ref === ref).length;
+  if (P.sources.length || poeRows.length || state.power.ext.length) {
+    const seg = x => '<span class="seg small" role="group" aria-label="How ' + esc(x.name) + ' gets power">' + [[0, 'Adapter'], [1, 'PoE']].map(([v, l]) => '<button type="button" data-act="poe-on" data-ref="' + x.ref + '" data-v="' + v + '" aria-pressed="' + (x.on === !!v) + '">' + l + '</button>').join('') + '</span>';
+    const fed = x => !x.on ? 'own power supply' + (x.p.poeIn.optional ? '; PoE needs a PoE HAT or splitter' : '') : unp(x.ref) ? 'no PoE port for it' : 'from ' + fedBy(x.ref).join(', ');
+    body += sub('pw-poe', 'PoE', P.sources.length ? Math.round(P.load) + ' of ' + Math.round(P.budget) + ' W · ' + P.used + ' of ' + P.ports + ' ports' : 'no PoE source', '<ul>' +
+      P.sources.map(s => { const pct = s.budget ? Math.min(100, s.used / s.budget * 100) : 100, it = s.ref[0] === 'i' ? find(+s.ref.slice(1)) : null;
+        return row(s.name, esc(s.where) + ' · ' + s.n + ' of ' + s.ports + ' ' + L.STD[s.std].name + ' port' + (s.ports > 1 ? 's' : '') + ' used', '<span class="minibar" aria-hidden="true"><i style="width:' + pct.toFixed(0) + '%' + (s.used > s.budget * L.K.tight ? ';background:var(--warn)' : '') + '"></i></span><span class="at">' + Math.round(s.used) + ' / ' + Math.round(s.budget) + ' W</span>' +
+          (it && s.id.endsWith(':0') ? '<label class="watts" title="PoE budget with your power adapter; empty: ' + s.spec + ' W from the spec sheet. Some switches give more PoE with a bigger adapter.">Budget <input class="field mini" type="number" min="0" max="1000" step="1" inputmode="numeric" data-poe-budget="' + it.id + '" placeholder="' + s.spec + '" value="' + (typeof it.poeBudget === 'number' ? it.poeBudget : '') + '"> W</label>' : '')); }).join('') +
+      poeRows.map(x => row(x.name, esc(x.where) + ' · up to ' + fmtW(x.p.poeIn.w) + (x.p.poeIn.n > 1 ? ' each ×' + x.p.poeIn.n : '') + ', ' + L.STD[L.need(x.p.poeIn.w)].name + ' · ' + esc(fed(x)), seg(x))).join('') +
+      state.power.ext.map((x, i) => row(x.name, 'outside the rack · ' + L.STD[L.need(x.w)].name + (unp('e' + i) ? ' · ' + unp('e' + i) + ' without a PoE port' : ''),
+        '<span class="pwext"><input class="field mini" type="number" min="1" max="48" step="1" inputmode="numeric" data-ext="' + i + '" data-k="n" value="' + x.n + '" aria-label="How many"> × <input class="field mini" type="number" min="0.5" max="100" step="0.5" inputmode="decimal" data-ext="' + i + '" data-k="w" value="' + x.w + '" aria-label="Maximum watts each"> W<button type="button" class="btn small ghost" data-act="poe-ext-rm" data-i="' + i + '" aria-label="Remove ' + esc(x.name) + '">×</button></span>')).join('') + '</ul>' +
+      '<label class="pwadd"><select class="field" id="poe-ext-add" aria-label="Add a PoE device outside the rack"><option value="">+ PoE device outside the rack…</option>' + poePresets().map(([n, w], k) => '<option value="' + k + '">' + esc(n) + ' (' + w + ' W)</option>').join('') + '</select></label>' +
+      '<p class="hint">Each device takes one PoE port and its maximum draw from the spec sheet, so the budget also holds at full load. PoE gives 15.4 W per port, PoE+ 30 W, PoE++ 60 W. Some switches reserve the full 15.4 or 30 W per port whatever the device draws; check how yours counts.</p>', P.load > 0 || iss.some(i => /PoE/.test(i.text)));
+  }
+  const pn = N.providers.map(p => p.name + ' ' + p.ports).join(', ');
+  body += sub('pw-net', 'Network ports', N.providers.length ? (N.need + N.linkPorts) + ' of ' + N.offered + ' used' : N.need + ' needed', '<dl class="kv">' +
+    '<dt>Cables to a switch port</dt><dd>' + N.need + '</dd>' + (N.extern ? '<div class="note">' + N.extern + ' of them for PoE devices outside the rack.</div>' : '') +
+    '<dt>Switch and router ports</dt><dd>' + N.offered + '</dd>' + (pn ? '<div class="note">' + esc(pn) + '. Routers without their WAN port.</div>' : '') +
+    (N.linkPorts ? '<dt>Used to link them</dt><dd>' + N.linkPorts + '</dd>' : '') +
+    (N.providers.length ? '<dt>Free</dt><dd>' + (N.free < 0 ? 'none, ' + N.short + ' short' : N.free) + '</dd>' : '') +
+    (N.keystones ? '<dt>Keystone jacks</dt><dd>' + N.keystones + '</dd><div class="note">Pass-throughs to the room; each one you patch takes a switch port too.</div>' : '') + '</dl>', false);
+  const u = state.power.ups;
+  body += sub('pw-ups', 'UPS runtime', r.ups ? '≈ ' + fmtMin(r.ups.minutes) + ' at ≈ ' + fmtW(r.total) : 'enter its size', '<dl class="kv">' +
+    '<dt><label for="ups-size">UPS size</label></dt><dd><input class="field mini" id="ups-size" type="number" min="1" max="100000" step="1" inputmode="numeric" placeholder="600" value="' + (u.size || '') + '"> <span class="seg small" role="group" aria-label="UPS size in">' +
+      ['VA', 'Wh'].map(v => '<button type="button" data-act="ups-unit" data-v="' + v + '" aria-pressed="' + (u.unit === v) + '">' + v + '</button>').join('') + '</span></dd>' +
+    (r.ups ? '<dt>Battery</dt><dd>' + (r.ups.unit === 'VA' ? '≈ ' : '') + Math.round(r.ups.wh) + ' Wh</dd>' + (r.ups.rating ? '<dt>Watt rating</dt><dd>≈ ' + Math.round(r.ups.rating) + ' W</dd>' : '') +
+      '<dt>Runtime</dt><dd>≈ ' + fmtMin(r.ups.minutes) + '</dd>' : '') + '</dl>' +
+    '<p class="hint">For a lead-acid UPS at full charge' + (u.unit === 'VA' ? ', with about 0.125 Wh of battery per VA' : '') + '. After a few years the battery lasts about a third less. A lithium (LiFePO4) UPS or power station lasts about Wh × 0.85 ÷ the draw.</p>', !!u.size);
+  body += sub('pw-how', 'How the estimate works', '', '<ul class="notes">' +
+    '<li>Draw is each part’s typical use, the same as the cooling estimate; ≈ marks an estimate. Start-up and full load can be two to three times higher.</li>' +
+    '<li>A PoE switch’s own draw leaves out what it sends over PoE; the devices on PoE count with their own draw, plus about 10 % lost in the switch’s power supply.</li>' +
+    '<li>PoE devices are handed out biggest first, each to the switch with the most budget left that has a free port of a high enough standard.</li>' +
+    '<li>Every device with a network cable takes a switch port. Each extra switch or router links to another and uses a port at both ends.</li>' +
+    '<li>UPS runtime: battery Wh, an 85 % inverter plus 5 W for the UPS, and less capacity at a high load (Peukert, k = 1.2).</li></ul>', false);
+  return { sum, body, r, iss };
+}
+
 /* ---------- render: build column ---------- */
 /* Sections fold to one line each, so the column stays short; the open ones are remembered. */
 const sec = (id, title, sum, body) => '<details class="sec" data-sec="' + id + '"' + (ui.sec[id] ? ' open' : '') + '><summary><span class="sec-t">' + title + '</span><span class="sec-s">' + sum + '</span><span class="chev" aria-hidden="true">›</span></summary><div class="sec-b">' + body + '</div></details>';
@@ -933,6 +1088,8 @@ function renderBuild() {
   html += sec('costs', 'Print time & budget', '<span>Filament · electricity · purchase budget</span>', estimateHTML());
   const air = airParts();
   html += sec('air', 'Cooling', air.sum, air.body);
+  const pw = powerParts();
+  html += sec('power', 'Power & network', pw.sum, pw.body);
 
   const ol = orderList(), kg = filament().reduce((n, x) => n + x.grams, 0) / 1000, amazonTag = CAT.shops && CAT.shops.amazon && CAT.shops.amazon.tag;
   html += sec('shop', 'Shopping list', '<span>' + ol.length + ' items · ≈ ' + kg.toFixed(1) + ' kg PETG</span>', shopHTML(ol) +
@@ -972,6 +1129,14 @@ function listText() {
     L.push('', 'Cooling (estimate, room ' + a.room + ' °C)', '- Heat: ' + (a.est ? '≈ ' : '') + fmtW(a.Q) + ' · air through the rack ' + fmtF(a.flow) + ' · hottest air ≈ ' + fmtT(a.maxT));
     a.fans.forEach(f => L.push('- Fan: ' + f.name + ', ' + fanLine(f.d) + ', ' + dirText(f.dir, f.place)));
     airTips(a).forEach(t => L.push('- ' + t.text + (t.after ? ' (hottest air ' + fmtT(a.maxT) + ' → ' + fmtT(t.after.maxT) + ')' : '')));
+  }
+  const pw = powerModel(), N = pw.ports;
+  if (pw.total || N.need) {
+    L.push('', 'Power & network (estimate)', '- Draw from the wall: ' + (pw.est ? '≈ ' : '') + fmtW(pw.total) + ', ' + energyText(pw) + ' a year');
+    pw.poe.sources.forEach(s => L.push('- PoE: ' + s.name + ', ' + Math.round(s.used) + ' of ' + Math.round(s.budget) + ' W, ' + s.n + ' of ' + s.ports + ' ports'));
+    if (N.providers.length) L.push('- Network ports: ' + N.need + ' cables, ' + N.offered + ' switch and router ports, ' + N.free + ' free');
+    if (pw.ups) L.push('- UPS ' + pw.ups.size + ' ' + pw.ups.unit + ': ≈ ' + fmtMin(pw.ups.minutes));
+    window.LRPower.issues(pw).forEach(i => L.push('- ' + i.text));
   }
   return L.join('\n');
 }
@@ -1095,7 +1260,17 @@ function pdfData() {
     top: state.top ? fullName(LIB[state.top]) : null, topLook: state.top ? LS.topFor(LIB[state.top], colorsFor()) : null, // the top mount as drawn above the frame
     items: byPos().map(i => { const d = info(i); return { pos: uRange(i.pos2, d.h2) + atBack(i), pos2: i.pos2, h2: d.h2, name: fullName(d), label: i.label || '', u: uTxt(d), url: d.url || '', author: d.author || '', color: colorOf(i), face: faceSVG(d, colorOf(i)), depth: partDepth(i), back: sideOf(i) === 'back' }; }),
     print: printPack().map(x => ({ qty: x.qty, name: x.name, sub: x.subs.join(', '), vars: x.variants, url: x.url })), shop: orderList(), guide: guide(), estimate: buildEstimate(), market: state.market, wallMounts: state.extras.filter(k => LIB[k].shape && LIB[k].shape.wall).map(k => ({ name: fullName(LIB[k]), url: LIB[k].url })), sides: state.sides, dimensions: CAT.frame.dimensions, shareUrl: TOP_WIN ? shareLink() + '&s=shop' : null, frameParts: frameParts(), notes: state.h > 5 ? [JOINER_NOTE] : [],
-    cooling: pdfCooling(), shareUrl: TOP_WIN ? shareLink() + '&s=shop' : null }; // the QR code opens this layout with its shopping list
+    cooling: pdfCooling(), power: pdfPower(), shareUrl: TOP_WIN ? shareLink() + '&s=shop' : null }; // the QR code opens this layout with its shopping list
+}
+function pdfPower() { // the Power & network block for the PDF; null when nothing draws power or needs a port
+  const r = powerModel(), P = r.poe, N = r.ports;
+  if (!r.total && !P.sources.length && !N.need) return null;
+  return { tiles: [['DRAW', (r.est ? '≈ ' : '') + fmtW(r.total)], ['POE', P.sources.length || P.load ? Math.round(P.load) + ' / ' + Math.round(P.budget) + ' W' : 'none'],
+      ['NETWORK PORTS', N.providers.length ? (N.need + N.linkPorts) + ' / ' + N.offered : N.need + ' needed'], ['UPS RUNTIME', r.ups ? '≈ ' + fmtMin(r.ups.minutes) : 'no UPS set']],
+    lines: [(r.est ? '≈ ' : '') + fmtW(r.total) + ' from the wall, ' + energyText(r) + ' a year running all the time.' + (r.ups ? ' UPS ' + r.ups.size + ' ' + r.ups.unit + ': ≈ ' + fmtMin(r.ups.minutes) + '.' : '')]
+      .concat(P.sources.map(s => s.name + ': ' + Math.round(s.used) + ' of ' + Math.round(s.budget) + ' W PoE, ' + s.n + ' of ' + s.ports + ' ports' + (s.pds.length ? ' (' + [...new Set(s.pds.map(p => p.name))].join(', ') + ')' : '') + '.'))
+      .concat(window.LRPower.issues(r).map(i => (i.level === 'short' ? '! ' : '') + i.text)),
+    short: window.LRPower.issues(r).some(i => i.level === 'short') };
 }
 function pdfCooling() { // the Cooling section for the PDF; null when nothing in the rack makes heat
   const a = airflow();
@@ -1345,6 +1520,12 @@ document.addEventListener('click', async e => {
     case 'fan-dir': if (FAN_DIRS.includes(a.dataset.v)) { setFanDir(a.dataset.ref, a.dataset.v); touch(); render(); hideTip(); } break;
     case 'air-top': if (LIB[a.dataset.key]) { state.top = a.dataset.key; state.topDir = null; touch(); render(); renderLib(); say(fullName(LIB[a.dataset.key]) + ' now sits on top of the rack.'); } break;
     case 'air-back': state.back = a.dataset.v === 'closed' ? 'closed' : 'open'; touch(); render(); break;
+    case 'poe-on': { const v = a.dataset.v === '1', ref = a.dataset.ref;
+      if (ref === 'top') state.power = Object.assign({}, state.power, { topPoe: v });
+      else state.items = state.items.map(i => 'i' + i.id === ref ? Object.assign({}, i, { poe: v }) : i);
+      touch(); render(); break; }
+    case 'poe-ext-rm': state.power = Object.assign({}, state.power, { ext: state.power.ext.filter((x, i) => i !== +a.dataset.i) }); touch(); render(); break;
+    case 'ups-unit': state.power = Object.assign({}, state.power, { ups: Object.assign({}, state.power.ups, { unit: a.dataset.v === 'Wh' ? 'Wh' : 'VA' }) }); touch(); render(); break;
     case 'clear': undo = JSON.stringify(state); state.items = []; state.top = null; state.extras = []; sel = null; touch(); render(); renderLib(); say('Rack cleared.', true); break;
     case 'undo': if (undo) { state = JSON.parse(undo); undo = null; render(); renderLib(); say('Restored.'); } break;
     case 'copy': copyText(listText(), 'List copied.'); break;
@@ -1411,6 +1592,14 @@ document.addEventListener('change', e => {
   if (t.id === 'wz-spare') { wz.spare = +t.value; return; }
   if (t.classList.contains('wz-mount')) { wz.picks[+t.dataset.i].mount = t.value; return; }
   if (t.id === 'air-room') { const v = Math.round(+t.value); if (v >= 10 && v <= 40) { state.room = v; render(); } else t.value = state.room; return; }
+  // Power & network: PoE devices outside the rack, a switch's PoE budget, the UPS size (cleanPower() checks the values)
+  const setPower = o => { state.power = cleanPower(Object.assign({}, state.power, o)); touch(); render(); };
+  if (t.id === 'poe-ext-add') { const p = poePresets()[+t.value]; if (p) setPower({ ext: state.power.ext.concat({ name: p[0], n: 1, w: p[1] }) }); return; }
+  if (t.dataset.ext != null) { const i = +t.dataset.ext, v = +t.value; setPower({ ext: state.power.ext.map((x, k) => k === i && t.value !== '' && Number.isFinite(v) ? Object.assign({}, x, { [t.dataset.k]: v }) : x) }); return; }
+  if (t.id === 'ups-size') { setPower({ ups: Object.assign({}, state.power.ups, { size: t.value.trim() === '' ? null : +t.value }) }); return; }
+  if (t.dataset.poeBudget != null) { const id = +t.dataset.poeBudget, v = t.value.trim() === '' ? null : Math.round(+t.value);
+    state.items = state.items.map(i => { if (i.id !== id) return i; const c = Object.assign({}, i); if (v != null && v >= 0 && v <= 1000) c.poeBudget = v; else delete c.poeBudget; return c; });
+    touch(); render(); return; }
   if (e.target.id === 'sel-color') { render(); return; } if (e.target.id === 'mk-type' || e.target.id === 'mk-u' || e.target.id === 'mk-pattern') { if (e.target.id === 'mk-type') mkOptions(null); mkPreview(); } });
 document.addEventListener('toggle', e => { const d = e.target; if (d.matches && d.matches('details.sec, details.abd')) { ui.sec[d.dataset.sec] = d.open; saveUI(); } }, true);
 document.addEventListener('focusout', e => { if (e.target.id === 'rack-name') renderSettings(); });
@@ -1524,7 +1713,7 @@ function cycleTheme() { theme = THEMES[(THEMES.indexOf(theme) + 1) % 3]; try { l
 /* ---------- share link (own page only) ---------- */
 // share links: "#c=" + base64url of [settings that differ from the defaults, parts as [key, pos2, other fields]],
 // short enough for a QR code; old "#l=" links (the whole state) still open
-const SHARE_KEYS = ['h', 'version', 'frame', 'panel', 'accent', 'label', 'top', 'extras', 'market', 'costs', 'back', 'sides'];
+const SHARE_KEYS = ['h', 'version', 'frame', 'panel', 'accent', 'label', 'top', 'extras', 'market', 'costs', 'back', 'sides', 'power'];
 function shareLink() {
   const d = defaultState(), same = (x, y) => JSON.stringify(x) === JSON.stringify(y), st = {};
   SHARE_KEYS.forEach(k => { if (state[k] !== undefined && !same(state[k], d[k])) st[k] = state[k]; });

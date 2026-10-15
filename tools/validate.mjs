@@ -26,6 +26,30 @@ function air(o, where, needWatts) {
   for (const k of ['at', 'fanAt']) if (o[k] != null && !PLACES.has(o[k])) errors.push(`${where}: ${k} must be side, back or top`);
 }
 
+// power and network: PoE given (poe) and taken (poeIn, poeOptional), network ports offered (ports) and needed (eth).
+// own: the device's fields under a mount, for poeOptional and to check PoE ports against the device's ports
+const STDS = new Set(['af', 'at', 'bt']), PDMAX = { bt: 51 }; // the most a PoE++ (Type 3) device can draw
+const int = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
+function power(o, where, own) {
+  const has = k => o[k] !== undefined || (own && own[k] !== undefined), get = k => o[k] !== undefined ? o[k] : own && own[k];
+  if (o.poe !== undefined) {
+    const p = o.poe;
+    if (!p || typeof p !== 'object' || Array.isArray(p)) errors.push(`${where}: poe must be { "budget": W, "ports": n, "std": "af" | "at" | "bt" }`);
+    else {
+      if (!(typeof p.budget === 'number' && p.budget > 0 && p.budget <= 1000)) errors.push(`${where}: poe.budget is the total PoE budget in W, more than 0 and at most 1000`);
+      if (!int(p.ports, 1, 48)) errors.push(`${where}: poe.ports is the number of PoE ports, a whole number from 1 to 48`);
+      if (p.std != null && !STDS.has(p.std)) errors.push(`${where}: poe.std must be af (PoE), at (PoE+) or bt (PoE++)`);
+      for (const k of Object.keys(p)) if (!['budget', 'ports', 'std'].includes(k)) errors.push(`${where}: poe has an unknown field "${k}"`);
+      const offered = get('ports') != null ? get('ports') : own && own.io ? LS.netPorts(own.io) : o.io ? LS.netPorts(o.io) : null;
+      if (offered && int(p.ports, 1, 48) && p.ports > offered) errors.push(`${where}: poe.ports (${p.ports}) is more than the ${offered} network ports it has`);
+    }
+  }
+  if (o.poeIn !== undefined && !(typeof o.poeIn === 'number' && o.poeIn > 0 && o.poeIn <= PDMAX.bt)) errors.push(`${where}: poeIn is the most the device draws over PoE in W, more than 0 and at most 51 (PoE++ Type 3)`);
+  if (o.poeOptional !== undefined && (typeof o.poeOptional !== 'boolean' || !has('poeIn'))) errors.push(`${where}: poeOptional is true or false, next to poeIn (on the part or its device)`);
+  if (o.ports !== undefined && !int(o.ports, 0, 64)) errors.push(`${where}: ports is how many network ports it offers to other devices, a whole number from 0 to 64`);
+  if (o.eth !== undefined && !int(o.eth, 0, 16)) errors.push(`${where}: eth is how many switch ports it takes, a whole number from 0 to 16`);
+}
+
 function claim(id, where) {
   if (typeof id !== 'string' || !/^[a-z0-9]+$/.test(id)) errors.push(`${where}: id "${id}" must be lowercase letters and digits only`);
   else if (ids.has(id)) errors.push(`${where}: duplicate id "${id}"`);
@@ -57,7 +81,7 @@ for (const g of cat.panels || []) {
     if (!text(p.name)) errors.push(`${w}: needs a name`);
     if (!okU(p.u)) errors.push(`${w}: u must be 0.5–10 in steps of 0.5`);
     if (p.face && !FACES.has(p.face)) errors.push(`${w}: unknown face "${p.face}"`);
-    url(p.url, w, false); hardware(p.hardware, w); air(p, w, false); look('part', p, w);
+    url(p.url, w, false); hardware(p.hardware, w); air(p, w, false); power(p, w); look('part', p, w);
   }
 }
 for (const g of cat.devices || []) {
@@ -66,6 +90,7 @@ for (const g of cat.devices || []) {
     if (!text(d.device)) errors.push('devices: every item needs a device name');
     if (!Array.isArray(d.mounts) || !d.mounts.length) errors.push(`${d.device}: needs at least one mount`);
     LS.checkDevice(d, d.device).forEach(e => errors.push(e));
+    power(d, d.device);
     for (const m of d.mounts || []) {
       const w = `${d.device} / ${m.id}`; claim(m.id, w);
       if (!text(m.label)) errors.push(`${w}: needs a label`);
@@ -73,7 +98,7 @@ for (const g of cat.devices || []) {
       if (m.position && m.position !== 'top') errors.push(`${w}: position can only be "top"`);
       if (m.position !== 'top' && !okU(m.u)) errors.push(`${w}: u must be 0.5–10 in steps of 0.5`);
       if (m.face && !FACES.has(m.face)) errors.push(`${w}: unknown face "${m.face}"`);
-      hardware(m.hardware, w); air(m, w, true); look(m.position === 'top' ? 'top' : 'part', m, w);
+      hardware(m.hardware, w); air(m, w, true); power(m, w, d); look(m.position === 'top' ? 'top' : 'part', m, w);
       if (m.url) { const k = m.url.replace(/^https:\/\/(www\.)?/, '').replace(/\/en\//, '/'); if (urls.has(k + d.device)) errors.push(`${w}: same model listed twice for this device`); urls.set(k + d.device, 1); }
     }
   }
