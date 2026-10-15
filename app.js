@@ -181,10 +181,44 @@ function addItem(obj, pos) {
   const sd = obj.side === 'back' || (obj.side == null && rackSide === 'back') ? 'back' : 'front';
   if (sd === 'back') obj.side = 'back'; else delete obj.side;
   const d = info(obj), p = pos == null ? firstFree(d.h2, sd) : nearest(pos, d.h2, undefined, sd);
-  if (p == null) { say('No room for ' + fullName(d) + ' (' + fmtU(d.h2) + ') at the ' + sd + '. Make the rack taller or remove something.'); return false; }
+  if (p == null) { noRoom(d, sd, () => addItem(obj), () => addItem(Object.assign(obj, { side: sd === 'back' ? 'front' : 'back' }))); return false; }
   obj.id = state.nextId++; obj.pos2 = p; state.items.push(obj); sel = obj.id; touch(); render();
   say(fullName(d) + ' (' + uTxt(d) + ') placed at ' + uRange(p, d.h2) + atBack(obj) + '.' + clashText(obj));
   return true;
+}
+// the lowest rack height, up to 10U, with a free slot of h2 half-units on a side; null when even 10U has none
+function heightFor(h2, side) {
+  const h0 = state.h;
+  try { for (let h = h0 + 1; h <= 10; h++) { state.h = h; if (firstFree(h2, side) != null) return h; } return null; } finally { state.h = h0; }
+}
+const freeSlots = side => slots() - placed().filter(o => sideOf(o) === side).reduce((n, o) => n + H(o), 0);
+// a small dialog with a title, a line of text and buttons [value, label, class]; resolves to the button's value ('' for Esc)
+function askUser(title, text, buttons) {
+  const dlg = $('#askdlg');
+  $('#ask-title').textContent = title; $('#ask-text').textContent = text;
+  dlg.querySelector('.ask-actions').innerHTML = buttons.map(([v, label, cls]) => '<button value="' + v + '" class="btn' + (cls ? ' ' + cls : '') + '">' + esc(label) + '</button>').join('');
+  dlg.returnValue = '';
+  return new Promise(res => { dlg.addEventListener('close', () => res(dlg.returnValue), { once: true }); dlg.showModal(); });
+}
+/* No slot for a part on side sd: offer the lowest rack height that makes room, or say why it can't go in and offer the other
+   side when it fits there. place() puts the part in and returns true when it did; placeOther() tries the other side. */
+async function noRoom(d, sd, place, placeOther) {
+  const name = fullName(d) + ' (' + fmtU(d.h2) + ')', free = freeSlots(sd), other = sd === 'back' ? 'front' : 'back';
+  const grow = heightFor(d.h2, sd), spread = free >= d.h2; // enough room in total, but not in one piece
+  const where = 'The ' + sd + ' of this ' + state.h + 'U rack has ' + (free ? fmtU(free) + ' free' + (spread ? ', but not in one piece' : '') : 'no free slots') + '.';
+  say('No room for ' + name + ' at the ' + sd + '.');
+  if (grow) {
+    const v = await askUser('Make the rack ' + grow + 'U?', name + ' doesn’t fit. ' + where + ' At ' + grow + 'U it fits at the bottom; the parts already in stay where they are.', [['', 'Cancel'], ['grow', 'Make it ' + grow + 'U', 'primary']]);
+    if (v !== 'grow') return;
+    const before = JSON.stringify(state); setHeight(grow);
+    if (place()) { undo = before; say($('#status').textContent + ' The rack is now ' + grow + 'U.', true); } else { state = JSON.parse(before); render(); }
+    return;
+  }
+  const otherOk = placeOther && d.h2 <= 20 && (firstFree(d.h2, other) != null || heightFor(d.h2, other) != null);
+  const why = d.h2 > 20 ? name + ' is taller than the largest rack (10U).'
+    : name + ' doesn’t fit, even at 10U, the largest rack. ' + where + (spread ? ' Move parts together to make one gap, or remove some.' : ' Remove or move parts to make room.');
+  const v = await askUser('No room for this part', why, otherOk ? [['', 'OK'], ['other', 'Place it at the ' + other, 'primary']] : [['', 'OK', 'primary']]);
+  if (v === 'other') placeOther();
 }
 // move a part to the other side of the rack, at the same height or the nearest free slot there
 function flipSide(id) {
@@ -1620,8 +1654,8 @@ document.addEventListener('click', async e => {
     case 'rm': removeItem(+a.dataset.id); break;
     case 'replace': {
       const it = find(+a.dataset.id), p = firstFree(H(it), sideOf(it));
-      if (p == null) say('There is no free ' + fmtU(H(it)) + ' slot at the ' + sideOf(it) + '.');
-      else { it.pos2 = p; sel = it.id; touch(); render(); say(fullName(info(it)) + ' placed back at ' + uRange(p, H(it)) + atBack(it) + '.'); }
+      const put = () => { const q = firstFree(H(it), sideOf(it)); if (q == null) return false; it.pos2 = q; sel = it.id; touch(); render(); say(fullName(info(it)) + ' placed back at ' + uRange(q, H(it)) + atBack(it) + '.'); return true; };
+      if (p == null) noRoom(info(it), sideOf(it), put); else put();
       break;
     }
     case 'done': { const k = a.dataset.k; if (state.done[k]) delete state.done[k]; else state.done[k] = true; renderBuild(); save(); break; }
@@ -1790,8 +1824,7 @@ host.addEventListener('dragover', e => {
 host.addEventListener('dragleave', e => { if (!host.contains(e.relatedTarget)) showGhost(null); });
 host.addEventListener('drop', e => {
   if (!libKey) return; e.preventDefault(); const k = libKey, p = dropP; libKey = null; dropP = null;
-  if (p == null) { say('There is no room there for ' + fullName(LIB[k]) + '.'); showGhost(null); return; }
-  addItem({ key: k }, p);
+  showGhost(null); addItem({ key: k }, p); // no slot anywhere: addItem offers a taller rack
 });
 document.addEventListener('keydown', e => {
   if (sel == null || e.target.closest('input,select,textarea,dialog')) return;
