@@ -11,7 +11,7 @@ Static web app for planning 3D-printed 10" homelab racks: Lab Rax and more. Form
 - `pdf.js` — build plan PDF with jsPDF 2.5.1.
 - `airflow.js` — cooling model: air temperature per ½U layer, stack effect, fan curves, openings and walls. app.js describes the rack for it (airflow section).
 - `catalog.json` — all community parts (devices/mounts, panels, extras, hardware). See CONTRIBUTING.md for the schema.
-- `tools/looks.html` — every part drawn from its shape (library drawing, front view, `&3d=1` for 3D); use it to check a new entry's look.
+- `tools/looks.html` — every part drawn from its shape (library drawing, front view, `&3d=1` for 3D), the custom part types last (`?ids=gen`); use it to check a new entry's look.
 - `tools/validate.mjs` — catalog validator (also checks shapes through shapes.js); `.github/workflows/validate.yml` runs it and the syntax check on every push to main and every pull request.
 - `tools/measure.mjs` — measures a model file (STL or 3MF) from `reference/`: U height, screw holes, openings, depth, shelf seat, top-mount tilt; compares it with the catalog entry named by the file and with the shapes.js drawing.
 - `reference/` — local, git-ignored folder for downloaded model files (named by catalog id, e.g. `reference/sbc7.3mf`) used to measure the frame and the parts. Never commit them, or meshes or outlines traced from them; only the measured numbers go into catalog.json and shapes.js.

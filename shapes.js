@@ -1087,6 +1087,12 @@ function genShape(p) {
     case 'keystone': return { row: [{ ks: (p.ports || 12) * (p.rows || 1), rows: p.rows || 1 }] };
     case 'shelf': return { row: [{ dev: { size: [p.dw || 120, p.dh || 30, p.dd || 120], color: '#3A3D42', io: ['led'] }, win: p.open === false ? 'frame' : 'full' }], shelf: true, depth: (p.dd || 120) + 6 };
     case 'label': return { row: p.text ? [{ text: p.text, size: Math.min(14, p.u * 44.45 * .38) }] : [] };
+    case 'fan': { // spaced as parts.js fanPitch(); a fan is drawn at most 7 mm smaller than the plate, so the gap makes up the rest
+      const size = p.size || 40, n = p.fans || 1, pitch = n > 1 ? Math.min(size + 8, (SPAN - size) / (n - 1)) : 0, drawn = Math.min(size, panelH(p.u) - 7);
+      return { row: [Object.assign({ fan: size, n, gap: Math.max(0, pitch - drawn) }, p.grille === 'open' ? {} : { grille: 'hex' })] };
+    }
+    case 'dtype': { const r = [{ dtype: p.ports || 6 }]; return p.u >= 2 ? { rows: [r, r] } : { row: r }; }
+    case 'pass': return { row: [{ [p.style === 'brush' ? 'brush' : 'slot']: true, w: p.width || 120, h: p.u >= 1 ? 26 : 12 }] }; // slot height as parts.js passH()
     default: return { row: [] };
   }
 }

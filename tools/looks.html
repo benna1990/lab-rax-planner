@@ -22,7 +22,7 @@ input{font:inherit;padding:6px 10px;border-radius:999px;border:1px solid var(--l
 </head>
 <body>
 <h1>Part looks</h1>
-<p>Every catalog part drawn from its <code>shape</code> by shapes.js, the way the planner draws it: library drawing, front view at 1.2 px/mm, and with <code>&amp;3d=1</code> the 3D model. Add <code>?ids=sbc7,ucgmax1</code> to show only those parts. Run a local server and open tools/looks.html.</p>
+<p>Every catalog part drawn from its <code>shape</code> by shapes.js, the way the planner draws it: library drawing, front view at 1.2 px/mm, and with <code>&amp;3d=1</code> the 3D model. The custom part maker's types come last (in 3D their printed geometry). Add <code>?ids=sbc7,ucgmax1</code> to show only those parts, <code>?ids=gen</code> for the custom parts. Run a local server and open tools/looks.html.</p>
 <p><input id="q" placeholder="Filter by name, id or author"></p>
 <div class="grid" id="g"></div>
 <script src="../parts.js"></script>
@@ -40,11 +40,16 @@ input{font:inherit;padding:6px 10px;border-radius:999px;border:1px solid var(--l
     d.mounts.forEach(m => { if (!m.ref) parts.push({ key: m.id, name: d.device, label: m.label, author: m.author, u: m.u, h2: (m.u || 0) * 2, top: m.position === 'top', face: m.face || 'shelf', shape: m.shape, device: dev, depth: m.depth }); });
   }));
   (cat.extras || []).forEach(g => g.items.forEach(i => parts.push({ key: i.id, name: i.name, label: i.label || g.group, author: i.author, extra: true, shape: i.shape })));
+  // the custom part maker's types (parts.js), drawn from genShape() as the planner draws them; in 3D the printed geometry, as in the planner
+  [{ type: 'fan', u: 1, size: 40, fans: 5, grille: 'hex' }, { type: 'fan', u: 1, size: 40, fans: 3, grille: 'open' }, { type: 'fan', u: 2, size: 80, fans: 2, grille: 'hex' }, { type: 'fan', u: 3, size: 120, fans: 1, grille: 'open' },
+    { type: 'dtype', u: 1, ports: 6 }, { type: 'dtype', u: 2, ports: 7 }, { type: 'pass', u: 0.5, width: 160, style: 'brush' }, { type: 'pass', u: 1, width: 120, style: 'slot' },
+    { type: 'vent', u: 1, pattern: 'hex' }, { type: 'keystone', u: 0.5, ports: 12, rows: 1 }, { type: 'shelf', u: 1, dw: 120, dh: 30, dd: 120, open: true }, { type: 'label', u: 0.5, text: 'LAB RAX' }]
+    .forEach((params, i) => parts.push({ key: 'gen-' + params.type + '-' + i, name: 'Custom ' + params.type, label: 'Custom part · ' + JSON.stringify(params), gen: true, params, u: params.u, h2: params.u * 2 }));
   L.devices(n => sizes[n] || null);
   const host = document.getElementById('g');
   function draw(q) {
     host.innerHTML = '';
-    parts.filter(p => (!ids || ids.includes(p.key)) && (!q || (p.key + p.name + (p.label || '') + (p.author || '')).toLowerCase().includes(q))).forEach(p => {
+    parts.filter(p => (!ids || ids.includes(p.key) || (p.gen && ids.includes('gen'))) && (!q || (p.key + p.name + (p.label || '') + (p.author || '')).toLowerCase().includes(q))).forEach(p => {
       const el = document.createElement('div'); el.className = 'c';
       let thumb = '', front = '';
       try {
@@ -63,7 +68,9 @@ input{font:inherit;padding:6px 10px;border-radius:999px;border:1px solid var(--l
     const scene = new T.Scene(), cam = new T.PerspectiveCamera(30, box.clientWidth / 260, 5, 5000);
     scene.add(new T.HemisphereLight(0xffffff, 0x444444, .75)); const d1 = new T.DirectionalLight(0xffffff, .7); d1.position.set(300, 500, 400); scene.add(d1); const d2 = new T.DirectionalLight(0xffffff, .35); d2.position.set(-400, 200, -200); scene.add(d2);
     const mat = c => new T.MeshStandardMaterial({ color: new T.Color(c).convertSRGBToLinear(), roughness: .8, metalness: .02 });
-    const g = p.top ? L.topMeshes(T, p, colors, mat) : L.partMeshes(T, p, colors, mat);
+    let g;
+    if (p.gen) { const part = await window.LRParts.build(p.params); g = new T.Group(); part.geoms.forEach(x => g.add(new T.Mesh(x, mat(colors.color)))); (part.show || []).forEach(s => g.add(new T.Mesh(s.g, mat(s.c)))); }
+    else g = p.top ? L.topMeshes(T, p, colors, mat) : L.partMeshes(T, p, colors, mat);
     scene.add(g);
     const b = new T.Box3().setFromObject(g), c = new T.Vector3(), s = new T.Vector3(); b.getCenter(c); b.getSize(s);
     const dist = Math.max(s.x, s.y, s.z) * 1.5 + 40; cam.position.set(c.x + dist * .5, c.y + dist * .35, c.z + dist * .85); cam.lookAt(c);

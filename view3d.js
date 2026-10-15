@@ -32,7 +32,7 @@ const HOLE_X = 236.525 / 2, HOLE_Y = [6.35, 22.225, 38.1];
 let T = null, R = null;            // three namespace, main view state
 const previews = new Map();         // container -> preview state
 const fileModels = new Map();       // item id -> { mesh, rot:[x,y,z] }
-const genCache = new Map();         // params json -> geometries
+const genCache = new Map();         // params json -> { geoms, show } of a generated part
 
 function themeColors() {
   const cs = getComputedStyle(document.documentElement);
@@ -93,9 +93,9 @@ function grilleTex(frameColor, accent, label, mods) {
   });
 }
 /* ---------- rack model ---------- */
-async function genGeoms(params) {
+async function genPart(params) { // { geoms, show }: the printed part and what only the 3D view adds (the fans behind a fan panel)
   const k = JSON.stringify(params);
-  if (!genCache.has(k)) genCache.set(k, (await P.build(params)).geoms);
+  if (!genCache.has(k)) { const p = await P.build(params); genCache.set(k, { geoms: p.geoms, show: p.show || [] }); }
   return genCache.get(k);
 }
 function handleMesh(m, F, kind) {
@@ -179,8 +179,9 @@ async function buildRack(snap) {
     const yBottom = y0 + inner - (it.pos2 + it.h2) * P.U / 2 + P.CLEAR / 2, ph = it.h2 * P.U / 2 - P.CLEAR;
     const holder = new T.Group(); holder.userData.id = it.id;
     if (it.gen) {
-      const geoms = await genGeoms(it.gen), m = mat(it.color);
-      geoms.forEach(gg => { const me = new T.Mesh(gg, m); me.userData.cached = true; holder.add(me); });
+      const part = await genPart(it.gen), m = mat(it.color);
+      part.geoms.forEach(gg => { const me = new T.Mesh(gg, m); me.userData.cached = true; holder.add(me); });
+      part.show.forEach(s => { const me = new T.Mesh(s.g, cmat(s.c)); me.userData.cached = true; holder.add(me); });
     } else { // the panel, what is mounted in it and the device behind it, as real geometry from the part's shape (shapes.js)
       const look = it.look || { key: 'face:' + it.face, face: it.face, h2: it.h2 };
       holder.add(LS.partMeshes(T, look, { color: it.color, accent: snap.accent, frame: snap.frame, maxDepth: F.depth - 25 }, cmat));
