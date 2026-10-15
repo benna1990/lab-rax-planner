@@ -105,6 +105,8 @@ Around the row: `"shelf": true` adds a shelf behind it (`"floor": "hex"` or `"sl
 
 `node tools/validate.mjs` checks shapes, sizes and `io` tokens.
 
+If you have the model file, put it in `reference/` named by the entry's id (`reference/keystone.3mf`) and run `node tools/measure.mjs keystone`. It reports the height in U, the screw holes, the openings through the front plate, the depth and, for top mounts, the tilt, and compares them with the catalog entry and its drawing (a text map shows openings that are only in the model or only in the drawing). `reference/` is ignored by git: never commit model files or outlines traced from them.
+
 Run `node tools/validate.mjs`, then open a pull request.
 
 ## Custom part types

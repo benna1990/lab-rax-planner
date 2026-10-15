@@ -13,11 +13,13 @@ Static web app for planning 3D-printed 10" homelab racks: Lab Rax and more. Form
 - `catalog.json` — all community parts (devices/mounts, panels, extras, hardware). See CONTRIBUTING.md for the schema.
 - `tools/looks.html` — every part drawn from its shape (library drawing, front view, `&3d=1` for 3D); use it to check a new entry's look.
 - `tools/validate.mjs` — catalog validator (also checks shapes through shapes.js); `.github/workflows/validate.yml` runs it and the syntax check on every push to main and every pull request.
-- `reference/` — local, git-ignored folder for downloaded model files used to measure the frame. Never commit them.
+- `tools/measure.mjs` — measures a model file (STL or 3MF) from `reference/`: U height, screw holes, openings, depth, shelf seat, top-mount tilt; compares it with the catalog entry named by the file and with the shapes.js drawing.
+- `reference/` — local, git-ignored folder for downloaded model files (named by catalog id, e.g. `reference/sbc7.3mf`) used to measure the frame and the parts. Never commit them, or meshes or outlines traced from them; only the measured numbers go into catalog.json and shapes.js.
 
 ## Commands
 - Run: `python3 -m http.server 8000` then open http://localhost:8000 (needs a server; `fetch('catalog.json')`).
 - Check: `node tools/validate.mjs && for f in app.js parts.js shapes.js view3d.js pdf.js airflow.js; do node --check $f; done`
+- Measure: `node tools/measure.mjs [id …]` (all of `reference/` without ids; `--front=±axis`, `--up=±axis` when it picks the wrong face, `--svg` for an overlay in `reference/`, `--json` for numbers).
 
 ## Rules
 - Whole-U panels start on a U boundary (EIA hole pattern repeats per U); ½U panels may sit in either half.
