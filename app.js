@@ -934,6 +934,12 @@ function facts() { // what the layout holds, for the shopping list and the guide
   state.extras.forEach(k => fanPart(LIB[k]));
   return f;
 }
+// device mounts and extras in the build without a hardware list of their own (panels only need the panel screws)
+function noHardwareParts() {
+  const seen = new Set(), out = [];
+  placed().map(i => info(i)).concat(state.extras.map(k => LIB[k])).forEach(d => { if (d && !d.gen && !d.custom && (d.tab === 'devices' || d.extra) && !(d.hardware || []).length && !seen.has(d.key)) { seen.add(d.key); out.push(d); } });
+  return out;
+}
 function orderList() {
   const m = new Map(), add = (p, q) => { if (CAT.hardware[p] && q > 0) m.set(p, (m.get(p) || 0) + q); }, br = state.version === 'brass', f = facts();
   (br ? CAT.frame.brass : CAT.frame.bolted).hardware.forEach(x => add(x.part, x.qty));
@@ -972,6 +978,8 @@ function orderList() {
   if (state.bottom === 'acrylic') { const a = CAT.hardware.acrylic || {}, tp = (CAT.frame.dimensions || {}).topPanel || [228, 171.5];
     out.push({ key: 'acrylic-bottom', group: 'acrylic', name: 'Acrylic bottom panel, 3 mm', spec: tp[0] + ' × ' + tp[1] + ' mm, the size of the printed bottom panel; check it against the frame model before ordering', qty: 1, links: [], buy: null, cutters: (CAT.acrylic || []).filter(c => ['NL', 'BE'].includes(state.market) || /world|eu/i.test(c.note || '')) }); }
   if (state.extras.some(k => LIB[k].shape && LIB[k].shape.wall)) out.push({ key: 'wallfixings', group: 'fasteners', name: 'Wall bracket fixings', spec: 'Choose for the selected bracket, loaded rack and wall', qty: null, links: [], buy: null });
+  // parts that don't list their own hardware: the panel screws are counted, anything else they need isn't known
+  const bare = noHardwareParts(); if (bare.length) out.push({ key: 'parthardware', group: 'fasteners', name: 'Hardware the parts themselves need', spec: bare.length + (bare.length > 1 ? ' parts don’t' : ' part doesn’t') + ' list their own screws, nuts or magnets (' + bare.slice(0, 3).map(d => shortName(d)).join(', ') + (bare.length > 3 ? '…' : '') + '); check their model pages', qty: null, links: [], buy: null });
   if (state.h > 5) out.push({ key: 'joiners', group: 'fasteners', name: 'Fasteners for the 4 post joiners', spec: 'Not confirmed yet; check the extension model page', qty: null, links: [], buy: null, check: CAT.frame.extension.url });
   // handy extras from tips.json, when they fit this rack
   const when = { always: true, fans: f.fanParts.length > 0, acrylic: state.sides === 'acrylic' || state.bottom === 'acrylic', brass: br, bolted: !br, network: f.eth > 0 || f.ks > 0, sbc: f.boards > 0, drives: f.drives > 0, tall: state.h > 5, power: f.mains > 0 };
@@ -1447,7 +1455,7 @@ function readyFacts(pk) {
     parts: pl.length, unplaced: state.items.length - pl.length, clashes: cl.length, clashId: cl[0] && cl[0].id, overlaps: ov.length, overlapId: ov[0] && ov[0].id,
     printer: pk.printer ? { name: bedName(pk.printer), bad: bedBad(pk).length, turned: pk.some(x => x.bed && x.bed.turned.length) } : null,
     cooling: { level: !a.Q ? 'none' : a.maxT <= RATED[0] ? 'cool' : a.maxT <= RATED[1] ? 'warm' : 'hot', maxT: a.maxT },
-    power: window.LRPower.issues(powerModel()), estimated: pl.filter(i => info(i).est).length,
+    power: window.LRPower.issues(powerModel()), estimated: pl.filter(i => info(i).est).length, noHardware: noHardwareParts().length,
     market: (window.LRMarket.regions[state.market] || {}).name
   };
 }
@@ -2294,5 +2302,5 @@ fetch('catalog.json', { cache: 'no-cache' })
 
 window.LRApp = { snapshot, select: id => { sel = id; render(); }, say, toggleSides: () => { state.sides = state.sides === 'acrylic' ? 'printed' : 'acrylic'; touch(); render(); }, tip: (id, x, y) => id == null ? hideTip() : showTip(id, x, y) };
 // tools/selftest.html drives the planner through these; only on a page opened with ?selftest
-if (/[?&]selftest\b/.test(location.search)) window.LRApp.test = { get state() { return state; }, addItem, move, setHeight, histGo, shareLink, rackFile, readRackFile, byPos, ready: () => window.LRReady.summary(READY) };
+if (/[?&]selftest\b/.test(location.search)) window.LRApp.test = { get state() { return state; }, printPack, orderList, addItem, move, setHeight, histGo, shareLink, rackFile, readRackFile, byPos, ready: () => window.LRReady.summary(READY) };
 })();

@@ -36,6 +36,7 @@
     W.URL.revokeObjectURL = () => {};
   };
   const T = () => W.LRApp.test, $ = s => W.document.querySelector(s), items = () => JSON.stringify(T().state.items.map(i => [i.key, i.pos2]));
+  const fail = m => { throw new Error(m); }; // a check passes with true or a note, and fails by throwing
   async function check(name, fn) { try { const d = await fn(); log(d !== false, name, typeof d === 'string' ? d : ''); } catch (e) { log(false, name, e.message); } }
   async function download(act, re) {
     W.__dl = []; $('[data-act="' + act + '"]').click(); await wait(400);
@@ -63,10 +64,24 @@
     await check('Build pack ZIP export', async () => { W.document.querySelector('#finalize-build').close && W.document.querySelector('#finalize-build').close(); await wait(200);
       const f = await download('pack', /download/i), v = new DataView(f.buf.buffer), eo = f.buf.length - 22, n = v.getUint16(eo + 10, true); let cd = v.getUint32(eo + 16, true); const names = [];
       for (let i = 0; i < n; i++) { const nl = v.getUint16(cd + 28, true); names.push(new TextDecoder().decode(f.buf.subarray(cd + 46, cd + 46 + nl))); cd += 46 + nl + v.getUint16(cd + 30, true) + v.getUint16(cd + 32, true); }
-      const need = ['.pdf', '.rack.json', 'shopping-list.csv'].filter(x => !names.some(nm => nm.endsWith(x))); return need.length ? 'missing ' + need.join(', ') : f.name + ': ' + names.length + ' files'; });
-    await check('No errors while building', () => errors.length ? errors.join('; ') : true);
+      const need = ['.pdf', '.rack.json', 'shopping-list.csv'].filter(x => !names.some(nm => nm.endsWith(x))); return need.length ? fail('missing ' + need.join(', ')) : f.name + ': ' + names.length + ' files'; });
+    // regressions from the first review (AUDIT-NL.md, findings 1–4)
+    await check('Print list: two variants from one model page share a row and both show', async () => { T().setHeight(8); T().addItem({ key: 'mw1385541' }); T().addItem({ key: 'mw13855411' }); await wait(200);
+      const rows = T().printPack().filter(x => /1385541/.test(x.url || '')); return rows.length === 1 && rows[0].qty === 2 && /½U/.test(rows[0].variants) && /1U/.test(rows[0].variants) ? rows[0].variants : fail('rows: ' + JSON.stringify(rows.map(r => [r.qty, r.variants]))); });
+    await check('Print list: two custom parts with the same name but other settings stay apart', async () => { T().addItem({ key: 'gen', name: 'Panel', params: { type: 'vent', u: 1, pattern: 'hex' } }); T().addItem({ key: 'gen', name: 'Panel', params: { type: 'vent', u: 1, pattern: 'slots' } }); await wait(200);
+      const n = T().printPack().filter(x => x.name === 'Panel').length; return n === 2 || fail(n + ' rows'); });
+    await check('Shopping list: a mount without its own hardware list shows unknown hardware', () => { const r = T().orderList().find(x => x.key === 'parthardware'); return !!r && r.qty == null ? r.spec.slice(0, 60) + '…' : false; });
+    await check('No errors while building', () => errors.length ? fail(errors.join('; ')) : true);
+    await check('PDF at 10U, full: every text line inside the page', async () => { T().setHeight(10); for (const key of ['tiny1', 'fan40', 'keystone']) T().addItem({ key }); await wait(300); // fills the last 2½U
+      W.document.querySelector('#finalize-build').close && W.document.querySelector('#finalize-build').close();
+      const f = await download('pdf', /download pdf/i), s = new TextDecoder('latin1').decode(f.buf), pages = (s.match(/\/Type \/Page\b/g) || []).length; const bad = []; let n = 0;
+      for (const blk of s.matchAll(/\bBT\b([\s\S]*?)\bET\b/g)) { let x = 0, y = 0; // the first Td in a text block is absolute, the next ones move from the line before
+        for (const m of blk[1].matchAll(/(-?[\d.]+) (-?[\d.]+) Td/g)) { n++; x += +m[1]; y += +m[2]; if (x < 0 || x > 595.3 || y < 14 || y > 841.9) bad.push(x.toFixed(1) + ',' + y.toFixed(1) + ' ' + blk[1].slice(m.index, m.index + 80).replace(/\s+/g, ' ')); } }
+      return n > 50 && !bad.length ? pages + ' pages, ' + n + ' text lines inside A4' : fail(bad.length + ' of ' + n + ' text lines outside the page: ' + bad.slice(0, 2).join(' | ')); });
+    await check('A failed PDF is reported, not silently left out of the build pack', async () => { W.document.querySelector('#finalize-build').close && W.document.querySelector('#finalize-build').close(); const make = W.LRPdf.make; W.LRPdf.make = () => Promise.reject(new Error('test failure'));
+      try { const f = await download('pack', /download/i); await wait(300); const st = W.document.getElementById('status').textContent; return /PDF is missing/.test(st) ? f.name + ': ' + st.slice(0, 70) + '…' : fail('status: ' + st); } finally { W.LRPdf.make = make; } });
     await load(link.slice(link.indexOf('#'))); hook();
-    await check('Share link opens the same layout', () => { const got = items(); return got === want || 'got ' + got; });
+    await check('Share link opens the same layout', () => { const got = items(); return got === want || fail('got ' + got); });
   } catch (e) { log(false, 'Self-test stopped', e.message); }
   finally { KEYS.forEach((k, i) => saved[i] == null ? localStorage.removeItem(k) : localStorage.setItem(k, saved[i])); }
   const bad = results.filter(x => !x).length;

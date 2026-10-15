@@ -31,6 +31,10 @@ assert.equal(R.stepState(c, 3), 'warn');
 assert.equal(R.stepState(c, 5), 'warn');
 assert.equal(R.summary(c).warn, 6);
 
+// parts without a hardware list are a note on step 5, not a problem
+c = run({ noHardware: 3 });
+assert.equal(c.find(x => x.id === 'hardware').state, 'info'); assert.equal(c.find(x => x.id === 'hardware').step, 5); assert.equal(R.summary(c).ready, true);
+
 // warm is a warning too; estimated heights are counted as a note
 c = run({ cooling: { level: 'warm', maxT: 38.6 }, estimated: 1 });
 assert.equal(c.find(x => x.id === 'cooling').state, 'warn');

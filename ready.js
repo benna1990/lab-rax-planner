@@ -10,7 +10,7 @@ const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
      printer: null | { name, bad, turned },                           the chosen printer and the prints too big for it
      cooling: { level: 'none' | 'cool' | 'warm' | 'hot', maxT },      the cooling estimate
      power: [{ level: 'short' | 'tight' | 'info', text }],            from power.js issues()
-     estimated, market                                                parts with an estimated height; the shop country's name
+     estimated, noHardware, market                                    parts with an estimated height or no hardware list; the shop country
    } */
 function checks(f) {
   const out = [], add = (id, step, state, title, why, fix) => out.push({ id, step, state, title, why: why || '', fix: fix || null });
@@ -33,6 +33,7 @@ function checks(f) {
   if (short.length) short.forEach((x, i) => add('power' + i, 3, 'warn', x.text, '', { act: 'go-step', step: 3, label: 'See power' }));
   else if (f.parts) add('power', 3, 'ok', 'Power, PoE and network ports add up');
   // 4 what is still an estimate
+  if (f.noHardware) add('hardware', 5, 'info', plural(f.noHardware, 'part doesn’t', 'parts don’t') + ' list their own hardware', 'Besides the panel screws they may need screws, nuts or magnets of their own; the shopping list can’t count those, so check their model pages.');
   if (f.estimated) add('estimated', 4, 'info', plural(f.estimated, 'part has', 'parts have') + ' an estimated height (≈)', 'Check the height on the model page before you print.');
   add('frame', 4, 'info', 'Frame sizes are estimates', 'The 3D frame comes from photos and a few measured models. A test print of one panel confirms the fit.');
   // 1 where the shopping list links to
