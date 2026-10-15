@@ -325,6 +325,8 @@ details.abd .hint{margin-top:6px}
 .lghead[aria-expanded="true"] .chev,details.sec[open] > summary .chev{transform:rotate(90deg)}
 .lrows{display:flex;flex-direction:column;gap:2px;padding:0 0 10px}
 .lrow-wrap{display:flex;align-items:center;gap:4px}
+.lrow[data-fit]{opacity:.72}
+.lrow[data-fit]::after{content:attr(data-fit);flex:none;margin-left:auto;font-size:11px;font-weight:700;color:var(--muted);border:1px dashed var(--line-2);border-radius:999px;padding:1px 7px;white-space:nowrap} /* doesn't fit at this side: the rack height it needs */
 .lrow{flex:1;min-width:0;display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:10px;border:1px solid transparent;background:none;color:var(--ink);text-align:left;cursor:pointer}
 .lrow:hover{background:var(--sunk);border-color:var(--line)}
 .lrow.on{border-color:color-mix(in srgb,var(--accent) 55%,transparent)}
@@ -473,6 +475,7 @@ dialog.askdlg::backdrop{background:rgba(10,12,14,.55)}
         <button type="button" data-act="view" data-v="3d" id="v-3d">3D view</button>
       </div>
       <div style="display:flex;align-items:center;gap:10px">
+        <div class="stepper"><button type="button" data-act="hist-undo" id="hist-undo" title="Undo (⌘Z or Ctrl+Z)" aria-label="Undo" disabled>↶</button><button type="button" data-act="hist-redo" id="hist-redo" title="Redo (⇧⌘Z or Ctrl+Y)" aria-label="Redo" disabled>↷</button></div>
         <span class="muted" style="font-weight:600">Height</span>
         <div class="stepper"><button type="button" data-act="h-" id="h-minus" aria-label="Make the rack 1U lower">−</button><output id="h-out">5U</output><button type="button" data-act="h+" id="h-plus" aria-label="Make the rack 1U taller">+</button></div>
       </div>

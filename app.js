@@ -52,7 +52,24 @@ function load() {
   try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && Array.isArray(s.items) && s.h >= 1 && s.h <= 10 && s.nextId) return Object.assign({ accent: '#B5CF2A', label: 'Lab Rax', top: null, extras: [], done: {} }, s); } catch (e) {}
   return null;
 }
-function save() { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {} }
+/* Undo history: every saved change of the layout, up to 100 steps back. Changes less than 0.8 s apart (typing a label, a run of
+   arrow keys) count as one step. Cmd/Ctrl+Z and the arrows next to Height walk it; the Undo link in a message restores its own snapshot. */
+const HIST = { back: [], fwd: [], last: null, at: 0, quiet: false };
+function save() {
+  const s = JSON.stringify(state);
+  if (HIST.last != null && s !== HIST.last && !HIST.quiet) { const now = Date.now(); if (now - HIST.at > 800) { HIST.back.push(HIST.last); if (HIST.back.length > 100) HIST.back.shift(); } HIST.fwd.length = 0; HIST.at = now; }
+  HIST.last = s; histButtons();
+  try { localStorage.setItem(STORE, s); } catch (e) {}
+}
+function histButtons() { const u = document.getElementById('hist-undo'), r = document.getElementById('hist-redo'); if (u) u.disabled = !HIST.back.length; if (r) r.disabled = !HIST.fwd.length; }
+function histGo(dir) { // -1 undo, +1 redo
+  const from = dir < 0 ? HIST.back : HIST.fwd, to = dir < 0 ? HIST.fwd : HIST.back;
+  if (!from.length) { say(dir < 0 ? 'Nothing to undo.' : 'Nothing to redo.'); return; }
+  to.push(JSON.stringify(state)); state = JSON.parse(from.pop()); sel = null; undo = null;
+  HIST.quiet = true; try { sanitize(); render(); renderLib(); } finally { HIST.quiet = false; }
+  HIST.last = JSON.stringify(state); HIST.at = 0; histButtons();
+  say((dir < 0 ? 'Undone' : 'Redone') + ' (' + (dir < 0 ? HIST.back.length + ' more step' + (HIST.back.length === 1 ? '' : 's') + ' back' : HIST.fwd.length + ' more forward') + ').');
+}
 const HEX = /^#[0-9a-f]{6}$/i;
 const FAN_DIRS = ['intake', 'exhaust', 'cross'];
 const own = (o, k) => typeof k === 'string' && Object.prototype.hasOwnProperty.call(o, k);
@@ -180,7 +197,7 @@ function say(msg, btn) { const b = btn === true ? ['undo', 'Undo'] : btn; $('#st
 function addItem(obj, pos) {
   const sd = obj.side === 'back' || (obj.side == null && rackSide === 'back') ? 'back' : 'front';
   if (sd === 'back') obj.side = 'back'; else delete obj.side;
-  const d = info(obj), p = pos == null ? firstFree(d.h2, sd) : nearest(pos, d.h2, undefined, sd);
+  const d = info(obj), p = pos == null ? firstClear(obj, d.h2, sd) : nearest(pos, d.h2, undefined, sd);
   if (p == null) { noRoom(d, sd, () => addItem(obj), () => addItem(Object.assign(obj, { side: sd === 'back' ? 'front' : 'back' }))); return false; }
   obj.id = state.nextId++; obj.pos2 = p; state.items.push(obj); sel = obj.id; touch(); render();
   say(fullName(d) + ' (' + uTxt(d) + ') placed at ' + uRange(p, d.h2) + atBack(obj) + '.' + clashText(obj));
@@ -192,6 +209,31 @@ function heightFor(h2, side) {
   try { for (let h = h0 + 1; h <= 10; h++) { state.h = h; if (firstFree(h2, side) != null) return h; } return null; } finally { state.h = h0; }
 }
 const freeSlots = side => slots() - placed().filter(o => sideOf(o) === side).reduce((n, o) => n + H(o), 0);
+// the first free slot where the part doesn't run into a part on the other side (depth), else the first free slot
+function firstClear(obj, h2, sd) {
+  let first = null;
+  for (let p = 0; p + h2 <= slots(); p++) if (isFree(p, h2, undefined, sd)) { if (first == null) first = p; if (!clashes(Object.assign({ id: -1 }, obj, { pos2: p })).length) return p; }
+  return first;
+}
+// slide the parts on a side up against each other, so their free space is one gap at the bottom; whole-U parts stay on a U
+function packSide(side) {
+  let p = 0, n = 0;
+  placed().filter(o => sideOf(o) === side).sort((x, y) => x.pos2 - y.pos2).forEach(o => { const h = H(o); while (!aligned(p, h)) p++; if (o.pos2 !== p) { o.pos2 = p; n++; } p += h; });
+  return n;
+}
+// would packing the side make a slot for h2? (tried, then put back)
+function packHelps(h2, side) { const was = placed().map(o => [o, o.pos2]); packSide(side); const ok = firstFree(h2, side) != null; was.forEach(([o, p]) => { o.pos2 = p; }); return ok; }
+// one U lower; ask first when parts would no longer fit
+async function shrink(h) {
+  if (h < 1) return;
+  const out = placed().filter(i => i.pos2 + H(i) > h * 2);
+  if (out.length) {
+    const names = out.map(i => i.label || fullName(info(i))), list = names.slice(0, 3).join(', ') + (names.length > 3 ? ' and ' + (names.length - 3) + ' more' : ''), many = out.length > 1;
+    const v = await askUser('Make the rack ' + h + 'U?', (many ? out.length + ' parts no longer fit' : '1 part no longer fits') + ' in ' + h + 'U: ' + list + '. ' + (many ? 'They move' : 'It moves') + ' to “Doesn’t fit” under the rack, where you can put ' + (many ? 'them' : 'it') + ' back.', [['', 'Cancel'], ['go', 'Make it ' + h + 'U', 'primary']]);
+    if (v !== 'go') return;
+  }
+  const before = JSON.stringify(state); setHeight(h); if (out.length) { undo = before; say($('#status').textContent, true); }
+}
 // a small dialog with a title, a line of text and buttons [value, label, class]; resolves to the button's value ('' for Esc)
 function askUser(title, text, buttons) {
   const dlg = $('#askdlg');
@@ -207,8 +249,18 @@ async function noRoom(d, sd, place, placeOther) {
   const grow = heightFor(d.h2, sd), spread = free >= d.h2; // enough room in total, but not in one piece
   const where = 'The ' + sd + ' of this ' + state.h + 'U rack has ' + (free ? fmtU(free) + ' free' + (spread ? ', but not in one piece' : '') : 'no free slots') + '.';
   say('No room for ' + name + ' at the ' + sd + '.');
+  if (spread && packHelps(d.h2, sd)) {
+    const v = await askUser('Move parts together?', name + ' doesn’t fit in one gap. ' + where + ' Sliding the parts at the ' + sd + ' up against each other makes one gap at the bottom.', [['', 'Cancel']].concat(grow ? [['grow', 'Make it ' + grow + 'U']] : [], [['pack', 'Move parts together', 'primary']]));
+    if (v === 'pack') {
+      const before = JSON.stringify(state); packSide(sd); touch(); render();
+      if (place()) { undo = before; say($('#status').textContent + ' The parts at the ' + sd + ' moved together to make room.', true); } else { state = JSON.parse(before); render(); }
+      return;
+    }
+    if (v !== 'grow') return;
+  }
   if (grow) {
-    const v = await askUser('Make the rack ' + grow + 'U?', name + ' doesn’t fit. ' + where + ' At ' + grow + 'U it fits at the bottom; the parts already in stay where they are.', [['', 'Cancel'], ['grow', 'Make it ' + grow + 'U', 'primary']]);
+    const asked = spread && packHelps(d.h2, sd); // the dialog above already offered the taller rack
+    const v = asked ? 'grow' : await askUser('Make the rack ' + grow + 'U?', name + ' doesn’t fit. ' + where + ' At ' + grow + 'U it fits at the bottom; the parts already in stay where they are.', [['', 'Cancel'], ['grow', 'Make it ' + grow + 'U', 'primary']]);
     if (v !== 'grow') return;
     const before = JSON.stringify(state); setHeight(grow);
     if (place()) { undo = before; say($('#status').textContent + ' The rack is now ' + grow + 'U.', true); } else { state = JSON.parse(before); render(); }
@@ -224,7 +276,7 @@ async function noRoom(d, sd, place, placeOther) {
 function flipSide(id) {
   const it = find(id); if (!it || it.pos2 == null) return;
   const to = sideOf(it) === 'back' ? 'front' : 'back', p = nearest(it.pos2, H(it), undefined, to);
-  if (p == null) { say('There is no free ' + fmtU(H(it)) + ' slot at the ' + to + '.'); return; }
+  if (p == null) { noRoom(info(it), to, () => { flipSide(id); return sideOf(find(id)) === to; }); return; }
   state.items = state.items.map(i => i.id === id ? Object.assign({}, i, { pos2: p, side: to }) : i);
   const nw = find(id); if (to === 'front') delete nw.side;
   sel = id; touch(); save(); // setView() only redraws, so save here
@@ -256,9 +308,32 @@ function removeItem(id) {
   undo = JSON.stringify(state); state.items = state.items.filter(i => i.id !== id); if (sel === id) sel = null;
   touch(); render(); say(fullName(info(it)) + ' removed.', true);
 }
+/* Move a part to slot t on its side and slide the parts it passes the other way, so a full rack can be reordered. Returns the new
+   slot, or null (nothing changed) when sliding would put a whole-U panel off its U or a part outside the rack. */
+function reorder(id, t) {
+  const it = find(id), h = H(it), sd = sideOf(it), a = it.pos2, others = placed().filter(o => o.id !== id && sideOf(o) === sd);
+  const was = others.map(o => [o, o.pos2]); let np;
+  if (t < a) { const hit = others.filter(o => o.pos2 < a && o.pos2 + H(o) > t); np = Math.min(t, ...hit.map(o => o.pos2)); hit.forEach(o => { o.pos2 += h; }); }
+  else { const end = t + h, hit = others.filter(o => o.pos2 >= a + h && o.pos2 < end); np = Math.max(end, ...hit.map(o => o.pos2 + H(o))) - h; hit.forEach(o => { o.pos2 -= h; }); }
+  it.pos2 = np;
+  const all = [it, ...others], ok = all.every(o => o.pos2 >= 0 && o.pos2 + H(o) <= slots() && aligned(o.pos2, H(o))) &&
+    all.every(o => all.every(q => q === o || q.pos2 >= o.pos2 + H(o) || o.pos2 >= q.pos2 + H(q)));
+  if (!ok) { it.pos2 = a; was.forEach(([o, p]) => { o.pos2 = p; }); return null; }
+  return np;
+}
+// one step up (dir < 0) or down: into free space when there is some, else past the neighbouring part, which takes this one's place
 function move(id, dir) {
   const it = find(id); if (!it || it.pos2 == null) return;
-  const h2 = H(it); let p = it.pos2 + dir;
+  const h2 = H(it), a = it.pos2, adj = dir < 0 ? a - 1 : a + h2;
+  if (adj < 0 || adj >= slots()) return;
+  const nb = placed().find(o => o.id !== id && sideOf(o) === sideOf(it) && o.pos2 <= adj && adj < o.pos2 + H(o));
+  if (nb) {
+    let t = dir < 0 ? nb.pos2 : nb.pos2 + H(nb) - h2;
+    if (h2 % 2 === 0) t += dir < 0 ? -(t % 2) : t % 2; // a whole-U part passes a whole U: both ½U parts in it
+    if (reorder(id, t) == null) { say(fullName(info(it)) + ' can’t swap with ' + fullName(info(nb)) + ': a whole-U panel has to start on a U.'); return; }
+    touch(); render(); focusSel(); say(fullName(info(it)) + ' moved ' + (dir < 0 ? 'above ' : 'below ') + fullName(info(nb)) + ', now at ' + uRange(it.pos2, h2) + atBack(it) + '.' + clashText(it)); return;
+  }
+  let p = a + dir;
   while (p >= 0 && p + h2 <= slots()) { if (isFree(p, h2, id)) { it.pos2 = p; touch(); render(); focusSel(); return; } p += Math.sign(dir); }
 }
 function setHeight(h) {
@@ -338,6 +413,15 @@ function groupHTML(id, title, rows, n) { // rows is only built for open groups; 
     (groupOpen(id) ? '<div class="lrows">' + rows.join('') + '</div>' : '') + '</section>';
 }
 function matches(...s) { if (!query) return true; const q = query.toLowerCase().replace(/[\s-]/g, ''); return s.join(' ').toLowerCase().replace(/[\s-]/g, '').includes(q); }
+// library rows of parts that don't fit at the current side get a note: the rack height they need, or "no room"
+function markFit() {
+  const side = rackSide === 'back' ? 'back' : 'front', memo = {};
+  document.querySelectorAll('.lrow[data-key]').forEach(b => {
+    const d = LIB[b.dataset.key]; if (!d || d.top || d.extra || !d.h2) return;
+    if (!(d.h2 in memo)) { const g = firstFree(d.h2, side) != null ? 0 : heightFor(d.h2, side); memo[d.h2] = g === 0 ? '' : g ? 'needs ' + g + 'U' : 'no room'; }
+    const f = memo[d.h2]; if ((b.dataset.fit || '') !== f) { if (f) b.dataset.fit = f; else delete b.dataset.fit; }
+  });
+}
 function renderLib() {
   renderTabs();
   if (!CAT) return;
@@ -374,6 +458,7 @@ function renderLib() {
   if (!hits) h = '<p class="hint">Nothing found' + (query ? ' for “' + esc(query) + '”' : '') + (ui.lr ? ' made for Lab Rax' : '') + '. Make a custom part below, or set up a rack with the wizard.</p>';
   else if (tab === 'devices') h += '<p class="hint lfoot">Click a device to add its best mount; ▾ shows the others. ≈ means the height is estimated.</p>';
   $('#cards').innerHTML = h;
+  markFit();
 }
 
 /* ---------- render: rack (front view) ---------- */
@@ -1635,7 +1720,9 @@ document.addEventListener('click', async e => {
     case 'lib-more': { const d = a.dataset.dev; if (devOpen.has(d)) devOpen.delete(d); else devOpen.add(d); renderLib(); break; }
     case 'lib-lr': ui.lr = !ui.lr; saveUI(); renderLib(); break;
     case 'view': setView(a.dataset.v); break;
-    case 'h-': setHeight(state.h - 1); break;
+    case 'h-': shrink(state.h - 1); break;
+    case 'hist-undo': histGo(-1); break;
+    case 'hist-redo': histGo(1); break;
     case 'h+': setHeight(state.h + 1); break;
     case 'ver': state.version = a.dataset.v; touch(); render(); break;
     case 'frame': state.frame = a.dataset.c; touch(); render(); break;
@@ -1700,8 +1787,10 @@ document.addEventListener('click', async e => {
       const name = $('#mk-name').value.trim() || GEN_NAMES[p.type];
       if (mkEdit) {
         const it = mkEdit, oldH = H(it); it.params = p; it.name = name;
-        if (H(it) !== oldH && !isFree(it.pos2, H(it), it.id)) { const np = nearest(it.pos2, H(it), it.id); it.pos2 = np; }
+        let lost = false;
+        if (H(it) !== oldH && !isFree(it.pos2, H(it), it.id)) { const np = nearest(it.pos2, H(it), it.id); it.pos2 = np; lost = np == null; }
         touch(); render(); renderLib(); say(name + ' updated.');
+        if (lost) noRoom(info(it), sideOf(it), () => { const q = firstFree(H(it), sideOf(it)); if (q == null) return false; it.pos2 = q; sel = it.id; touch(); render(); say(name + ' updated and placed at ' + uRange(q, H(it)) + atBack(it) + '.'); return true; });
       } else addItem({ key: 'gen', name, params: p });
       $('#maker').close ? $('#maker').close() : $('#maker').removeAttribute('open');
       break;
@@ -1776,12 +1865,18 @@ host.addEventListener('pointerdown', e => {
 host.addEventListener('pointermove', e => {
   if (!drag) return; const dy = e.clientY - drag.y0; if (!drag.moved && Math.abs(dy) < 4) return;
   drag.moved = true; drag.el.classList.add('drag'); drag.el.style.transform = 'translateY(' + dy + 'px)';
-  const it = find(drag.id); drag.p = nearest(Math.round((drag.top0 + dy) / G.HU), H(it), it.id); showGhost(drag.p, H(it));
+  const it = find(drag.id), h = H(it); let t = Math.max(0, Math.min(slots() - h, Math.round((drag.top0 + dy) / G.HU))); if (h % 2 === 0) t -= t % 2;
+  drag.p = t; drag.free = isFree(t, h, it.id); showGhost(t, h); // a taken spot: the parts in between slide over on drop
 });
 host.addEventListener('pointerup', () => {
   if (!drag) return; const d = drag; drag = null;
   if (!d.moved) { sel = d.id; render(); focusSel(); return; }
-  const it = find(d.id); if (d.p != null && d.p !== it.pos2) { it.pos2 = d.p; touch(); say(fullName(info(it)) + ' moved to ' + uRange(d.p, H(it)) + atBack(it) + '.' + clashText(it)); }
+  const it = find(d.id);
+  if (d.p != null && d.p !== it.pos2) {
+    const p = d.free ? d.p : reorder(it.id, d.p);
+    if (p == null) say(fullName(info(it)) + ' can’t go there: the parts in between can’t slide without putting a whole-U panel off its U.');
+    else { if (d.free) it.pos2 = p; touch(); say(fullName(info(it)) + ' moved to ' + uRange(it.pos2, H(it)) + atBack(it) + (d.free ? '' : '; the parts in between moved over') + '.' + clashText(it)); }
+  }
   sel = d.id; render();
 });
 host.addEventListener('pointercancel', () => { if (drag) { drag = null; render(); } });
@@ -1830,8 +1925,13 @@ host.addEventListener('drop', e => {
   if (!libKey) return; e.preventDefault(); const k = libKey, p = dropP; libKey = null; dropP = null;
   showGhost(null); addItem({ key: k }, p); // no slot anywhere: addItem offers a taller rack
 });
+document.addEventListener('keydown', e => { // Cmd/Ctrl+Z undo, Shift+Cmd+Z or Ctrl+Y redo; text fields keep their own undo
+  if (!(e.metaKey || e.ctrlKey) || e.altKey || e.target.closest('input,select,textarea,[contenteditable]') || document.querySelector('dialog[open]')) return;
+  const k = e.key.toLowerCase();
+  if (k === 'z') { e.preventDefault(); histGo(e.shiftKey ? 1 : -1); } else if (k === 'y') { e.preventDefault(); histGo(1); }
+});
 document.addEventListener('keydown', e => {
-  if (sel == null || e.target.closest('input,select,textarea,dialog')) return;
+  if (sel == null || e.metaKey || e.ctrlKey || e.target.closest('input,select,textarea,dialog')) return;
   if (e.key === 'ArrowUp') { e.preventDefault(); move(sel, e.shiftKey ? -2 : -1); }
   else if (e.key === 'ArrowDown') { e.preventDefault(); move(sel, e.shiftKey ? 2 : 1); }
   else if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); removeItem(sel); }
