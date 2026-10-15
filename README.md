@@ -23,6 +23,7 @@ Choose community mounts, arrange your devices in a 10″ Lab Rax rack, preview t
 | Browse hundreds of community mounts and panels | Switch between front, 3D and airflow views | Download a build pack for your layout |
 | Arrange devices in a 1–10U rack, front and back | Load your downloaded STL/3MF files locally | Find source models through a download checklist |
 | Choose a frame, colours and side panels | Explore approximate airflow and temperatures | Get a shopping list and build instructions |
+| Save a layout as a `.rack.json` file and open it again | Check which parts fit your printer’s bed | See which prints are too big before you slice |
 | Generate blank, vent, keystone, label and shelf parts | Change device heat and fan direction | Export generated parts as STL |
 
 The catalog includes network gear, mini PCs, Raspberry Pi boards, drive bays, patch panels, cooling parts and frame accessories. Each community entry links back to its maker’s model page.
@@ -43,6 +44,7 @@ No account or application installation is needed to use the planner. See the [st
 - **Build guide** with assembly steps and a shopping list.
 - **Download checklist** linking to community model pages.
 - **Print and shopping lists** in CSV, plus a README.
+- **Rack file** (`<name>-<height>u.rack.json`) to open the layout in the planner again.
 
 Community STL/3MF files are downloaded from their original pages and retain their own licenses. They are not bundled in this repository or redistributed in the build pack.
 
@@ -88,7 +90,8 @@ To run the repository checks with Node.js:
 
 ```sh
 node tools/validate.mjs
-for f in app.js parts.js shapes.js view3d.js pdf.js airflow.js; do node --check "$f"; done
+for f in app.js parts.js shapes.js view3d.js pdf.js airflow.js guide.js estimate.js market.js printers.js; do node --check "$f"; done
+node tools/test-printers.mjs
 ```
 
 ## Help improve the planner
@@ -111,6 +114,18 @@ Found a mount, checked a dimension or printed a working build? [Suggest a model]
 | Outer width | ≈ 280 mm | LowProfile remix (280 × 240 mm) |
 | Printed panel width (custom parts) | 250 mm | chosen to fit a 256 mm bed and reach past the holes |
 | Keystone cut-out | 14.9 × 16.4 mm in a 2 mm plate | module face 14.5 × 16.0 mm |
+
+### Print bed check
+
+Pick your printer in the print list (or in **Set up a rack**) and every print that has a part too big for its bed is marked, in the planner, the PDF and the build pack lists. A part fits when it lies flat on the bed, straight or turned; long, narrow parts often fit only diagonally. The printer is a setting of your browser, not part of the layout. Presets and the check are in `printers.js`; the sizes come from these assumptions (≈ is an estimate):
+
+| Part | Size used | Source |
+|---|---|---|
+| Horizontal pieces | ≈ 280 × 32 mm (outer width × ring) | they only fit a 256 mm bed diagonally and not a 220 mm bed (Lab Rax article and comments) |
+| Posts and side panels | ≈ n × 44.45 mm long (5U at most), posts 26 mm wide, side panels 170 mm deep | “5U being the largest that fits a 250 mm print bed” (Lab Rax article) |
+| Top and bottom panel | ≈ 228 × 171.5 mm | top panel above |
+| Catalog panels and mounts | ≈ 254 mm × panel height | a full 10″ front; check the model, many are narrower |
+| Custom parts | 250 mm × panel height; shelves also their depth | `parts.js` |
 
 The 3D frame follows the photos in the Lab Rax article: bevelled top and bottom rings with mitred corners, the hex grille and logo on the front bevel, arched handles, posts with inserts and tinted side panels. Ring sizes, post section, handles and feet are estimates. They live in `FRAME` at the top of `view3d.js`; correct them there when you measure the original files (keep downloaded model files in `reference/`, which git ignores).
 

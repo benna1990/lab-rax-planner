@@ -496,31 +496,95 @@ function frameParts() {
   if (h <= 5) return { posts: '4× ' + h + 'U', sides: '2× ' + h + 'U', joiners: 0, b: 0 };
   const b = h - 5; return { posts: '4× 5U + 4× ' + b + 'U', sides: '2× ' + b + 'U + 2× 5U', joiners: 4, b };
 }
+/* ---------- print bed check ---------- */
+/* What each print-list row prints, as flat pieces that printers.js checks against the printer in ui.printer (a browser setting,
+   not part of the layout). Sizes in mm; ≈ ones are estimates. The horizontal pieces span the outer width and are as wide as the ring
+   (FRAME in view3d.js), which agrees with the Lab Rax article: they only fit a 256 mm bed diagonally and not a 220 mm bed. Posts and
+   side panels are as tall as the rack up to 5U ("5U being the largest that fits a 250 mm print bed"), edge pieces and side panels
+   are 170 mm deep and the top and bottom panels 228 × 171.5 mm (catalog frame dimensions). Catalog panels and mounts are taken as a
+   full 10″ (254 mm) wide; custom parts are as parts.js makes them. */
+const PANEL_10 = 254;
+const SPLIT_FRAME = 'mw2452007'; // "5U for A1 mini (split parts)" in Frame & extras
+const bedPrinter = () => window.LRPrinters.bed(ui.printer);
+// ways: the footprints a piece can lie on, [a, b, height it then stands]; size: what the lists show
+const piece = (name, ways, est, size) => ({ name, ways, est: !!est, size: size || ways[0].slice(0, 2) });
+function framePieces() {
+  const F = (window.LRView3D && window.LRView3D.FRAME) || { ring: 32, top: 36, post: 26, postDepth: 20 }, dm = CAT.frame.dimensions || {};
+  const n = Math.min(state.h, 5), tall = n * P.U, deep = dm.sideBeam || 170, tp = dm.topPanel || [228, 171.5];
+  const sides = (add, always) => always || state.sides !== 'acrylic' ? [piece('side panels (' + n + 'U)', [[tall, deep + add, 3]], true)] : [];
+  return {
+    ring: [piece('horizontal pieces', [[dm.outerWidth || 280, F.ring, F.top]], true), piece('edge pieces', [[deep, F.ring, F.top]], true),
+      piece(state.top ? 'bottom panel' : 'top and bottom panels', [[tp[0], tp[1], 3]], true)],
+    posts: [piece('posts (' + n + 'U)', [[tall, F.post, F.postDepth]], true), ...sides(0)],
+    top: [piece('top', [[tp[0], tp[1], 3]], true)],
+    // frame extras: longer edge pieces and side panels for a deeper rack, patterned or fan side panels
+    extra: d => { const s = d.shape || {}; return s.depth ? [piece('edge pieces', [[deep + s.depth, F.ring, F.top]], true), ...sides(s.depth)] : s.side || s.fan ? sides(frameMods().depthAdd || 0, true) : []; }
+  };
+}
+function itemPieces(it, d) {
+  if (it.key !== 'gen') return [piece(fmtU(d.h2) + (d.tab === 'devices' ? ' mount' : ' panel'), [[PANEL_10, P.panelH(d.h2 / 2), 3]], true)];
+  const p = it.params, h = P.panelH(p.u);
+  if (p.type !== 'shelf') return [piece(fmtU(d.h2) + ' ' + GEN_NAMES[p.type].toLowerCase(), [[P.PANEL_W, h, 3]])];
+  const dd = p.dd + 5; // front plate and rear stop; it prints face-down, or lying on its floor
+  return [piece('shelf', [[P.PANEL_W, h, dd], [P.PANEL_W, dd, h]], false, [P.PANEL_W, h, dd])];
+}
+const mmTxt = v => String(Math.round(v * 10) / 10);
+const sizeTxt = p => (p.est ? '≈' : '') + p.size.map(mmTxt).join(' × ') + ' mm';
+const bedName = B => { const s = B.w + ' × ' + B.d + (B.h ? ' × ' + B.h : '') + ' mm'; return B.id === 'custom' ? s + ' bed' : B.name + ' (' + s + ')'; };
+function bedText(r, short) { // a print-list row's pieces that don't fit the bed, or only fit diagonally; short where the printer is named above
+  if (!r) return '';
+  const names = ps => ps.map(p => p.name + ' ' + sizeTxt(p)).join(', ');
+  return [r.bad.length ? (short ? 'Too big: ' : 'Too big for your printer: ') + names(r.bad) + '.' : '', r.turned.length ? (short ? 'Only diagonally: ' : 'Fits only diagonally: ') + names(r.turned) + '.' : ''].filter(Boolean).join(' ');
+}
+const bedBad = pk => pk.filter(x => x.bed && x.bed.bad.length);
+function printerPicker(px) { // the printer select, and the bed size when it's your own
+  const pr = ui.printer || {}, L = window.LRPrinters, custom = pr.id === 'custom';
+  return '<span class="bedset"><select class="field pr-sel" id="' + px + '-printer" aria-label="Your 3D printer"><option value="">' + (px === 'wz' ? 'Skip for now' : 'Pick your printer to check the bed') + '</option>' +
+    L.list.map(p => '<option value="' + p.id + '"' + (pr.id === p.id ? ' selected' : '') + '>' + esc(p.name) + ' · ' + p.w + ' × ' + p.d + '</option>').join('') +
+    '<option value="custom"' + (custom ? ' selected' : '') + '>Other size…</option></select>' +
+    (custom ? '<span class="beddims">' + [['w', 'Bed width'], ['d', 'Bed depth'], ['h', 'Build height (optional)']].map(([k, l]) => '<input class="field pr-dim" id="' + px + '-bed-' + k + '" type="number" min="' + L.MIN + '" max="' + L.MAX + '" step="1" inputmode="numeric" data-k="' + k + '" aria-label="' + l + ' in mm" title="' + l + '" placeholder="' + k.toUpperCase() + '" value="' + (typeof pr[k] === 'number' ? pr[k] : '') + '">').join('×') + ' mm</span>' : '') + '</span>';
+}
+function setPrinter(id, dims) {
+  const L = window.LRPrinters, pr = Object.assign({}, ui.printer); // the custom size stays when switching to a preset and back
+  if (dims) Object.keys(dims).forEach(k => { const v = Math.round(dims[k]); if (v >= L.MIN && v <= L.MAX) pr[k] = v; else delete pr[k]; });
+  if (id === 'custom' && !dims && !L.bed(Object.assign({}, pr, { id }))) Object.assign(pr, { w: 256, d: 256 });
+  pr.id = id || null; ui.printer = pr; saveUI();
+  // draw the lists again once the focus has moved on (Tab fires change before it moves), and keep the focus where it is;
+  // the wizard only changes when the size fields show or hide
+  setTimeout(() => {
+    const f = document.activeElement && document.activeElement.id;
+    renderBuild();
+    if (!dims && wz && $('#wizard').open) renderWizard();
+    const el = f && document.getElementById(f); if (el && el !== document.activeElement) el.focus();
+  });
+}
 function printPack() {
   const h = state.h, fr = CAT.frame, br = state.version === 'brass', out = []; let n = 0;
-  // one row per model page, since each page is downloaded once; v is the variant printed from it
-  const add = (name, sub, url, qty, kind, v) => {
+  // one row per model page, since each page is downloaded once; v is the variant printed from it, pieces what is printed (bed check)
+  const add = (name, sub, url, qty, kind, v, pieces) => {
     const k = url || ('gen:' + name + sub);
     let ex = out.find(x => x.k === k);
-    if (!ex) out.push(ex = { id: n++, k, name, subs: [], url, qty: 0, kind, vars: [] });
+    if (!ex) out.push(ex = { id: n++, k, name, subs: [], url, qty: 0, kind, vars: [], pieces: [] });
     ex.qty += qty; if (sub && !ex.subs.includes(sub)) ex.subs.push(sub);
     if (v) { const e = ex.vars.find(x => x.key === v.key); if (e) e.qty += qty; else ex.vars.push(Object.assign({ qty }, v)); }
+    (pieces || []).forEach(p => { if (!ex.pieces.some(q => q.name === p.name && q.size.join() === p.size.join())) ex.pieces.push(p); });
   };
+  const fp = framePieces();
   const variant = d => ({ key: d.key, name: d.name, label: d.label || '', h2: d.h2, u: d.top ? 'top' : d.extra ? 'extra' : fmtU(d.h2) });
   const fm = br ? fr.brass : fr.bolted;
   const acr = state.sides === 'acrylic';
-  add(fm.name, h === 5 ? 'Complete 5U frame' + (acr ? '; skip the side panels, yours are acrylic' : ' with side panels') : 'Base frame: edges, horizontals, handles, feet', fm.url, 1, 'mw');
-  if (h !== 5) add(fr.sizes.name, 'Posts' + (acr ? '' : ' and side panels') + ' for ' + h + 'U', fr.sizes.url, 1, 'mw');
+  add(fm.name, h === 5 ? 'Complete 5U frame' + (acr ? '; skip the side panels, yours are acrylic' : ' with side panels') : 'Base frame: edges, horizontals, handles, feet', fm.url, 1, 'mw', null, h === 5 ? fp.ring.concat(fp.posts) : fp.ring);
+  if (h !== 5) add(fr.sizes.name, 'Posts' + (acr ? '' : ' and side panels') + ' for ' + h + 'U', fr.sizes.url, 1, 'mw', null, fp.posts);
   if (h > 5) add(fr.extension.name, '4 joiners for ' + h + 'U', fr.extension.url, 1, 'mw');
-  if (state.top) { const d = LIB[state.top]; add(fullName(d), 'Replaces the top panel', d.url, 1, 'mw', variant(d)); }
-  state.extras.forEach(k => { const d = LIB[k]; add(fullName(d), 'Frame extra', d.url, 1, 'mw', variant(d)); });
+  if (state.top) { const d = LIB[state.top]; add(fullName(d), 'Replaces the top panel', d.url, 1, 'mw', variant(d), fp.top); }
+  state.extras.forEach(k => { const d = LIB[k]; add(fullName(d), 'Frame extra', d.url, 1, 'mw', variant(d), fp.extra(d)); });
   let missing = 0;
   byPos().forEach(i => {
     const d = info(i);
     const col = i.color ? ' · ' + colorName(i.color) : '';
-    if (i.key === 'gen') { add(i.name, genLabel(i.params) + ' · ' + uRange(i.pos2, d.h2) + atBack(i) + col + ' · in the build pack', null, 1, 'gen'); return; }
+    if (i.key === 'gen') { add(i.name, genLabel(i.params) + ' · ' + uRange(i.pos2, d.h2) + atBack(i) + col + ' · in the build pack', null, 1, 'gen', null, itemPieces(i, d)); return; }
     if (!d.url) { if (d.custom) missing++; return; }
-    add(fullName(d), (i.label || shortName(d)) + ' · ' + uRange(i.pos2, d.h2) + atBack(i) + col, d.url, 1, 'mw', variant(d));
+    add(fullName(d), (i.label || shortName(d)) + ' · ' + uRange(i.pos2, d.h2) + atBack(i) + col, d.url, 1, 'mw', variant(d), itemPieces(i, d));
   });
   // a page with several variants lists them, e.g. "½U ×2, 1U ×1", so it's clear which files to print
   out.forEach(x => {
@@ -531,7 +595,9 @@ function printPack() {
     x.variants = vs.map(v => (names ? v.name + (us ? ' ' + v.u : '') : us ? v.u : v.label || v.u) + ' ×' + v.qty).join(', ');
     if (names) x.name = [...new Set(vs.map(v => v.name))].join(' / ');
   });
-  out.missing = missing;
+  const B = bedPrinter();
+  out.forEach(x => { x.bed = B ? window.LRPrinters.check(x.pieces, B) : null; });
+  out.missing = missing; out.printer = B;
   return out;
 }
 /* ---------- shopping list and build guide ---------- */
@@ -917,15 +983,23 @@ function renderBuild() {
   byPos().forEach(i => { const d = info(i), hw = heatOf(i); if (d.url && hw.w) { const r = ra(d.url); r.w += hw.w; r.est = r.est || hw.est; } });
   airflow().fans.forEach(f => { if (f.d.url) ra(f.d.url).fans.push(f); });
   const airChips = url => { const r = url && rowAir[url]; return r ? '<span class="pchips">' + wChip(r.w, r.est) + r.fans.map(f => fanChip(f.d, f.dir)).join('') + '</span>' : ''; };
-  html += sec('print', 'Print list', '<span>' + done + ' of ' + pk.length + ' printed</span><span class="minibar" aria-hidden="true"><i style="width:' + (pk.length ? done / pk.length * 100 : 0) + '%"></i></span>',
+  const B = pk.printer, tooBig = bedBad(pk), bedEst = pk.some(x => x.bed && [...x.bed.bad, ...x.bed.turned].some(p => p.est));
+  const frameBad = pk.some(x => x.bed && x.bed.bad.length && [CAT.frame.brass.url, CAT.frame.bolted.url, CAT.frame.sizes.url].includes(x.url));
+  html += sec('print', 'Print list', '<span>' + done + ' of ' + pk.length + ' printed</span>' + (tooBig.length ? '<span class="badge est" title="Too big for your printer">' + tooBig.length + ' too big</span>' : '') + '<span class="minibar" aria-hidden="true"><i style="width:' + (pk.length ? done / pk.length * 100 : 0) + '%"></i></span>',
+    '<div class="bedrow"><label for="bp-printer">Printer</label>' + printerPicker('bp') + '</div>' +
+    (B ? '<p class="hint">Checked against your ' + esc(bedName(B)) + ': ' + (tooBig.length ? tooBig.length + (tooBig.length > 1 ? ' prints have parts' : ' print has a part') + ' too big for it.'
+      : 'every part fits lying flat' + (pk.some(x => x.bed) ? ', some only diagonally.' : '.')) + (bedEst ? ' ≈ sizes are estimates; check them in your slicer.' : '') + '</p>' : '') +
     '<ul class="plist">' + pk.map(x => {
       const ok = !!state.done[x.k];
       return '<li class="prow"><button type="button" class="tick" data-act="done" data-k="' + esc(x.k) + '" aria-pressed="' + ok + '" aria-label="Mark ' + esc(x.name) + ' as printed">' +
         (ok ? '<svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="var(--accent)" stroke-width="2.2" aria-hidden="true"><path d="M4 9.5l3.2 3L14 5.5"/></svg>'
             : '<svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="var(--muted)" stroke-width="1.7" aria-hidden="true"><path d="M9 3v9M5 8.5l4 4 4-4M4 15h10"/></svg>') + '</button>' +
-        '<span class="tx"><b>' + esc(x.name) + '</b>' + (x.variants ? '<small>Variants: ' + esc(x.variants) + '</small>' : '') + '<small>' + esc(x.subs.join(', ')) + '</small>' + airChips(x.url) + '</span>' + (x.qty > 1 ? '<span class="q">' + x.qty + '×</span>' : '') +
+        '<span class="tx"><b>' + esc(x.name) + '</b>' + (x.variants ? '<small>Variants: ' + esc(x.variants) + '</small>' : '') + '<small>' + esc(x.subs.join(', ')) + '</small>' +
+        (x.bed ? '<small class="' + (x.bed.bad.length ? 'bedbad' : 'bedturn') + '">' + esc(bedText(x.bed)) + '</small>' : '') + airChips(x.url) + '</span>' + (x.qty > 1 ? '<span class="q">' + x.qty + '×</span>' : '') +
         (x.url ? '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">Open</a>' : '<span class="badge">STL</span>') + '</li>';
     }).join('') + '</ul>' +
+    (frameBad && LIB[SPLIT_FRAME] ? '<p class="hint">' + (state.extras.includes(SPLIT_FRAME) ? 'You have “' + esc(LIB[SPLIT_FRAME].name) + '” in your build: print the frame from that model instead of the frame pieces marked too big.'
+      : 'For small beds, “' + esc(LIB[SPLIT_FRAME].name) + '” in Frame &amp; extras splits the 5U frame into smaller pieces.') + '</p>' : '') +
     (pk.missing ? '<p class="hint">' + pk.missing + ' own device' + (pk.missing > 1 ? 's' : '') + ' without a link.</p>' : '') +
     (placed().some(i => info(i).est) ? '<p class="hint">Parts marked ≈ have an estimated height. Check it in the model before printing.</p>' : '') +
     '<p class="hint">Download community models from MakerWorld as 3MF to keep their print profiles. Your build pack has the custom parts and a download list to click through the rest.</p>');
@@ -950,7 +1024,8 @@ function renderBuild() {
          : '<dt>Top + bottom panel</dt><dd>1 + 1</dd>') +
     '<div class="note">The horizontal pieces need a print bed of about 250 mm; they don’t fit on 220 mm beds.' + (h > 5 ? ' Above 10U the printed frame gets too weak for a full rack, so the planner stops at 10U.' : '') + '</div></dl>');
 
-  html += '<div class="actions"><button type="button" class="btn small" data-act="copy">Copy list</button><button type="button" class="btn small" data-act="share">Share link</button><button type="button" class="btn small" data-act="fill"' + (free ? '' : ' disabled') + '>Fill open slots' + (rackSide === 'back' ? ' at the back' : '') + '</button><button type="button" class="btn small danger" data-act="clear"' + (state.items.length ? '' : ' disabled') + '>Clear rack</button></div><div id="copyfall"></div>';
+  html += '<div class="actions"><button type="button" class="btn small" data-act="copy">Copy list</button><button type="button" class="btn small" data-act="share">Share link</button>' +
+    '<button type="button" class="btn small" data-act="save-file" title="Download this layout as a .rack.json file">Save as file</button><button type="button" class="btn small" data-act="open-file" title="Open a .rack.json file">Open file</button><button type="button" class="btn small" data-act="fill"' + (free ? '' : ' disabled') + '>Fill open slots' + (rackSide === 'back' ? ' at the back' : '') + '</button><button type="button" class="btn small danger" data-act="clear"' + (state.items.length ? '' : ' disabled') + '>Clear rack</button></div><div id="copyfall"></div>';
   $('#build').innerHTML = html;
 }
 
@@ -964,7 +1039,9 @@ function listText() {
   if (onSide('back').length) { L.push('', 'Back (top to bottom)'); onSide('back').forEach(i => { const d = info(i); L.push('  ' + uRange(i.pos2, d.h2).padEnd(8) + (i.label ? '[' + i.label + '] ' : '') + fullName(d) + ' (' + uTxt(d) + ')'); }); }
   L.push('', 'Frame', '- Vertical posts: ' + fp.posts); if (fp.joiners) L.push('- Post joiners: 4');
   L.push('- Side panels: ' + fp.sides + (state.sides === 'acrylic' ? ' (3 mm acrylic)' : ''), '- Horizontal pieces: 4', '- Edge pieces: 4', '- Handles · feet: 2 · 4', state.top ? '- Top: ' + fullName(LIB[state.top]) + '\n- Bottom panel: 1' : '- Top + bottom panel: 1 + 1');
-  L.push('', 'Print pack'); printPack().forEach(x => L.push('- ' + x.qty + '× ' + x.name + (x.variants ? ' (' + x.variants + ')' : '') + (x.url ? '  ' + x.url : '  (custom STL in build pack)')));
+  const pk = printPack();
+  L.push('', 'Print pack' + (pk.printer ? ', checked against your ' + bedName(pk.printer) : ''));
+  pk.forEach(x => { L.push('- ' + x.qty + '× ' + x.name + (x.variants ? ' (' + x.variants + ')' : '') + (x.url ? '  ' + x.url : '  (custom STL in build pack)')); if (x.bed) L.push('  ' + bedText(x.bed)); });
   L.push('', 'Shopping list'); orderList().forEach(x => L.push('- ' + qtyText(x) + ' ' + x.name + (x.spec ? ' (' + x.spec + ')' : '') + (x.check ? ' – ' + x.check : '')));
   guide().forEach((g, n) => { L.push('', (n + 1) + '. ' + g.title); g.steps.forEach(t => L.push('- ' + t)); });
   const a = airflow();
@@ -1048,16 +1125,19 @@ function downloadListHTML(pk) {
 }
 async function buildPack() {
   say('Preparing your build pack…');
-  const files = [], base = slug(state.label || 'lab-rax') + '-' + state.h + 'u';
+  const files = [], base = rackName();
   const gens = byPos().filter(i => i.key === 'gen');
   for (const g of gens) files.push({ name: 'custom-parts/' + uRange(g.pos2, H(g)).replace('–', '-') + (sideOf(g) === 'back' ? '-back' : '') + '-' + slug(g.name) + '.stl', data: await genSTL(g) });
   const pk = printPack();
   files.push({ name: 'download-list.html', data: downloadListHTML(pk) });
-  files.push({ name: 'print-list.csv', data: csv([['Qty', 'Part', 'Variants', 'Where', 'Link'], ...pk.map(x => [x.qty, x.name, x.variants, x.subs.join('; '), x.url || 'custom-parts/'])]) });
+  const bedCol = x => pk.printer ? [x.pieces.length ? bedText(x.bed) || 'Fits' : ''] : []; // empty: no sizes known for that model
+  files.push({ name: 'print-list.csv', data: csv([['Qty', 'Part', 'Variants', 'Where', 'Link', ...(pk.printer ? ['Print bed: ' + bedName(pk.printer)] : [])], ...pk.map(x => [x.qty, x.name, x.variants, x.subs.join('; '), x.url || 'custom-parts/', ...bedCol(x)])]) });
+  files.push({ name: base + '.rack.json', data: rackFile() });
   files.push({ name: 'shopping-list.csv', data: csv([['Group', 'Qty', 'Item', 'Spec', ...((shopLinks('x')).map(l => l.shop))], ...orderList().map(x => [(SHOP_GROUPS.find(g => g[0] === x.group) || ['', ''])[1], qtyText(x), x.name, x.spec || '', ...(x.links || []).map(l => l.url)])]) });
   files.push({ name: 'build-guide.html', data: buildGuidePage() });
   files.push({ name: 'README.txt', data: 'Mini Rack Planner build pack — ' + (state.label || 'Lab Rax') + ', ' + state.h + 'U\n\n' + listText() +
-    '\n\nCommunity models stay on MakerWorld under their own licenses: open download-list.html, download each model there as 3MF and tick it off.\nCustom parts in custom-parts/ were generated by the Lab Rax Planner (MIT) and print without supports: panels and shelves face-down, label plates face-up.\n' });
+    '\n\nCommunity models stay on MakerWorld under their own licenses: open download-list.html, download each model there as 3MF and tick it off.\nCustom parts in custom-parts/ were generated by the Lab Rax Planner (MIT) and print without supports: panels and shelves face-down, label plates face-up.\n' +
+    base + '.rack.json is this layout: open it in the planner with Open file (under Your build) to change it later.\n' });
   let pdfErr = window.LRPdf ? null : 'the PDF module is not available';
   if (!pdfErr) try { files.push({ name: base + '-build-plan.pdf', data: await window.LRPdf.make(pdfData()) }); } catch (e) { pdfErr = e && e.message || 'unknown error'; }
   const zip = base + '-build-pack.zip';
@@ -1091,10 +1171,12 @@ function openFinalize(format) {
   updateFinalize();dialog.showModal();
 }
 function pdfData() {
+  const pk = printPack();
   return { title: (state.label || 'Lab Rax') + ' · ' + state.h + 'U', h: state.h, version: state.version === 'brass' ? 'Heat-set inserts' : 'Bolted', frame: state.frame, panel: state.panel, accent: state.accent, label: state.label || 'Lab Rax',
     top: state.top ? fullName(LIB[state.top]) : null, topLook: state.top ? LS.topFor(LIB[state.top], colorsFor()) : null, // the top mount as drawn above the frame
     items: byPos().map(i => { const d = info(i); return { pos: uRange(i.pos2, d.h2) + atBack(i), pos2: i.pos2, h2: d.h2, name: fullName(d), label: i.label || '', u: uTxt(d), url: d.url || '', author: d.author || '', color: colorOf(i), face: faceSVG(d, colorOf(i)), depth: partDepth(i), back: sideOf(i) === 'back' }; }),
-    print: printPack().map(x => ({ qty: x.qty, name: x.name, sub: x.subs.join(', '), vars: x.variants, url: x.url })), shop: orderList(), guide: guide(), estimate: buildEstimate(), market: state.market, wallMounts: state.extras.filter(k => LIB[k].shape && LIB[k].shape.wall).map(k => ({ name: fullName(LIB[k]), url: LIB[k].url })), sides: state.sides, dimensions: CAT.frame.dimensions, shareUrl: TOP_WIN ? shareLink() + '&s=shop' : null, frameParts: frameParts(), notes: state.h > 5 ? [JOINER_NOTE] : [],
+    print: pk.map(x => ({ qty: x.qty, name: x.name, sub: x.subs.join(', '), vars: x.variants, url: x.url, bed: bedText(x.bed, true), bad: !!(x.bed && x.bed.bad.length) })),
+    printer: pk.printer ? { name: bedName(pk.printer), bad: bedBad(pk).length, turned: pk.some(x => x.bed && x.bed.turned.length), est: pk.some(x => x.bed && [...x.bed.bad, ...x.bed.turned].some(q => q.est)) } : null, shop: orderList(), guide: guide(), estimate: buildEstimate(), market: state.market, wallMounts: state.extras.filter(k => LIB[k].shape && LIB[k].shape.wall).map(k => ({ name: fullName(LIB[k]), url: LIB[k].url })), sides: state.sides, dimensions: CAT.frame.dimensions, shareUrl: TOP_WIN ? shareLink() + '&s=shop' : null, frameParts: frameParts(), notes: state.h > 5 ? [JOINER_NOTE] : [],
     cooling: pdfCooling(), shareUrl: TOP_WIN ? shareLink() + '&s=shop' : null }; // the QR code opens this layout with its shopping list
 }
 function pdfCooling() { // the Cooling section for the PDF; null when nothing in the rack makes heat
@@ -1209,7 +1291,8 @@ function planLayout(w) {
     const [k1, k05] = a.cfm > 0 ? blankKeys() : ['vent1', 'vent05']; // close the rest: blanks with fans, vents without
     for (let s = 0; s < slots();) { if (isFree(s, 2, undefined, 'front')) { state.items.push({ id: state.nextId++, key: k1, pos2: s }); s += 2; } else if (isFree(s, 1, undefined, 'front')) { state.items.push({ id: state.nextId++, key: k05, pos2: s }); s += 1; } else s++; }
     a = airflow();
-    return { state: cand, a, unplaced: cand.items.filter(i => i.pos2 == null).length };
+    const pk = printPack();
+    return { state: cand, a, unplaced: cand.items.filter(i => i.pos2 == null).length, tooBig: bedBad(pk).length, printer: pk.printer };
   } finally { state = keep; }
 }
 function openWizard() {
@@ -1255,7 +1338,8 @@ function renderWizard() {
   else if (st === 1) body = '<h3 class="wz-h">How do you build it?</h3>' +
     wzOption('version', 'Frame', [['brass', 'Heat-set inserts', 'Brass inserts you melt in with a soldering iron. Neat, and the screws go straight in.'], ['bolted', 'Bolted', 'M6 or #10-32 screws with nuts. No inserts, no soldering iron.']]) +
     wzOption('sides', 'Side panels', [['printed', 'Printed', 'Printed with the frame, in the frame colour.'], ['acrylic', 'Acrylic', '3 mm acrylic cut to size, so you can see inside.']]) +
-    wzOption('fans', 'Fans', [['auto', 'Only if needed', 'The planner checks the airflow and adds a fan when the rack would get warm.'], ['top', 'Top fan', 'A 120 mm fan in the top panel, blowing out.'], ['none', 'No fans', 'Quiet: vent panels instead of fans.']]);
+    wzOption('fans', 'Fans', [['auto', 'Only if needed', 'The planner checks the airflow and adds a fan when the rack would get warm.'], ['top', 'Top fan', 'A 120 mm fan in the top panel, blowing out.'], ['none', 'No fans', 'Quiet: vent panels instead of fans.']]) +
+    '<fieldset class="wz-opt"><legend>Printer</legend>' + printerPicker('wz') + '<p class="hint" style="margin-top:6px">The print list then marks parts too big for your bed. Remembered in this browser, not saved with the layout.</p></fieldset>';
   else if (st === 2) body = '<h3 class="wz-h">Give it a name</h3><p class="hint">It goes on the front of the rack, like the Lab Rax logo.</p>' +
     '<input class="field wz-name" id="wz-name" type="text" maxlength="16" value="' + esc(wz.label) + '" placeholder="Lab Rax" aria-label="Rack name">' +
     '<div class="wz-logo" style="--f:' + look[1] + ';--a:' + look[3] + '"><span id="wz-logo">' + esc(wz.label || 'Lab Rax') + '</span></div>';
@@ -1271,6 +1355,7 @@ function renderWizard() {
     body = '<h3 class="wz-h">Your rack</h3><div class="wz-result">' + miniRack(s) + '<div class="wz-sum">' +
       '<p><b>' + s.h + 'U</b> · ' + s.items.filter(i => i.pos2 != null).length + ' parts · ' + (s.version === 'brass' ? 'heat-set inserts' : 'bolted') + ' · ' + s.sides + ' sides</p>' +
       (a.Q ? '<p>Hottest air ≈ ' + fmtT(a.maxT) + ' in a ' + a.room + ' °C room (' + lvl + ')' + (s.top ? ', with a 120 mm fan in the top' : '') + (s.items.some(i => i.key === 'fan40') ? ' and a fan panel' : '') + '.</p>' : '') +
+      (r.tooBig ? '<p class="wz-warn">' + r.tooBig + (r.tooBig > 1 ? ' prints have parts' : ' print has a part') + ' too big for your ' + esc(bedName(r.printer)) + '. The print list shows which.</p>' : '') +
       (r.unplaced ? '<p class="wz-warn">' + r.unplaced + (r.unplaced > 1 ? ' parts don’t' : ' part doesn’t') + ' fit in 10U. Take some hardware out, or place them later.</p>' : '') +
       (wz.picks.length ? '' : '<p class="wz-warn">No hardware picked, so this is an empty frame with panels.</p>') +
       '<ul class="wz-list">' + wz.picks.map(p => { const d = LIB[p.mount]; return '<li>' + (p.qty > 1 ? p.qty + '× ' : '') + esc(fullName(d)) + ' <span class="muted">' + uTxt(d) + '</span>' + (d.url ? ' <a href="' + esc(d.url) + '" target="_blank" rel="noopener">↗</a>' : '') + '</li>'; }).join('') + '</ul>' +
@@ -1348,6 +1433,8 @@ document.addEventListener('click', async e => {
     case 'clear': undo = JSON.stringify(state); state.items = []; state.top = null; state.extras = []; sel = null; touch(); render(); renderLib(); say('Rack cleared.', true); break;
     case 'undo': if (undo) { state = JSON.parse(undo); undo = null; render(); renderLib(); say('Restored.'); } break;
     case 'copy': copyText(listText(), 'List copied.'); break;
+    case 'save-file': saveFile(rackName() + '.rack.json', new Blob([rackFile()], { type: 'application/json' })); break;
+    case 'open-file': $('#rackfile').click(); break;
     case 'share': if (TOP_WIN) copyText(shareLink(), 'Share link copied. Anyone who opens it sees this layout.'); else say('Open the planner on its own page to share a link.'); break;
     case 'maker': openMaker(null); break;
     case 'edit-gen': openMaker(find(+a.dataset.id)); break;
@@ -1409,6 +1496,9 @@ document.addEventListener('change', e => {
   const t = e.target;
   if (t.id === 'wz-patch' || t.id === 'wz-power') { wz[t.id.slice(3)] = t.checked; return; }
   if (t.id === 'wz-spare') { wz.spare = +t.value; return; }
+  if (t.classList.contains('pr-sel')) { setPrinter(t.value || null); return; }
+  if (t.classList.contains('pr-dim')) { setPrinter('custom', { [t.dataset.k]: t.value.trim() === '' ? NaN : +t.value }); return; }
+  if (t.id === 'rackfile') { openRackFile(t.files && t.files[0]); t.value = ''; return; }
   if (t.classList.contains('wz-mount')) { wz.picks[+t.dataset.i].mount = t.value; return; }
   if (t.id === 'air-room') { const v = Math.round(+t.value); if (v >= 10 && v <= 40) { state.room = v; render(); } else t.value = state.room; return; }
   if (e.target.id === 'sel-color') { render(); return; } if (e.target.id === 'mk-type' || e.target.id === 'mk-u' || e.target.id === 'mk-pattern') { if (e.target.id === 'mk-type') mkOptions(null); mkPreview(); } });
@@ -1521,22 +1611,62 @@ function applyTheme() {
 }
 function cycleTheme() { theme = THEMES[(THEMES.indexOf(theme) + 1) % 3]; try { localStorage.setItem(THEMEKEY, theme); } catch (e) {} applyTheme(); }
 
-/* ---------- share link (own page only) ---------- */
-// share links: "#c=" + base64url of [settings that differ from the defaults, parts as [key, pos2, other fields]],
-// short enough for a QR code; old "#l=" links (the whole state) still open
-const SHARE_KEYS = ['h', 'version', 'frame', 'panel', 'accent', 'label', 'top', 'extras', 'market', 'costs', 'back', 'sides'];
-function shareLink() {
-  const d = defaultState(), same = (x, y) => JSON.stringify(x) === JSON.stringify(y), st = {};
+/* ---------- share link (own page only) and rack file ---------- */
+// share links: "#c=" + base64url of the compact layout, [settings that differ from the defaults, parts as [key, pos2, other fields]],
+// short enough for a QR code; old "#l=" links (the whole state) still open. A rack file holds the same compact layout.
+const SHARE_KEYS = ['h', 'version', 'frame', 'panel', 'accent', 'label', 'top', 'topDir', 'extras', 'xdir', 'market', 'costs', 'back', 'sides', 'room'];
+function compactLayout() {
+  const d = Object.assign(defaultState(), { market: 'NL', costs: window.LREstimate.settings() }), same = (x, y) => JSON.stringify(x) === JSON.stringify(y), st = {}; // sanitize() fills in the defaults
   SHARE_KEYS.forEach(k => { if (state[k] !== undefined && !same(state[k], d[k])) st[k] = state[k]; });
   const items = state.items.map(i => { const { id, key, pos2, ...rest } = i; return Object.keys(rest).length ? [key, pos2, rest] : [key, pos2]; });
-  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify([st, items])))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return [st, items];
+}
+function expandLayout(st, items) { // a compact layout as a state, before sanitize(); null when it can't be one
+  const list = Array.isArray(items) ? items : [], o = {};
+  if (st && typeof st === 'object') SHARE_KEYS.forEach(k => { if (own(st, k)) o[k] = st[k]; }); // settings this planner knows
+  Object.assign(o, { items: list.map((x, n) => Object.assign({}, Array.isArray(x) && x[2] && typeof x[2] === 'object' ? x[2] : {}, { id: n + 1, key: Array.isArray(x) ? x[0] : null, pos2: Array.isArray(x) ? x[1] : null })), nextId: list.length + 1 });
+  const s2 = Object.assign(defaultState(), o, { example: false, done: {} });
+  return s2.h >= 1 && s2.h <= 10 ? s2 : null;
+}
+function shareLink() {
+  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(compactLayout())))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   return location.origin + location.pathname + location.search + '#c=' + b64;
+}
+// replace the layout with one from a link or a file; Undo brings the current one back
+function applyLayout(s2, msg) {
+  const count = s => (Array.isArray(s.items) ? s.items.length : 0) + (Array.isArray(s.extras) ? s.extras.length : 0) + (s.top ? 1 : 0), n = count(s2);
+  undo = JSON.stringify(state); state = s2; sel = null;
+  sanitize(); renderLib(); render();
+  const lost = n - count(state);
+  say(msg + (lost ? ' ' + lost + (lost > 1 ? ' parts in it aren’t' : ' part in it isn’t') + ' in this catalog and ' + (lost > 1 ? 'were' : 'was') + ' left out.' : ''), true);
 }
 function loadShared() {
   const shared = decodeShared(); if (!shared) return false;
-  undo = JSON.stringify(state); state = shared; sel = null;
-  sanitize(); renderLib(); render(); say('Layout loaded from a shared link.', true);
+  applyLayout(shared, 'Layout loaded from a shared link.');
   return true;
+}
+/* Rack file (<name>-<h>u.rack.json): the compact layout with a format name and version, written one part per line.
+   A newer version still opens; what this planner doesn't know is left out. */
+const RACK_FORMAT = 'mini-rack-planner', RACK_VERSION = 1;
+const rackName = () => slug(state.label || 'lab-rax') + '-' + state.h + 'u';
+function rackFile() {
+  const [settings, parts] = compactLayout();
+  return '{\n  "format": "' + RACK_FORMAT + '",\n  "version": ' + RACK_VERSION + ',\n  "settings": ' + JSON.stringify(settings) + ',\n  "parts": [' +
+    parts.map(x => '\n    ' + JSON.stringify(x)).join(',') + (parts.length ? '\n  ' : '') + ']\n}\n';
+}
+function readRackFile(text) { // { state, newer }, or null when the text isn't a rack file
+  let o = null; try { o = JSON.parse(String(text).replace(/^\uFEFF/, '')); } catch (e) {}
+  if (!o || o.format !== RACK_FORMAT || !Number.isInteger(o.version) || o.version < 1) return null;
+  const s2 = expandLayout(o.settings, o.parts);
+  return s2 ? { state: s2, newer: o.version > RACK_VERSION } : null;
+}
+async function openRackFile(file) {
+  if (!file || !CAT) return;
+  let text = null;
+  if (file.size <= 1e6) try { text = await file.text(); } catch (e) {}
+  const r = text == null ? null : readRackFile(text);
+  if (!r) { say(file.name + ' isn’t a rack file from this planner.'); return; }
+  applyLayout(r.state, 'Opened ' + file.name + '.' + (r.newer ? ' It was saved by a newer version of the planner, so some settings may be left out.' : ''));
 }
 function decodeShared() {
   const m = location.hash.match(/^#([lc])=([^&]*)(.*)$/); // l: the whole state (older links), c: compact
@@ -1545,9 +1675,8 @@ function decodeShared() {
     if (/&s=shop\b/.test(m[3])) { ui.sec.shop = true; setTimeout(() => { const b = $('#build'); if (b) b.scrollIntoView({ block: 'start' }); }, 300); }
     const raw = JSON.parse(decodeURIComponent(escape(atob(m[2].replace(/-/g, '+').replace(/_/g, '/')))));
     history.replaceState(null, '', location.pathname + location.search);
-    let o = raw;
-    if (m[1] === 'c') { const [st, items] = Array.isArray(raw) ? raw : [{}, []], list = Array.isArray(items) ? items : [];
-      o = Object.assign({}, st, { items: list.map((x, n) => Object.assign({}, Array.isArray(x) && x[2] && typeof x[2] === 'object' ? x[2] : {}, { id: n + 1, key: Array.isArray(x) ? x[0] : null, pos2: Array.isArray(x) ? x[1] : null })), nextId: list.length + 1 }); }
+    if (m[1] === 'c') { const [st, items] = Array.isArray(raw) ? raw : [{}, []]; return expandLayout(st, items); }
+    const o = raw;
     if (o && Array.isArray(o.items)) { const s2 = Object.assign(defaultState(), o, { example: false, done: {} }); if (s2.h >= 1 && s2.h <= 10) return s2; }
   } catch (e) {}
   return null;
