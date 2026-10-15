@@ -27,7 +27,7 @@ function buildCatalog(c) {
     const top = m.position === 'top';
     add(m.id, { name: d.device, label: m.label, u: top ? 0 : m.u, top, est: !!m.estimated, face: m.face || 'shelf', url: m.url || null, author: m.author || '', hardware: m.hardware || [], watts: m.watts, note: m.note, depth: m.depth, group: g.group, tab: top ? 'top' : 'devices' });
   })));
-  (c.extras || []).forEach(g => g.items.forEach(i => add(i.id, { name: i.name, label: i.label || null, u: 0, extra: true, url: i.url, author: i.author || '', note: i.note, group: g.group, tab: 'extras' })));
+  (c.extras || []).forEach(g => g.items.forEach(i => add(i.id, { name: i.name, label: i.label || null, u: 0, extra: true, url: i.url, author: i.author || '', hardware: i.hardware || [], note: i.note, group: g.group, tab: 'extras' })));
 }
 
 /* ---------- state ---------- */
@@ -124,7 +124,8 @@ function isFree(p, h2, except) { if (p < 0 || p + h2 > slots() || !aligned(p, h2
 function nearest(t, h2, except) { const n = slots(); for (let d = 0; d <= n; d++) for (const c of d ? [t - d, t + d] : [t]) if (isFree(c, h2, except)) return c; return null; }
 function firstFree(h2) { for (let p = 0; p + h2 <= slots(); p++) if (isFree(p, h2)) return p; return null; }
 function touch() { state.example = false; }
-function say(msg, undoable) { $('#status').innerHTML = esc(msg) + (undoable ? ' <button type="button" class="lnk" data-act="undo">Undo</button>' : ''); }
+// btn: true for an Undo button, or [act, label] for another action
+function say(msg, btn) { const b = btn === true ? ['undo', 'Undo'] : btn; $('#status').innerHTML = esc(msg) + (b ? ' <button type="button" class="lnk" data-act="' + b[0] + '">' + esc(b[1]) + '</button>' : ''); }
 function addItem(obj, pos) {
   const d = info(obj), p = pos == null ? firstFree(d.h2) : nearest(pos, d.h2);
   if (p == null) { say('No room for ' + fullName(d) + ' (' + fmtU(d.h2) + '). Make the rack taller or remove something.'); return false; }
@@ -360,26 +361,38 @@ function frameParts() {
 }
 function printPack() {
   const h = state.h, fr = CAT.frame, br = state.version === 'brass', out = []; let n = 0;
-  const add = (name, sub, url, qty, kind) => {
+  // one row per model page, since each page is downloaded once; v is the variant printed from it
+  const add = (name, sub, url, qty, kind, v) => {
     const k = url || ('gen:' + name + sub);
-    const ex = out.find(x => x.k === k);
-    if (ex) { ex.qty += qty; if (sub && !ex.subs.includes(sub)) ex.subs.push(sub); return; }
-    out.push({ id: n++, k, name, subs: sub ? [sub] : [], url, qty, kind });
+    let ex = out.find(x => x.k === k);
+    if (!ex) out.push(ex = { id: n++, k, name, subs: [], url, qty: 0, kind, vars: [] });
+    ex.qty += qty; if (sub && !ex.subs.includes(sub)) ex.subs.push(sub);
+    if (v) { const e = ex.vars.find(x => x.key === v.key); if (e) e.qty += qty; else ex.vars.push(Object.assign({ qty }, v)); }
   };
+  const variant = d => ({ key: d.key, name: d.name, label: d.label || '', h2: d.h2, u: d.top ? 'top' : d.extra ? 'extra' : fmtU(d.h2) });
   const fm = br ? fr.brass : fr.bolted;
   const acr = state.sides === 'acrylic';
   add(fm.name, h === 5 ? 'Complete 5U frame' + (acr ? '; skip the side panels, yours are acrylic' : ' with side panels') : 'Base frame: edges, horizontals, handles, feet', fm.url, 1, 'mw');
   if (h !== 5) add(fr.sizes.name, 'Posts' + (acr ? '' : ' and side panels') + ' for ' + h + 'U', fr.sizes.url, 1, 'mw');
   if (h > 5) add(fr.extension.name, '4 joiners for ' + h + 'U', fr.extension.url, 1, 'mw');
-  if (state.top) { const d = LIB[state.top]; add(fullName(d), 'Replaces the top panel', d.url, 1, 'mw'); }
-  state.extras.forEach(k => { const d = LIB[k]; add(fullName(d), 'Frame extra', d.url, 1, 'mw'); });
+  if (state.top) { const d = LIB[state.top]; add(fullName(d), 'Replaces the top panel', d.url, 1, 'mw', variant(d)); }
+  state.extras.forEach(k => { const d = LIB[k]; add(fullName(d), 'Frame extra', d.url, 1, 'mw', variant(d)); });
   let missing = 0;
   byPos().forEach(i => {
     const d = info(i);
     const col = i.color ? ' · ' + colorName(i.color) : '';
     if (i.key === 'gen') { add(i.name, genLabel(i.params) + ' · ' + uRange(i.pos2, d.h2) + col + ' · in the build pack', null, 1, 'gen'); return; }
     if (!d.url) { if (d.custom) missing++; return; }
-    add(fullName(d), (i.label || shortName(d)) + ' · ' + uRange(i.pos2, d.h2) + col, d.url, 1, 'mw');
+    add(fullName(d), (i.label || shortName(d)) + ' · ' + uRange(i.pos2, d.h2) + col, d.url, 1, 'mw', variant(d));
+  });
+  // a page with several variants lists them, e.g. "½U ×2, 1U ×1", so it's clear which files to print
+  out.forEach(x => {
+    const vs = x.vars.sort((a, b) => a.h2 - b.h2), differ = f => new Set(vs.map(f)).size > 1;
+    x.variants = '';
+    if (vs.length < 2) return;
+    const names = differ(v => v.name), us = differ(v => v.u);
+    x.variants = vs.map(v => (names ? v.name + (us ? ' ' + v.u : '') : us ? v.u : v.label || v.u) + ' ×' + v.qty).join(', ');
+    if (names) x.name = [...new Set(vs.map(v => v.name))].join(' / ');
   });
   out.missing = missing;
   return out;
@@ -397,8 +410,13 @@ function orderList() {
   if (sc) { add(br ? 'm6x10' : 'm6x12', sc); add(br ? 'insert' : 'nut', sc); }
   placed().forEach(i => (info(i).hardware || []).forEach(x => add(x.part, x.qty)));
   if (state.top) (LIB[state.top].hardware || []).forEach(x => add(x.part, x.qty));
-  return [...m].map(([p, q]) => { const hw = CAT.hardware[p] || {}; return { name: hw.name || p, qty: q, buy: hw.buy || shopUrl(hw.search) }; });
+  state.extras.forEach(k => (LIB[k].hardware || []).forEach(x => add(x.part, x.qty)));
+  const out = [...m].map(([p, q]) => { const hw = CAT.hardware[p] || {}; return { name: hw.name || p, qty: q, buy: hw.buy || shopUrl(hw.search) }; });
+  // qty null: needed, but the number isn't confirmed
+  if (state.h > 5) out.push({ name: 'Fasteners for the 4 post joiners', qty: null, buy: null, check: CAT.frame.extension.url });
+  return out;
 }
+const JOINER_NOTE = 'Above 5U the posts are joined. How the post joiners are fastened isn’t confirmed yet, so their screws aren’t counted; check the extension model page.';
 
 /* ---------- airflow ---------- */
 /* An estimate, not a simulation. Heat per part comes from what you entered, the catalog ("watts") or a rule of thumb per kind of device.
@@ -534,7 +552,7 @@ function renderBuild() {
       return '<li class="prow"><button type="button" class="tick" data-act="done" data-k="' + esc(x.k) + '" aria-pressed="' + ok + '" aria-label="Mark ' + esc(x.name) + ' as printed">' +
         (ok ? '<svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="var(--accent)" stroke-width="2.2" aria-hidden="true"><path d="M4 9.5l3.2 3L14 5.5"/></svg>'
             : '<svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="var(--muted)" stroke-width="1.7" aria-hidden="true"><path d="M9 3v9M5 8.5l4 4 4-4M4 15h10"/></svg>') + '</button>' +
-        '<span class="tx"><b>' + esc(x.name) + '</b><small>' + esc(x.subs.join(', ')) + '</small></span>' + (x.qty > 1 ? '<span class="q">' + x.qty + '×</span>' : '') +
+        '<span class="tx"><b>' + esc(x.name) + '</b>' + (x.variants ? '<small>Variants: ' + esc(x.variants) + '</small>' : '') + '<small>' + esc(x.subs.join(', ')) + '</small></span>' + (x.qty > 1 ? '<span class="q">' + x.qty + '×</span>' : '') +
         (x.url ? '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">Open</a>' : '<span class="badge">STL</span>') + '</li>';
     }).join('') + '</ul>' +
     (pk.missing ? '<p class="hint">' + pk.missing + ' own device' + (pk.missing > 1 ? 's' : '') + ' without a link.</p>' : '') +
@@ -544,8 +562,8 @@ function renderBuild() {
 
   const ol = orderList(), tagged = CAT.shops && CAT.shops.amazon && CAT.shops.amazon.en && CAT.shops.amazon.en.tag;
   html += '<div class="boxcard"><h3 class="sub">Shopping list</h3><dl class="kv">' +
-    ol.map(x => '<dt>' + esc(x.name) + '</dt><dd>' + x.qty + '×' + (x.buy ? '<a class="buy" href="' + esc(x.buy) + '" target="_blank" rel="noopener sponsored">Buy</a>' : '') + '</dd>').join('') +
-    '<div class="note">Mounting screws: 2 per side per panel, 1 per side for ½U panels.' + (br ? ' Inserts max 5 mm long; the hole is 5.5 mm deep.' : '') + '</div>' +
+    ol.map(x => '<dt>' + esc(x.name) + '</dt><dd>' + (x.qty == null ? 'unknown' : x.qty + '×') + (x.buy ? '<a class="buy" href="' + esc(x.buy) + '" target="_blank" rel="noopener sponsored">Buy</a>' : x.check ? '<a class="buy" href="' + esc(x.check) + '" target="_blank" rel="noopener">Check</a>' : '') + '</dd>').join('') +
+    '<div class="note">Mounting screws: 2 per side per panel, 1 per side for ½U panels.' + (br ? ' Inserts max 5 mm long; the hole is 5.5 mm deep.' : '') + '</div>' + (h > 5 ? '<div class="note">' + esc(JOINER_NOTE) + '</div>' : '') +
     (tagged ? '<div class="note">As an Amazon Associate the maintainer of this planner earns from qualifying purchases.</div>' : '') + '</dl></div>';
 
   const top = state.top ? LIB[state.top] : null;
@@ -574,8 +592,8 @@ function listText() {
   const used = placed().reduce((n, i) => n + H(i), 0); if (slots() - used > 0) L.push('  Open: ' + fmtU(slots() - used));
   L.push('', 'Frame', '- Vertical posts: ' + fp.posts); if (fp.joiners) L.push('- Post joiners: 4');
   L.push('- Side panels: ' + fp.sides + (state.sides === 'acrylic' ? ' (3 mm acrylic)' : ''), '- Horizontal pieces: 4', '- Edge pieces: 4', '- Handles · feet: 2 · 4', state.top ? '- Top: ' + fullName(LIB[state.top]) + '\n- Bottom panel: 1' : '- Top + bottom panel: 1 + 1');
-  L.push('', 'Print pack'); printPack().forEach(x => L.push('- ' + x.qty + '× ' + x.name + (x.url ? '  ' + x.url : '  (custom STL in build pack)')));
-  L.push('', 'Shopping list'); orderList().forEach(x => L.push('- ' + x.qty + '× ' + x.name));
+  L.push('', 'Print pack'); printPack().forEach(x => L.push('- ' + x.qty + '× ' + x.name + (x.variants ? ' (' + x.variants + ')' : '') + (x.url ? '  ' + x.url : '  (custom STL in build pack)')));
+  L.push('', 'Shopping list'); orderList().forEach(x => L.push('- ' + (x.qty == null ? 'unknown number of ' + x.name.toLowerCase() + ' (not confirmed; ' + x.check + ')' : x.qty + '× ' + x.name)));
   const a = airflow();
   if (a.Q) { L.push('', 'Airflow (estimate)', '- Heat: ' + (a.est ? '≈ ' : '') + Math.round(a.Q) + ' W; air in the rack ≈ room + ' + Math.round(a.rise) + ' °C'); airTips(a).forEach(t => L.push('- ' + t.text)); }
   return L.join('\n');
@@ -598,17 +616,18 @@ async function saveFile(filename, blob) {
   let dl = null;
   try { dl = window.claude && window.claude.use ? await window.claude.use('downloads') : null; } catch (e) { dl = null; }
   if (dl) {
-    try { await dl.save({ filename, data: blob }); say('Saved ' + filename + '.'); }
+    try { await dl.save({ filename, data: blob }); say('Saved ' + filename + '.'); return true; }
     catch (e) { say(e && e.code === 'declined' ? 'Download cancelled.' : 'This view can’t save files. Open the planner on its own page to download.'); }
-    return;
+    return false;
   }
   if (TOP_WIN) {
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename;
     document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     say('Downloaded ' + filename + '.');
-    return;
+    return true;
   }
   say('This view can’t save files. Open the planner on its own page to download.');
+  return false;
 }
 async function genSTL(item) {
   const part = await P.build(item.params);
@@ -640,7 +659,7 @@ function downloadListHTML(pk) {
   const title = (state.label || 'Lab Rax') + ' · ' + state.h + 'U', models = pk.filter(x => x.url), own = pk.filter(x => !x.url);
   const site = u => /printables\.com/.test(u) ? 'Printables' : /makerworld\.com/.test(u) ? 'MakerWorld' : 'the model page';
   const key = 'labrax-download-list-' + P.crc32(new TextEncoder().encode(models.map(x => x.url).join('\n'))).toString(36);
-  const name = x => '<b>' + esc((x.qty > 1 ? x.qty + '× ' : '') + x.name) + '</b><small>' + esc(x.subs.join(', ')) + '</small>';
+  const name = x => '<b>' + esc((x.qty > 1 ? x.qty + '× ' : '') + x.name) + '</b>' + (x.variants ? '<small>Variants: ' + esc(x.variants) + '</small>' : '') + '<small>' + esc(x.subs.join(', ')) + '</small>';
   return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Download list · ' + esc(title) + '</title><style>' + DL_CSS + '</style></head>' +
     '<body data-key="' + key + '"><main><h1>Download list</h1><p>' + esc(title) + '. Open each model, download it there (MakerWorld asks you to sign in; the 3MF keeps the print profile) and tick it off. Your ticks are remembered in this browser.</p>' +
     (models.length ? '<div class="top"><strong id="count"></strong><button type="button" id="next">Open next ↗</button></div><div class="bar"><i id="bar"></i></div><ul>' +
@@ -656,18 +675,20 @@ async function buildPack() {
   for (const g of gens) files.push({ name: 'custom-parts/' + uRange(g.pos2, H(g)).replace('–', '-') + '-' + slug(g.name) + '.stl', data: await genSTL(g) });
   const pk = printPack();
   files.push({ name: 'download-list.html', data: downloadListHTML(pk) });
-  files.push({ name: 'print-list.csv', data: csv([['Qty', 'Part', 'Where', 'Link'], ...pk.map(x => [x.qty, x.name, x.subs.join('; '), x.url || 'custom-parts/'])]) });
-  files.push({ name: 'shopping-list.csv', data: csv([['Qty', 'Item', 'Buy'], ...orderList().map(x => [x.qty, x.name, x.buy || ''])]) });
+  files.push({ name: 'print-list.csv', data: csv([['Qty', 'Part', 'Variants', 'Where', 'Link'], ...pk.map(x => [x.qty, x.name, x.variants, x.subs.join('; '), x.url || 'custom-parts/'])]) });
+  files.push({ name: 'shopping-list.csv', data: csv([['Qty', 'Item', 'Buy'], ...orderList().map(x => [x.qty == null ? 'unknown' : x.qty, x.name, x.buy || x.check || ''])]) });
   files.push({ name: 'README.txt', data: 'Lab Rax build pack — ' + (state.label || 'Lab Rax') + ', ' + state.h + 'U\n\n' + listText() +
     '\n\nCommunity models stay on MakerWorld under their own licenses: open download-list.html, download each model there as 3MF and tick it off.\nCustom parts in custom-parts/ were generated by the Lab Rax Planner (MIT) and print without supports: panels and shelves face-down, label plates face-up.\n' });
-  try { if (window.LRPdf) files.push({ name: base + '-build-plan.pdf', data: await window.LRPdf.make(pdfData()) }); } catch (e) { /* PDF is optional in the pack */ }
-  await saveFile(base + '-build-pack.zip', P.zip(files));
+  let pdfErr = window.LRPdf ? null : 'the PDF module is not available';
+  if (!pdfErr) try { files.push({ name: base + '-build-plan.pdf', data: await window.LRPdf.make(pdfData()) }); } catch (e) { pdfErr = e && e.message || 'unknown error'; }
+  const zip = base + '-build-pack.zip';
+  if (await saveFile(zip, P.zip(files)) && pdfErr) say('Downloaded ' + zip + ', but the build plan PDF is missing from it: ' + pdfErr + '.', ['pdf', 'Try the PDF again']);
 }
 function pdfData() {
   return { title: (state.label || 'Lab Rax') + ' · ' + state.h + 'U', h: state.h, version: state.version === 'brass' ? 'Heat-set inserts' : 'Bolted', frame: state.frame, panel: state.panel, accent: state.accent, label: state.label || 'Lab Rax',
     top: state.top ? fullName(LIB[state.top]) : null,
     items: byPos().map(i => { const d = info(i); return { pos: uRange(i.pos2, d.h2), pos2: i.pos2, h2: d.h2, name: fullName(d), label: i.label || '', u: uTxt(d), url: d.url || '', author: d.author || '', color: colorOf(i) }; }),
-    print: printPack().map(x => ({ qty: x.qty, name: x.name, sub: x.subs.join(', '), url: x.url })), shop: orderList(), frameParts: frameParts(), notes: [] };
+    print: printPack().map(x => ({ qty: x.qty, name: x.name, sub: x.subs.join(', '), vars: x.variants, url: x.url })), shop: orderList(), frameParts: frameParts(), notes: state.h > 5 ? [JOINER_NOTE] : [] };
 }
 
 /* ---------- custom part maker ---------- */
