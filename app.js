@@ -25,14 +25,15 @@ const PW_KEYS = ['poe', 'poeIn', 'poeOptional', 'ports', 'eth'];
 const pwOf = o => { const r = {}; PW_KEYS.forEach(k => { if (o[k] !== undefined) r[k] = o[k]; }); return r; };
 /* What the catalog knows about a part and how, per claim (docs/audit/CATALOG_VERIFICATION.md): verified (measured or tested,
    with a method and a date), documented (the creator or maker says so), community (a builder reports it), estimated, unknown.
-   An entry's own "evidence" wins; otherwise the older fields are read as evidence. */
+   An entry's own "evidence" wins. Otherwise only what the older fields actually say counts: "estimated" is an estimate, "labrax"
+   means the model itself is made for Lab Rax (its page is the source). No flag is not evidence, so the rest stays unknown. */
 const EV_LABEL = { verified: 'Verified', documented: 'Documented', community: 'Community reported', estimated: 'Estimated', unknown: 'Unknown' };
 function evidenceOf(src) {
   const e = src.evidence || {};
   return {
-    height: e.height || (src.estimated ? { state: 'estimated', note: 'from the model’s title or photos' } : { state: 'documented', note: 'from the model page' }),
-    fit: e.fit || (src.labrax ? { state: 'documented', note: 'made for or tested in Lab Rax by its creator' } : { state: 'unknown' }),
-    power: e.power || (typeof src.watts !== 'number' ? { state: 'unknown' } : src.wattsEstimated ? { state: 'estimated', note: 'a typical figure for this kind of device' } : { state: 'documented', note: 'typical draw from the maker’s figures' })
+    height: e.height || (src.estimated ? { state: 'estimated', note: 'from the model’s title or photos' } : { state: 'unknown', note: 'where the height comes from isn’t recorded' }),
+    fit: e.fit || (src.labrax ? { state: 'documented', note: 'the model is made for Lab Rax (model page)' } : { state: 'unknown' }),
+    power: e.power || (typeof src.watts !== 'number' ? { state: 'unknown' } : src.wattsEstimated ? { state: 'estimated', note: 'a typical figure for this kind of device' } : { state: 'unknown', note: 'where the figure comes from isn’t recorded' })
   };
 }
 const evNote = x => x.method ? x.method + (x.date ? ', ' + x.date : '') : x.note || '';

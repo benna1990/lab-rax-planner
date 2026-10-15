@@ -17,8 +17,11 @@ const isFan = part => typeof cat.hardware?.[part]?.cfm === 'number';
 // heat and airflow: typical heat in W (wattsEstimated marks a guess), fan direction, free area of an opening, where an extra sits
 // how a claim is known (docs/audit/CATALOG_VERIFICATION.md): verified needs a method and a date, documented and community a source
 const EV = new Set(['verified', 'documented', 'community', 'estimated', 'unknown']);
+// entries from before licences were recorded; every other entry must state its model's licence
+const LEGACY = new Set(JSON.parse(readFileSync(new URL('./catalog-baseline.json', import.meta.url), 'utf8')).ids);
 function evidence(o, where) {
   if (o.license != null && !text(o.license)) errors.push(`${where}: license must be text, e.g. "CC BY 4.0"`);
+  if (o.license == null && o.id && !LEGACY.has(o.id)) errors.push(`${where}: a new entry needs a license, as its model page states it (e.g. "CC BY-NC-SA 4.0")`);
   if (o.evidence == null) return;
   if (typeof o.evidence !== 'object' || Array.isArray(o.evidence)) return errors.push(`${where}: evidence must be an object`);
   for (const [k, e] of Object.entries(o.evidence)) {

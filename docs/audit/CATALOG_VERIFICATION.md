@@ -51,7 +51,7 @@ Add an optional `evidence` object per entry. Old fields keep working and map ont
 "license": "CC BY-NC-SA 4.0"
 ```
 
-Mapping of today's fields: `estimated: true` → `height.state = "estimated"`, and no `estimated` → `height.state = "documented"` (taken from the model page). `wattsEstimated` → `power.state = "estimated"`. `labrax: true` with a measured entry → `fit.state = "verified"`, otherwise `"documented"`. Measured entries (the list above) → `height.state = "verified"`, `method: "measured from model file"`.
+Mapping of today's fields (as implemented in `app.js` `evidenceOf`): `estimated: true` → `height.state = "estimated"`; `wattsEstimated: true` → `power.state = "estimated"`; `labrax: true` → `fit.state = "documented"` (the model page says it's made for Lab Rax). **A missing flag is not evidence:** a height or a power figure without an `evidence` record stays `"unknown"` ("where it comes from isn't recorded"). Measured entries (the list above) carry `evidence.height.state = "verified"` with method and date.
 
 ## Contribution and review
 
