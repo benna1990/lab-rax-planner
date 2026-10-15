@@ -209,10 +209,10 @@ function heightFor(h2, side) {
   try { for (let h = h0 + 1; h <= 10; h++) { state.h = h; if (firstFree(h2, side) != null) return h; } return null; } finally { state.h = h0; }
 }
 const freeSlots = side => slots() - placed().filter(o => sideOf(o) === side).reduce((n, o) => n + H(o), 0);
-// the first free slot where the part doesn't run into a part on the other side (depth), else the first free slot
+// the first free slot where the part doesn't run into a part on the other side (depth) or overlap its neighbour, else the first free slot
 function firstClear(obj, h2, sd) {
   let first = null;
-  for (let p = 0; p + h2 <= slots(); p++) if (isFree(p, h2, undefined, sd)) { if (first == null) first = p; if (!clashes(Object.assign({ id: -1 }, obj, { pos2: p })).length) return p; }
+  for (let p = 0; p + h2 <= slots(); p++) if (isFree(p, h2, undefined, sd)) { if (first == null) first = p; const o = Object.assign({ id: -1 }, obj, { pos2: p }); if (!clashes(o).length && !overlaps(o).length) return p; }
   return first;
 }
 // slide the parts on a side up against each other, so their free space is one gap at the bottom; whole-U parts stay on a U
@@ -299,9 +299,21 @@ function clashes(it) {
   return placed().filter(o => o !== it && o.id !== it.id && sideOf(o) !== sideOf(it) && o.pos2 < it.pos2 + H(it) && it.pos2 < o.pos2 + H(o))
     .map(o => ({ o, d: partDepth(o) })).filter(x => x.d && mine + x.d > room).map(x => Object.assign(x, { mine, room }));
 }
+/* Parts on the same side whose panels overlap: a ½U Lab Rax panel is 22.6 mm high, more than half a U, and sits on the U's outer
+   hole, so it reaches past the middle of its U into the other half (shapes.js). Two ½U parts in one U then overlap: 3.6 mm for two
+   Lab Rax panels, 1.4 mm next to an EIA one. Returns [{ o, mm }]. */
+function overlaps(it) {
+  if (it.pos2 == null) return [];
+  const span = o => { const [py, ph] = plateBox(o, info(o)), t = o.pos2 * P.U / 2 + py; return [t, t + ph]; }, [a0, a1] = span(it);
+  return placed().filter(o => o.id !== it.id && sideOf(o) === sideOf(it) && Math.abs(o.pos2 - it.pos2) <= 2)
+    .map(o => { const [b0, b1] = span(o); return { o, mm: Math.min(a1, b1) - Math.max(a0, b0) }; }).filter(x => x.mm > .05);
+}
+// would a ½U part fit in slot p, without overlapping the part in the other half of its U? (for filling open slots)
+const halfFits = (key, p, side) => !overlaps(Object.assign({ id: 'probe', key, pos2: p }, side === 'back' ? { side } : {})).length;
 function clashText(it) {
-  const c = clashes(it)[0];
-  return c ? ' It runs into ' + fullName(info(c.o)) + ' at the ' + sideOf(c.o) + ': ' + Math.round(c.mine) + ' + ' + Math.round(c.d) + ' mm is more than the ' + c.room + ' mm inside the rack.' : '';
+  const c = clashes(it)[0], v = overlaps(it)[0];
+  return (c ? ' It runs into ' + fullName(info(c.o)) + ' at the ' + sideOf(c.o) + ': ' + Math.round(c.mine) + ' + ' + Math.round(c.d) + ' mm is more than the ' + c.room + ' mm inside the rack.' : '') +
+    (v ? ' It overlaps ' + fullName(info(v.o)) + ' by ' + v.mm.toFixed(1) + ' mm: a ½U Lab Rax panel is 22.6 mm high, more than half a U, so two ½U parts may not fit in one U. Use one of them, or a 1U panel.' : '');
 }
 function removeItem(id) {
   const it = find(id); if (!it) return;
@@ -346,14 +358,15 @@ function setHeight(h) {
 function fillGaps(keys, noun, side) {
   const [k1, k05] = keys || ['vent1', 'vent05']; noun = noun || 'vent panel';
   const sd = side || rackSide, at = sd === 'back' ? { side: 'back' } : {};
-  let n = 0, p = 0;
+  let n = 0, p = 0, left = 0; // left: half U's beside a ½U part, where the ½U panel would overlap it
   while (p < slots()) {
     if (isFree(p, 2, undefined, sd)) { state.items.push(Object.assign({ id: state.nextId++, key: k1, pos2: p }, at)); n++; p += 2; }
-    else if (isFree(p, 1, undefined, sd)) { state.items.push(Object.assign({ id: state.nextId++, key: k05, pos2: p }, at)); n++; p += 1; }
-    else p++;
+    else if (isFree(p, 1, undefined, sd) && halfFits(k05, p, sd)) { state.items.push(Object.assign({ id: state.nextId++, key: k05, pos2: p }, at)); n++; p += 1; }
+    else { if (isFree(p, 1, undefined, sd)) left++; p++; }
   }
-  if (!n) { say('There are no open slots at the ' + sd + '.'); return; }
-  touch(); render(); say(n + ' ' + noun + (n > 1 ? 's' : '') + ' added to the open slots at the ' + sd + '.');
+  const why = left ? ' ' + (left > 1 ? left + ' half U’s stay' : 'A half U stays') + ' open: ½U Lab Rax panels are 22.6 mm high, more than half a U, so a ½U ' + noun + ' would overlap the ½U part beside it.' : '';
+  if (!n) { say((left ? 'Nothing added at the ' + sd + '.' : 'There are no open slots at the ' + sd + '.') + why); return; }
+  touch(); render(); say(n + ' ' + noun + (n > 1 ? 's' : '') + ' added to the open slots at the ' + sd + '.' + why);
 }
 function focusSel() { const el = document.querySelector('.item[data-id="' + sel + '"]'); if (el) el.focus({ preventScroll: true }); }
 
@@ -485,8 +498,8 @@ function renderRack() {
   const rear = view === 'back';
   onSide(rear ? 'back' : 'front').forEach(it => {
     // no text on the panels, so the faces show what is placed; the name is in the tooltip and the aria-label
-    const d = info(it), c = colorOf(it), clash = clashes(it).length > 0, [py, ph] = plateBox(it, d);
-    items += '<div class="item' + (it.id === sel ? ' sel' : '') + (clash ? ' clash' : '') + '" data-id="' + it.id + '" role="button" tabindex="0" aria-label="' + esc((it.label ? it.label + ': ' : '') + fullName(d) + ', ' + uTxt(d) + ', ' + uRange(it.pos2, d.h2) + atBack(it) + (clash ? ', runs into a part on the other side' : '')) + '"' +
+    const d = info(it), c = colorOf(it), clash = clashes(it).length > 0, over = overlaps(it)[0], [py, ph] = plateBox(it, d);
+    items += '<div class="item' + (it.id === sel ? ' sel' : '') + (clash || over ? ' clash' : '') + '" data-id="' + it.id + '" role="button" tabindex="0" aria-label="' + esc((it.label ? it.label + ': ' : '') + fullName(d) + ', ' + uTxt(d) + ', ' + uRange(it.pos2, d.h2) + atBack(it) + (clash ? ', runs into a part on the other side' : '') + (over ? ', overlaps ' + fullName(info(over.o)) : '')) + '"' +
       ' style="top:' + (it.pos2 * HU + py * s).toFixed(1) + 'px;height:' + (ph * s).toFixed(1) + 'px;left:' + inset.toFixed(1) + 'px;right:' + inset.toFixed(1) + 'px;--c:' + c + '">' +
       faceSVG(d, c, upperHalf(it)) + '</div>';
   });
@@ -580,6 +593,7 @@ function tipHTML(it) {
     (it.label ? '<span>' + esc(fullName(d)) + '</span>' : d.label ? '<span>' + esc(d.label) + '</span>' : '') +
     '<span class="mono">' + uTxt(d) + ' · ' + uRange(it.pos2, d.h2) + atBack(it) + (hw.w ? ' · ' + (hw.est ? '≈ ' : '') + fmtW(hw.w) : '') + '</span>' +
     clashes(it).map(c => '<span class="warn">Runs into ' + esc(fullName(info(c.o))) + ' at the ' + sideOf(c.o) + ' (' + Math.round(c.mine) + ' + ' + Math.round(c.d) + ' mm deep, ' + c.room + ' mm of room)</span>').join('') +
+    overlaps(it).map(v => '<span class="warn">Overlaps ' + esc(fullName(info(v.o))) + ' by ' + v.mm.toFixed(1) + ' mm</span>').join('') +
     (p ? '<span class="mono">Air here ≈ ' + fmtT(p.T) + (hw.w ? '' : ' · no heat') + '</span>' : '') +
     (cfmOf(d) ? '<span class="mono">' + esc(fanLine(d)) + '</span>' : '') + (f ? '<span class="mono">' + (f.dir === 'intake' ? 'Blows in' : 'Blows out') + ': ' + flow(f) + '</span>' : '') +
     (g ? '<span class="mono">Vents: ' + flow(g) + '</span>' : '') + (d.author ? '<span>by ' + esc(d.author) + '</span>' : '');
@@ -600,7 +614,7 @@ function renderSel() {
   const it = sel != null ? find(sel) : null, bar = $('#selbar');
   if (!it || it.pos2 == null) { bar.innerHTML = '<span class="hint">Click a part in the rack to move, label or remove it. Drag it, or use the arrow keys to move by ½U.</span>'; return; }
   const d = info(it), auto = heatOf(Object.assign({}, it, { watts: undefined }));
-  bar.innerHTML = '<div class="who"><b>' + esc(fullName(d)) + '</b><span class="hint">' + uTxt(d) + ' · ' + uRange(it.pos2, d.h2) + ' · ' + sideOf(it) + (d.author ? ' · by ' + esc(d.author) : '') + '</span>' + (clashes(it).length ? '<span class="hint warn">' + esc(clashText(it).trim()) + '</span>' : '') + '</div>' +
+  bar.innerHTML = '<div class="who"><b>' + esc(fullName(d)) + '</b><span class="hint">' + uTxt(d) + ' · ' + uRange(it.pos2, d.h2) + ' · ' + sideOf(it) + (d.author ? ' · by ' + esc(d.author) : '') + '</span>' + (clashText(it) ? '<span class="hint warn">' + esc(clashText(it).trim()) + '</span>' : '') + '</div>' +
     '<input class="field" id="sel-label" type="text" maxlength="24" aria-label="Label on the panel" placeholder="Label, e.g. Pi 5" value="' + esc(it.label || '') + '">' +
     '<label class="watts" title="Heat this part gives off, for the cooling estimate. Empty: ' + (auto.w ? (auto.est ? 'about ' : '') + fmtW(auto.w) + ', its typical draw' : 'no heat') + '">Heat <input class="field" id="sel-watts" type="number" min="0" max="500" step="1" inputmode="numeric" placeholder="' + (auto.w ? (auto.est ? '≈' : '') + auto.w : '0') + '" value="' + (typeof it.watts === 'number' ? it.watts : '') + '"> W</label>' +
     (cfmOf(d) ? '<span class="watts" title="' + esc(fanLine(d)) + '">Fans ' + dirSeg({ ref: 'i' + it.id, d, place: fanPlace(d, 'item', it), kind: 'item', dir: dirFor(d, it.dir, fanPlace(d, 'item', it), 'item'), name: fullName(d) }) + '</span>' : '') +
@@ -672,7 +686,7 @@ function framePieces() {
   };
 }
 function itemPieces(it, d) {
-  if (it.key !== 'gen') return [piece(fmtU(d.h2) + (d.tab === 'devices' ? ' mount' : ' panel'), [[PANEL_10, P.panelH(d.h2 / 2), 3]], true)];
+  if (it.key !== 'gen') return [piece(fmtU(d.h2) + (d.tab === 'devices' ? ' mount' : ' panel'), [[PANEL_10, LS.fit(d).h, 3]], true)];
   const p = it.params, h = P.panelH(p.u);
   if (p.type !== 'shelf') return [piece(fmtU(d.h2) + ' ' + GEN_NAMES[p.type].toLowerCase(), [[P.PANEL_W, h, 3]])];
   const dd = p.dd + 5; // front plate and rear stop; it prints face-down, or lying on its floor
@@ -1055,7 +1069,7 @@ function predict(change) {
 }
 function fillInto(k1, k05) { // every open slot filled, on a copy of the items list
   state.items = state.items.slice(); let id = -1;
-  for (let p = 0; p < slots();) { if (isFree(p, 2, undefined, 'front')) { state.items.push({ id: id--, key: k1, pos2: p }); p += 2; } else if (isFree(p, 1, undefined, 'front')) { state.items.push({ id: id--, key: k05, pos2: p }); p += 1; } else p++; }
+  for (let p = 0; p < slots();) { if (isFree(p, 2, undefined, 'front')) { state.items.push({ id: id--, key: k1, pos2: p }); p += 2; } else if (isFree(p, 1, undefined, 'front') && halfFits(k05, p)) { state.items.push({ id: id--, key: k05, pos2: p }); p += 1; } else p++; }
 }
 const blankKeys = () => LIB.mw13855411 && LIB.mw1385541 ? ['mw13855411', 'mw1385541'] : ['vent1', 'vent05'];
 function airTips(a) {
@@ -1623,7 +1637,7 @@ function planLayout(w) {
       const q = lowestFree(2); if (q != null) { state.items.push({ id: state.nextId++, key: 'fan40', pos2: q }); a = airflow(); }
     }
     const [k1, k05] = a.cfm > 0 ? blankKeys() : ['vent1', 'vent05']; // close the rest: blanks with fans, vents without
-    for (let s = 0; s < slots();) { if (isFree(s, 2, undefined, 'front')) { state.items.push({ id: state.nextId++, key: k1, pos2: s }); s += 2; } else if (isFree(s, 1, undefined, 'front')) { state.items.push({ id: state.nextId++, key: k05, pos2: s }); s += 1; } else s++; }
+    for (let s = 0; s < slots();) { if (isFree(s, 2, undefined, 'front')) { state.items.push({ id: state.nextId++, key: k1, pos2: s }); s += 2; } else if (isFree(s, 1, undefined, 'front') && halfFits(k05, s)) { state.items.push({ id: state.nextId++, key: k05, pos2: s }); s += 1; } else s++; }
     a = airflow();
     const pk = printPack();
     return { state: cand, a, unplaced: cand.items.filter(i => i.pos2 == null).length, tooBig: bedBad(pk).length, printer: pk.printer };
