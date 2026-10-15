@@ -347,7 +347,25 @@ const halfFits = (key, p, side) => !overlaps(Object.assign({ id: 'probe', key, p
 function clashText(it) {
   const c = clashes(it)[0], v = overlaps(it)[0];
   return (c ? ' It runs into ' + fullName(info(c.o)) + ' at the ' + sideOf(c.o) + ': ' + Math.round(c.mine) + ' + ' + Math.round(c.d) + ' mm is more than the ' + c.room + ' mm inside the rack.' : '') +
-    (v ? ' It overlaps ' + fullName(info(v.o)) + ' by ' + v.mm.toFixed(1) + ' mm: a ½U Lab Rax panel is 22.6 mm high, more than half a U, so two ½U parts may not fit in one U. Use one of them, or a 1U panel.' : '');
+    (v ? ' It overlaps ' + fullName(info(v.o)) + ' by ' + v.mm.toFixed(1) + ' mm: two ½U Lab Rax panels don’t fit in one U.' : '');
+}
+// the selected part's warning: what's wrong in a few words, why in the tooltip, and a button that moves it to a spot without the problem
+function warnHTML(it) {
+  const c = clashes(it)[0], v = overlaps(it)[0]; if (!c && !v) return '';
+  const what = c ? 'Runs into ' + fullName(info(c.o)) + ' at the ' + sideOf(c.o) + ': ' + Math.round(c.mine + c.d) + ' mm deep, the rack has ' + c.room + ' mm'
+    : 'Overlaps ' + fullName(info(v.o)) + ' by ' + v.mm.toFixed(1) + ' mm';
+  const why = c ? 'A part at the front and one at the back at the same height share the depth of the rack; together these two are too deep.'
+    : 'A ½U Lab Rax panel is 22.6 mm high, a bit more than half a U (22.2 mm), and its screw hole sits 1.6 mm off-centre (measured from the model), so two ½U panels in one U overlap. Give one a U of its own, or use one 1U panel instead of two ½U ones.';
+  return '<span class="selwarn" title="' + esc(why) + '">⚠ ' + esc(what) + '. <button type="button" class="lnk" data-act="unclash">Move it to a free spot</button></span>';
+}
+// the nearest free slot on the part's side where it neither overlaps a neighbour nor runs into a part at the other side
+function unclash(id) {
+  const it = find(id); if (!it) return;
+  const h = H(it), a = it.pos2, ok = p => isFree(p, h, id) && !clashes(Object.assign({}, it, { pos2: p })).length && !overlaps(Object.assign({}, it, { pos2: p })).length;
+  for (let dd = 1; dd <= slots(); dd++) for (const p of [a - dd, a + dd]) if (p >= 0 && p + h <= slots() && ok(p)) {
+    undo = JSON.stringify(state); it.pos2 = p; touch(); render(); say(fullName(info(it)) + ' moved to ' + uRange(p, h) + atBack(it) + ', where it fits.', true); return;
+  }
+  say('There is no free spot where ' + fullName(info(it)) + ' fits without an overlap. Make the rack taller, or use a 1U panel instead of two ½U ones.');
 }
 function removeItem(id) {
   const it = find(id); if (!it) return;
@@ -447,8 +465,9 @@ function rowHTML(key, name, sub, extra) {
   const hw = heatOf({ key }), kind = d.top ? 'top' : d.extra ? 'extra' : 'item', fan = cfmOf(d) ? fanChip(d, dirFor(d, null, fanPlace(d, kind), kind)) : '';
   if (cfmOf(d)) sub = (sub ? sub + ' · ' : '') + fanLine(d);
   return '<div class="lrow-wrap"><button type="button" class="lrow' + (on || n ? ' on' : '') + '" draggable="' + !(d.top || d.extra) + '" data-act="lib" data-key="' + key + '" title="' + esc(fullName(d)) + (d.author ? ' · by ' + esc(d.author) : '') + '">' +
-    '<span class="lthumb">' + miniThumb(d) + '</span><span class="ltx"><b>' + esc(name) + '</b>' + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span>' +
-    (n ? '<span class="inrack" title="In your rack">' + n + '×</span>' : '') + fan + wChip(hw.w, hw.est) + '<span class="badge' + (d.est ? ' est' : '') + '"' + (d.est ? ' title="Height estimated; check the model"' : '') + '>' + badge + '</span></button>' +
+    '<span class="lthumb">' + miniThumb(d) + '</span><span class="ltx"><b>' + esc(name) + '</b><span class="lmeta"><span class="lchips">' + // the name gets the whole first line
+    (n ? '<span class="inrack" title="In your rack">' + n + '×</span>' : '') + '<span class="badge' + (d.est ? ' est' : '') + '"' + (d.est ? ' title="≈: the height is estimated, not yet checked against the model"' : '') + '>' + badge + '</span>' + wChip(hw.w, hw.est) + fan + '</span>' +
+    (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span></span></button>' +
     (extra || '') + (d.url ? '<a class="lext" href="' + esc(d.url) + '" target="_blank" rel="noopener" aria-label="Open model page for ' + esc(fullName(d)) + '" title="Open model page">↗</a>' : '') + '</div>';
 }
 const mountSub = m => m.label + (m.labrax && !/lab ?rax/i.test(m.label) ? ' · Lab Rax' : '') + (m.author ? ' · ' + m.author : '');
@@ -466,7 +485,7 @@ function markFit() {
   document.querySelectorAll('.lrow[data-key]').forEach(b => {
     const d = LIB[b.dataset.key]; if (!d || d.top || d.extra || !d.h2) return;
     if (!(d.h2 in memo)) { const g = firstFree(d.h2, side) != null ? 0 : heightFor(d.h2, side); memo[d.h2] = g === 0 ? '' : g ? 'needs ' + g + 'U' : 'no room'; }
-    const f = memo[d.h2]; if ((b.dataset.fit || '') !== f) { if (f) b.dataset.fit = f; else delete b.dataset.fit; }
+    const f = memo[d.h2], ch = b.querySelector('.lchips'); if ((b.dataset.fit || '') !== f) { if (f) { b.dataset.fit = f; if (ch) ch.dataset.fit = f; } else { delete b.dataset.fit; if (ch) delete ch.dataset.fit; } }
   });
 }
 function renderLib() {
@@ -648,7 +667,7 @@ function renderSel() {
   const it = sel != null ? find(sel) : null, bar = $('#selbar');
   if (!it || it.pos2 == null) { bar.innerHTML = '<span class="hint">Click a part in the rack to move, label or remove it. Drag it, or use the arrow keys to move by ½U.</span>'; return; }
   const d = info(it), auto = heatOf(Object.assign({}, it, { watts: undefined }));
-  bar.innerHTML = '<div class="who"><b>' + esc(fullName(d)) + '</b><span class="hint">' + uTxt(d) + ' · ' + uRange(it.pos2, d.h2) + ' · ' + sideOf(it) + (d.author ? ' · by ' + esc(d.author) : '') + '</span>' + (clashText(it) ? '<span class="hint warn">' + esc(clashText(it).trim()) + '</span>' : '') + '</div>' +
+  bar.innerHTML = '<div class="who"><b>' + esc(fullName(d)) + '</b><span class="hint">' + uTxt(d) + ' · ' + uRange(it.pos2, d.h2) + ' · ' + sideOf(it) + (d.author ? ' · by ' + esc(d.author) : '') + '</span>' + warnHTML(it) + '</div>' +
     '<input class="field" id="sel-label" type="text" maxlength="24" aria-label="Label on the panel" placeholder="Label, e.g. Pi 5" value="' + esc(it.label || '') + '">' +
     '<label class="watts" title="Heat this part gives off, for the cooling estimate. Empty: ' + (auto.w ? (auto.est ? 'about ' : '') + fmtW(auto.w) + ', its typical draw' : 'no heat') + '">Heat <input class="field" id="sel-watts" type="number" min="0" max="500" step="1" inputmode="numeric" placeholder="' + (auto.w ? (auto.est ? '≈' : '') + auto.w : '0') + '" value="' + (typeof it.watts === 'number' ? it.watts : '') + '"> W</label>' +
     (cfmOf(d) ? '<span class="watts" title="' + esc(fanLine(d)) + '">Fans ' + dirSeg({ ref: 'i' + it.id, d, place: fanPlace(d, 'item', it), kind: 'item', dir: dirFor(d, it.dir, fanPlace(d, 'item', it), 'item'), name: fullName(d) }) + '</span>' : '') +
@@ -1770,6 +1789,7 @@ document.addEventListener('click', async e => {
     case 'view': setView(a.dataset.v); break;
     case 'h-': shrink(state.h - 1); break;
     case 'hist-undo': histGo(-1); break;
+    case 'unclash': unclash(sel); break;
     case 'fill': { const it = find(sel), md = it && modOf(LIB[it.key]); if (!md) break; const k = Math.max(0, Math.min(md.n, (it.fill != null ? it.fill : md.n) + +a.dataset.d)); if (k === md.n) delete it.fill; else it.fill = k; touch(); render(); say(fullName(LIB[it.key]) + ': ' + (slotText(it) || 'all ' + md.n + ' ' + SLOT_NOUN[md.kind][1]) + '.'); break; }
     case 'hist-redo': histGo(1); break;
     case 'h+': setHeight(state.h + 1); break;

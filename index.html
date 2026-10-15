@@ -109,7 +109,7 @@ h3.sub{font-size:14px;font-weight:700;margin:0}
 .card .ft{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-top:auto}
 .card .by{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .badge{font-family:var(--f-mono);font-size:11.5px;font-weight:500;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent-text);white-space:nowrap}
-.badge.est{background:var(--warn-soft);color:var(--warn)}
+.badge.est{background:none;color:var(--ink-2);box-shadow:inset 0 0 0 1px var(--line-2)} /* ≈ estimated height: a note, not a warning */
 .badge.hot{background:var(--warn);color:var(--panel)}
 .card .ext{position:absolute;top:14px;right:14px;width:26px;height:26px;border-radius:999px;background:var(--panel);border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-2);text-decoration:none;font-size:12px}
 .card .ext:hover{border-color:var(--accent);color:var(--accent)}
@@ -332,7 +332,10 @@ details.abd .hint{margin-top:6px}
 .slotnames{flex-basis:100%;display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px}
 .slotnames .field{width:100%;min-width:0}
 .lrow[data-fit]{opacity:.72}
-.lrow[data-fit]::after{content:attr(data-fit);flex:none;margin-left:auto;font-size:11px;font-weight:700;color:var(--muted);border:1px dashed var(--line-2);border-radius:999px;padding:1px 7px;white-space:nowrap} /* doesn't fit at this side: the rack height it needs */
+.lchips[data-fit]::after{content:attr(data-fit);font-size:11px;font-weight:700;color:var(--muted);border:1px dashed var(--line-2);border-radius:999px;padding:1px 7px;white-space:nowrap} /* doesn't fit at this side: the rack height it needs */
+/* a library row: the name on the first line, the chips and the description on the second */
+.lmeta{display:flex;align-items:center;gap:8px;min-width:0;margin-top:3px}
+.lchips{display:flex;align-items:center;gap:4px;flex:none}
 .lrow{flex:1;min-width:0;display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:10px;border:1px solid transparent;background:none;color:var(--ink);text-align:left;cursor:pointer}
 .lrow:hover{background:var(--sunk);border-color:var(--line)}
 .lrow.on{border-color:color-mix(in srgb,var(--accent) 55%,transparent)}
@@ -347,7 +350,9 @@ details.abd .hint{margin-top:6px}
 .lprev .mono{font-family:var(--f-mono);font-size:11.5px;color:var(--muted)}
 .ltx{flex:1;min-width:0;display:flex;flex-direction:column}
 .ltx b{font-weight:600;font-size:13.5px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ltx small{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ltx small{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.selwarn{display:block;font-size:12.5px;color:var(--warn);line-height:1.4;cursor:help}
+.selwarn .lnk{cursor:pointer}
 .inrack{font-family:var(--f-mono);font-size:11px;color:var(--accent-text)}
 .lmore,.lext{flex:none;height:28px;min-width:28px;padding:0 8px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink-2);font-size:12px;display:grid;place-items:center;text-decoration:none;cursor:pointer}
 .lmore:hover,.lext:hover{border-color:var(--accent);color:var(--accent)}
