@@ -7,7 +7,19 @@ const FACES = new Set(['shelf', 'switch', 'vent', 'fan', 'ks', 'd', 'sbc', 'drv2
 const text = v => typeof v === 'string' && v.trim() !== '';
 const okUrl = u => typeof u === 'string' && /^https:\/\/\S+$/.test(u);
 const okU = u => typeof u === 'number' && u >= 0.5 && u <= 10 && Number.isInteger(u * 2);
-const watts = (w, where) => { if (w != null && !(typeof w === 'number' && w >= 0 && w <= 500)) errors.push(`${where}: watts must be a number from 0 to 500`); };
+const DIRS = new Set(['intake', 'exhaust', 'cross']), PLACES = new Set(['side', 'back', 'top']);
+const isFan = part => typeof cat.hardware?.[part]?.cfm === 'number';
+// heat and airflow: typical heat in W (wattsEstimated marks a guess), fan direction, free area of an opening, where an extra sits
+function air(o, where, needWatts) {
+  if (o.watts == null) { if (needWatts) errors.push(`${where}: needs watts, the typical heat in W (add "wattsEstimated": true when it's a guess)`); }
+  else if (!(typeof o.watts === 'number' && o.watts >= 0 && o.watts <= 500)) errors.push(`${where}: watts must be a number from 0 to 500`);
+  if (o.wattsEstimated != null && (o.wattsEstimated !== true || o.watts == null)) errors.push(`${where}: wattsEstimated can only be true, next to watts`);
+  const fans = (o.hardware || []).some(h => isFan(h.part));
+  if (o.fanDir != null && (!DIRS.has(o.fanDir) || !fans)) errors.push(`${where}: fanDir must be intake, exhaust or cross, on a part whose hardware has fans`);
+  if (o.fanDir === 'cross' && !['side', 'top'].includes(o.at)) errors.push(`${where}: fanDir cross is only for a pair of fans in the side panels (one in, one out) or in the top and bottom panel (in at the bottom, out at the top)`);
+  if (o.vent != null && !(typeof o.vent === 'number' && o.vent > 0 && o.vent <= 1)) errors.push(`${where}: vent is the open share of the opening, more than 0 and at most 1`);
+  for (const k of ['at', 'fanAt']) if (o[k] != null && !PLACES.has(o[k])) errors.push(`${where}: ${k} must be side, back or top`);
+}
 
 function claim(id, where) {
   if (typeof id !== 'string' || !/^[a-z0-9]+$/.test(id)) errors.push(`${where}: id "${id}" must be lowercase letters and digits only`);
@@ -27,7 +39,10 @@ function url(u, where, required) {
   if (!okUrl(u)) errors.push(`${where}: url must start with https://`);
 }
 
-for (const [k, h] of Object.entries(cat.hardware || {})) if (!text(h.name)) errors.push(`hardware.${k}: needs a name`);
+for (const [k, h] of Object.entries(cat.hardware || {})) {
+  if (!text(h.name)) errors.push(`hardware.${k}: needs a name`);
+  if (h.cfm != null && !['mm', 'cfm', 'pa'].every(f => typeof h[f] === 'number' && h[f] > 0)) errors.push(`hardware.${k}: a fan needs mm, cfm and pa (size, rated flow, maximum static pressure), all above 0`);
+}
 for (const v of ['brass', 'bolted']) { const f = cat.frame?.[v]; if (!f) errors.push(`frame.${v} is missing`); else { url(f.url, `frame.${v}`, true); hardware(f.hardware, `frame.${v}`); } }
 
 for (const g of cat.panels || []) {
@@ -37,7 +52,7 @@ for (const g of cat.panels || []) {
     if (!text(p.name)) errors.push(`${w}: needs a name`);
     if (!okU(p.u)) errors.push(`${w}: u must be 0.5–10 in steps of 0.5`);
     if (p.face && !FACES.has(p.face)) errors.push(`${w}: unknown face "${p.face}"`);
-    url(p.url, w, false); hardware(p.hardware, w); watts(p.watts, w);
+    url(p.url, w, false); hardware(p.hardware, w); air(p, w, false);
   }
 }
 for (const g of cat.devices || []) {
@@ -52,14 +67,14 @@ for (const g of cat.devices || []) {
       if (m.position && m.position !== 'top') errors.push(`${w}: position can only be "top"`);
       if (m.position !== 'top' && !okU(m.u)) errors.push(`${w}: u must be 0.5–10 in steps of 0.5`);
       if (m.face && !FACES.has(m.face)) errors.push(`${w}: unknown face "${m.face}"`);
-      hardware(m.hardware, w); watts(m.watts, w);
+      hardware(m.hardware, w); air(m, w, true);
       if (m.url) { const k = m.url.replace(/^https:\/\/(www\.)?/, '').replace(/\/en\//, '/'); if (urls.has(k + d.device)) errors.push(`${w}: same model listed twice for this device`); urls.set(k + d.device, 1); }
     }
   }
 }
 for (const g of cat.extras || []) {
   if (!text(g.group)) errors.push('extras: every group needs a name');
-  for (const x of g.items || []) { const w = `extra ${x.id}`; claim(x.id, w); if (!text(x.name)) errors.push(`${w}: needs a name`); url(x.url, w, true); hardware(x.hardware, w); }
+  for (const x of g.items || []) { const w = `extra ${x.id}`; claim(x.id, w); if (!text(x.name)) errors.push(`${w}: needs a name`); url(x.url, w, true); hardware(x.hardware, w); air(x, w, false); }
 }
 
 if (errors.length) { console.error(`catalog.json has ${errors.length} problem(s):\n- ` + errors.join('\n- ')); process.exit(1); }

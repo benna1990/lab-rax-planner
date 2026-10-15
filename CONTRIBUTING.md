@@ -36,9 +36,31 @@ Find the device's group under `devices`, then add a mount to the device, or add 
 | `hardware` | no | Extra parts to buy: `[{ "part": "fan80", "qty": 2 }]`. |
 | `note` | no | One sentence the builder should know. |
 | `depth` | no | Device depth in mm, used by the 3D view. |
-| `watts` | no | Typical heat the device gives off in W, used by the airflow estimate. Without it the planner guesses from the kind of device. |
+| `watts` | yes | Typical heat the device gives off in W, used by the cooling estimate. See [Watts](#watts) below. |
+| `wattsEstimated` | no | `true` when `watts` is a guess rather than a spec or a measurement. Shown as ≈. |
+| `fanDir` | no | For parts with fans in `hardware`: which way they blow by default, `intake` or `exhaust`, or `cross` for a pair: one in and one out, in the two side panels or in the bottom and top panel. Builders can turn each part around. |
+| `vent` | no | For openings: the open share of the panel, 0 to 1. A hex mesh top is about `0.5`, a vent panel `0.4`. |
 
-Panels use `id`, `name`, `u`, `face`, `url`, `author`, `labrax`, `estimated`, `hardware` and `watts`. Extras use `id`, `name`, `label`, `author`, `url` and `hardware`, for example a side panel with an 80 mm fan: `"hardware": [{ "part": "fan80", "qty": 1 }]`.
+Panels use `id`, `name`, `u`, `face`, `url`, `author`, `labrax`, `estimated`, `hardware`, `watts`, `wattsEstimated`, `fanDir` and `vent`; `watts` only when the panel makes heat (power supplies, chargers, displays). Extras use `id`, `name`, `label`, `author`, `url`, `hardware`, `fanDir` and `vent`, plus `at`: where the extra lets air through, `side`, `back` or `top` (`top` also covers a matching bottom panel; `fanAt` when its fans sit elsewhere). For example a pair of side panels with an 80 mm fan each:
+
+```json
+{ "id": "mw1460771", "name": "Side panels with an 80 mm fan", "url": "https://makerworld.com/models/1460771",
+  "hardware": [{ "part": "fan80", "qty": 2 }], "fanDir": "cross", "at": "side" }
+```
+
+### Watts
+
+- Use the typical draw of a home lab under light load, not the maximum and not the power supply's rating.
+- Switches: their own draw, never the PoE budget. The power a switch sends out heats the devices it feeds.
+- When the maker only gives a maximum (often "excluding PoE output"), use about two thirds of it. Measured figures (ServeTheHome, wall-meter tests) beat both.
+- PCs: idle to light load, e.g. 12 W for a Lenovo Tiny or HP EliteDesk Mini, 7 W for a Mac mini M4.
+- Drives: about 6 W per 3.5″ hard drive and 2 W per 2.5″ drive. Add up everything a mount holds.
+- Power supplies and chargers: only what they lose as heat, a few watts.
+- Add `"wattsEstimated": true` when you had to guess, for example when a mount fits several devices or a different number of boards.
+
+### Fans
+
+Fans are entries in `hardware` with their size, rated flow and maximum static pressure, at full speed in free air: `"fan80": { "name": "80 mm fan", "mm": 80, "cfm": 30, "pa": 23 }`. The values are typical for good case fans (Noctua, Arctic); a part refers to them by `part` and `qty`.
 
 Run `node tools/validate.mjs`, then open a pull request.
 
