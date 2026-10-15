@@ -54,4 +54,7 @@ Work happens on the `redesign/guided-builder` branch. `main` (the live site) sta
 | 2026-10-15 | Batch 2 (part): plain-language "?" explanations for U, depth, PoE, airflow, heat-set inserts, keystones and estimates | 283ef60 |
 | 2026-10-15 | Taxonomy: rack systems and variants (catalog `kind: "rack"`) move to step 1; the Where bar's Frame becomes Inside; device rows name the mount | 4d83fab |
 | 2026-10-15 | Verification states: `evidence` and `license` in the catalog and validator; 5 measured parts marked verified; shown in the library preview, the height chip (✓) and the selection bar with a "?" | ea1dbd7 |
-| 2026-10-15 | Research (`RESEARCH_SOURCES.md`) and Batch 3: Connect cards (`connect.js` + test) for mains, Raspberry Pi 5, fans, PoE, logo LEDs and UPS; step 3 opens them | (next commit) |
+| 2026-10-15 | Research (`RESEARCH_SOURCES.md`) and Batch 3: Connect cards (`connect.js` + test) for mains, Raspberry Pi 5, fans, PoE, logo LEDs and UPS; step 3 opens them | 53cb74b |
+| 2026-10-15 | `layout.js` and `codec.js` as pure, tested modules; tests for layout, codec and ZIP; browser self-test | 4df82c5 |
+| 2026-10-15 | Review fixes: unsourced heights and power figures are Unknown; new entries need a licence | a80d19d |
+| 2026-10-15 | Regression checks for the first review's findings (print list, part hardware, PDF at 10U, failed PDF) | 97f285e |

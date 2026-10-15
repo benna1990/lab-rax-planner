@@ -1,34 +1,43 @@
 # Test results
 
-## Automated (run on 15 October 2026, branch `redesign/guided-builder`)
+Updated 15 October 2026, branch `redesign/guided-builder`. What passes here proves the tested logic and the checked outputs. It doesn't prove a correct PDF layout beyond the checks below, and it doesn't prove that printed parts fit.
 
-| Check | Result |
-|---|---|
-| `node tools/validate.mjs` | catalog.json valid: 507 parts, mounts and extras |
-| `node --check` on all 13 scripts | pass |
-| `tools/test-estimate.mjs` | pass |
-| `tools/test-market.mjs` | pass |
-| `tools/test-power.mjs` | pass |
-| `tools/test-printers.mjs` | pass (4000 random fits against a brute-force search) |
-| `tools/test-ready.mjs` (new) | pass: complete, empty, broken and warm builds; every warning has a fix |
-| `tools/test-connect.mjs` (new) | pass: cards only when the build needs them, numbers from the build, every fact card has https sources, no wiring for undocumented lights |
-| `node tools/validate.mjs` with `evidence` | pass; verified claims need a method and a date, documented ones a source |
+## Node (run in CI on every push: `.github/workflows/validate.yml`)
 
-## Browser walkthroughs (localhost:8000, Chromium in the Claude desktop browser pane)
+| Check | What it covers | Result |
+|---|---|---|
+| `node tools/validate.mjs` | catalog schema, shapes, evidence states (verified needs a method and a date, documented a source), a licence for every entry not in `tools/catalog-baseline.json` | pass, 507 entries. A new unlicensed entry fails (tried on a copy) |
+| `node --check` on 15 scripts | syntax | pass |
+| `tools/test-layout.mjs` | alignment, collisions per side, free and nearest slots, the height a part needs, reorder in a full rack (incl. a whole U of ½U parts), pack | pass |
+| `tools/test-codec.mjs` | share link and rack file round trips, defaults left out, non-ASCII text, a newer file version, bad base64, wrong format, an 11U rack, unknown settings | pass |
+| `tools/test-zip.mjs` | the build pack's ZIP writer: CRC-32 check value, stored entries, UTF-8 names, offsets | pass |
+| `tools/test-ready.mjs` | build readiness: complete, empty, broken and warm builds, part hardware as a note | pass |
+| `tools/test-connect.mjs` | Connect cards only when needed, numbers from the build, https sources, no wiring for undocumented lights | pass |
+| `tools/test-estimate.mjs`, `test-market.mjs`, `test-power.mjs`, `test-printers.mjs` | costs, shop links, PoE/ports/UPS, print beds | pass |
 
-| Scenario | Result |
-|---|---|
-| First visit (empty `localStorage`) | The start screen shows four choices over the rack; the step bar is visible |
-| The new example build | Passes its own checks: cooling ≈ 31 °C, power and ports OK. Only "pick your printer" is open (a choice, not a problem) |
-| Start empty | Empty 5U rack; readiness shows "Add your hardware" and "Pick your 3D printer"; the search field gets focus; Undo works |
-| Adding two ½U parts | The second goes to a free U on its own (no overlap) |
-| Forced ½U overlap | A warning at the top of readiness; step 2 turns red; "Show" switches to the Flat view and selects the part, with its "Move it to a free spot" action |
-| Step bar 3 and 5 | Open and scroll to Connect (with Power & network opened) and the Print list |
-| Taxonomy | Step 1 lists the frame ("Lab Rax frame, heat-set inserts, by mklements") with 26 sizes and versions; the Where bar ends with Inside (wall mounting, rails, inside parts); device rows read "Mount: …" |
-| Verification | Keystone panel: "½U ✓", preview "Height Verified (measured from the model file, 2026-10-15)", selection bar "Height verified · fit documented ?" |
-| Connect (example build) | Step 3 opens Connect: power (2 own adapters, Pi cluster noted), Pi 5 (4 × 5.1 V 5 A), fans (5 × 40 mm, 5 V, ≈ 0.5 A), PoE (52 W, unused); adding the NeoPixel logo adds the lighting card |
-| Console errors | none (one startup error found and fixed: the rack row was drawn before the catalog loaded) |
+## Browser self-test (`/tools/selftest.html`, 16 checks)
+
+It runs the real planner in a frame (Chromium, the Claude desktop browser pane) and puts the saved rack back afterwards. Last run: all 16 passed.
+
+1. The start screen shows on a first visit.
+2. The example passes its checks, apart from picking a printer.
+3. "Start empty" gives an empty rack.
+4. Parts go to the first free slot.
+5. Reorder works in a full rack.
+6. Undo and redo.
+7. The rack file round-trips.
+8. PDF export: 6 pages.
+9. Build pack ZIP: 7 files, including the PDF, the `.rack.json` and the shopping list CSV.
+10. Print list: two variants from one model page share a row, and both variants are named.
+11. Print list: two custom parts with the same name but other settings stay separate.
+12. Shopping list: a mount without its own hardware list shows unknown hardware.
+13. No errors while building.
+14. PDF at 10U with a full rack: 7 pages, and all 335 text lines inside A4. This checks text positions only, not images or overlapping text.
+15. A failed PDF is reported in the status, not silently left out of the build pack.
+16. The share link opens the same layout.
+
+**Limits:** run in one browser engine only (no Safari or Firefox), and not in CI, because that would need a headless browser as a dependency. This test was run by Claude in its browser pane; open the page yourself to repeat it.
 
 ## Not tested
 
-Real users; a screen reader; a physical phone (touch was emulated at 375 × 812 for the audit only); Safari and Firefox.
+Real users, a screen reader, a physical phone, the visual quality of the PDF beyond the text check, and anything physical: print quality, the fit of parts and devices, electrical behaviour.
