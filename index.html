@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lab Rax Planner</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Plan a 3D-printed Lab Rax 10-inch homelab rack: pick devices with existing mounts, design custom panels, view it in 3D and download the build pack.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Audiowide&family=Geist+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: parts library left, the rack as a product shot on a stage in the middle, "your build" right */
+:root{
+  --bg:#F3F4F2; --panel:#FFFFFF; --card:#FFFFFF; --sunk:#F1F2F0; --stage:#FFFFFF;
+  --ink:#16181B; --ink-2:#3A3F45; --muted:#6A6F76; --line:#E3E5E2; --line-2:#D8DBD7;
+  --accent:#17824A; --accent-ink:#FFFFFF; --accent-soft:#E3F2E8; --accent-text:#11663A; --link:#17824A;
+  --chip-on:#16181B; --chip-on-ink:#FFFFFF; --seg:#E8EAE7; --seg-on:#FFFFFF;
+  --warn:#9A4A0B; --warn-soft:#FBEBDD; --shadow:0 1px 2px rgba(0,0,0,.08); --floor:rgba(0,0,0,.16);
+  --f-ui:"Plus Jakarta Sans","Helvetica Neue",system-ui,sans-serif;
+  --f-mono:"Geist Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --f-logo:"Audiowide","Plus Jakarta Sans",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141517; --panel:#1B1C1F; --card:#202124; --sunk:#232428; --stage:#2B2D31;
+    --ink:#ECEDEE; --ink-2:#C2C5CA; --muted:#9A9EA4; --line:#2A2C30; --line-2:#3A3C41;
+    --accent:#3CC27A; --accent-ink:#0E1A13; --accent-soft:#1E3428; --accent-text:#7EE0A8; --link:#4FD08A;
+    --chip-on:#ECEDEE; --chip-on-ink:#141517; --seg:#232428; --seg-on:#34363B;
+    --warn:#F2A065; --warn-soft:#38230F; --shadow:none; --floor:rgba(0,0,0,.45);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141517; --panel:#1B1C1F; --card:#202124; --sunk:#232428; --stage:#2B2D31;
+  --ink:#ECEDEE; --ink-2:#C2C5CA; --muted:#9A9EA4; --line:#2A2C30; --line-2:#3A3C41;
+  --accent:#3CC27A; --accent-ink:#0E1A13; --accent-soft:#1E3428; --accent-text:#7EE0A8; --link:#4FD08A;
+  --chip-on:#ECEDEE; --chip-on-ink:#141517; --seg:#232428; --seg-on:#34363B;
+  --warn:#F2A065; --warn-soft:#38230F; --shadow:none; --floor:rgba(0,0,0,.45);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:14px;line-height:1.45}
+button,input,select{font:inherit;color:inherit}
+a{color:var(--link)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+.mono{font-family:var(--f-mono)}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--panel);border-bottom:1px solid var(--line);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top-in{min-height:64px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding-block:10px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;letter-spacing:-.02em;margin-right:auto}
+.mark{width:30px;height:30px;border-radius:8px;background:#16181B;display:grid;place-items:center;flex:0 0 auto}
+.top-actions{display:flex;flex-wrap:wrap;gap:8px}
+.btn{height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.btn:hover{border-color:var(--ink-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.small{height:32px;padding:0 12px;font-size:13px}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.danger{color:var(--warn)}
+.btn:disabled{opacity:.45;cursor:default}
+.iconbtn{width:40px;height:40px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);display:grid;place-items:center;cursor:pointer}
+
+/* layout */
+.app{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"stage" "lib" "build";gap:0}
+@media (min-width:860px){.app{grid-template-columns:340px minmax(0,1fr);grid-template-areas:"lib stage" "lib build"}}
+@media (min-width:1280px){.app{grid-template-columns:400px minmax(0,1fr) 350px;grid-template-areas:"lib stage build"}
+  .side-in{position:sticky;top:calc(65px + env(safe-area-inset-top,0px));max-height:calc(100vh - 65px);overflow:auto}}
+.lib{grid-area:lib;background:var(--panel);border-right:1px solid var(--line);min-width:0}
+.stagecol{grid-area:stage;min-width:0;padding:18px max(16px,env(safe-area-inset-right,0px)) 18px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px}
+.build{grid-area:build;background:var(--panel);border-left:1px solid var(--line);min-width:0}
+@media (max-width:859px){.lib,.build{border:0;border-top:1px solid var(--line)}}
+.side-in{padding:20px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px}
+@media (min-width:860px){.side-in{padding:20px}}
+h2.title{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:0}
+h3.sub{font-size:14px;font-weight:700;margin:0}
+.muted{color:var(--muted)}
+.hint{font-size:12.5px;color:var(--muted);margin:0}
+
+/* library */
+.search{display:flex;align-items:center;gap:8px;height:42px;padding:0 14px;border-radius:999px;background:var(--sunk);color:var(--muted)}
+.search input{border:0;background:transparent;flex:1;min-width:0;outline:none;color:var(--ink)}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);color:var(--ink-2);font-weight:600;cursor:pointer}
+.pill[aria-pressed="true"]{background:var(--chip-on);border-color:var(--chip-on);color:var(--chip-on-ink)}
+.grouphead{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:6px 2px 0}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.card{position:relative;display:flex;flex-direction:column;gap:9px;padding:10px;border-radius:14px;border:1px solid var(--line);background:var(--card);text-align:left;cursor:pointer;min-width:0}
+.card:hover{border-color:var(--line-2)}
+.card.on{border-color:var(--accent)}
+.thumb{height:72px;border-radius:10px;background:var(--sunk);display:grid;place-items:center;overflow:hidden}
+.card .nm{font-weight:700;line-height:1.25;overflow-wrap:anywhere}
+.card .mt{font-size:12.5px;color:var(--muted);line-height:1.3}
+.card .ft{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-top:auto}
+.card .by{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.badge{font-family:var(--f-mono);font-size:11.5px;font-weight:500;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent-text);white-space:nowrap}
+.badge.est{background:var(--warn-soft);color:var(--warn)}
+.card .ext{position:absolute;top:14px;right:14px;width:26px;height:26px;border-radius:999px;background:var(--panel);border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-2);text-decoration:none;font-size:12px}
+.card .ext:hover{border-color:var(--accent);color:var(--accent)}
+.makebox{border:1px dashed var(--line-2);border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;background:transparent;text-align:left;cursor:pointer;width:100%}
+.makebox:hover{border-color:var(--accent)}
+.plus{width:36px;height:36px;border-radius:10px;background:var(--accent-soft);display:grid;place-items:center;flex:0 0 auto}
+
+/* stage */
+.toolbar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}
+.seg{display:flex;gap:4px;background:var(--seg);padding:4px;border-radius:999px}
+.seg button{height:32px;padding:0 16px;border-radius:999px;border:0;background:transparent;color:var(--muted);font-weight:600;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--seg-on);color:var(--ink);box-shadow:var(--shadow)}
+.stepper{display:flex;align-items:center;border:1px solid var(--line-2);border-radius:999px;background:var(--panel)}
+.stepper button{width:36px;height:36px;border:0;background:transparent;font-size:17px;cursor:pointer;border-radius:999px}
+.stepper button:disabled{opacity:.35;cursor:default}
+.stepper output{min-width:34px;text-align:center;font-weight:700}
+.stage{position:relative;border-radius:20px;background:var(--stage);border:1px solid var(--line);min-height:560px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:28px 12px 18px;overflow:hidden}
+.stage .meas{font-family:var(--f-mono);font-size:12px;color:var(--muted);text-align:center}
+.example{position:absolute;top:14px;left:14px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--warn-soft);color:var(--warn)}
+#view3d{position:absolute;inset:0}
+#view3d canvas,#mk-3d canvas{display:block;width:100%!important;height:100%!important;touch-action:none}
+.v3d-ui{position:absolute;right:12px;bottom:12px;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.v3d-ui .btn{background:var(--panel)}
+.v3d-msg{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);text-align:center;padding:20px}
+
+/* rack (2D) */
+.rack{display:grid;touch-action:pan-y;user-select:none}
+.ulab{position:relative}
+.ulab span{position:absolute;right:8px;display:flex;align-items:center;font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.rframe{position:relative}
+.edge{position:relative;background:var(--frame)}
+.edge.top{border-radius:3px 3px 0 0;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+/* the top ring is bevelled at 45° and mitred, so seen from the front its corners are cut off */
+.edge.top::before,.edge.top::after{content:"";position:absolute;top:0;width:var(--bev);height:var(--bev);background:var(--stage);z-index:1}
+.edge.top::before{left:0;clip-path:polygon(0 0,100% 0,0 100%)}
+.edge.top::after{right:0;clip-path:polygon(0 0,100% 0,100% 100%)}
+.edge.bot{border-radius:0 0 6px 6px}
+.handle{position:absolute;bottom:calc(100% - 1px);display:block;background:var(--frame);border-radius:3px 3px 0 0;box-shadow:inset 1px 1px 0 rgba(255,255,255,.07)}
+.tp-band{position:absolute;bottom:100%;left:6%;right:6%;background:var(--acc);clip-path:polygon(3% 0,97% 0,100% 100%,0 100%);filter:brightness(.9)}
+.hexgrill{position:absolute;left:5%;top:17%;width:90%;height:68%;display:block} /* an <svg> keeps its 300×150 default unless sized explicitly */
+.logo{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--f-logo);color:var(--acc);white-space:nowrap;line-height:1;text-shadow:0 0 1px #000,0 0 2px #000;pointer-events:none}
+.foot{position:absolute;top:100%;width:11%;height:6px;background:var(--frame);border-radius:0 0 3px 3px;filter:brightness(.85)}
+.post{position:absolute;top:0;bottom:0;background:var(--frame)}
+.hole{position:absolute;left:50%;width:var(--hs);height:var(--hs);margin:calc(var(--hs) / -2) 0 0 calc(var(--hs) / -2);border-radius:50%;background:#070809}
+.rack.brass .hole{box-shadow:0 0 0 calc(var(--hs) * .2) #C9A55A}
+.bay{position:absolute;top:0;bottom:0;background:#0C0D0F}
+.mount{position:absolute;inset:0}
+.item{position:absolute;display:flex;align-items:center;gap:7px;background:var(--c);color:var(--fc);border-radius:2px;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -1px 0 rgba(0,0,0,.3);cursor:grab;touch-action:none;overflow:hidden}
+.item:hover{filter:brightness(1.07)}
+.item.sel{outline:2px solid var(--accent);outline-offset:1px;z-index:2}
+.item.drag{z-index:3;opacity:.94;cursor:grabbing;box-shadow:0 10px 24px rgba(0,0,0,.4)}
+.screw{flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#F5F6F7 0,#B9BEC3 45%,#6E747A 100%);box-shadow:0 1px 1px rgba(0,0,0,.5)}
+.lbl{flex:0 1 auto;max-width:56%;min-width:0;display:flex;align-items:baseline;gap:6px;white-space:nowrap;font-size:11.5px;line-height:1.1}
+.lbl b{font-weight:700;overflow:hidden;text-overflow:ellipsis;color:var(--lc)}
+.lbl small{font-family:var(--f-mono);font-size:10px;opacity:.7}
+.face{flex:1 1 auto;min-width:0;height:100%;display:flex;align-items:center;justify-content:flex-end;gap:3px;overflow:hidden}
+.f-vent{flex:1;height:50%;background:repeating-linear-gradient(90deg,var(--hole) 0 3px,transparent 3px 7px);border-radius:2px}
+.f-fan{height:76%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,var(--c) 0 18%,var(--hole) 19% 100%);flex:0 0 auto}
+.f-ks{width:6px;height:52%;background:var(--hole);border-radius:1px;flex:0 0 auto}
+.f-dev{height:64%;flex:0 1 70%;border-radius:2px;background:var(--hole);display:flex;align-items:center;justify-content:flex-end;gap:2px;padding:0 5px;min-width:0;overflow:hidden}
+.f-port{width:5px;height:42%;background:var(--c);opacity:.85;flex:0 0 auto}
+.f-led{width:4px;height:4px;border-radius:50%;background:#4ADE80;margin-left:4px;flex:0 0 auto}
+.f-sbc{width:3px;height:74%;background:var(--hole);flex:0 0 auto;margin-left:4px}
+.f-drv{height:58%;flex:0 1 54px;border-radius:2px;background:var(--hole)}
+.f-cut{height:70%;flex:0 1 60%;border-radius:2px;background:#0C0D0F;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.ghost{position:absolute;border:2px dashed var(--accent);background:color-mix(in srgb,var(--accent) 22%,transparent);border-radius:3px;pointer-events:none;z-index:4}
+.ap{position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);width:62%;height:58px;pointer-events:none}
+.ap i.disc{position:absolute;left:0;right:0;top:4px;height:24px;border-radius:50%;background:#F2F3F4;box-shadow:inset 0 -5px 0 #D5D9DC,0 2px 4px rgba(0,0,0,.3);display:grid;place-items:center}
+.ap i.disc::after{content:"";width:9%;height:4px;border-radius:2px;background:#3B82F6}
+.ap i.leg{position:absolute;bottom:0;width:7%;height:34px;background:var(--frame);border-radius:3px 3px 0 0}
+.floor{height:18px;margin:4px 8% 0;border-radius:50%;background:radial-gradient(ellipse at center,var(--floor),transparent 70%)}
+
+.selbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;border-radius:14px;background:var(--panel);border:1px solid var(--line);min-height:56px}
+.selbar .who{flex:1 1 200px;min-width:0;display:flex;flex-direction:column}
+.selbar .who b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.field{height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);min-width:0}
+.status{font-size:13px;color:var(--muted);min-height:20px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.status .lnk{background:none;border:0;padding:0;color:var(--link);text-decoration:underline;cursor:pointer;font-weight:600}
+.unplaced{border:1px dashed var(--warn);background:var(--warn-soft);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.unplaced p{margin:0;color:var(--warn);font-weight:700;font-size:13px}
+.unplaced .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.unplaced .row span{flex:1;min-width:0}
+
+/* rack settings */
+.settings{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center;padding:12px 14px;border-radius:14px;background:var(--panel);border:1px solid var(--line)}
+.set{display:flex;align-items:center;gap:8px}
+.set>span,.set>label{font-size:12.5px;font-weight:600;color:var(--muted)}
+.swatches{display:flex;gap:5px}
+.sw{width:22px;height:22px;border-radius:50%;border:2px solid var(--panel);box-shadow:0 0 0 1px var(--line-2);background:var(--c);cursor:pointer;padding:0}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--accent)}
+.seg.small button{height:28px;padding:0 12px;font-size:13px}
+
+/* build column */
+.progress{height:6px;border-radius:999px;background:var(--line);overflow:hidden}
+.progress i{display:block;height:100%;background:var(--accent)}
+.plist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.prow{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:var(--sunk);border:1px solid var(--line)}
+.prow .tick{width:34px;height:34px;border-radius:9px;background:var(--panel);border:1px solid var(--line);display:grid;place-items:center;flex:0 0 auto;cursor:pointer}
+.prow .tick[aria-pressed="true"]{border-color:var(--accent)}
+.prow .tx{flex:1;min-width:0;display:flex;flex-direction:column}
+.prow .tx b{font-weight:600;line-height:1.25}
+.prow .tx small{font-size:12px;color:var(--muted)}
+.prow a{font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap}
+.prow .q{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.boxcard{padding:14px;border-radius:14px;border:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.kv{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;margin:0;font-size:13.5px}
+.kv dd{margin:0;font-family:var(--f-mono);font-size:12.5px;text-align:right;white-space:nowrap}
+.kv .note{grid-column:1/-1;font-size:12px;color:var(--muted);margin-top:-2px}
+.kv a.buy{margin-left:8px;font-family:var(--f-ui);font-size:12.5px;font-weight:700;text-decoration:none}
+.notes{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+textarea.copybox{width:100%;min-height:150px;font-family:var(--f-mono);font-size:12px;background:var(--sunk);border:1px solid var(--line);border-radius:10px;padding:8px;color:var(--ink)}
+.foot-note{font-size:12px;color:var(--muted);margin:0;padding:16px max(16px,env(safe-area-inset-left,0px)) 28px;max-width:90ch}
+
+/* part maker dialog */
+dialog.maker{width:min(980px,calc(100vw - 24px));max-height:calc(100vh - 24px);border:1px solid var(--line);border-radius:20px;padding:0;background:var(--panel);color:var(--ink)}
+dialog.maker::backdrop{background:rgba(10,12,14,.55)}
+.mk{display:grid;grid-template-columns:minmax(0,1fr);gap:0}
+@media (min-width:760px){.mk{grid-template-columns:330px minmax(0,1fr)}}
+.mk-form{padding:20px;display:flex;flex-direction:column;gap:12px;border-right:1px solid var(--line)}
+.mk-form label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.mk-form input,.mk-form select{height:38px;padding:0 12px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);font-weight:500;color:var(--ink)}
+.mk-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.mk-prev{position:relative;min-height:360px;background:var(--stage)}
+.mk-prev .dims{position:absolute;left:14px;bottom:12px;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.mk-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.mk-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+@media (prefers-reduced-motion:no-preference){.card,.btn,.pill{transition:border-color .12s,filter .12s}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <span class="mark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#B5CF2A" stroke-width="1.6"><rect x="2.5" y="2" width="11" height="12" rx="1.5"/><path d="M5 5.5h6M5 8h6M5 10.5h6"/></svg></span>
+      Lab Rax Planner
+    </div>
+    <div class="top-actions">
+      <button type="button" class="iconbtn" data-act="theme" id="themebtn" aria-label="Switch light or dark theme"></button>
+      <button type="button" class="btn" data-act="pdf">Build plan PDF</button>
+      <button type="button" class="btn primary" data-act="pack">Download build pack</button>
+    </div>
+  </div>
+</header>
+
+<div class="app">
+  <aside class="lib" aria-label="Parts library">
+    <div class="side-in">
+      <label class="search" for="q">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
+        <input id="q" type="search" placeholder="Search mounts, panels and devices" autocomplete="off">
+      </label>
+      <div class="pills" id="tabs" role="group" aria-label="Category"></div>
+      <div id="cards"></div>
+      <button type="button" class="makebox" data-act="maker">
+        <span class="plus" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M9 4v10M4 9h10"/></svg></span>
+        <span style="display:flex;flex-direction:column"><b>Make a custom part</b><span class="hint">Blank, vent, keystone or a shelf sized to your device. Exports as STL.</span></span>
+      </button>
+    </div>
+  </aside>
+
+  <section class="stagecol" aria-label="Rack">
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="View">
+        <button type="button" data-act="view" data-v="front" id="v-front">Front</button>
+        <button type="button" data-act="view" data-v="3d" id="v-3d">3D view</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="muted" style="font-weight:600">Height</span>
+        <div class="stepper"><button type="button" data-act="h-" id="h-minus" aria-label="Make the rack 1U lower">−</button><output id="h-out">5U</output><button type="button" data-act="h+" id="h-plus" aria-label="Make the rack 1U taller">+</button></div>
+      </div>
+    </div>
+    <div class="stage" id="stage">
+      <span class="example" id="example" hidden>Example layout</span>
+      <div id="rackHost"></div>
+      <div class="meas" id="meas"></div>
+      <div id="view3d" hidden></div>
+    </div>
+    <div class="selbar" id="selbar"></div>
+    <div id="unplaced"></div>
+    <div class="status" id="status" aria-live="polite"></div>
+    <div class="settings" id="settings"></div>
+  </section>
+
+  <aside class="build" aria-label="Your build">
+    <div class="side-in" id="build"></div>
+  </aside>
+</div>
+<p class="foot-note" id="footer"></p>
+
+<dialog class="maker" id="maker" aria-labelledby="mk-title">
+  <div class="mk">
+    <form class="mk-form" id="mk-form" method="dialog">
+      <div class="mk-head"><h2 class="title" id="mk-title" style="font-size:19px">Custom part</h2><button type="button" class="iconbtn" data-act="maker-close" aria-label="Close" style="width:34px;height:34px">✕</button></div>
+      <label for="mk-type">Part
+        <select id="mk-type">
+          <option value="blank">Blank panel</option>
+          <option value="vent">Vent panel</option>
+          <option value="keystone">Keystone panel</option>
+          <option value="shelf">Shelf for a device</option>
+          <option value="label">Label plate</option>
+        </select>
+      </label>
+      <label for="mk-u">Height
+        <select id="mk-u"></select>
+      </label>
+      <div id="mk-opts" style="display:flex;flex-direction:column;gap:12px"></div>
+      <label for="mk-name">Name in the rack
+        <input id="mk-name" type="text" maxlength="24" placeholder="E.g. Router shelf">
+      </label>
+      <p class="hint" id="mk-note"></p>
+      <div class="mk-actions">
+        <button type="button" class="btn primary" data-act="maker-add">Add to rack</button>
+        <button type="button" class="btn" data-act="maker-stl">Download STL</button>
+      </div>
+    </form>
+    <div class="mk-prev"><div id="mk-3d" style="position:absolute;inset:0"></div><span class="dims" id="mk-dims"></span></div>
+  </div>
+</dialog>
+
+<script src="parts.js"></script>
+<script src="view3d.js"></script>
+<script src="pdf.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

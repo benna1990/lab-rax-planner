@@ -1,0 +1,5 @@
+.DS_Store
+node_modules/
+
+# measured reference models (never commit community model files)
+reference/
