@@ -35,4 +35,9 @@ assert.equal(hex.id, 'logo'); assert.match(hex.lead, /No documented wiring/); as
 // a fan without a listed current is said to be left out of the total
 assert.match(C.cards({ fans: [{ name: 'A', qty: 2, mm: 80, volt: 5, amp: 0.1 }, { name: 'B', qty: 1, mm: 140, volt: 12 }] })[0].lead, /3 fans at 5 and 12 V, about 0\.2 A together for the ones with a listed current/);
 
+// the general guides: every card, no build numbers
+const g = C.guides();
+assert.deepEqual(g.map(x => x.id), ['power', 'pi5', 'fans', 'poe', 'logo', 'ups']);
+assert.ok(g.every(x => !/a device|a fan panel/.test(x.lead + x.items.join(' '))), 'no placeholder names');
+
 console.log('Connect checks passed: cards only when needed, build numbers, sources, no guessed wiring.');

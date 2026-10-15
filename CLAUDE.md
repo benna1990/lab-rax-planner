@@ -10,6 +10,7 @@ Static web app for planning 3D-printed 10" homelab racks: Lab Rax and more. Form
 - `view3d.js` — 3D view (three.js r128 from cdnjs, OrbitControls/STLLoader/3MFLoader from jsDelivr). `FRAME` holds frame dimensions.
 - `pdf.js` — build plan PDF with jsPDF 2.5.1.
 - `ready.js` — build readiness: the checks behind the step bar and the Build readiness panel (pure; `tools/test-ready.mjs`). Audit and plan: `docs/audit/`.
+- `resources.json` — the Guides → Resources list (title, https url, kind, about; validated); only sources that were actually read.
 - `layout.js` — placement rules (free slots, nearest, reorder, pack, the height a part needs); pure, app.js wraps it (`tools/test-layout.mjs`).
 - `codec.js` — share links, the compact layout and the `.rack.json` file; pure (`tools/test-codec.mjs`).
 - `connect.js` — the Connect cards (power and mains, Raspberry Pi 5, fans, PoE, lighting, UPS) for what a build holds; every fact sourced from `docs/audit/RESEARCH_SOURCES.md`, nothing guessed (pure; `tools/test-connect.mjs`).

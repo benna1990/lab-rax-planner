@@ -127,5 +127,9 @@ for (const g of cat.extras || []) {
   for (const x of g.items || []) { const w = `extra ${x.id}`; claim(x.id, w); if (!text(x.name)) errors.push(`${w}: needs a name`); url(x.url, w, true); hardware(x.hardware, w); air(x, w, false); evidence(x, w); look('extra', x, w); }
 }
 
+// resources.json: the Guides → Resources list
+const res = JSON.parse(readFileSync(new URL('../resources.json', import.meta.url), 'utf8'));
+for (const g of res.groups || []) { if (!text(g.title)) errors.push('resources: every group needs a title'); for (const r of g.items || []) { const w = `resource ${r.title || '(untitled)'}`; if (!text(r.title) || !text(r.kind) || !text(r.about)) errors.push(`${w}: needs a title, a kind and an about`); if (!okUrl(r.url)) errors.push(`${w}: needs an https url`); } }
+
 if (errors.length) { console.error(`catalog.json has ${errors.length} problem(s):\n- ` + errors.join('\n- ')); process.exit(1); }
 console.log(`catalog.json is valid: ${ids.size} parts, mounts and extras.`);

@@ -58,3 +58,4 @@ Work happens on the `redesign/guided-builder` branch. `main` (the live site) sta
 | 2026-10-15 | `layout.js` and `codec.js` as pure, tested modules; tests for layout, codec and ZIP; browser self-test | 4df82c5 |
 | 2026-10-15 | Review fixes: unsourced heights and power figures are Unknown; new entries need a licence | a80d19d |
 | 2026-10-15 | Regression checks for the first review's findings (print list, part hardware, PDF at 10U, failed PDF) | 97f285e |
+| 2026-10-15 | Guides (the six steps, all Connect guides, the words) and Resources (`resources.json`, 24 sources from the research, validated) in a dialog from the header | (next commit) |

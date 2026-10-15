@@ -1420,14 +1420,33 @@ function connectFacts() {
   return { devices, fans, pi5, boards, poe: P.budget > 0 || P.load > 0 ? { budget: P.budget || 0, load: P.load || 0, sources: (P.sources || []).map(s => s.name) } : null,
     logo, ups: state.power && state.power.ups && state.power.ups.size ? state.power.ups : null };
 }
+const cardHTML = c => '<div class="ccard"><h4>' + esc(c.title) + '</h4>' + (c.lead ? '<p>' + esc(c.lead) + '</p>' : '') +
+  (c.items && c.items.length ? '<ul class="citems">' + c.items.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '') +
+  (c.steps.length ? '<ol class="csteps">' + c.steps.map(x => '<li>' + esc(x) + '</li>').join('') + '</ol>' : '') +
+  (c.sources.length ? '<p class="csrc">Sources: ' + c.sources.map(([t, u]) => '<a href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(t) + '</a>').join(' · ') + '</p>' : '') + '</div>';
+/* ---------- Guides and Resources (the header's Guides button) ---------- */
+let RESOURCES = null;
+const STEP_ABOUT = { 1: 'The frame and its version, the height, your 3D printer and the country for the shop links.', 2: 'Your devices with a printed mount for each, panels and custom parts; the Where bar picks the front, back, top, bottom, sides or inside.',
+  3: 'How everything gets power, network and air: supplies, fans, PoE and lights, for what your build holds.', 4: 'Build readiness: what is missing, what clashes and what the planner can’t confirm.',
+  5: 'What to print and on which printer, the frame parts and the build guide, step by step.', 6: 'The build plan PDF, the build pack, the shopping list, a share link and a rack file to open later.' };
+function renderHelp(tab) {
+  const body = $('#help-body'); if (!body) return;
+  document.querySelectorAll('#helpdlg [data-act="help-tab"]').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === tab));
+  if (tab === 'resources') {
+    body.innerHTML = !RESOURCES ? '<p class="hint">The list of resources didn’t load.</p>' : '<p class="hint">Places to learn more, find models and check facts. Model searches are searches, not checked lists. Checked ' + esc(RESOURCES.checked || '') + '.</p>' +
+      RESOURCES.groups.map(g => '<p class="sgroup">' + esc(g.title) + '</p><ul class="reslist">' + g.items.map(r => '<li><a href="' + esc(r.url) + '" target="_blank" rel="noopener">' + esc(r.title) + '</a><span class="badge">' + esc(r.kind) + '</span><small>' + esc(r.about) + '</small></li>').join('') + '</ul>').join('');
+    return;
+  }
+  body.innerHTML = '<p class="sgroup">The six steps</p><ol class="hsteps">' + STEPS.map(([n, l]) => '<li><b>' + l + '</b> ' + esc(STEP_ABOUT[n]) + ' <button type="button" class="lnk" data-act="help-go" data-step="' + n + '">Go there</button></li>').join('') + '</ol>' +
+    '<p class="sgroup">Connecting things</p>' + window.LRConnect.guides().map(cardHTML).join('') +
+    '<p class="sgroup">Words</p><dl class="hterms">' + Object.values(TERMS).map(([t, d]) => '<dt>' + esc(t) + '</dt><dd>' + esc(d) + '</dd>').join('') + '</dl>' +
+    '<p class="sgroup">Your rack</p><p><button type="button" class="btn small" data-act="help-buildguide">Open the build guide for this rack</button></p>';
+}
 function connectHTML() {
   const cs = window.LRConnect.cards(connectFacts());
   if (!cs.length) return '';
   const body = '<p class="hint">How everything gets power, network and air, for the parts in this build. Facts carry their source; where nothing is documented the card says so.</p>' +
-    cs.map(c => '<div class="ccard"><h4>' + esc(c.title) + '</h4>' + (c.lead ? '<p>' + esc(c.lead) + '</p>' : '') +
-      (c.items && c.items.length ? '<ul class="citems">' + c.items.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '') +
-      (c.steps.length ? '<ol class="csteps">' + c.steps.map(x => '<li>' + esc(x) + '</li>').join('') + '</ol>' : '') +
-      (c.sources.length ? '<p class="csrc">Sources: ' + c.sources.map(([t, u]) => '<a href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(t) + '</a>').join(' · ') + '</p>' : '') + '</div>').join('');
+    cs.map(cardHTML).join('');
   return sec('connect', 'Connect', '<span>' + cs.map(c => c.title.replace(/ \(.*\)$/, '')).join(' · ') + '</span>', body);
 }
 
@@ -1954,6 +1973,11 @@ document.addEventListener('click', async e => {
     case 'tab': tab = a.dataset.t; renderLib(); break;
     case 'where': setWhere(a.dataset.v); break;
     case 'go-step': goStep(+a.dataset.step); break;
+    case 'help': $('#helpdlg').showModal(); renderHelp('guides'); break;
+    case 'help-tab': renderHelp(a.dataset.v); break;
+    case 'help-close': $('#helpdlg').close(); break;
+    case 'help-go': $('#helpdlg').close(); goStep(+a.dataset.step); break;
+    case 'help-buildguide': $('#helpdlg').close(); ui.sec.guide = true; saveUI(); renderBuild(); { const g = $('[data-sec="guide"]'); if (g) g.scrollIntoView({ behavior: 'smooth', block: 'start' }); } break;
     case 'rack-variants': ui.rackOpen = !ui.rackOpen; saveUI(); renderSettings(); break;
     case 'explain': { const t = TERMS[a.dataset.k]; if (t) askUser(t[0], t[1], [['', 'Got it', 'primary']]); } break;
     case 'go-printer': ui.sec.print = true; saveUI(); renderBuild(); { const p = document.querySelector('#build select[id$="-printer"]'); if (p) { p.scrollIntoView({ behavior: 'smooth', block: 'center' }); p.focus({ preventScroll: true }); } } break;
@@ -2289,6 +2313,7 @@ fetch('catalog.json', { cache: 'no-cache' })
   .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
   .then(c => {
     buildCatalog(c);
+    fetch('resources.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).then(x => { if (x && Array.isArray(x.groups)) RESOURCES = x; }).catch(() => {});
     fetch('tips.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).then(t => { if (t && (Array.isArray(t.items) || Array.isArray(t.tips))) { TIPS = t; renderBuild(); } }).catch(() => {});
     sanitize();
     if (!loadShared()) { renderLib(); render(); }

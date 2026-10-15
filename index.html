@@ -325,6 +325,18 @@ details.abd .hint{margin-top:6px}
 .lghead[aria-expanded="true"] .chev,details.sec[open] > summary .chev{transform:rotate(90deg)}
 .lrows{display:flex;flex-direction:column;gap:2px;padding:0 0 10px}
 .lrow-wrap{display:flex;align-items:center;gap:4px}
+/* Guides and Resources */
+dialog.helpdlg{width:min(760px,calc(100vw - 24px));max-height:calc(100vh - 24px);border:1px solid var(--line);border-radius:20px;padding:0;background:var(--panel);color:var(--ink)}
+dialog.helpdlg::backdrop{background:rgba(10,12,14,.55)}
+.help-head{position:sticky;top:0;z-index:1;display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line);background:var(--panel)}
+.help-head h2{margin:0;flex:1;font-size:19px}
+.help-body{padding:6px 18px 18px;font-size:13.5px;line-height:1.5}
+.hsteps{padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.hterms dt{font-weight:700;margin-top:8px}
+.hterms dd{margin:2px 0 0;color:var(--ink-2)}
+.reslist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.reslist li{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;padding:7px 0;border-top:1px solid var(--line)}
+.reslist small{flex-basis:100%;color:var(--muted);font-size:12.5px}
 /* Connect cards */
 .ccard{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:13px;line-height:1.45}
 .ccard h4{margin:0 0 4px;font-size:14px}
@@ -522,6 +534,7 @@ dialog.askdlg::backdrop{background:rgba(10,12,14,.55)}
     </div>
     <div class="top-actions">
       <button type="button" class="iconbtn" data-act="theme" id="themebtn" aria-label="Switch light or dark theme"></button>
+      <button type="button" class="btn" data-act="help">Guides</button>
       <button type="button" class="btn" data-act="wizard">Set up a rack</button>
       <button type="button" class="btn" data-act="pdf">Build plan PDF</button>
       <button type="button" class="btn primary" data-act="pack">Download build pack</button>
@@ -613,6 +626,9 @@ dialog.askdlg::backdrop{background:rgba(10,12,14,.55)}
   </div>
 </dialog>
 
+<dialog class="helpdlg" id="helpdlg" aria-labelledby="help-title">
+  <div class="help"><div class="help-head"><h2 class="title" id="help-title">Guides</h2><div class="seg small" role="group" aria-label="Guides or resources"><button type="button" data-act="help-tab" data-v="guides" aria-pressed="true">Guides</button><button type="button" data-act="help-tab" data-v="resources" aria-pressed="false">Resources</button></div><button type="button" class="iconbtn" data-act="help-close" aria-label="Close" style="width:34px;height:34px">×</button></div><div class="help-body" id="help-body"></div></div>
+</dialog>
 <dialog class="askdlg" id="askdlg" aria-labelledby="ask-title">
   <form method="dialog" class="ask"><h2 class="title" id="ask-title"></h2><p id="ask-text"></p><div class="ask-actions"></div></form>
 </dialog>

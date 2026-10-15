@@ -79,5 +79,12 @@ function cards(f) {
     sources: [SRC.ups] });
   return out;
 }
-window.LRConnect = { cards };
+// every card in its general form, for the Guides: what applies to any build, without this build's numbers
+function guides() {
+  const lead = { power: 'Every device keeps the power adapter it came with, unless it runs on PoE.', pi5: 'Each Raspberry Pi 5 needs a 5.1 V, 5 A USB-C supply, or PoE through a PoE HAT.',
+    fans: 'Fan → hub or controller (for more than one fan, or speed control) → a supply with the same voltage.', poe: 'How the PoE standards and a switch’s PoE budget work.' };
+  return cards({ devices: [{ name: 'a device', poe: null }], pi5: 1, boards: 1, fans: [{ name: 'a fan panel', qty: 1, mm: 40, volt: 5, amp: 0.1 }], poe: { budget: 0, load: 0, sources: [] }, logo: 'neopixel', ups: { size: 1, unit: 'VA' } })
+    .map(x => Object.assign({}, x, { lead: lead[x.id] || x.lead, items: x.id === 'poe' ? x.items : [] }));
+}
+window.LRConnect = { cards, guides };
 })();
