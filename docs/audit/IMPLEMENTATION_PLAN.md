@@ -47,4 +47,5 @@ Work happens on the `redesign/guided-builder` branch. `main` (the live site) sta
 | 2026-10-15 | Batch 1: step bar, Build readiness (`ready.js` + test), start screen, an example that passes its checks, export buttons and the country choice in readiness | a66ffbc |
 | 2026-10-15 | Batch 2 (part): the setup wizard asks for hardware first | 0a612b7 |
 | 2026-10-15 | Batch 2 (part): plain-language "?" explanations for U, depth, PoE, airflow, heat-set inserts, keystones and estimates | 283ef60 |
-| 2026-10-15 | Taxonomy: rack systems and variants (catalog `kind: "rack"`) move to step 1; the Where bar's Frame becomes Inside; device rows name the mount | (next commit) |
+| 2026-10-15 | Taxonomy: rack systems and variants (catalog `kind: "rack"`) move to step 1; the Where bar's Frame becomes Inside; device rows name the mount | 4d83fab |
+| 2026-10-15 | Verification states: `evidence` and `license` in the catalog and validator; 5 measured parts marked verified; shown in the library preview, the height chip (✓) and the selection bar with a "?" | (next commit) |

@@ -23,10 +23,29 @@ const LS = window.LRShapes; // how parts look: shapes.js
 // power and network fields (see the power budget below): pw on a part or mount, pwDev on the device it holds (PWDEV: those per device name)
 const PW_KEYS = ['poe', 'poeIn', 'poeOptional', 'ports', 'eth'];
 const pwOf = o => { const r = {}; PW_KEYS.forEach(k => { if (o[k] !== undefined) r[k] = o[k]; }); return r; };
+/* What the catalog knows about a part and how, per claim (docs/audit/CATALOG_VERIFICATION.md): verified (measured or tested,
+   with a method and a date), documented (the creator or maker says so), community (a builder reports it), estimated, unknown.
+   An entry's own "evidence" wins; otherwise the older fields are read as evidence. */
+const EV_LABEL = { verified: 'Verified', documented: 'Documented', community: 'Community reported', estimated: 'Estimated', unknown: 'Unknown' };
+function evidenceOf(src) {
+  const e = src.evidence || {};
+  return {
+    height: e.height || (src.estimated ? { state: 'estimated', note: 'from the model’s title or photos' } : { state: 'documented', note: 'from the model page' }),
+    fit: e.fit || (src.labrax ? { state: 'documented', note: 'made for or tested in Lab Rax by its creator' } : { state: 'unknown' }),
+    power: e.power || (typeof src.watts !== 'number' ? { state: 'unknown' } : src.wattsEstimated ? { state: 'estimated', note: 'a typical figure for this kind of device' } : { state: 'documented', note: 'typical draw from the maker’s figures' })
+  };
+}
+const evNote = x => x.method ? x.method + (x.date ? ', ' + x.date : '') : x.note || '';
+function evidenceHTML(d) { // the hover preview in the library
+  if (!d || !d.ev) return '';
+  const row = (what, x) => '<li class="ev ev-' + x.state + '"><span>' + what + '</span><b>' + EV_LABEL[x.state] + '</b>' + (evNote(x) ? '<small>' + esc(evNote(x)) + '</small>' : '') + '</li>';
+  return '<ul class="evlist">' + row('Height', d.ev.height) + (d.top || d.extra ? '' : row('Fit in Lab Rax', d.ev.fit)) + (d.watts > 0 || d.device ? row('Power', d.ev.power) : '') + '</ul>';
+}
+const evShort = d => !d || !d.ev ? '' : 'Height ' + EV_LABEL[d.ev.height.state].toLowerCase() + (d.top || d.extra ? '' : ' · fit ' + EV_LABEL[d.ev.fit.state].toLowerCase()) + (d.watts > 0 || d.device ? ' · power ' + EV_LABEL[d.ev.power.state].toLowerCase() : '');
 function buildCatalog(c) {
   CAT = c; LIB = {}; SIZES = {}; PWDEV = {};
   // src: the catalog entry, for its heat, airflow and power fields
-  const add = (id, o, src) => { LIB[id] = Object.assign({ key: id, h2: o.u ? Math.round(o.u * 2) : 0 }, o, { watts: src.watts, wattsEst: !!src.wattsEstimated, fanDir: src.fanDir, vent: src.vent, at: src.at, fanAt: src.fanAt, pw: pwOf(src), fit: src.fit }); };
+  const add = (id, o, src) => { LIB[id] = Object.assign({ key: id, h2: o.u ? Math.round(o.u * 2) : 0 }, o, { watts: src.watts, wattsEst: !!src.wattsEstimated, fanDir: src.fanDir, vent: src.vent, at: src.at, fanAt: src.fanAt, pw: pwOf(src), fit: src.fit, ev: evidenceOf(src) }); };
   (c.panels || []).forEach(g => g.items.forEach(i => add(i.id, { name: i.name, label: null, u: i.u, est: !!i.estimated, face: i.face || 'blank', shape: i.shape, url: i.url || null, author: i.author || '', hardware: i.hardware || [], group: g.group, tab: 'panels' }, i)));
   (c.devices || []).forEach(g => g.items.forEach(d => {
     const dev = d.size ? { device: d.device, size: d.size, color: d.color, io: d.io } : null;
@@ -494,7 +513,7 @@ function rowHTML(key, name, sub, extra) {
   if (cfmOf(d)) sub = (sub ? sub + ' · ' : '') + fanLine(d);
   return '<div class="lrow-wrap"><button type="button" class="lrow' + (on || n ? ' on' : '') + '" draggable="' + !(d.top || d.extra) + '" data-act="lib" data-key="' + key + '" title="' + esc(fullName(d)) + (d.author ? ' · by ' + esc(d.author) : '') + '">' +
     '<span class="lthumb">' + miniThumb(d) + '</span><span class="ltx"><b>' + esc(name) + '</b><span class="lmeta"><span class="lchips">' + // the name gets the whole first line
-    (n ? '<span class="inrack" title="In your rack">' + n + '×</span>' : '') + '<span class="badge' + (d.est ? ' est' : '') + '"' + (d.est ? ' title="≈: the height is estimated, not yet checked against the model"' : '') + '>' + badge + '</span>' + wChip(hw.w, hw.est) + fan + '</span>' +
+    (n ? '<span class="inrack" title="In your rack">' + n + '×</span>' : '') + '<span class="badge' + (d.est ? ' est' : '') + '"' + (d.est ? ' title="≈: the height is estimated, not yet checked against the model"' : d.ev && d.ev.height.state === 'verified' ? ' title="Height verified: ' + esc(evNote(d.ev.height)) + '"' : '') + '>' + badge + (d.ev && d.ev.height.state === 'verified' && !d.top && !d.extra ? ' ✓' : '') + '</span>' + wChip(hw.w, hw.est) + fan + '</span>' +
     (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span></span></button>' +
     (extra || '') + (d.url ? '<a class="lext" href="' + esc(d.url) + '" target="_blank" rel="noopener" aria-label="Open model page for ' + esc(fullName(d)) + '" title="Open model page">↗</a>' : '') + '</div>';
 }
@@ -715,7 +734,7 @@ function renderSel() {
   const it = sel != null ? find(sel) : null, bar = $('#selbar');
   if (!it || it.pos2 == null) { bar.innerHTML = '<span class="hint">Click a part in the rack to move, label or remove it. Drag it, or use the arrow keys to move by ½U.</span>'; return; }
   const d = info(it), auto = heatOf(Object.assign({}, it, { watts: undefined }));
-  bar.innerHTML = '<div class="who"><b>' + esc(fullName(d)) + '</b><span class="hint">' + uTxt(d) + ' · ' + uRange(it.pos2, d.h2) + ' · ' + sideOf(it) + (d.author ? ' · by ' + esc(d.author) : '') + '</span>' + warnHTML(it) + '</div>' +
+  bar.innerHTML = '<div class="who"><b>' + esc(fullName(d)) + '</b><span class="hint">' + uTxt(d) + ' · ' + uRange(it.pos2, d.h2) + ' · ' + sideOf(it) + (d.author ? ' · by ' + esc(d.author) : '') + '</span>' + warnHTML(it) + '' + (evShort(d) ? '<span class="hint evs">' + esc(evShort(d)) + qm('verification') + '</span>' : '') + '</div>' +
     '<input class="field" id="sel-label" type="text" maxlength="24" aria-label="Label on the panel" placeholder="Label, e.g. Pi 5" value="' + esc(it.label || '') + '">' +
     '<label class="watts" title="Heat this part gives off, for the cooling estimate. Empty: ' + (auto.w ? (auto.est ? 'about ' : '') + fmtW(auto.w) + ', its typical draw' : 'no heat') + '">Heat <input class="field" id="sel-watts" type="number" min="0" max="500" step="1" inputmode="numeric" placeholder="' + (auto.w ? (auto.est ? '≈' : '') + auto.w : '0') + '" value="' + (typeof it.watts === 'number' ? it.watts : '') + '"> W</label>' +
     (cfmOf(d) ? '<span class="watts" title="' + esc(fanLine(d)) + '">Fans ' + dirSeg({ ref: 'i' + it.id, d, place: fanPlace(d, 'item', it), kind: 'item', dir: dirFor(d, it.dir, fanPlace(d, 'item', it), 'item'), name: fullName(d) }) + '</span>' : '') +
@@ -1397,6 +1416,7 @@ const TERMS = {
   airflow: ['Airflow: intake and exhaust', 'Intake fans blow room air in, exhaust fans blow warm air out. Warm air rises, so air in low at the front and out at the top or back works with it. The planner estimates the air temperature around your parts from their typical heat; it is an estimate, not a measurement of the parts themselves.'],
   insert: ['Heat-set inserts or bolted', 'Heat-set inserts are small threaded brass sleeves you press into the printed holes with a soldering iron; the screws then go into metal threads. A bolted frame uses screws with nuts instead, so you don’t need a soldering iron.'],
   keystone: ['Keystone', 'A keystone is a standard snap-in jack (network, HDMI, USB and more) that clips into the square openings of a keystone panel. You buy the jacks; the panel is printed.'],
+  verification: ['How sure is this?', 'Each claim about a part has its own status. Verified: measured from the model file or tested, with the date. Documented: the creator or maker states it, not checked here. Community reported: a builder reports that it works. Estimated: taken from the title, photos or a similar part. Unknown: no information yet. A verified height says nothing about print quality, or about whether your device fits.'],
   estimate: ['Estimated (≈)', 'A value marked ≈ hasn’t been checked against the model or the real part. It comes from the model’s title, photos or a similar part. Check it on the model page, or print one test piece, before you print everything.']
 };
 const qm = k => TERMS[k] ? '<button type="button" class="qm" data-act="explain" data-k="' + k + '" aria-label="What is ' + esc(TERMS[k][0]) + '?" title="What is this?">?</button>' : '';
@@ -2104,7 +2124,7 @@ function previewHTML(d) {
   let front = '';
   if (d.top) { const t = LS.topFor(d, colorsFor()); if (t.h > 1.5) front = '<div class="lp-front" style="aspect-ratio:' + t.w + '/' + t.h.toFixed(1) + '">' + t.svg + '</div>'; }
   else if (!d.extra) front = '<div class="lp-front" style="aspect-ratio:250/' + LS.fit(d).h.toFixed(1) + '">' + faceSVG(d) + '</div>';
-  return '<div class="lp-3d">' + thumbSVG(d) + '</div>' + front + (size ? '<span class="mono">' + esc(d.name) + ' · ' + size + '</span>' : '');
+  return '<div class="lp-3d">' + thumbSVG(d) + '</div>' + front + (size ? '<span class="mono">' + esc(d.name) + ' · ' + size + '</span>' : '') + evidenceHTML(d);
 }
 $('#cards').addEventListener('pointermove', e => {
   if (e.pointerType !== 'mouse' || !lprev || drag) return;

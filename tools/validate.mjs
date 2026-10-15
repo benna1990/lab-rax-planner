@@ -15,6 +15,19 @@ const okU = u => typeof u === 'number' && u >= 0.5 && u <= 10 && Number.isIntege
 const DIRS = new Set(['intake', 'exhaust', 'cross']), PLACES = new Set(['side', 'back', 'top']);
 const isFan = part => typeof cat.hardware?.[part]?.cfm === 'number';
 // heat and airflow: typical heat in W (wattsEstimated marks a guess), fan direction, free area of an opening, where an extra sits
+// how a claim is known (docs/audit/CATALOG_VERIFICATION.md): verified needs a method and a date, documented and community a source
+const EV = new Set(['verified', 'documented', 'community', 'estimated', 'unknown']);
+function evidence(o, where) {
+  if (o.license != null && !text(o.license)) errors.push(`${where}: license must be text, e.g. "CC BY 4.0"`);
+  if (o.evidence == null) return;
+  if (typeof o.evidence !== 'object' || Array.isArray(o.evidence)) return errors.push(`${where}: evidence must be an object`);
+  for (const [k, e] of Object.entries(o.evidence)) {
+    if (!['height', 'fit', 'power', 'depth'].includes(k)) errors.push(`${where}: evidence.${k} is not a known claim (height, fit, power, depth)`);
+    if (!e || !EV.has(e.state)) { errors.push(`${where}: evidence.${k}.state must be one of ${[...EV].join(', ')}`); continue; }
+    if (e.state === 'verified' && !(text(e.method) && /^\d{4}-\d{2}-\d{2}$/.test(e.date || ''))) errors.push(`${where}: evidence.${k} is verified, so it needs a method and a date (YYYY-MM-DD)`);
+    if ((e.state === 'documented' || e.state === 'community') && !(okUrl(e.source) || okUrl(o.url))) errors.push(`${where}: evidence.${k} is ${e.state}, so it needs a source link`);
+  }
+}
 function air(o, where, needWatts) {
   if (o.watts == null) { if (needWatts) errors.push(`${where}: needs watts, the typical heat in W (add "wattsEstimated": true when it's a guess)`); }
   else if (!(typeof o.watts === 'number' && o.watts >= 0 && o.watts <= 500)) errors.push(`${where}: watts must be a number from 0 to 500`);
@@ -82,7 +95,7 @@ for (const g of cat.panels || []) {
     if (!okU(p.u)) errors.push(`${w}: u must be 0.5–10 in steps of 0.5`);
     if (p.face && !FACES.has(p.face)) errors.push(`${w}: unknown face "${p.face}"`);
     if (p.fit != null && p.fit !== 'labrax') errors.push(`${w}: fit can only be "labrax"`);
-    url(p.url, w, false); hardware(p.hardware, w); air(p, w, false); power(p, w); look('part', p, w);
+    url(p.url, w, false); hardware(p.hardware, w); air(p, w, false); power(p, w); evidence(p, w); look('part', p, w);
   }
 }
 for (const g of cat.devices || []) {
@@ -100,7 +113,7 @@ for (const g of cat.devices || []) {
       if (m.position !== 'top' && !okU(m.u)) errors.push(`${w}: u must be 0.5–10 in steps of 0.5`);
       if (m.face && !FACES.has(m.face)) errors.push(`${w}: unknown face "${m.face}"`);
       if (m.fit != null && (m.fit !== 'labrax' || m.position === 'top')) errors.push(`${w}: fit can only be "labrax", on a panel`);
-      hardware(m.hardware, w); air(m, w, true); power(m, w, d); look(m.position === 'top' ? 'top' : 'part', m, w);
+      hardware(m.hardware, w); air(m, w, true); power(m, w, d); evidence(m, w); look(m.position === 'top' ? 'top' : 'part', m, w);
       if (m.url) { const k = m.url.replace(/^https:\/\/(www\.)?/, '').replace(/\/en\//, '/'); if (urls.has(k + d.device)) errors.push(`${w}: same model listed twice for this device`); urls.set(k + d.device, 1); }
     }
   }
@@ -108,7 +121,7 @@ for (const g of cat.devices || []) {
 for (const g of cat.extras || []) {
   if (!text(g.group)) errors.push('extras: every group needs a name');
   if (g.kind != null && g.kind !== 'rack' && g.kind !== 'addon') errors.push(`extras group ${g.group}: kind must be rack (rack systems and variants) or addon`);
-  for (const x of g.items || []) { const w = `extra ${x.id}`; claim(x.id, w); if (!text(x.name)) errors.push(`${w}: needs a name`); url(x.url, w, true); hardware(x.hardware, w); air(x, w, false); look('extra', x, w); }
+  for (const x of g.items || []) { const w = `extra ${x.id}`; claim(x.id, w); if (!text(x.name)) errors.push(`${w}: needs a name`); url(x.url, w, true); hardware(x.hardware, w); air(x, w, false); evidence(x, w); look('extra', x, w); }
 }
 
 if (errors.length) { console.error(`catalog.json has ${errors.length} problem(s):\n- ` + errors.join('\n- ')); process.exit(1); }

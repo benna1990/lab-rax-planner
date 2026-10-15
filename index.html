@@ -325,6 +325,14 @@ details.abd .hint{margin-top:6px}
 .lghead[aria-expanded="true"] .chev,details.sec[open] > summary .chev{transform:rotate(90deg)}
 .lrows{display:flex;flex-direction:column;gap:2px;padding:0 0 10px}
 .lrow-wrap{display:flex;align-items:center;gap:4px}
+/* how sure the catalog is, per claim */
+.evlist{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:3px;font-size:12px}
+.ev{display:grid;grid-template-columns:86px auto;column-gap:8px;align-items:baseline}
+.ev span{color:var(--muted)}
+.ev small{grid-column:2;color:var(--muted);font-size:11.5px}
+.ev-verified b{color:var(--accent-text)}
+.ev-estimated b,.ev-unknown b{color:var(--ink-2);font-weight:600}
+.evs{display:block}
 /* step 1: the rack system and its variants */
 .rackset{flex-basis:100%}
 .rsys{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}

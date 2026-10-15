@@ -416,6 +416,7 @@
     },
     {
      "id": "vent1",
+     "evidence": {"height": {"state": "verified", "method": "measured from the model file with tools/measure.mjs", "date": "2026-10-15"}},
      "name": "Vent panel",
      "u": 1,
      "face": "vent",
@@ -446,6 +447,7 @@
     },
     {
      "id": "mw1385530",
+     "evidence": {"height": {"state": "verified", "method": "measured from the model file with tools/measure.mjs", "date": "2026-10-15"}},
      "name": "Fan holder, 2× 80 mm",
      "u": 2,
      "face": "fan",
@@ -497,6 +499,7 @@
     },
     {
      "id": "keystone",
+     "evidence": {"height": {"state": "verified", "method": "measured from the model file with tools/measure.mjs", "date": "2026-10-15"}},
      "name": "Keystone panel, 12 ports",
      "u": 0.5,
      "face": "ks",
@@ -2614,6 +2617,7 @@
      "mounts": [
       {
        "id": "u7pro45",
+       "evidence": {"height": {"state": "verified", "method": "measured from the model file with tools/measure.mjs", "date": "2026-10-15"}},
        "label": "45° mount, replaces the top panel",
        "position": "top",
        "shape": {"ap": "U7 Pro", "tilt": 45},
@@ -5195,6 +5199,7 @@
      "mounts": [
       {
        "id": "sbc7",
+       "evidence": {"height": {"state": "verified", "method": "measured from the model file with tools/measure.mjs", "date": "2026-10-15"}},
        "label": "SBC holder for 7 boards",
        "u": 2,
        "watts": 35,
