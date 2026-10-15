@@ -10,6 +10,7 @@ Static web app for planning 3D-printed 10" homelab racks: Lab Rax and more. Form
 - `view3d.js` — 3D view (three.js r128 from cdnjs, OrbitControls/STLLoader/3MFLoader from jsDelivr). `FRAME` holds frame dimensions.
 - `pdf.js` — build plan PDF with jsPDF 2.5.1.
 - `ready.js` — build readiness: the checks behind the step bar and the Build readiness panel (pure; `tools/test-ready.mjs`). Audit and plan: `docs/audit/`.
+- `connect.js` — the Connect cards (power and mains, Raspberry Pi 5, fans, PoE, lighting, UPS) for what a build holds; every fact sourced from `docs/audit/RESEARCH_SOURCES.md`, nothing guessed (pure; `tools/test-connect.mjs`).
 - `printers.js` — printer presets and the print bed check: does a piece fit lying flat, straight or turned (`tools/test-printers.mjs`). app.js says what each print-list row prints (`framePieces`, `itemPieces`); the chosen printer lives in the UI settings (`labrax-planner-ui`), not in the layout.
 - `airflow.js` — cooling model: air temperature per ½U layer, stack effect, fan curves, openings and walls. app.js describes the rack for it (airflow section).
 - `power.js` — power budget: total draw (the same watts as the cooling estimate), PoE budget and ports per switch, network ports, UPS runtime. app.js describes the rack for it (power and network section); catalog fields `poe`, `poeIn`, `poeOptional`, `ports`, `eth`.
@@ -21,7 +22,7 @@ Static web app for planning 3D-printed 10" homelab racks: Lab Rax and more. Form
 
 ## Commands
 - Run: `python3 -m http.server 8000` then open http://localhost:8000 (needs a server; `fetch('catalog.json')`).
-- Check: `node tools/validate.mjs && for f in app.js parts.js shapes.js view3d.js pdf.js airflow.js power.js guide.js estimate.js market.js printers.js ready.js; do node --check $f; done && node tools/test-power.mjs && node tools/test-printers.mjs && node tools/test-ready.mjs`
+- Check: `node tools/validate.mjs && for f in app.js parts.js shapes.js view3d.js pdf.js airflow.js power.js guide.js estimate.js market.js printers.js ready.js connect.js; do node --check $f; done && node tools/test-power.mjs && node tools/test-printers.mjs && node tools/test-ready.mjs && node tools/test-connect.mjs`
 - Measure: `node tools/measure.mjs [id …]` (all of `reference/` without ids; `--front=±axis`, `--up=±axis` when it picks the wrong face, `--svg` for an overlay in `reference/`, `--json` for numbers).
 
 ## Rules

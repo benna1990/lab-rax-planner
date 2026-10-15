@@ -35,6 +35,11 @@ Work happens on the `redesign/guided-builder` branch. `main` (the live site) sta
 - Per device: how it's powered (USB-C PD, barrel jack, PoE, mains), from documented specs only. Unknown stays "check the manual".
 - Cards for fans, LED lighting and PoE that appear only when the build has them. They show documented wiring only, and say so when a pinout is unknown.
 
+### Next
+- Catalog: record each device's power input (adapter voltage and plug, USB-C PD, PoE class) from datasheets, so the power card can name it instead of "check its manual".
+- Guides and Resources sections (an index of the cards and the research sources).
+- Tests for placement, collisions, save/load, undo and share links; a browser smoke test for the PDF and ZIP.
+
 ### Batch 4: dimensions and fit (P2)
 - Rack dimensions come from one record, read by `shapes.js`, `parts.js`, `view3d.js` and `app.js`.
 - The 3D view labels estimated frame sizes.
@@ -48,4 +53,5 @@ Work happens on the `redesign/guided-builder` branch. `main` (the live site) sta
 | 2026-10-15 | Batch 2 (part): the setup wizard asks for hardware first | 0a612b7 |
 | 2026-10-15 | Batch 2 (part): plain-language "?" explanations for U, depth, PoE, airflow, heat-set inserts, keystones and estimates | 283ef60 |
 | 2026-10-15 | Taxonomy: rack systems and variants (catalog `kind: "rack"`) move to step 1; the Where bar's Frame becomes Inside; device rows name the mount | 4d83fab |
-| 2026-10-15 | Verification states: `evidence` and `license` in the catalog and validator; 5 measured parts marked verified; shown in the library preview, the height chip (✓) and the selection bar with a "?" | (next commit) |
+| 2026-10-15 | Verification states: `evidence` and `license` in the catalog and validator; 5 measured parts marked verified; shown in the library preview, the height chip (✓) and the selection bar with a "?" | ea1dbd7 |
+| 2026-10-15 | Research (`RESEARCH_SOURCES.md`) and Batch 3: Connect cards (`connect.js` + test) for mains, Raspberry Pi 5, fans, PoE, logo LEDs and UPS; step 3 opens them | (next commit) |

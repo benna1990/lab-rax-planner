@@ -1407,6 +1407,31 @@ function powerParts() { // the Power & network section: a one-line summary and t
 
 /* ---------- render: build column ---------- */
 /* Sections fold to one line each, so the column stays short; the open ones are remembered. */
+/* ---------- Connect: power, fans, PoE and lighting for what this build holds (connect.js holds the cards) ---------- */
+function connectFacts() {
+  const r = powerModel(), P = r.poe || { sources: [] }, srcOf = ref => { const s = (P.sources || []).find(x => (x.pds || []).some(p => p.ref === ref)); return s ? s.name : null; };
+  let pi5 = 0, boards = 0; const devices = [];
+  byPos().forEach(it => {
+    const d = info(it), sbc = modsOf(d).filter(m => m.sbc).reduce((n, m) => { const k = typeof m.sbc === 'number' ? (m.fill != null ? m.fill : m.sbc) : 1; if ((m.board || 'pi5') === 'pi5') pi5 += k; boards += k; return n + k; }, 0);
+    if (heatOf(it).w > 0 || sbc) devices.push({ name: it.label || shortName(d), poe: srcOf('i' + it.id), note: sbc ? sbc + (sbc > 1 ? ' boards, each on its own supply or PoE HAT (see below)' : ' board on its own supply or PoE HAT (see below)') : null });
+  });
+  const fans = [];
+  fanParts().forEach(f => (f.d.hardware || []).forEach(h => { const hw = CAT.hardware[h.part]; if (hw && hw.cfm) fans.push({ name: f.name, qty: h.qty, mm: hw.mm, volt: hw.volt, amp: hw.amp }); }));
+  const logo = state.extras.map(k => LIB[k] && LIB[k].shape && LIB[k].shape.logo).find(Boolean) || null;
+  return { devices, fans, pi5, boards, poe: P.budget > 0 || P.load > 0 ? { budget: P.budget || 0, load: P.load || 0, sources: (P.sources || []).map(s => s.name) } : null,
+    logo, ups: state.power && state.power.ups && state.power.ups.size ? state.power.ups : null };
+}
+function connectHTML() {
+  const cs = window.LRConnect.cards(connectFacts());
+  if (!cs.length) return '';
+  const body = '<p class="hint">How everything gets power, network and air, for the parts in this build. Facts carry their source; where nothing is documented the card says so.</p>' +
+    cs.map(c => '<div class="ccard"><h4>' + esc(c.title) + '</h4>' + (c.lead ? '<p>' + esc(c.lead) + '</p>' : '') +
+      (c.items && c.items.length ? '<ul class="citems">' + c.items.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '') +
+      (c.steps.length ? '<ol class="csteps">' + c.steps.map(x => '<li>' + esc(x) + '</li>').join('') + '</ol>' : '') +
+      (c.sources.length ? '<p class="csrc">Sources: ' + c.sources.map(([t, u]) => '<a href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(t) + '</a>').join(' · ') + '</p>' : '') + '</div>').join('');
+  return sec('connect', 'Connect', '<span>' + cs.map(c => c.title.replace(/ \(.*\)$/, '')).join(' · ') + '</span>', body);
+}
+
 /* ---------- plain-language help for the words the planner uses ---------- */
 // [title, explanation]; a "?" button (qm) opens it. Only standard or measured facts here; no guesses.
 const TERMS = {
@@ -1456,8 +1481,8 @@ function goStep(n) {
   const at = el => { if (!el) return; el.scrollIntoView({ behavior: 'smooth', block: 'start' }); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); };
   if (n === 1) return at($('#settings'));
   if (n === 2) { if (where() !== 'front' && where() !== 'back') setWhere('front'); at($('.lib')); setTimeout(() => { const q = $('#q'); if (q) q.focus({ preventScroll: true }); }, 400); return; }
-  const id = { 3: 'power', 5: 'print' }[n];
-  if (id) { ui.sec[id] = true; if (n === 3) ui.sec.air = true; saveUI(); renderBuild(); return at($('[data-sec="' + id + '"]')); }
+  const id = { 3: 'connect', 5: 'print' }[n];
+  if (id) { ui.sec[id] = true; if (n === 3) ui.sec.power = true; saveUI(); renderBuild(); return at($('[data-sec="' + id + '"]') || $('[data-sec="power"]')); }
   at($(n === 6 ? '#export' : '#ready'));
 }
 // the first visit: four ways in, over the rack
@@ -1506,6 +1531,7 @@ function renderBuild() {
   html += sec('air', 'Cooling', air.sum, air.body);
   const pw = powerParts();
   html += sec('power', 'Power & network', pw.sum, pw.body);
+  html += connectHTML();
 
   const ol = orderList(), kg = filament().reduce((n, x) => n + x.grams, 0) / 1000, amazonTag = CAT.shops && CAT.shops.amazon && CAT.shops.amazon.tag;
   html += sec('shop', 'Shopping list', '<span>' + ol.length + ' items · ≈ ' + kg.toFixed(1) + ' kg PETG</span>', shopHTML(ol) +
