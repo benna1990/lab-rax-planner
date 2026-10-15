@@ -49,7 +49,7 @@ function raster(svg, w, h, ppm, type, grey) {
 async function make(d) {
   const JsPDF = await load();
   const doc = new JsPDF({ unit: 'mm', format: 'a4' }), W = 210, M = 16, BOT = 275; // BOT: lowest baseline for content
-  const ink = [22, 24, 27], muted = [106, 111, 118], line = [218, 221, 216], green = [23, 130, 74];
+  const ink = [22, 24, 27], muted = [106, 111, 118], line = [218, 221, 216], green = [23, 130, 74], warnC = [164, 78, 34];
   const text = (s, x, y, o) => doc.text(Array.isArray(s) ? s.map(clean) : clean(s), x, y, o); // arrays are wrapped lines
   const wrap = (s, w) => doc.splitTextToSize(clean(s), w);
   const head = (s, y) => {
@@ -244,21 +244,27 @@ async function make(d) {
 
   let y=page();section('Print & parts checklist','Only selected prints and essential purchases');
   y=head('Print & parts checklist',y);
-  const tableRow=(name,qty,url,detail,cost)=>{
+  // warn: { text, bad } for parts too big for the printer (bad) or that only fit diagonally; on the name line when it fits, else under the row
+  const tableRow=(name,qty,url,detail,cost,warn)=>{
     doc.setFont('helvetica','bold');doc.setFontSize(8.5);const lines=wrap(name,112),nameW=doc.getTextWidth(clean(lines[lines.length-1]));
     doc.setFont('helvetica','normal');doc.setFontSize(7);
     const inline=!!detail&&nameW+3+doc.getTextWidth(clean(detail))<=112, sub=detail&&!inline?wrap(detail,112):[];
-    const hh=Math.max(6.6,lines.length*3.6+sub.length*3+3);
+    const endW=inline?nameW+3+doc.getTextWidth(clean(detail)):nameW, warnInline=!!warn&&!sub.length&&endW+3+doc.getTextWidth(clean(warn.text))<=112, wl=warn&&!warnInline?wrap(warn.text,112):[];
+    const hh=Math.max(6.6,lines.length*3.6+(sub.length+wl.length)*3+3);
     y=continued(y,hh,'Print & parts checklist');
     doc.setDrawColor(...line);doc.setLineWidth(.15);doc.line(M,y+hh-3.4,W-M,y+hh-3.4);
     doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(...(url?green:ink));text(lines,M+2,y);
     if(url)doc.link(M+2,y-3,112,Math.max(4,lines.length*3.6),{url});
     doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(...muted);
     if(inline)text(detail,M+2+nameW+3,y+(lines.length-1)*3.6);else if(sub.length)text(sub,M+2,y+lines.length*3.6);
+    if(warn){doc.setTextColor(...(warn.bad?warnC:muted));if(warnInline)text(warn.text,M+2+endW+3,y+(lines.length-1)*3.6);else text(wl,M+2,y+lines.length*3.6+sub.length*3);}
     doc.setFontSize(8);doc.setTextColor(...ink);text(qty,W-M-29,y,{align:'right'});if(cost)text(cost,W-M,y,{align:'right'});y+=hh;
   };
   doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...muted);text('TO PRINT / CLICK A MODEL NAME TO DOWNLOAD',M,y);y+=8;
-  d.print.forEach(p=>tableRow(p.name,p.qty+'×',p.url,p.vars?'Variant: '+p.vars:'',null));
+  if(d.printer){const pr=d.printer;doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(...(pr.bad?warnC:muted));
+    const l=wrap('Checked against your '+pr.name+': '+(pr.bad?pr.bad+(pr.bad>1?' prints have parts':' print has a part')+' too big for it.':'every part fits lying flat'+(pr.turned?', some only diagonally.':'.'))+(pr.est?' ~ sizes are estimates; check them in your slicer.':''),W-2*M);
+    text(l,M,y-2.5);y+=l.length*3.2+1.5;}
+  d.print.forEach(p=>tableRow(p.name,p.qty+'×',p.url,p.vars?'Variant: '+p.vars:'',null,p.bed?{text:p.bed,bad:p.bad}:null));
   y=fit(y+8,25);y=head('To buy / essential supplies',y);
   doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(...muted);
   const buyNote=wrap('Total need per item; what you already own is deducted from what to buy and the costs. Filament is on page 1; tools, optional extras and devices are left out.',W-2*M);text(buyNote,M,y-2);y+=buyNote.length*3.2+3;

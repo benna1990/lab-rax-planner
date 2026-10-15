@@ -44,7 +44,11 @@ The pack also attempts to include a PDF build plan. If it is missing, try **Buil
 
 ## Save and share
 
-Your layout is saved in this browser. Use **Share link** in **Your build** and keep the link if you want to reopen or share the configuration. Clearing browser storage removes the local saved layout. Locally loaded model files need to be loaded again in a new session.
+Your layout is saved in this browser. Use **Share link** in **Your build** and keep the link if you want to reopen or share the configuration, or **Save as file** for a small `.rack.json` file you can keep, send or open on another computer with **Open file** (Undo brings back the layout you had). The build pack holds the same file. Clearing browser storage removes the local saved layout. Locally loaded model files need to be loaded again in a new session.
+
+## Check your printer
+
+Pick your printer at the top of the **Print list** (or in **Set up a rack**). Prints with a part too big for its bed are marked, with the part and its size; parts that only fit turned diagonally are noted too. Sizes marked ≈ are estimates, so check the model in your slicer. For 180 mm beds there is a 5U frame with split parts under **Frame & extras**.
 
 ## Common questions
 

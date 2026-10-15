@@ -229,6 +229,13 @@ h3.sub{font-size:14px;font-weight:700;margin:0}
 .prow .tx small{font-size:12px;color:var(--muted)}
 .prow a{font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap}
 .prow .q{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.prow .tx small.bedbad{color:var(--warn);font-weight:600}
+.bedrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.bedrow>label{font-size:12.5px;font-weight:600;color:var(--muted)}
+.bedset{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1;min-width:0}
+.bedset select.field{height:32px;padding:0 10px;flex:1 1 180px;min-width:0;max-width:100%}
+.beddims{display:flex;align-items:center;gap:4px;font-size:12.5px;color:var(--muted)}
+.beddims .field{width:66px;height:32px;padding:0 8px}
 .boxcard{padding:14px;border-radius:14px;border:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
 .kv{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;margin:0;font-size:13.5px}
 .kv dd{margin:0;font-family:var(--f-mono);font-size:12.5px;text-align:right;white-space:nowrap}
@@ -475,6 +482,7 @@ dialog.wizard::backdrop{background:rgba(10,12,14,.55)}
 
   <aside class="build" aria-label="Your build">
     <div class="side-in" id="build"></div>
+    <input type="file" id="rackfile" accept=".json,application/json" hidden>
   </aside>
 </div>
 <p class="foot-note" id="footer"></p>
@@ -527,6 +535,7 @@ dialog.wizard::backdrop{background:rgba(10,12,14,.55)}
 <script src="market.js"></script>
 <script src="estimate.js"></script>
 <script src="guide.js"></script>
+<script src="printers.js"></script>
 <script src="pdf.js"></script>
 <script src="airflow.js"></script>
 <script src="power.js"></script>
