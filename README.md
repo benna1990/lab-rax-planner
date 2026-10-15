@@ -21,7 +21,7 @@ Choose community mounts, arrange your devices in a 10″ Lab Rax rack, preview t
 | Plan | Preview | Prepare |
 | --- | --- | --- |
 | Browse hundreds of community mounts and panels | Switch between front, 3D and airflow views | Download a build pack for your layout |
-| Arrange devices in a 1–10U rack | Load your downloaded STL/3MF files locally | Find source models through a download checklist |
+| Arrange devices in a 1–10U rack, front and back | Load your downloaded STL/3MF files locally | Find source models through a download checklist |
 | Choose a frame, colours and side panels | Explore approximate airflow and temperatures | Get a shopping list and build instructions |
 | Generate blank, vent, keystone, label and shelf parts | Change device heat and fan direction | Export generated parts as STL |
 
@@ -120,7 +120,7 @@ The 3D frame follows the photos in the Lab Rax article: bevelled top and bottom 
 
 - **Heat.** Each part's `watts` in `catalog.json` is its typical draw in a home lab under light load, from spec sheets and wall-meter measurements. A switch counts its own draw, not its PoE budget, and a power supply only its losses. ≈ marks an estimate. A part's own value always wins.
 - **Layers.** The rack is split into ½U layers, each with one air temperature. Air that comes in through an opening is at room temperature (25 °C unless you change it).
-- **Stack effect.** Warm air is lighter, so the pressure inside rises faster with height than outside. Low openings take air in, high ones let it out. An open back does both, split at the neutral plane (the dashed line in the Airflow view). Openings follow orifice flow with a discharge coefficient of 0.6, and the seams between panels leak a little.
+- **Stack effect.** Warm air is lighter, so the pressure inside rises faster with height than outside. Low openings take air in, high ones let it out. An open back does both, split at the neutral plane (the dashed line in the Airflow view). Panels on the rear posts close the back where they sit: their vents count as openings in the back, and their fans blow out by default. Openings follow orifice flow with a discharge coefficient of 0.6, and the seams between panels leak a little.
 - **Fans.** Each fan follows a straight fan curve from its rated flow and maximum static pressure, at full speed, minus 15 % for the grille. It pushes against whatever pressure the openings leave. Typical figures: 40 mm 6 CFM, 80 mm 30, 92 mm 40, 120 mm 52, 140 mm 75, 200 mm 86 CFM (1 CFM = 1.7 m³/h).
 - **Heat balance.** In every layer the parts' heat is carried off by the air flowing through it. Warm air under cooler air turns over and mixes upward, warm air above cooler air stays put, and about 4 W per m² per °C leaks through the printed walls. Pressure and temperature depend on each other, so the model solves them in turn until they settle.
 - **Not included.** The devices' own fans (which usually help), draughts and air conditioning in the room, sunlight, and how hot a device runs inside. The temperatures are of the air around the parts. Most network gear and mini PCs are rated for air up to 40 °C, so the planner calls a rack cool up to 35 °C, warm up to 40 °C and hot above that.

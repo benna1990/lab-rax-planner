@@ -166,7 +166,7 @@ function flipSide(id) {
   if (p == null) { say('There is no free ' + fmtU(H(it)) + ' slot at the ' + to + '.'); return; }
   state.items = state.items.map(i => i.id === id ? Object.assign({}, i, { pos2: p, side: to }) : i);
   const nw = find(id); if (to === 'front') delete nw.side;
-  sel = id; touch();
+  sel = id; touch(); save(); // setView() only redraws, so save here
   if (view === 'front' || view === 'back') setView(to); else render();
   say(fullName(info(nw)) + ' moved to the ' + to + ', ' + uRange(p, H(nw)) + '.' + clashText(nw));
 }

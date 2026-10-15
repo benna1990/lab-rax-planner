@@ -5,6 +5,7 @@ Status on 15 October 2026 and what comes next. Written so a new session (for exa
 ## Done
 
 - Planner UI: parts library (devices, panels, top mounts, frame & extras, custom), front view at real scale, light/dark theme, share link.
+- The back of the rack: a Back view to place panels on the rear posts (vents, fan panels, keystones, power), shown in 3D, in the cooling estimate (rear vents and fans at their own height), the lists and the PDF. A front and a rear part at the same height that together are deeper than the rack are marked.
 - Catalog of ~500 community parts with links, authors and heights (≈ when estimated). About 150 were added on 15 October 2026 from a MakerWorld search sweep, and 64 more from a second sweep the same day (power, patch panels, thin clients, firewall boxes).
 - Whole-U panels snap to the EIA hole pattern; ½U panels fit either half.
 - 3D view (three.js r128) with side panels toggle, selection, and loading your own STL/3MF onto a part. The frame is modelled after the photos of the real Lab Rax (bevelled rings, arched handles, brass inserts).
