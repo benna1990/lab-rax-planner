@@ -173,12 +173,12 @@ async function make(d) {
   // cooling overview, else on a page of its own before the assembly steps.
   const pw=d.power;
   doc.setFont('helvetica','normal');doc.setFontSize(8.5);
-  const pwLines=pw?pw.lines.slice(0,8).map(s=>wrap(s.replace(/^! /,''),W-2*M)):[], pwH=pw?13+29+pwLines.reduce((n,l)=>n+l.length*3.7+1.8,0):0;
+  const pwLines=pw?pw.lines.slice(0,8).map(s=>wrap(s.replace(/^! /,''),W-2*M)):[], pwH=pw?13+23+pwLines.reduce((n,l)=>n+l.length*3.7+1.8,0):0;
   function powerBlock(y){
     section('Power & network','Draw, PoE budget, network ports, UPS');
     y=head('Power & network',y);
-    pw.tiles.forEach(([name,value],i)=>{const x=M+i*45.5;doc.setFillColor(243,246,243);doc.roundedRect(x,y,41.5,21,2,2,'F');doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(...muted);text(name,x+4,y+7);doc.setFontSize(14);doc.setTextColor(...(i===1&&pw.short&&/\//.test(value)?[164,78,34]:ink));text(value,x+4,y+16);});
-    y+=29;doc.setFont('helvetica','normal');doc.setFontSize(8.5);
+    pw.tiles.forEach(([name,value],i)=>{const x=M+i*45.5;doc.setFillColor(243,246,243);doc.roundedRect(x,y,41.5,17,2,2,'F');doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(...muted);text(name,x+4,y+6);doc.setFontSize(12.5);doc.setTextColor(...(i===1&&pw.short&&/\//.test(value)?[164,78,34]:ink));text(value,x+4,y+13.5);});
+    y+=23;doc.setFont('helvetica','normal');doc.setFontSize(8.5);
     pwLines.forEach((l,i)=>{doc.setTextColor(...(/^! /.test(pw.lines[i])?[164,78,34]:ink));text(l,M,y);y+=l.length*3.7+1.8;});
     return y;
   }
@@ -238,7 +238,7 @@ async function make(d) {
     }
     y=Math.max(sy+12,ty+4);
     doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(...muted);
-    const note=wrap('Colour = estimated air temperature, room to +'+SPAN+' °C. A planning estimate of the air around your equipment, not the temperature inside it; check with a thermometer after an hour of use.',W-2*M);text(note,M,y);y+=note.length*3.5+5;
+    const note=wrap('Colour = estimated air temperature, room to +'+SPAN+' °C. A planning estimate of the air around your equipment, not the temperature inside it; check with a thermometer after an hour of use.',W-2*M);text(note,M,y);y+=note.length*3.5+3;
     return y;
   }
 
@@ -277,11 +277,13 @@ async function make(d) {
     y2=airMap(c.map,page());
     const notes=[...c.fans.map(f=>f.name+' / '+f.dir),...c.tips.slice(0,2).map(t=>t.text)];
     if(notes.length){
-      y2=fit(y2+8,22);y2=head('For this build',y2);
-      doc.setFont('helvetica','normal');doc.setFontSize(9);
-      for(const note of notes){const lines=wrap(note,W-2*M-8);y2=fit(y2,lines.length*4+6);doc.setTextColor(...ink);text(lines,M+4,y2);y2+=lines.length*4+6;}
+      y2=fit(y2+4,14);doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(...muted);text('FANS AND TIPS FOR THIS BUILD',M,y2);y2+=5; // a small label like PER U: two lines don't need a section head
+      doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(...ink);
+      const colW=(W-2*M-12)/2, short=notes.every(n=>wrap(n,colW).length===1); // short notes in two columns, so the power block fits on this page too
+      if(short){for(let i=0;i<notes.length;i+=2){y2=fit(y2,5);text(notes[i],M,y2);if(notes[i+1])text(notes[i+1],M+12+colW,y2);y2+=5;}}
+      else for(const note of notes){const lines=wrap(note,W-2*M-8);y2=fit(y2,lines.length*3.6+1.8);text(lines,M,y2);y2+=lines.length*3.6+1.8;}
     }
-    if(pw&&!pwDone&&y2+8+pwH+5<=BOT){powerBlock(y2+8);pwDone=true;}
+    if(pw&&!pwDone&&y2+5+pwH+5<=BOT){powerBlock(y2+5);pwDone=true;}
   }
   if(pw&&!pwDone)powerBlock(page());
 
