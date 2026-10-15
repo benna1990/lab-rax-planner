@@ -1,32 +1,99 @@
-# Mini Rack Planner
+<p align="center">
+  <img src="docs/assets/banner.svg" alt="Lab Rax Planner — plan your rack, choose your parts, prepare your build" width="960">
+</p>
 
-**Plan your 3D-printed 10″ rack · Lab Rax and more.** Plan a [Lab Rax](https://the-diy-life.com/introducing-lab-rax-a-3d-printable-modular-10-rack-system/) or another 3D-printed 10″ homelab rack before you print it. (Formerly the Lab Rax Planner; it is an independent planner, not an official Lab Rax tool.)
+# Lab Rax Planner
 
-**Open the planner: https://benna1990.github.io/lab-rax-planner/**
+**Build your homelab on screen before you start printing.**
 
-- **Pick from ~500 community parts**: device mounts (UniFi, TP-Link, MikroTik, Netgear, Zyxel, mini PCs, thin clients, firewall boxes, Mac mini, Raspberry Pi, Mini-ITX, NAS and drive bays…), panels (power, keystone and D-type patch panels, fans, shelves), top mounts and frame mods, each linked to its model page.
-- **Lay it out** at real scale. Whole-U panels snap to the hole pattern; ½U panels fit either half of a U.
-- **Look around in 3D**, and load your own downloaded STL or 3MF files onto a part to see them in place. Those files never leave your browser.
-- **Check the cooling**: every part has its typical heat in watts and every fan its rated flow. The planner estimates the air temperature at each height and the airflow through the rack, shows where air comes in and goes out, and suggests fans, a mesh top, an open back or other changes with their effect (hottest air before → after). You can turn each fan around and enter a part's real watts. See [Cooling estimate](#cooling-estimate).
-- **Make custom parts**: blank, vent (slots or hexagons), keystone and label panels, and a shelf sized to your device. They export as STL, ready to print without supports: panels and shelves face-down, label plates face-up.
-- **Know what to buy and how to build it**: a shopping list made from your layout (filament per colour, screws and inserts in packs, fans with safe 5 V power, network, power supplies, acrylic, handy extras) with shop links, and a step-by-step build and wiring guide.
-- **Download a build pack**: one ZIP with your custom STL files, a PDF build plan, a build guide page with the shopping list, a download list to click through the community models, a print list and a shopping list (CSV).
-- Light and dark theme. Your layout is saved in your browser; share it with a link (Share link in Your build).
+Choose community mounts, arrange your devices in a 10″ Lab Rax rack, preview the result and download a build pack with model links, custom STL files and a shopping list.
 
-It is a static site with no build step: `index.html`, `app.js`, `parts.js`, `view3d.js`, `pdf.js`, `airflow.js` and `catalog.json`. three.js r128 and jsPDF 2.5.1 load from cdnjs/jsDelivr when the 3D view or PDF export is first used.
+[**Open the planner →**](https://benna1990.github.io/lab-rax-planner/) · [Quick start](docs/QUICKSTART.md) · [Roadmap](ROADMAP.md) · [Report a problem](https://github.com/benna1990/lab-rax-planner/issues/new/choose)
 
-## Run it locally
+[![Validation](https://github.com/benna1990/lab-rax-planner/actions/workflows/validate.yml/badge.svg)](https://github.com/benna1990/lab-rax-planner/actions/workflows/validate.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Runs in your browser](https://img.shields.io/badge/Runs_in-your_browser-B5CF2A)](https://benna1990.github.io/lab-rax-planner/)
+
+> **In active development.** Layouts, material quantities and cooling figures help you plan. Confirm model dimensions and slice the selected files before buying materials or printing. The current rack family is Lab Rax 10″.
+
+## What can you do?
+
+| Plan | Preview | Prepare |
+| --- | --- | --- |
+| Browse hundreds of community mounts and panels | Switch between front, 3D and airflow views | Download a build pack for your layout |
+| Arrange devices in a 1–10U rack | Load your downloaded STL/3MF files locally | Find source models through a download checklist |
+| Choose a frame, colours and side panels | Explore approximate airflow and temperatures | Get a shopping list and build instructions |
+| Generate blank, vent, keystone, label and shelf parts | Change device heat and fan direction | Export generated parts as STL |
+
+The catalog includes network gear, mini PCs, Raspberry Pi boards, drive bays, patch panels, cooling parts and frame accessories. Each community entry links back to its maker’s model page.
+
+## Your first rack
+
+1. **[Open the planner](https://benna1990.github.io/lab-rax-planner/)** and choose **Set up a rack** to start your own layout.
+2. **Add your devices and panels.** Adjust the rack height and arrange the parts. ≈ marks an estimated height.
+3. **Check your build.** Review the 3D preview, cooling estimate, print list and shopping list.
+4. **Download the build pack.** Open the community model links, select the correct variants and slice the files for your printer.
+
+No account or application installation is needed to use the planner. See the [step-by-step guide](docs/QUICKSTART.md) for downloads, custom parts and sharing.
+
+## What is in the build pack?
+
+- **Custom STL files** for parts generated in the planner.
+- **Build plan PDF**, when PDF generation succeeds.
+- **Build guide** with assembly steps and a shopping list.
+- **Download checklist** linking to community model pages.
+- **Print and shopping lists** in CSV, plus a README.
+
+Community STL/3MF files are downloaded from their original pages and retain their own licenses. They are not bundled in this repository or redistributed in the build pack.
+
+## Current status
+
+| Feature | Status |
+| --- | --- |
+| Layout editor, community catalog and custom STL generation | Available |
+| 3D preview and local STL/3MF preview | Available; previews do not certify fit |
+| Shopping list and assembly guide | Available; verify against selected model variants |
+| Filament per colour | Rough estimate, including a spare allowance |
+| Cooling and airflow | Simplified estimate; see [assumptions below](#cooling-estimate) |
+| Print time and full build cost | Planned |
+| Acrylic sides | Material choice and supplier links; measured cutting files still needed |
+| Cheapest delivered acrylic quote by country | Planned |
+
+Our aim is one simple route from choosing devices to a complete print and build plan. The next steps are verified dimensions, reliable print profiles, costs and made-to-measure acrylic ordering. Follow the [roadmap](ROADMAP.md) for the implementation work.
+
+## Documentation
+
+- [Quick start and common questions](docs/QUICKSTART.md)
+- [Dimensions and frame assumptions](#dimensions)
+- [How the cooling estimate works](#cooling-estimate)
+- [Add a model or contribute code](CONTRIBUTING.md)
+- [Development roadmap](ROADMAP.md)
+- [Credits and licenses](#credits-and-licenses)
+
+## Run locally
+
+Requires Python 3. There is no build step or package installation.
 
 ```sh
+git clone https://github.com/benna1990/lab-rax-planner.git
+cd lab-rax-planner
 python3 -m http.server 8000
-# open http://localhost:8000
 ```
 
-Opening `index.html` straight from disk doesn't work, because the page loads `catalog.json` with `fetch`.
+Open [localhost:8000](http://localhost:8000). Serve the folder over HTTP: opening `index.html` directly cannot load the catalog.
 
-## Publish with GitHub Pages
+The app uses plain HTML, CSS and JavaScript. Browser storage keeps your layout locally. 3D and PDF features load libraries from external CDNs; community and shopping links open external sites.
 
-Settings → Pages → Deploy from a branch → `main` / root.
+To run the repository checks with Node.js:
+
+```sh
+node tools/validate.mjs
+for f in app.js parts.js shapes.js view3d.js pdf.js airflow.js; do node --check "$f"; done
+```
+
+## Help improve the planner
+
+Found a mount, checked a dimension or printed a working build? [Suggest a model](https://github.com/benna1990/lab-rax-planner/issues/new/choose) or read [CONTRIBUTING.md](CONTRIBUTING.md). Model links, measured dimensions, slicer results and photos of completed builds are especially useful.
 
 ## Dimensions
 

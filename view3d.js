@@ -185,7 +185,9 @@ async function buildRack(snap) {
       const look = it.look || { key: 'face:' + it.face, face: it.face, h2: it.h2 };
       holder.add(LS.partMeshes(T, look, { color: it.color, accent: snap.accent, frame: snap.frame, maxDepth: F.depth - 25 }, cmat));
     }
-    holder.position.set(0, yBottom, 3);
+    // panels on the rear posts face out the back: half a turn, so what they hold reaches forward into the rack
+    if (it.back) { holder.rotation.y = Math.PI; holder.position.set(0, yBottom, -F.depth - 3); }
+    else holder.position.set(0, yBottom, 3);
     if (it.sel) { const sel = new T.BoxHelper(holder, 0x3CC27A); holder.userData.helper = sel; }
     const fm = fileModels.get(it.id);
     if (fm) { const c = fm.mesh.clone(); c.traverse(o => { o.userData.cached = true; }); placeFileMesh(c, fm, ph); holder.add(c); holder.children.forEach(ch => { if (ch !== c && !ch.userData.keep) ch.visible = false; }); }
@@ -238,13 +240,13 @@ function lights(scene) {
   const d1 = new T.DirectionalLight(0xffffff, .7); d1.position.set(300, 500, 400); scene.add(d1);
   const d2 = new T.DirectionalLight(0xffffff, .35); d2.position.set(-400, 200, -200); scene.add(d2);
 }
-function fit() {
-  // frame the whole rack from the front right, whatever the shape of the view
+function fit(back) {
+  // frame the whole rack from the front right (or from behind, on the left), whatever the shape of the view
   if (!R || !R.rack) return;
   const box = new T.Box3().setFromObject(R.rack), c = new T.Vector3(), s = new T.Vector3(); box.getCenter(c); box.getSize(s);
   const v = Math.tan(R.camera.fov * Math.PI / 360), across = Math.max(s.x, s.z) * .62;
   const dist = Math.max(s.y / 2 / v, across / (v * R.camera.aspect)) * 1.3 + s.z / 2;
-  R.camera.position.copy(c).addScaledVector(new T.Vector3(.5, .34, .8).normalize(), dist);
+  R.camera.position.copy(c).addScaledVector(new T.Vector3(back ? -.5 : .5, .34, back ? -.8 : .8).normalize(), dist);
   R.controls.target.copy(c).add(new T.Vector3(0, -s.y * .06, 0)); R.controls.update(); // a little low, so the buttons don't cover the feet
 }
 async function mount(container, snap) {
@@ -257,7 +259,7 @@ async function mount(container, snap) {
     ground.rotation.x = -Math.PI / 2; ground.position.set(0, -0.5, -FRAME.depth / 2); scene.add(ground);
     const controls = new T.OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.minDistance = 200; controls.maxDistance = 2600;
     const ui = document.createElement('div'); ui.className = 'v3d-ui';
-    ui.innerHTML = '<button type="button" class="btn small" data-act="v3d" data-v="reset">Reset view</button><button type="button" class="btn small" data-act="v3d" data-v="sides">Side panels</button>' +
+    ui.innerHTML = '<button type="button" class="btn small" data-act="v3d" data-v="reset">Reset view</button><button type="button" class="btn small" data-act="v3d" data-v="back">From the back</button><button type="button" class="btn small" data-act="v3d" data-v="sides">Side panels</button>' +
       '<button type="button" class="btn small" data-act="v3d" data-v="rotate">Rotate model</button><label class="btn small" style="cursor:pointer">Load STL/3MF<input type="file" accept=".stl,.3mf" hidden id="v3d-file"></label>';
     container.appendChild(ui);
     ui.querySelector('#v3d-file').addEventListener('change', e => { if (e.target.files.length) loadFiles(e.target.files); e.target.value = ''; });
@@ -313,6 +315,7 @@ function theme() { if (R) R.ground.material.color.copy(lin(themeColors().line));
 async function action(v) {
   if (!R) return;
   if (v === 'reset') fit();
+  if (v === 'back') fit(true);
   if (v === 'sides') window.LRApp.toggleSides();
   if (v === 'rotate') {
     const snap = window.LRApp.snapshot(), t = snap.items.find(i => i.sel), fm = t && fileModels.get(t.id);

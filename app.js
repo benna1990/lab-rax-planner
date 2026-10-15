@@ -69,6 +69,8 @@ function sanitize() {
   if (!(typeof state.room === 'number' && state.room >= 10 && state.room <= 40)) state.room = 25; // °C in the room, for the cooling estimate
   state.room = Math.round(state.room);
   if (state.sides !== 'acrylic') state.sides = 'printed';
+  state.market = own(window.LRMarket.regions,state.market) ? state.market : 'NL';
+  state.costs = window.LREstimate.settings(state.costs);
   for (const k of ['frame', 'panel', 'accent']) if (!HEX.test(state[k])) state[k] = d[k];
   state.label = typeof state.label === 'string' ? state.label.slice(0, 16) : d.label;
   state.items = (Array.isArray(state.items) ? state.items : []).filter(i => i && typeof i === 'object' && (
@@ -84,6 +86,7 @@ function sanitize() {
     if (i.watts != null && !(typeof i.watts === 'number' && i.watts >= 0 && i.watts <= 500)) delete i.watts;
     if (i.dir != null && !FAN_DIRS.includes(i.dir)) delete i.dir;
     if (i.pos2 != null && !Number.isInteger(i.pos2)) i.pos2 = 0;
+    if (i.side !== 'back') delete i.side;
     if (!Number.isInteger(i.id) || i.id < 1 || ids.has(i.id)) i.id = null; else ids.add(i.id);
   });
   state.nextId = Math.max(Number.isInteger(state.nextId) ? state.nextId : 1, ...[...ids].map(n => n + 1));
@@ -100,6 +103,7 @@ function sanitize() {
 
 let state = load() || defaultState();
 let sel = null, undo = null, G = {}, drag = null, libKey = null, dropP = null, tab = 'devices', query = '', view = 'front';
+let rackSide = 'front'; // the side new parts go to: the back while the Back view is open, else the front (the 3D view keeps the last one)
 
 const info = it => {
   if (it.key === 'custom') return { custom: true, name: it.name, h2: it.h2, face: 'custom', url: it.url || null, hardware: [] };
@@ -111,6 +115,10 @@ const slots = () => state.h * 2;
 const placed = () => state.items.filter(i => i.pos2 != null);
 const byPos = () => placed().sort((a, b) => a.pos2 - b.pos2);
 const find = id => state.items.find(i => i.id === id);
+// panels screw to the front posts or, facing out the back, to the rear posts; each side has its own slots
+const sideOf = it => it && it.side === 'back' ? 'back' : 'front';
+const atBack = it => sideOf(it) === 'back' ? ' (back)' : '';
+const onSide = sd => byPos().filter(i => sideOf(i) === sd);
 const colorOf = it => it.color || state.panel; // a part's own colour, or the default panel colour
 const colorName = c => (FIL.find(f => f[1].toLowerCase() === c.toLowerCase()) || [c.toUpperCase()])[0];
 function fmtU(h2) { const w = Math.floor(h2 / 2), h = h2 % 2; return (w || !h ? w : '') + (h ? '½' : '') + 'U'; }
@@ -131,18 +139,56 @@ function genFace(p) { return { blank: 'blank', vent: 'vent', keystone: 'ks', she
 /* ---------- placement ---------- */
 /* The 10" hole pattern (6.35 / 22.225 / 38.1 mm) repeats per whole U, so panels of 1U and taller must start on a U boundary; ½U panels fit either half. */
 const aligned = (p, h2) => h2 === 1 || p % 2 === 0;
-function isFree(p, h2, except) { if (p < 0 || p + h2 > slots() || !aligned(p, h2)) return false; return !placed().some(o => o.id !== except && p < o.pos2 + H(o) && o.pos2 < p + h2); }
-function nearest(t, h2, except) { const n = slots(); for (let d = 0; d <= n; d++) for (const c of d ? [t - d, t + d] : [t]) if (isFree(c, h2, except)) return c; return null; }
-function firstFree(h2) { for (let p = 0; p + h2 <= slots(); p++) if (isFree(p, h2)) return p; return null; }
+// side: front or back; without it, the side of the part being moved (except), else the side being edited
+function isFree(p, h2, except, side) {
+  if (p < 0 || p + h2 > slots() || !aligned(p, h2)) return false;
+  const sd = side || (except != null && find(except) ? sideOf(find(except)) : rackSide);
+  return !placed().some(o => o.id !== except && sideOf(o) === sd && p < o.pos2 + H(o) && o.pos2 < p + h2);
+}
+function nearest(t, h2, except, side) { const n = slots(); for (let d = 0; d <= n; d++) for (const c of d ? [t - d, t + d] : [t]) if (isFree(c, h2, except, side)) return c; return null; }
+function firstFree(h2, side) { for (let p = 0; p + h2 <= slots(); p++) if (isFree(p, h2, undefined, side)) return p; return null; }
 function touch() { state.example = false; }
 // btn: true for an Undo button, or [act, label] for another action
 function say(msg, btn) { const b = btn === true ? ['undo', 'Undo'] : btn; $('#status').innerHTML = esc(msg) + (b ? ' <button type="button" class="lnk" data-act="' + b[0] + '">' + esc(b[1]) + '</button>' : ''); }
 function addItem(obj, pos) {
-  const d = info(obj), p = pos == null ? firstFree(d.h2) : nearest(pos, d.h2);
-  if (p == null) { say('No room for ' + fullName(d) + ' (' + fmtU(d.h2) + '). Make the rack taller or remove something.'); return false; }
+  const sd = obj.side === 'back' || (obj.side == null && rackSide === 'back') ? 'back' : 'front';
+  if (sd === 'back') obj.side = 'back'; else delete obj.side;
+  const d = info(obj), p = pos == null ? firstFree(d.h2, sd) : nearest(pos, d.h2, undefined, sd);
+  if (p == null) { say('No room for ' + fullName(d) + ' (' + fmtU(d.h2) + ') at the ' + sd + '. Make the rack taller or remove something.'); return false; }
   obj.id = state.nextId++; obj.pos2 = p; state.items.push(obj); sel = obj.id; touch(); render();
-  say(fullName(d) + ' (' + uTxt(d) + ') placed at ' + uRange(p, d.h2) + '.');
+  say(fullName(d) + ' (' + uTxt(d) + ') placed at ' + uRange(p, d.h2) + atBack(obj) + '.' + clashText(obj));
   return true;
+}
+// move a part to the other side of the rack, at the same height or the nearest free slot there
+function flipSide(id) {
+  const it = find(id); if (!it || it.pos2 == null) return;
+  const to = sideOf(it) === 'back' ? 'front' : 'back', p = nearest(it.pos2, H(it), undefined, to);
+  if (p == null) { say('There is no free ' + fmtU(H(it)) + ' slot at the ' + to + '.'); return; }
+  state.items = state.items.map(i => i.id === id ? Object.assign({}, i, { pos2: p, side: to }) : i);
+  const nw = find(id); if (to === 'front') delete nw.side;
+  sel = id; touch();
+  if (view === 'front' || view === 'back') setView(to); else render();
+  say(fullName(info(nw)) + ' moved to the ' + to + ', ' + uRange(p, H(nw)) + '.' + clashText(nw));
+}
+/* Parts at the front and the back share the depth of the rack: a deep shelf at the front and one at the back at the same height
+   run into each other. Depth of a part as shapes.js draws it (its shelf or the device behind it), in mm. */
+const depthMemo = new Map();
+function partDepth(it) {
+  const k = it.key === 'gen' ? 'gen' + JSON.stringify(it.params) : it.key === 'custom' ? 'custom' + it.h2 : it.key;
+  if (!depthMemo.has(k)) { let v = 0; try { v = LS.scene(info(it), {}).depth || 0; } catch (e) {} depthMemo.set(k, v); }
+  return depthMemo.get(k);
+}
+function clashes(it) {
+  if (it.pos2 == null) return [];
+  // the panels sit on the outside of the posts, so the two parts share the frame depth plus both 3 mm plates
+  const room = ((CAT.frame.dimensions || {}).depth || 240) + (frameMods().depthAdd || 0) + 2 * 3, mine = partDepth(it);
+  if (!mine) return [];
+  return placed().filter(o => o !== it && o.id !== it.id && sideOf(o) !== sideOf(it) && o.pos2 < it.pos2 + H(it) && it.pos2 < o.pos2 + H(o))
+    .map(o => ({ o, d: partDepth(o) })).filter(x => x.d && mine + x.d > room).map(x => Object.assign(x, { mine, room }));
+}
+function clashText(it) {
+  const c = clashes(it)[0];
+  return c ? ' It runs into ' + fullName(info(c.o)) + ' at the ' + sideOf(c.o) + ': ' + Math.round(c.mine) + ' + ' + Math.round(c.d) + ' mm is more than the ' + c.room + ' mm inside the rack.' : '';
 }
 function removeItem(id) {
   const it = find(id); if (!it) return;
@@ -161,16 +207,17 @@ function setHeight(h) {
   touch(); render();
   say(lost ? lost + (lost > 1 ? ' parts no longer fit' : ' part no longer fits') + ' in ' + h + 'U. See below.' : 'The rack is now ' + h + 'U (' + mm(h * P.U) + ' inner height).');
 }
-function fillGaps(keys, noun) {
+function fillGaps(keys, noun, side) {
   const [k1, k05] = keys || ['vent1', 'vent05']; noun = noun || 'vent panel';
+  const sd = side || rackSide, at = sd === 'back' ? { side: 'back' } : {};
   let n = 0, p = 0;
   while (p < slots()) {
-    if (isFree(p, 2)) { state.items.push({ id: state.nextId++, key: k1, pos2: p }); n++; p += 2; }
-    else if (isFree(p, 1)) { state.items.push({ id: state.nextId++, key: k05, pos2: p }); n++; p += 1; }
+    if (isFree(p, 2, undefined, sd)) { state.items.push(Object.assign({ id: state.nextId++, key: k1, pos2: p }, at)); n++; p += 2; }
+    else if (isFree(p, 1, undefined, sd)) { state.items.push(Object.assign({ id: state.nextId++, key: k05, pos2: p }, at)); n++; p += 1; }
     else p++;
   }
-  if (!n) { say('There are no open slots.'); return; }
-  touch(); render(); say(n + ' ' + noun + (n > 1 ? 's' : '') + ' added to the open slots.');
+  if (!n) { say('There are no open slots at the ' + sd + '.'); return; }
+  touch(); render(); say(n + ' ' + noun + (n > 1 ? 's' : '') + ' added to the open slots at the ' + sd + '.');
 }
 function focusSel() { const el = document.querySelector('.item[data-id="' + sel + '"]'); if (el) el.focus({ preventScroll: true }); }
 
@@ -284,31 +331,34 @@ function renderRack() {
   for (let i = 0; i < state.h; i++) labels += '<span style="top:' + (i * UPX).toFixed(1) + 'px;height:' + UPX.toFixed(1) + 'px">' + (state.h - i) + '</span>';
   const inset = (137 - P.PANEL_W / 2) * s; // printed panels are 250 mm wide, the frame 274 mm across the posts
   let items = '';
-  byPos().forEach(it => {
+  // the Back view shows the panels on the rear posts, seen from behind; the Front and Airflow views the front ones
+  const rear = view === 'back';
+  onSide(rear ? 'back' : 'front').forEach(it => {
     // no text on the panels, so the faces show what is placed; the name is in the tooltip and the aria-label
-    const d = info(it), c = colorOf(it);
-    items += '<div class="item' + (it.id === sel ? ' sel' : '') + '" data-id="' + it.id + '" role="button" tabindex="0" aria-label="' + esc((it.label ? it.label + ': ' : '') + fullName(d) + ', ' + uTxt(d) + ', ' + uRange(it.pos2, d.h2)) + '"' +
+    const d = info(it), c = colorOf(it), clash = clashes(it).length > 0;
+    items += '<div class="item' + (it.id === sel ? ' sel' : '') + (clash ? ' clash' : '') + '" data-id="' + it.id + '" role="button" tabindex="0" aria-label="' + esc((it.label ? it.label + ': ' : '') + fullName(d) + ', ' + uTxt(d) + ', ' + uRange(it.pos2, d.h2) + atBack(it) + (clash ? ', runs into a part on the other side' : '')) + '"' +
       ' style="top:' + (it.pos2 * HU).toFixed(1) + 'px;height:' + (d.h2 * HU - 1).toFixed(1) + 'px;left:' + inset.toFixed(1) + 'px;right:' + inset.toFixed(1) + 'px;--c:' + c + '">' +
       faceSVG(d, c) + '</div>';
   });
   // the top mount, drawn above the frame at the same scale (280 mm across the outside of the frame)
   const tf = state.top ? LS.topFor(LIB[state.top], colorsFor()) : null;
-  const ap = tf && tf.h > 1.5 ? '<span class="ap" title="' + esc(fullName(LIB[state.top])) + '" style="width:' + (tf.w * s).toFixed(1) + 'px;height:' + (tf.h * s).toFixed(1) + 'px;margin-left:' + (-tf.w * s / 2).toFixed(1) + 'px">' + tf.svg + '</span>' : '';
+  const ap = tf && tf.h > 1.5 ? '<span class="ap" title="' + esc(fullName(LIB[state.top])) + '" style="width:' + (tf.w * s).toFixed(1) + 'px;height:' + (tf.h * s).toFixed(1) + 'px;margin-left:' + (-tf.w * s / 2).toFixed(1) + 'px' + (rear ? ';transform:scaleX(-1)' : '') + '">' + tf.svg + '</span>' : '';
   const mods = frameMods(), below = (mods.drawer ? 30 : 0) + (mods.feet === 'casters' ? 40 : mods.feet === 'big' ? 8 : 0);
   const marginTop = Math.round(Math.max(ap ? tf.h * s + 4 : 0, frameW * .12 + 6));
   // extras seen from the front: keystones or an LED matrix in the top corner, a lit logo, a switch in the edge, grips on the sides,
-  // bigger feet or casters and a drawer under the base
-  const crown = mods.corner === 'matrix' ? '<span class="corner-mx" aria-hidden="true"></span>'
+  // bigger feet or casters and a drawer under the base. From the back: the hex grille without the name, handles, feet
+  const crown = rear ? hexSVG(s)
+    : mods.corner === 'matrix' ? '<span class="corner-mx" aria-hidden="true"></span>'
     : mods.corner ? '<span class="corner-ks" aria-hidden="true">' + '<i></i>'.repeat(Math.min(12, mods.corner)) + '</span>'
     : hexSVG(s).replace('class="hexgrill"', 'class="hexgrill' + (mods.logo === 'hexbar' ? ' lit' : '') + '"') + '<span class="logo' + (mods.logo === 'neopixel' ? ' glow' : '') + '" style="font-size:' + logoSize(frameW, topH).toFixed(1) + 'px">' + esc(state.label || 'Lab Rax') + '</span>';
   const feet = mods.feet === 'casters' ? '<i class="caster" style="left:4%;width:' + (32 * s).toFixed(1) + 'px;height:' + (32 * s).toFixed(1) + 'px;top:calc(100% + ' + ((mods.drawer ? 30 : 0) * s + 8 * s).toFixed(1) + 'px)"></i><i class="caster" style="right:4%;width:' + (32 * s).toFixed(1) + 'px;height:' + (32 * s).toFixed(1) + 'px;top:calc(100% + ' + ((mods.drawer ? 30 : 0) * s + 8 * s).toFixed(1) + 'px)"></i>'
     : ['left', 'right'].map(sd => '<i class="foot" style="' + sd + ':3%;height:' + ((mods.feet === 'big' ? 14 : 6) * s).toFixed(1) + 'px' + (mods.drawer ? ';top:calc(100% + ' + (30 * s).toFixed(1) + 'px)' : '') + '"></i>').join('');
-  const drawer = mods.drawer ? '<i class="drawer" style="height:' + (28 * s).toFixed(1) + 'px"><i></i></i>' : '';
+  const drawer = mods.drawer && !rear ? '<i class="drawer" style="height:' + (28 * s).toFixed(1) + 'px"><i></i></i>' : '';
   const grips = mods.handles === 'side' ? '<i class="sgrip" style="left:' + (-12 * s).toFixed(1) + 'px;width:' + (12 * s).toFixed(1) + 'px"></i><i class="sgrip" style="right:' + (-12 * s).toFixed(1) + 'px;width:' + (12 * s).toFixed(1) + 'px"></i>' : '';
   $('#rackHost').innerHTML =
-    '<div class="rack' + (state.version === 'brass' ? ' brass' : '') + (air ? ' airv' : '') + '" id="rack" style="--frame:' + state.frame + ';--acc:' + state.accent + ';--bev:' + (20 * s).toFixed(1) + 'px;--hs:' + Math.max(3.5, 5 * s).toFixed(1) + 'px;grid-template-columns:34px ' + frameW.toFixed(1) + 'px ' + (air ? 90 : 34) + 'px;grid-template-rows:' + topH.toFixed(1) + 'px ' + bodyH.toFixed(1) + 'px ' + edge + 'px auto;margin-top:' + marginTop + 'px">' +
+    '<div class="rack' + (state.version === 'brass' ? ' brass' : '') + (air ? ' airv' : '') + (rear ? ' backv' : '') + '" id="rack" style="--frame:' + state.frame + ';--acc:' + state.accent + ';--bev:' + (20 * s).toFixed(1) + 'px;--hs:' + Math.max(3.5, 5 * s).toFixed(1) + 'px;grid-template-columns:34px ' + frameW.toFixed(1) + 'px ' + (air ? 90 : 34) + 'px;grid-template-rows:' + topH.toFixed(1) + 'px ' + bodyH.toFixed(1) + 'px ' + edge + 'px auto;margin-top:' + marginTop + 'px">' +
       '<div></div><div class="edge top">' + (state.top ? '' : '<span class="tp-band" style="height:' + Math.round(7 * s) + 'px"></span>') + handleSVG(s, 'left', mods.handles) + handleSVG(s, 'right', mods.handles) + crown +
-        (mods.edgeSwitch ? '<i class="eswitch" style="width:' + (14 * s).toFixed(1) + 'px;height:' + (12 * s).toFixed(1) + 'px"></i>' : '') + ap + (air ? airEnd(air, 'top') : '') + '</div><div></div>' +
+        (mods.edgeSwitch && !rear ? '<i class="eswitch" style="width:' + (14 * s).toFixed(1) + 'px;height:' + (12 * s).toFixed(1) + 'px"></i>' : '') + ap + (air ? airEnd(air, 'top') : '') + '</div><div></div>' +
       '<div class="ulab">' + labels + '</div>' +
       '<div class="rframe" style="width:' + frameW.toFixed(1) + 'px">' + grips +
         '<div class="post" style="left:0;width:' + postW.toFixed(1) + 'px">' + holesL + '</div>' +
@@ -320,7 +370,7 @@ function renderRack() {
       '<div></div><div class="floor"' + (below ? ' style="margin-top:' + (4 + below * s).toFixed(1) + 'px"' : '') + '></div><div></div>' +
     '</div>';
   if (air) $('#meas').innerHTML = airLegend(air);
-  else $('#meas').textContent = '222 mm usable width · ' + (state.h * P.U).toFixed(1) + ' mm inner height · ' + state.h + 'U';
+  else $('#meas').textContent = (rear ? 'Seen from the back · ' : '') + '222 mm usable width · ' + (state.h * P.U).toFixed(1) + ' mm inner height · ' + state.h + 'U';
 }
 function showGhost(p, h2) {
   const g = $('#ghost'); if (!g) return;
@@ -334,7 +384,7 @@ function airLayer(a, inset) { // over the bay: a temperature wash, the in/out ma
   const n = slots(), HU = G.HU, mid = (s0, s1) => ((s0 + s1 + 1) / 2 * HU).toFixed(1);
   let h = '<div class="airfield" style="left:' + inset.toFixed(1) + 'px;right:' + inset.toFixed(1) + 'px;background:linear-gradient(to bottom,' + a.temp.map((t, s) => heatCSS(t - a.room) + ' ' + ((s + .5) / n * 100).toFixed(1) + '%').join(',') + ')"></div>';
   const left = 'left:' + (inset + 16 * G.s).toFixed(1) + 'px';
-  a.parts.forEach(p => { if (p.w > 0) h += '<span class="wtag hl' + wLevel(p.w) + '" style="top:' + mid(p.it.pos2, p.it.pos2 + p.d.h2 - 1) + 'px;right:' + (inset + 16 * G.s).toFixed(1) + 'px">' + (p.est ? '≈' : '') + fmtW(p.w) + '</span>'; });
+  a.parts.forEach(p => { if (p.w > 0 && sideOf(p.it) === 'front') h += '<span class="wtag hl' + wLevel(p.w) + '" style="top:' + mid(p.it.pos2, p.it.pos2 + p.d.h2 - 1) + 'px;right:' + (inset + 16 * G.s).toFixed(1) + 'px">' + (p.est ? '≈' : '') + fmtW(p.w) + '</span>'; });
   const mark = (s0, s1, i, o) => { if (i + o >= .5) h += '<span class="amark" style="top:' + mid(s0, s1) + 'px;' + left + '">' + (i >= .5 ? flowPill(i, 1) : '') + (o >= .5 ? flowPill(o, -1) : '') + '</span>'; };
   a.groups.filter(g => g.kind === 'front' || g.kind === 'slot').forEach(g => mark(Math.min(...g.layers), Math.max(...g.layers), g.in, g.out));
   a.fans.filter(f => f.place === 'front').forEach(f => mark(f.it.pos2, f.it.pos2 + f.d.h2 - 1, f.in, f.out));
@@ -358,7 +408,7 @@ function airSide(a) { // right of the rack: back and side openings (in or out pe
   }
   let fansAt = ''; // side and back fans: one compact marker each, right of the °C labels
   a.fans.filter(f => f.place === 'side' || f.place === 'back').forEach(f => {
-    const c = Math.round(n / (f.place === 'back' ? 4 : 2)), cross = f.in >= .5 && f.out >= .5, v = Math.max(f.in, f.out);
+    const c = f.it ? f.it.pos2 + f.d.h2 / 2 : Math.round(n / (f.place === 'back' ? 4 : 2)), cross = f.in >= .5 && f.out >= .5, v = Math.max(f.in, f.out); // rear fan panels at their own height
     fansAt += '<span class="fpill sidefan ' + (cross ? 'both' : f.in >= f.out ? 'in' : 'out') + '" style="top:' + (c * HU).toFixed(1) + 'px">' + (cross ? '⇄ ' : f.in >= f.out ? '↘ ' : '↗ ') + Math.round(v) + '</span>';
   });
   a.temp.forEach((t, s) => { cells += '<i style="top:' + (s * HU).toFixed(1) + 'px;height:' + (HU + .6).toFixed(1) + 'px;background:' + heatCSS(t - a.room) + '"></i>'; });
@@ -378,7 +428,8 @@ function tipHTML(it) {
   const flow = x => [x.in >= .5 ? 'in ' + fmtF(x.in) : '', x.out >= .5 ? 'out ' + fmtF(x.out) : ''].filter(Boolean).join(', ') || 'still';
   return '<b>' + esc(it.label || d.name) + '</b>' +
     (it.label ? '<span>' + esc(fullName(d)) + '</span>' : d.label ? '<span>' + esc(d.label) + '</span>' : '') +
-    '<span class="mono">' + uTxt(d) + ' · ' + uRange(it.pos2, d.h2) + (hw.w ? ' · ' + (hw.est ? '≈ ' : '') + fmtW(hw.w) : '') + '</span>' +
+    '<span class="mono">' + uTxt(d) + ' · ' + uRange(it.pos2, d.h2) + atBack(it) + (hw.w ? ' · ' + (hw.est ? '≈ ' : '') + fmtW(hw.w) : '') + '</span>' +
+    clashes(it).map(c => '<span class="warn">Runs into ' + esc(fullName(info(c.o))) + ' at the ' + sideOf(c.o) + ' (' + Math.round(c.mine) + ' + ' + Math.round(c.d) + ' mm deep, ' + c.room + ' mm of room)</span>').join('') +
     (p ? '<span class="mono">Air here ≈ ' + fmtT(p.T) + (hw.w ? '' : ' · no heat') + '</span>' : '') +
     (cfmOf(d) ? '<span class="mono">' + esc(fanLine(d)) + '</span>' : '') + (f ? '<span class="mono">' + (f.dir === 'intake' ? 'Blows in' : 'Blows out') + ': ' + flow(f) + '</span>' : '') +
     (g ? '<span class="mono">Vents: ' + flow(g) + '</span>' : '') + (d.author ? '<span>by ' + esc(d.author) + '</span>' : '');
@@ -399,11 +450,12 @@ function renderSel() {
   const it = sel != null ? find(sel) : null, bar = $('#selbar');
   if (!it || it.pos2 == null) { bar.innerHTML = '<span class="hint">Click a part in the rack to move, label or remove it. Drag it, or use the arrow keys to move by ½U.</span>'; return; }
   const d = info(it), auto = heatOf(Object.assign({}, it, { watts: undefined }));
-  bar.innerHTML = '<div class="who"><b>' + esc(fullName(d)) + '</b><span class="hint">' + uTxt(d) + ' · ' + uRange(it.pos2, d.h2) + (d.author ? ' · by ' + esc(d.author) : '') + '</span></div>' +
+  bar.innerHTML = '<div class="who"><b>' + esc(fullName(d)) + '</b><span class="hint">' + uTxt(d) + ' · ' + uRange(it.pos2, d.h2) + ' · ' + sideOf(it) + (d.author ? ' · by ' + esc(d.author) : '') + '</span>' + (clashes(it).length ? '<span class="hint warn">' + esc(clashText(it).trim()) + '</span>' : '') + '</div>' +
     '<input class="field" id="sel-label" type="text" maxlength="24" aria-label="Label on the panel" placeholder="Label, e.g. Pi 5" value="' + esc(it.label || '') + '">' +
     '<label class="watts" title="Heat this part gives off, for the cooling estimate. Empty: ' + (auto.w ? (auto.est ? 'about ' : '') + fmtW(auto.w) + ', its typical draw' : 'no heat') + '">Heat <input class="field" id="sel-watts" type="number" min="0" max="500" step="1" inputmode="numeric" placeholder="' + (auto.w ? (auto.est ? '≈' : '') + auto.w : '0') + '" value="' + (typeof it.watts === 'number' ? it.watts : '') + '"> W</label>' +
-    (cfmOf(d) ? '<span class="watts" title="' + esc(fanLine(d)) + '">Fans ' + dirSeg({ ref: 'i' + it.id, d, place: 'front', kind: 'item', dir: dirFor(d, it.dir, 'front', 'item'), name: fullName(d) }) + '</span>' : '') +
+    (cfmOf(d) ? '<span class="watts" title="' + esc(fanLine(d)) + '">Fans ' + dirSeg({ ref: 'i' + it.id, d, place: fanPlace(d, 'item', it), kind: 'item', dir: dirFor(d, it.dir, fanPlace(d, 'item', it), 'item'), name: fullName(d) }) + '</span>' : '') +
     '<button type="button" class="btn small" data-act="up" aria-label="Move up">↑</button><button type="button" class="btn small" data-act="down" aria-label="Move down">↓</button>' +
+    '<button type="button" class="btn small" data-act="flip" title="Screw it to the ' + (sideOf(it) === 'back' ? 'front' : 'rear') + ' posts instead">' + (sideOf(it) === 'back' ? 'Move to the front' : 'Move to the back') + '</button>' +
     (it.key === 'gen' ? '<button type="button" class="btn small" data-act="edit-gen" data-id="' + it.id + '">Edit part</button>' : d.url ? '<a class="btn small" href="' + esc(d.url) + '" target="_blank" rel="noopener" style="text-decoration:none;color:inherit">Model ↗</a>' : '') +
     '<button type="button" class="btn small" data-act="dup">Duplicate</button><button type="button" class="btn small danger" data-act="del">Remove</button>' +
     '<div class="selcolor"><span>Colour</span><div class="swatches">' + FIL.map(([n, c]) => '<button type="button" class="sw" style="--c:' + c + '" data-act="part-color" data-c="' + c + '" aria-label="' + n + '" title="PETG ' + n.toLowerCase() + '" aria-pressed="' + (it.color === c) + '"></button>').join('') + '</div>' +
@@ -415,7 +467,7 @@ function renderUnplaced() {
   if (!un.length) { box.innerHTML = ''; return; }
   box.innerHTML = '<div class="unplaced"><p>Doesn’t fit in a ' + state.h + 'U rack</p>' + un.map(i => {
     const d = info(i);
-    return '<div class="row"><span>' + esc(fullName(d)) + ' · ' + uTxt(d) + '</span><button type="button" class="btn small" data-act="replace" data-id="' + i.id + '">Place</button><button type="button" class="btn small danger" data-act="rm" data-id="' + i.id + '">Remove</button></div>';
+    return '<div class="row"><span>' + esc(fullName(d)) + ' · ' + uTxt(d) + atBack(i) + '</span><button type="button" class="btn small" data-act="replace" data-id="' + i.id + '">Place</button><button type="button" class="btn small danger" data-act="rm" data-id="' + i.id + '">Remove</button></div>';
   }).join('') + '</div>';
 }
 function renderSettings() {
@@ -433,7 +485,7 @@ function renderSettings() {
 function renderControls() {
   $('#h-out').textContent = state.h + 'U';
   $('#h-minus').disabled = state.h <= 1; $('#h-plus').disabled = state.h >= 10;
-  $('#v-front').setAttribute('aria-pressed', view === 'front'); $('#v-air').setAttribute('aria-pressed', view === 'air'); $('#v-3d').setAttribute('aria-pressed', view === '3d');
+  $('#v-front').setAttribute('aria-pressed', view === 'front'); if ($('#v-back')) $('#v-back').setAttribute('aria-pressed', view === 'back'); $('#v-air').setAttribute('aria-pressed', view === 'air'); $('#v-3d').setAttribute('aria-pressed', view === '3d');
   $('#example').hidden = !state.example;
   renderSettings();
 }
@@ -466,9 +518,9 @@ function printPack() {
   byPos().forEach(i => {
     const d = info(i);
     const col = i.color ? ' · ' + colorName(i.color) : '';
-    if (i.key === 'gen') { add(i.name, genLabel(i.params) + ' · ' + uRange(i.pos2, d.h2) + col + ' · in the build pack', null, 1, 'gen'); return; }
+    if (i.key === 'gen') { add(i.name, genLabel(i.params) + ' · ' + uRange(i.pos2, d.h2) + atBack(i) + col + ' · in the build pack', null, 1, 'gen'); return; }
     if (!d.url) { if (d.custom) missing++; return; }
-    add(fullName(d), (i.label || shortName(d)) + ' · ' + uRange(i.pos2, d.h2) + col, d.url, 1, 'mw', variant(d));
+    add(fullName(d), (i.label || shortName(d)) + ' · ' + uRange(i.pos2, d.h2) + atBack(i) + col, d.url, 1, 'mw', variant(d));
   });
   // a page with several variants lists them, e.g. "½U ×2, 1U ×1", so it's clear which files to print
   out.forEach(x => {
@@ -488,18 +540,7 @@ function printPack() {
    catalog.json "shops", with the maintainer's affiliate tag or deep-link template when one is set. */
 let TIPS = null; // tips.json: { items, tips }, loaded after the catalog when it exists
 const SHOP_GROUPS = [['print', 'Filament'], ['fasteners', 'Screws and inserts'], ['tools', 'Tools'], ['cooling', 'Fans and fan power'], ['power', 'Power'], ['network', 'Network'], ['acrylic', 'Acrylic'], ['other', 'Handy extras']];
-function shopLinks(q) {
-  const S = (CAT && CAT.shops) || {}, out = [];
-  if (!q) return out;
-  Object.keys(S).forEach(k => {
-    const s = S[k]; if (k[0] === '_' || !s || typeof s.url !== 'string') return;
-    let u = s.url.replace('{q}', encodeURIComponent(q));
-    if (s.tag && s.tagParam) u += (u.indexOf('?') < 0 ? '?' : '&') + encodeURIComponent(s.tagParam) + '=' + encodeURIComponent(s.tag);
-    if (s.wrap) u = s.wrap.replace('{url}', encodeURIComponent(u));
-    out.push({ shop: s.name || k, url: u, aff: !!(s.tag || s.wrap) });
-  });
-  return out;
-}
+function shopLinks(q) { return q ? window.LRMarket.links(q,state.market,(CAT && CAT.shops)||{}) : []; }
 const shopUrl = q => (shopLinks(q)[0] || {}).url || null;
 const affiliate = () => { const S = (CAT && CAT.shops) || {}; return Object.keys(S).some(k => S[k] && (S[k].tag || S[k].wrap)); };
 // grams of filament per U, by face: a rough estimate before slicing
@@ -513,6 +554,15 @@ function filament() {
   placed().forEach(i => { const d = info(i), face = i.key === 'gen' ? genFace(i.params) : d.face; add(colorOf(i), Math.max(12, (GRAMS_PER_U[face] || 40) * d.h2 / 2)); });
   state.extras.forEach(() => add(state.frame, 60));
   return [...g].map(([c, grams]) => ({ c, grams: Math.round(grams * 1.1 / 10) * 10 })); // +10 % for brims, purge and a failed print
+}
+function buildEstimate() { return window.LREstimate.calculate(filament(), orderList(), state.costs); }
+function estimateHTML(includeSummary = true) {
+  const e=buildEstimate(), s=e.s, money=n=>window.LREstimate.money(n,s.currency);
+  const field=(key,label,value,step='1')=>'<label style="display:flex;flex-direction:column;gap:3px">'+esc(label)+'<input class="field" data-cost="'+esc(key)+'" type="number" min="'+(key==='gramsHour'?'0.1':'0')+'" step="'+step+'" value="'+(value==null?'':value)+'" placeholder="Estimate"></label>';
+  return (includeSummary ? '<p><b>≈ '+e.grams.toFixed(0)+' g · '+e.hours.toFixed(1)+' machine hours · '+money(e.printing)+' print use</b></p><p>Remaining purchase budget: '+(e.unknown.length?'known subtotal ':'≈ ')+money(e.total)+(e.unknown.length?' + '+e.unknown.length+' unpriced items':'')+'</p>' : '')+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+field('kgPrice','Filament / kg ('+s.currency+')',s.kgPrice,'.01')+field('kwhPrice','Electricity / kWh ('+s.currency+')',s.kwhPrice,'.01')+field('watts','Average printer power (W)',s.watts)+field('gramsHour','Rough throughput (g/h)',s.gramsHour,'.1')+field('slicedGrams','Slicer total (g), optional',s.slicedGrams)+field('slicedHours','Slicer total (hours), optional',s.slicedHours,'.1')+'</div>'+
+    '<p class="hint">Editable prices in '+s.currency+'; no currency conversion or live quotes. Budget accounts for owned stock, then buys whole spools and hardware packs. Excludes devices, tools and delivery. Blank slicer fields use rough estimates.</p>'+
+    '<details><summary>Edit hardware allowances (per pack / item)</summary>'+e.supplies.map(r=>field('price:'+r.key,r.name+(r.pack>1?' / '+r.pack+' pack':''),r.price,'.01')).join('')+'</details>';
 }
 const modsOf = d => { const s = d && d.shape; return s ? [].concat(...(s.rows || [s.row || []])).filter(m => m && typeof m === 'object') : []; };
 function facts() { // what the layout holds, for the shopping list and the guide
@@ -561,7 +611,8 @@ function orderList() {
   filament().forEach(x => { const cn = colorName(x.c), named = cn[0] !== '#', q2 = fil.search.replace('{colour}', named ? cn.toLowerCase() : '').replace(/\s+/g, ' ');
     out.push({ key: 'filament-' + x.c, group: 'print', name: fil.name.replace('1.75 mm', named ? cn : 'custom ' + cn) + ', 1.75 mm', spec: '≈ ' + x.grams + ' g with 10 % spare; an estimate before slicing', qty: Math.ceil(x.grams / 1000), unit: 'spool', swatch: x.c, links: shopLinks(q2), buy: shopUrl(q2) }); });
   if (state.sides === 'acrylic') { const a = CAT.hardware.acrylic || {};
-    out.push({ key: 'acrylic', group: 'acrylic', name: a.name || 'Acrylic sheet, 3 mm, cut to size', spec: (a.spec || '') + '. Take the size from the printed side panel model; the planner has no measured size yet.', qty: 2, links: [], buy: null, cutters: CAT.acrylic || [] }); }
+    out.push({ key: 'acrylic', group: 'acrylic', name: a.name || 'Acrylic sheet, 3 mm, cut to size', spec: (a.spec || '') + '. Take the size from the printed side panel model; the planner has no measured size yet.', qty: 2, links: [], buy: null, cutters: (CAT.acrylic || []).filter(c => ['NL','BE'].includes(state.market) || /worldwide/i.test(c.note || '')) }); }
+  if (state.extras.some(k => LIB[k].shape && LIB[k].shape.wall)) out.push({ key: 'wallfixings', group: 'fasteners', name: 'Wall bracket fixings', spec: 'Choose for the selected bracket, loaded rack and wall', qty: null, links: [], buy: null });
   if (state.h > 5) out.push({ key: 'joiners', group: 'fasteners', name: 'Fasteners for the 4 post joiners', spec: 'Not confirmed yet; check the extension model page', qty: null, links: [], buy: null, check: CAT.frame.extension.url });
   // handy extras from tips.json, when they fit this rack
   const when = { always: true, fans: f.fanParts.length > 0, acrylic: state.sides === 'acrylic', brass: br, bolted: !br, network: f.eth > 0 || f.ks > 0, sbc: f.boards > 0, drives: f.drives > 0, tall: state.h > 5, power: f.mains > 0 };
@@ -602,7 +653,7 @@ function guide() {
     'Add the top horizontal pieces, then ' + (state.top ? 'the ' + fullName(LIB[state.top]) : 'the top panel') + ', and close the top with the last two edge pieces.',
     'Screw the handles on top and the feet underneath; they use the same hole pattern.']);
   add('mount', 'Mount the parts, top to bottom', ['Fit each device into its mount first, then screw the panel to the front of the posts: ½U panels take one ' + screw + ' per side, 1U and taller two per side.']
-    .concat(byPos().map(i => { const d = info(i); return uRange(i.pos2, d.h2) + ': ' + (i.label ? i.label + ' – ' : '') + fullName(d) + ' (' + (H(i) === 1 ? 2 : 4) + ' screws)'; })));
+    .concat(byPos().map(i => { const d = info(i); return uRange(i.pos2, d.h2) + atBack(i) + ': ' + (i.label ? i.label + ' – ' : '') + fullName(d) + ' (' + (H(i) === 1 ? 2 : 4) + ' screws' + (sideOf(i) === 'back' ? ', on the rear posts, facing out the back' : '') + ')'; })));
   if (f.eth || f.ks) add('network', 'Connect the network', [
     f.ks ? 'Snap the ' + f.ks + ' keystone jacks into the patch panel and number them.' : null,
     'Run short patch cables from each device to the switch' + (f.gateway ? ', and from the switch to the gateway' : '') + (f.ks ? '; patch the keystone ports you use the same way' : '') + '.',
@@ -623,14 +674,19 @@ function guide() {
     'Close the open slots with blank or vent panels, as the Cooling section suggests.',
     'Bundle the cables at the back with velcro and label both ends.',
     'Switch on one device at a time, and check the temperatures after an hour of normal use.']);
-  ((TIPS && TIPS.tips) || []).forEach(t => { const s = t && S.find(x => x.id === t.step); if (s && t.text) s.steps.push('Tip: ' + t.text); });
   return S;
 }
-function guideHTML(G) { return G.map((s, i) => '<div class="gstep"><b>' + (i + 1) + '. ' + esc(s.title) + '</b><ul>' + s.steps.map(t => '<li' + (/^Tip: /.test(t) ? ' class="gtip"' : '') + '>' + esc(t) + '</li>').join('') + '</ul></div>').join(''); }
+function guideData() {
+  return { h: state.h, version: state.version === 'brass' ? 'Heat-set inserts' : 'Bolted', sides: state.sides,
+    frame: state.frame, panel: state.panel, accent: state.accent, top: state.top ? fullName(LIB[state.top]) : null,
+    wallMounts: state.extras.filter(k => LIB[k].shape && LIB[k].shape.wall).map(k => ({ name: fullName(LIB[k]), url: LIB[k].url })), frameParts: frameParts(), guide: guide(), items: byPos().map(i => { const d = info(i); return {
+      pos: uRange(i.pos2, d.h2), pos2: i.pos2, h2: d.h2, name: fullName(d), label: i.label || '', back: sideOf(i) === 'back', face: faceSVG(d, colorOf(i)) }; }) };
+}
+function guideHTML() { return window.LRGuide.html(guideData()); }
 /* build-guide.html in the build pack: the guide and the shopping list with links, on one page that prints well */
 function buildGuidePage() {
-  const title = (state.label || 'Lab Rax') + ' · ' + state.h + 'U', rows = orderList();
-  const css = DL_CSS + 'h2{font-size:18px}.gstep{margin:0 0 14px}.gstep ul{margin:6px 0 0;padding-left:20px}.gstep li{margin:3px 0}.gtip{color:var(--muted)}' +
+  const title = (state.label || 'Lab Rax') + ' · ' + state.h + 'U', rows = orderList().filter(r => !r.optional && r.group !== 'tools' && r.key !== 'fanspeed');
+  const css = DL_CSS + window.LRGuide.css + 'h2{font-size:18px}.gstep{margin:0 0 14px}.gstep ul{margin:6px 0 0;padding-left:20px}.gstep li{margin:3px 0}.gtip{color:var(--muted)}' +
     '.sgroup{margin:18px 0 6px;font-weight:700}.srow{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line);list-style:none}.stx{flex:1;display:flex;flex-direction:column}.stx small{color:var(--muted)}' +
     '.sqty{white-space:nowrap;font-size:13px}.slinks{display:flex;flex-direction:row;flex:none;gap:10px}.slinks a{font-size:13px}.smodel{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:center}.smodel .slinks{justify-content:flex-start}.srow{flex-wrap:wrap}.slist{margin:0;padding:0}.swatchdot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);margin-right:6px;box-shadow:0 0 0 1px rgba(127,127,127,.5)}';
   return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Build guide · ' + esc(title) + '</title><style>' + css + '</style></head><body><main>' +
@@ -665,15 +721,16 @@ const toM3h = cfm => cfm * 1.699;
 function fanLine(d) { const c = cfmOf(d); return fanSpecs(d).map(f => (f.qty > 1 ? f.qty + '× ' : '') + f.mm + ' mm').join(' + ') + ' · ' + Math.round(c) + ' CFM · ' + fmtF(toM3h(c)); }
 // where a part's fans sit and which way they blow: the builder's choice, else the catalog's, else in at the front and sides, out at the top and back.
 // A pair in an extra can also go one in, one out: across the side panels, or in at the bottom and out at the top.
-const fanPlace = (d, kind) => kind === 'item' ? 'front' : kind === 'top' ? 'top' : d.fanAt || d.at || 'side';
+const fanPlace = (d, kind, it) => kind === 'item' ? sideOf(it) : kind === 'top' ? 'top' : d.fanAt || d.at || 'side';
 const canCross = (d, place, kind) => kind === 'extra' && (place === 'side' || place === 'top') && fanSpecs(d).reduce((n, f) => n + f.qty, 0) >= 2;
 function dirFor(d, chosen, place, kind) {
   const ok = v => v === 'intake' || v === 'exhaust' || (v === 'cross' && canCross(d, place, kind));
-  return ok(chosen) ? chosen : ok(d.fanDir) ? d.fanDir : place === 'top' || place === 'back' ? 'exhaust' : 'intake';
+  // a fan panel on the rear posts blows out by default, so the air goes front to back whatever the catalog suggests for the front
+  return ok(chosen) ? chosen : kind === 'item' && place === 'back' ? 'exhaust' : ok(d.fanDir) ? d.fanDir : place === 'top' || place === 'back' ? 'exhaust' : 'intake';
 }
 const dirText = (dir, place) => dir === 'intake' ? 'blows in' : dir === 'exhaust' ? 'blows out' : place === 'top' ? 'blows in at the bottom and out at the top' : 'blows in on one side and out on the other';
 function fanParts() { // every part in the rack with fans
-  const out = [], add = (ref, d, kind, chosen, name, it) => { const place = fanPlace(d, kind); out.push({ ref, d, it, kind, place, dir: dirFor(d, chosen, place, kind), name, where: it ? uRange(it.pos2, d.h2) : place === 'side' ? 'sides' : place }); };
+  const out = [], add = (ref, d, kind, chosen, name, it) => { const place = fanPlace(d, kind, it); out.push({ ref, d, it, kind, place, dir: dirFor(d, chosen, place, kind), name, where: it ? uRange(it.pos2, d.h2) + atBack(it) : place === 'side' ? 'sides' : place }); };
   byPos().forEach(it => { const d = info(it); if (cfmOf(d)) add('i' + it.id, d, 'item', it.dir, it.label || fullName(d), it); });
   if (state.top && cfmOf(LIB[state.top])) add('top', LIB[state.top], 'top', state.topDir, fullName(LIB[state.top]));
   state.extras.forEach(k => { if (cfmOf(LIB[k])) add('x' + k, LIB[k], 'extra', state.xdir[k], fullName(LIB[k])); });
@@ -698,16 +755,16 @@ function frontVent(it, d) { // m² of free area in a part's front plate
 }
 function rackModel() {
   const K = window.LRAir.K, n = slots(), dz = P.U / 2000, heat = new Array(n).fill(0), ua = new Array(n).fill(0);
-  const openings = [], fans = [], groups = [], parts = [], occ = new Array(n).fill(null);
+  const openings = [], fans = [], groups = [], parts = [], occ = new Array(n).fill(null), occB = new Array(n).fill(null); // parts at the front, at the back
   const group = (kind, name, where, extra) => { const g = Object.assign({ kind, name, where, ids: [], area: 0, layers: [] }, extra); groups.push(g); return g; };
   const hole = (g, area, layer, at) => { const id = 'o' + openings.length; openings.push(at ? { id, at, area } : { id, layer, area }); g.ids.push(id); g.area += area; if (!at) g.layers.push(layer); };
   byPos().forEach(it => {
-    const d = info(it), h = heatOf(it), lay = [];
-    for (let s = it.pos2; s < Math.min(n, it.pos2 + d.h2); s++) { lay.push(s); occ[s] = it; }
+    const d = info(it), h = heatOf(it), lay = [], rear = sideOf(it) === 'back';
+    for (let s = it.pos2; s < Math.min(n, it.pos2 + d.h2); s++) { lay.push(s); (rear ? occB : occ)[s] = it; }
     lay.forEach(s => { heat[s] += h.w / lay.length; });
     parts.push({ it, d, w: h.w, est: h.est, own: !!h.own, layers: lay });
     const area = frontVent(it, d);
-    if (area > 0) { const g = group('front', it.label || fullName(d), uRange(it.pos2, d.h2), { it }); lay.forEach(s => hole(g, area / lay.length, s)); }
+    if (area > 0) { const g = group(rear ? 'back' : 'front', it.label || fullName(d), uRange(it.pos2, d.h2) + atBack(it), { it }); lay.forEach(s => hole(g, area / lay.length, s)); }
   });
   for (let s = 0; s < n;) { // open slots, one group per run
     if (occ[s]) { s++; continue; }
@@ -716,7 +773,7 @@ function rackModel() {
     s = e;
   }
   const back = state.back !== 'closed', top = state.top ? LIB[state.top] : null, topVent = top && top.vent || 0;
-  if (back) { const g = group('back', 'Open back', 'back'); for (let s = 0; s < n; s++) hole(g, BAY_W * dz, s); }
+  if (back && occB.some(o => !o)) { const g = group('back', occB.some(o => o) ? 'Open part of the back' : 'Open back', 'back'); for (let s = 0; s < n; s++) if (!occB[s]) hole(g, BAY_W * dz, s); }
   if (topVent) hole(group('top', fullName(top), 'top'), TOP_A * topVent, 0, 'top');
   state.extras.forEach(k => { const d = LIB[k]; if (d.at === 'side' && d.vent) { const g = group('side', fullName(d), 'both sides'); for (let s = 0; s < n; s++) hole(g, 2 * SIDE_D * dz * d.vent, s); } });
   const seams = group('seams', 'Seams between panels', 'everywhere');
@@ -725,7 +782,7 @@ function rackModel() {
   const fp = fanParts();
   fp.forEach(f => {
     let layers;
-    if (f.place === 'front') { const lay = [], end = Math.min(n, f.it.pos2 + f.d.h2); for (let s = f.it.pos2; s < end; s++) lay.push(s); layers = lay.map(s => ({ layer: s, share: 1 / lay.length })); }
+    if (f.it) { const lay = [], end = Math.min(n, f.it.pos2 + f.d.h2); for (let s = f.it.pos2; s < end; s++) lay.push(s); layers = lay.map(s => ({ layer: s, share: 1 / lay.length })); } // a fan panel, front or back
     else if (f.place === 'top') layers = [{ at: 'top', share: 1 }];
     else { // side fans sit halfway up, back fans in the upper part; a fan covers as many ½U layers as it is wide
       const mm = Math.max(...fanSpecs(f.d).map(x => x.mm)), c = Math.max(1, Math.min(n, Math.round(mm / 1000 / dz)));
@@ -742,13 +799,13 @@ function rackModel() {
       });
     });
   });
-  for (let s = 0; s < n; s++) ua[s] = K.uWall * dz * (2 * RACK_D + (occ[s] ? BAY_W : 0) + (back ? 0 : BAY_W)); // sides, panels, a closed back
+  for (let s = 0; s < n; s++) ua[s] = K.uWall * dz * (2 * RACK_D + (occ[s] ? BAY_W : 0) + (back && !occB[s] ? 0 : BAY_W)); // sides, panels, a closed back or rear panels
   ua[0] += K.uWall * BAY_W * RACK_D * (1 - topVent); ua[n - 1] += K.uWall * BAY_W * RACK_D;            // top and bottom panel
   return { model: { n, dz, room: state.room, heat, ua, openings, fans }, groups, parts, fp };
 }
 const airMemo = new Map();
 function airflow() {
-  const sig = JSON.stringify([state.h, state.items.map(i => [i.key, i.pos2, i.watts, i.dir, i.params]), state.top, state.topDir, state.extras, state.xdir, state.back, state.room]);
+  const sig = JSON.stringify([state.h, state.items.map(i => [i.key, i.pos2, i.watts, i.dir, i.params, i.side]), state.top, state.topDir, state.extras, state.xdir, state.back, state.room]);
   if (airMemo.has(sig)) return airMemo.get(sig);
   const m = rackModel(), r = window.LRAir.solve(m.model), flow = {};
   r.openings.forEach(o => { flow[o.id] = o.flow; }); r.fans.forEach(f => { flow[f.id] = f.flow; });
@@ -771,7 +828,7 @@ function predict(change) {
 }
 function fillInto(k1, k05) { // every open slot filled, on a copy of the items list
   state.items = state.items.slice(); let id = -1;
-  for (let p = 0; p < slots();) { if (isFree(p, 2)) { state.items.push({ id: id--, key: k1, pos2: p }); p += 2; } else if (isFree(p, 1)) { state.items.push({ id: id--, key: k05, pos2: p }); p += 1; } else p++; }
+  for (let p = 0; p < slots();) { if (isFree(p, 2, undefined, 'front')) { state.items.push({ id: id--, key: k1, pos2: p }); p += 2; } else if (isFree(p, 1, undefined, 'front')) { state.items.push({ id: id--, key: k05, pos2: p }); p += 1; } else p++; }
 }
 const blankKeys = () => LIB.mw13855411 && LIB.mw1385541 ? ['mw13855411', 'mw1385541'] : ['vent1', 'vent05'];
 function airTips(a) {
@@ -789,7 +846,7 @@ function airTips(a) {
     const v = predict(() => fillInto('vent1', 'vent05')), b = predict(() => fillInto(...blankKeys()));
     if (b.maxT - v.maxT >= 1) out.push({ text: 'Closing the open ' + fmtU(a.openU) + ' for a tidy front? With vent panels the hottest air would be about ' + fmtT(v.maxT) + ', with blank panels ' + fmtT(b.maxT) + '.', act: 'fill', label: 'Fill with vents' });
   }
-  const ps = a.parts.slice().sort((x, y) => x.it.pos2 - y.it.pos2);
+  const ps = a.parts.filter(p => sideOf(p.it) === 'front').sort((x, y) => x.it.pos2 - y.it.pos2);
   for (let i = 0; i + 1 < ps.length; i++) { const x = ps[i], y = ps[i + 1]; if (x.w >= 15 && y.w >= 15 && x.it.pos2 + x.d.h2 === y.it.pos2) out.push({ text: nm(x) + ' and ' + nm(y) + ' both run warm and sit right against each other. A ½U vent panel between them lets each get its own air; the estimate can’t see that difference.' }); }
   ps.filter(p => /drv/.test(p.d.face || '') || /storage/i.test(p.d.group || '')).forEach(p => {
     const below = a.temp.slice(Math.max(...p.layers) + 1), cool = below.length ? Math.min(...below) : Infinity, where = nm(p) + ' (' + uRange(p.it.pos2, p.d.h2) + ')';
@@ -826,10 +883,10 @@ function airParts() { // the Cooling section: a one-line summary and the breakdo
     '<dt>Air through the rack</dt><dd>' + fmtF(a.flow) + ' · ' + Math.round(a.flow / 1.699) + ' CFM</dd>' +
     (a.Q ? '<dt>Air leaving the rack</dt><dd>≈ ' + fmtT(a.exhaustT) + '</dd>' +
       '<dt>Heat out with the air · through the walls</dt><dd>' + Math.round(a.r.toAir) + ' · ' + Math.round(a.r.toWalls) + ' W</dd>' : '') +
-    '<dt>Back of the rack</dt><dd><span class="seg small" role="group" aria-label="Back of the rack">' + [['open', 'Open'], ['closed', 'Closed']].map(([v, l]) => '<button type="button" data-act="air-back" data-v="' + v + '" aria-pressed="' + (state.back === v) + '">' + l + '</button>').join('') + '</span></dd></dl>';
+    '<dt>' + (onSide('back').length ? 'Rest of the back' : 'Back of the rack') + '</dt><dd><span class="seg small" role="group" aria-label="' + (onSide('back').length ? 'Back of the rack where no panel sits' : 'Back of the rack') + '">' + [['open', 'Open'], ['closed', 'Closed']].map(([v, l]) => '<button type="button" data-act="air-back" data-v="' + v + '" aria-pressed="' + (state.back === v) + '">' + l + '</button>').join('') + '</span></dd></dl>';
   const src = a.parts.filter(p => p.w > 0).sort((x, y) => y.w - x.w);
   if (src.length) body += sub('air-src', 'Heat sources', src.length + ' · ' + (a.est ? '≈ ' : '') + fmtW(a.Q), '<ul>' +
-    src.map(p => row(p.it.label || fullName(p.d), uRange(p.it.pos2, p.d.h2) + (p.own ? ' · your value' : ''), wChip(p.w, p.est) + '<span class="at" title="Air at this height">' + fmtT(p.T) + '</span>')).join('') + '</ul>', false);
+    src.map(p => row(p.it.label || fullName(p.d), uRange(p.it.pos2, p.d.h2) + atBack(p.it) + (p.own ? ' · your value' : ''), wChip(p.w, p.est) + '<span class="at" title="Air at this height">' + fmtT(p.T) + '</span>')).join('') + '</ul>', false);
   if (a.fans.length) body += sub('air-fans', 'Fans', a.fans.length + ' · ' + fmtF(a.fans.reduce((n, f) => n + f.in + f.out, 0)) + ' moved', '<ul>' +
     a.fans.map(f => row(f.name, esc(f.where) + ' · ' + esc(fanLine(f.d)), dirSeg(f) + '<span class="at" title="Air it moves here, in m³/h; rated ' + Math.round(f.rated) + ' m³/h in free air">' + Math.round(f.in + f.out) + '</span>')).join('') + '</ul>', true);
   const og = a.groups.filter(g => g.kind !== 'seams' || Math.max(g.in, g.out) >= .5);
@@ -852,7 +909,7 @@ function airParts() { // the Cooling section: a one-line summary and the breakdo
 const sec = (id, title, sum, body) => '<details class="sec" data-sec="' + id + '"' + (ui.sec[id] ? ' open' : '') + '><summary><span class="sec-t">' + title + '</span><span class="sec-s">' + sum + '</span><span class="chev" aria-hidden="true">›</span></summary><div class="sec-b">' + body + '</div></details>';
 function renderBuild() {
   if (!CAT) return;
-  const h = state.h, used = placed().reduce((n, i) => n + H(i), 0), free = slots() - used, fp = frameParts(), br = state.version === 'brass';
+  const h = state.h, used = onSide(rackSide).reduce((n, i) => n + H(i), 0), free = slots() - used, fp = frameParts(), br = state.version === 'brass';
   const pk = printPack(), done = pk.filter(x => state.done[x.k]).length, count = placed().length + (state.top ? 1 : 0);
   let html = '<div><h2 class="title">Your build</h2><span class="muted">' + h + 'U · ' + count + (count === 1 ? ' part · ' : ' parts · ') + (free ? fmtU(free) + ' open' : 'no open slots') + '</span></div>';
 
@@ -873,6 +930,7 @@ function renderBuild() {
     (placed().some(i => info(i).est) ? '<p class="hint">Parts marked ≈ have an estimated height. Check it in the model before printing.</p>' : '') +
     '<p class="hint">Download community models from MakerWorld as 3MF to keep their print profiles. Your build pack has the custom parts and a download list to click through the rest.</p>');
 
+  html += sec('costs', 'Print time & budget', '<span>Filament · electricity · purchase budget</span>', estimateHTML());
   const air = airParts();
   html += sec('air', 'Cooling', air.sum, air.body);
 
@@ -881,7 +939,7 @@ function renderBuild() {
     '<p class="hint">Mounting screws: 2 per side per panel, 1 per side for ½U panels.' + (br ? ' Inserts max 5 mm long; the hole is 5.5 mm deep.' : '') + (h > 5 ? ' ' + esc(JOINER_NOTE) : '') + '</p>' +
     (affiliate() ? '<p class="hint">Some shop links are affiliate links: the maintainer of this planner may earn a small commission, at no cost to you.' + (amazonTag ? ' As an Amazon Associate the maintainer earns from qualifying purchases.' : '') + '</p>' : ''));
   const G = guide();
-  html += sec('guide', 'Build guide', '<span>' + G.length + ' steps · from printing to wiring</span>', guideHTML(G));
+  html += sec('guide', 'Build guide', '<span>' + window.LRGuide.cards(guideData()).length + ' illustrated steps</span>', guideHTML(G));
 
   const top = state.top ? LIB[state.top] : null;
   html += sec('frame', 'Frame parts', '<span>' + (br ? 'Heat-set inserts' : 'Bolted') + ' · ' + (state.sides === 'acrylic' ? 'acrylic' : 'printed') + ' sides</span>', '<dl class="kv">' +
@@ -892,7 +950,7 @@ function renderBuild() {
          : '<dt>Top + bottom panel</dt><dd>1 + 1</dd>') +
     '<div class="note">The horizontal pieces need a print bed of about 250 mm; they don’t fit on 220 mm beds.' + (h > 5 ? ' Above 10U the printed frame gets too weak for a full rack, so the planner stops at 10U.' : '') + '</div></dl>');
 
-  html += '<div class="actions"><button type="button" class="btn small" data-act="copy">Copy list</button><button type="button" class="btn small" data-act="share">Share link</button><button type="button" class="btn small" data-act="fill"' + (free ? '' : ' disabled') + '>Fill open slots</button><button type="button" class="btn small danger" data-act="clear"' + (state.items.length ? '' : ' disabled') + '>Clear rack</button></div><div id="copyfall"></div>';
+  html += '<div class="actions"><button type="button" class="btn small" data-act="copy">Copy list</button><button type="button" class="btn small" data-act="share">Share link</button><button type="button" class="btn small" data-act="fill"' + (free ? '' : ' disabled') + '>Fill open slots' + (rackSide === 'back' ? ' at the back' : '') + '</button><button type="button" class="btn small danger" data-act="clear"' + (state.items.length ? '' : ' disabled') + '>Clear rack</button></div><div id="copyfall"></div>';
   $('#build').innerHTML = html;
 }
 
@@ -901,8 +959,9 @@ function listText() {
   L.push((state.label && state.label !== 'Lab Rax' ? state.label + ' – ' : '') + 'Lab Rax ' + state.h + 'U (' + (br ? 'heat-set inserts' : 'bolted') + ')');
   L.push((state.h * P.U).toFixed(1) + ' mm inner height · 222 mm usable width', '', 'Layout (top to bottom)');
   if (state.top) L.push('  top     ' + fullName(LIB[state.top]));
-  byPos().forEach(i => { const d = info(i); L.push('  ' + uRange(i.pos2, d.h2).padEnd(8) + (i.label ? '[' + i.label + '] ' : '') + fullName(d) + ' (' + uTxt(d) + ')'); });
-  const used = placed().reduce((n, i) => n + H(i), 0); if (slots() - used > 0) L.push('  Open: ' + fmtU(slots() - used));
+  onSide('front').forEach(i => { const d = info(i); L.push('  ' + uRange(i.pos2, d.h2).padEnd(8) + (i.label ? '[' + i.label + '] ' : '') + fullName(d) + ' (' + uTxt(d) + ')'); });
+  const used = onSide('front').reduce((n, i) => n + H(i), 0); if (slots() - used > 0) L.push('  Open: ' + fmtU(slots() - used));
+  if (onSide('back').length) { L.push('', 'Back (top to bottom)'); onSide('back').forEach(i => { const d = info(i); L.push('  ' + uRange(i.pos2, d.h2).padEnd(8) + (i.label ? '[' + i.label + '] ' : '') + fullName(d) + ' (' + uTxt(d) + ')'); }); }
   L.push('', 'Frame', '- Vertical posts: ' + fp.posts); if (fp.joiners) L.push('- Post joiners: 4');
   L.push('- Side panels: ' + fp.sides + (state.sides === 'acrylic' ? ' (3 mm acrylic)' : ''), '- Horizontal pieces: 4', '- Edge pieces: 4', '- Handles · feet: 2 · 4', state.top ? '- Top: ' + fullName(LIB[state.top]) + '\n- Bottom panel: 1' : '- Top + bottom panel: 1 + 1');
   L.push('', 'Print pack'); printPack().forEach(x => L.push('- ' + x.qty + '× ' + x.name + (x.variants ? ' (' + x.variants + ')' : '') + (x.url ? '  ' + x.url : '  (custom STL in build pack)')));
@@ -925,7 +984,7 @@ function snapshot() {
   return {
     h: state.h, version: state.version, sides: state.sides, frame: state.frame, panel: state.panel, accent: state.accent, label: state.label || 'Lab Rax', top: state.top ? fullName(LIB[state.top]) : null,
     topPart: state.top ? LIB[state.top] : null, mods: frameMods(),
-    items: byPos().map(i => { const d = info(i); return { id: i.id, pos2: i.pos2, h2: d.h2, name: i.label || shortName(d), face: d.face, look: d, color: colorOf(i), depth: d.depth || (i.key === 'gen' && i.params.type === 'shelf' ? i.params.dd : null), gen: i.key === 'gen' ? i.params : null, sel: i.id === sel }; })
+    items: byPos().map(i => { const d = info(i); return { id: i.id, pos2: i.pos2, h2: d.h2, name: i.label || shortName(d), face: d.face, look: d, color: colorOf(i), depth: d.depth || (i.key === 'gen' && i.params.type === 'shelf' ? i.params.dd : null), gen: i.key === 'gen' ? i.params : null, sel: i.id === sel, back: sideOf(i) === 'back' }; })
   };
 }
 
@@ -991,7 +1050,7 @@ async function buildPack() {
   say('Preparing your build pack…');
   const files = [], base = slug(state.label || 'lab-rax') + '-' + state.h + 'u';
   const gens = byPos().filter(i => i.key === 'gen');
-  for (const g of gens) files.push({ name: 'custom-parts/' + uRange(g.pos2, H(g)).replace('–', '-') + '-' + slug(g.name) + '.stl', data: await genSTL(g) });
+  for (const g of gens) files.push({ name: 'custom-parts/' + uRange(g.pos2, H(g)).replace('–', '-') + (sideOf(g) === 'back' ? '-back' : '') + '-' + slug(g.name) + '.stl', data: await genSTL(g) });
   const pk = printPack();
   files.push({ name: 'download-list.html', data: downloadListHTML(pk) });
   files.push({ name: 'print-list.csv', data: csv([['Qty', 'Part', 'Variants', 'Where', 'Link'], ...pk.map(x => [x.qty, x.name, x.variants, x.subs.join('; '), x.url || 'custom-parts/'])]) });
@@ -1004,11 +1063,38 @@ async function buildPack() {
   const zip = base + '-build-pack.zip';
   if (await saveFile(zip, P.zip(files)) && pdfErr) say('Downloaded ' + zip + ', but the build plan PDF is missing from it: ' + pdfErr + '.', ['pdf', 'Try the PDF again']);
 }
+async function downloadPDF() {
+  if (!window.LRPdf) { say('The PDF module is not available.'); return; }
+  say('Preparing the build plan…');
+  try { const bytes = await window.LRPdf.make(pdfData()); await saveFile(slug(state.label || 'lab-rax') + '-' + state.h + 'u-build-plan.pdf', new Blob([bytes], { type: 'application/pdf' })); }
+  catch (err) { say('The build plan could not be made: ' + (err && err.message || 'unknown error') + '.'); }
+}
+function changeCurrency(currency) {
+  if(!['EUR','USD','GBP','CAD','AUD'].includes(currency))return;
+  state.budgets=state.budgets&&typeof state.budgets==='object'?state.budgets:{};
+  const old=window.LREstimate.settings(state.costs);state.budgets[old.currency]=old;
+  state.costs=window.LREstimate.settings({...state.budgets[currency],currency,watts:old.watts,gramsHour:old.gramsHour,slicedGrams:old.slicedGrams,slicedHours:old.slicedHours,owned:old.owned,filamentOwned:old.filamentOwned});
+}
+function updateFinalize() {
+  const el=$('#finalize-total');if(!el)return;
+  const e=buildEstimate();el.textContent='≈ '+window.LREstimate.money(e.total,e.s.currency)+' left to buy incl. print electricity'+(e.unknown.length?' + '+e.unknown.length+' unpriced item(s)':'')+' · '+e.spools+' filament spool(s) to buy';
+}
+function openFinalize(format) {
+  let dialog=$('#finalize-build');
+  if(!dialog){dialog=document.createElement('dialog');dialog.id='finalize-build';dialog.className='finalize-build';document.body.appendChild(dialog);}
+  const e=buildEstimate(),input=(key,v,max)=>'<input class="field" type="number" min="0"'+(max?' max="'+max+'"':'')+' step="1" data-cost="'+key+'" aria-label="Already owned quantity" value="'+v+'">';
+  dialog.dataset.format=format;
+  dialog.innerHTML='<div class="finalize-head"><div><h2>Ready to build?</h2><p>Check what you already have. Your download will show what is still needed.</p></div><button class="btn small" data-act="final-close">Close</button></div><p id="finalize-total" class="finalize-total"></p>'+
+    '<div style="display:flex;gap:16px;flex-wrap:wrap"><label>Ship to <select class="field" id="final-market">'+Object.entries(window.LRMarket.regions).map(([k,r])=>'<option value="'+k+'"'+(state.market===k?' selected':'')+'>'+r.name+'</option>').join('')+'</select></label><label>Currency <select class="field" id="final-currency">'+['EUR','USD','GBP','CAD','AUD'].map(k=>'<option'+(e.s.currency===k?' selected':'')+'>'+k+'</option>').join('')+'</select></label></div><p class="hint">Shop links follow your destination. No automatic currency conversion. Enter local prices in Print time &amp; budget; unpriced items stay visible.</p><h3>Filament</h3><div class="owned-row owned-label"><span>Colour</span><span>Needed</span><span>Have (g)</span></div>'+e.colours.map(r=>'<label class="owned-row"><span><i class="swatchdot" style="--c:'+r.c+'"></i>'+esc(colorName(r.c))+'</span><span>≈ '+Math.round(r.grams)+' g</span>'+input('stock:'+r.c,r.owned)+'</label>').join('')+
+    '<h3>Essential supplies</h3><div class="owned-row owned-label"><span>Item</span><span>Needed</span><span>Have (pieces)</span></div>'+e.supplies.map(r=>'<label class="owned-row"><span>'+esc(r.name)+'</span><span>'+(r.qty==null?'Check model':r.qty+'×')+'</span>'+input('owned:'+r.key,r.owned)+'</label>').join('')+
+    '<details class="finalize-prices"><summary>Print time and local price settings</summary>'+estimateHTML(false)+'</details><p class="hint">Enter pieces, not packs. Unknown bracket or joiner quantities still need checking. Print time and cost assumptions can be changed in Print time & budget.</p><div class="finalize-actions"><button class="btn primary" data-act="final-download">Download '+(format==='pack'?'build pack':'PDF')+'</button></div>';
+  updateFinalize();dialog.showModal();
+}
 function pdfData() {
   return { title: (state.label || 'Lab Rax') + ' · ' + state.h + 'U', h: state.h, version: state.version === 'brass' ? 'Heat-set inserts' : 'Bolted', frame: state.frame, panel: state.panel, accent: state.accent, label: state.label || 'Lab Rax',
     top: state.top ? fullName(LIB[state.top]) : null, topLook: state.top ? LS.topFor(LIB[state.top], colorsFor()) : null, // the top mount as drawn above the frame
-    items: byPos().map(i => { const d = info(i); return { pos: uRange(i.pos2, d.h2), pos2: i.pos2, h2: d.h2, name: fullName(d), label: i.label || '', u: uTxt(d), url: d.url || '', author: d.author || '', color: colorOf(i), face: faceSVG(d, colorOf(i)) }; }),
-    print: printPack().map(x => ({ qty: x.qty, name: x.name, sub: x.subs.join(', '), vars: x.variants, url: x.url })), shop: orderList(), guide: guide(), shareUrl: TOP_WIN ? shareLink() + '&s=shop' : null, frameParts: frameParts(), notes: state.h > 5 ? [JOINER_NOTE] : [],
+    items: byPos().map(i => { const d = info(i); return { pos: uRange(i.pos2, d.h2) + atBack(i), pos2: i.pos2, h2: d.h2, name: fullName(d), label: i.label || '', u: uTxt(d), url: d.url || '', author: d.author || '', color: colorOf(i), face: faceSVG(d, colorOf(i)), depth: partDepth(i), back: sideOf(i) === 'back' }; }),
+    print: printPack().map(x => ({ qty: x.qty, name: x.name, sub: x.subs.join(', '), vars: x.variants, url: x.url })), shop: orderList(), guide: guide(), estimate: buildEstimate(), market: state.market, wallMounts: state.extras.filter(k => LIB[k].shape && LIB[k].shape.wall).map(k => ({ name: fullName(LIB[k]), url: LIB[k].url })), sides: state.sides, dimensions: CAT.frame.dimensions, shareUrl: TOP_WIN ? shareLink() + '&s=shop' : null, frameParts: frameParts(), notes: state.h > 5 ? [JOINER_NOTE] : [],
     cooling: pdfCooling() };
 }
 function pdfCooling() { // the Cooling section for the PDF; null when nothing in the rack makes heat
@@ -1020,7 +1106,7 @@ function pdfCooling() { // the Cooling section for the PDF; null when nothing in
     tips: airTips(a).filter(t => t.after).map(t => ({ text: t.text, before: fmtT(a.maxT), after: fmtT(t.after.maxT) })),
     // the airflow diagram in the PDF: temp is °C per ½U layer, top first; flows are m³/h, positive into the rack
     map: { room: a.room, span: HEAT_SPAN, rated: RATED, maxT: a.maxT, flow: a.flow, Q: a.Q, est: a.est, h: state.h, H: a.r.H, neutral: a.r.neutral, temp: a.temp,
-      parts: a.parts.map(p => ({ pos2: p.it.pos2, h2: p.d.h2, w: p.w, est: p.est, t: p.T, name: p.it.label || shortName(p.d) })),
+      parts: a.parts.map(p => ({ pos2: p.it.pos2, h2: p.d.h2, w: p.w, est: p.est, t: p.T, name: p.it.label || shortName(p.d), back: sideOf(p.it) === 'back' })),
       openings: a.groups.filter(g => g.kind !== 'seams').map(g => ({ kind: g.kind, name: g.name, layers: g.layers, flows: g.flows, in: g.in, out: g.out })),
       fans: a.fans.map(f => ({ name: f.name, place: f.place, dir: f.dir, pos2: f.it ? f.it.pos2 : null, h2: f.it ? f.d.h2 : null, in: f.in, out: f.out, rated: f.rated, spec: fanLine(f.d) })) } };
 }
@@ -1092,7 +1178,7 @@ function wzDevices() { // every device with at least one front mount, flattened
 // the mount to suggest: one for this device alone (not a combination with other gear), then made for Lab Rax, a known height, the lowest
 const combo = m => /\+|together|with .*(switch|router|kvm|zero|nas)/i.test(m.label);
 const bestMount = dev => dev.mounts.slice().sort((a, b) => (combo(a) - combo(b)) || (!!b.labrax - !!a.labrax) || (!!a.estimated - !!b.estimated) || (a.u - b.u))[0].id;
-function lowestFree(h2) { for (let p = slots() - h2; p >= 0; p--) if (isFree(p, h2)) return p; return null; }
+function lowestFree(h2, side) { for (let p = slots() - h2; p >= 0; p--) if (isFree(p, h2, undefined, side || 'front')) return p; return null; }
 function planLayout(w) {
   const look = PRESETS[w.preset], half = w.fans === 'none' || !LIB.mw1385541 ? 'vent05' : 'mw1385541', list = [], items = [];
   if (w.patch && LIB.keystone) list.push({ key: 'keystone', role: 0 });
@@ -1121,7 +1207,7 @@ function planLayout(w) {
       const q = lowestFree(2); if (q != null) { state.items.push({ id: state.nextId++, key: 'fan40', pos2: q }); a = airflow(); }
     }
     const [k1, k05] = a.cfm > 0 ? blankKeys() : ['vent1', 'vent05']; // close the rest: blanks with fans, vents without
-    for (let s = 0; s < slots();) { if (isFree(s, 2)) { state.items.push({ id: state.nextId++, key: k1, pos2: s }); s += 2; } else if (isFree(s, 1)) { state.items.push({ id: state.nextId++, key: k05, pos2: s }); s += 1; } else s++; }
+    for (let s = 0; s < slots();) { if (isFree(s, 2, undefined, 'front')) { state.items.push({ id: state.nextId++, key: k1, pos2: s }); s += 2; } else if (isFree(s, 1, undefined, 'front')) { state.items.push({ id: state.nextId++, key: k05, pos2: s }); s += 1; } else s++; }
     a = airflow();
     return { state: cand, a, unplaced: cand.items.filter(i => i.pos2 == null).length };
   } finally { state = keep; }
@@ -1232,13 +1318,14 @@ document.addEventListener('click', async e => {
     case 'top-off': state.top = null; touch(); render(); renderLib(); say('Regular top panel restored.'); break;
     case 'up': move(sel, -1); break;
     case 'down': move(sel, 1); break;
-    case 'dup': { const it = find(sel); if (it) { const c = JSON.parse(JSON.stringify(it)); delete c.id; addItem(c); } break; }
+    case 'dup': { const it = find(sel); if (it) { const c = JSON.parse(JSON.stringify(it)); delete c.id; c.side = sideOf(it); addItem(c); } break; }
+    case 'flip': flipSide(sel); break;
     case 'del': removeItem(sel); break;
     case 'rm': removeItem(+a.dataset.id); break;
     case 'replace': {
-      const it = find(+a.dataset.id), p = firstFree(H(it));
-      if (p == null) say('There is no free ' + fmtU(H(it)) + ' slot.');
-      else { it.pos2 = p; sel = it.id; touch(); render(); say(fullName(info(it)) + ' placed back at ' + uRange(p, H(it)) + '.'); }
+      const it = find(+a.dataset.id), p = firstFree(H(it), sideOf(it));
+      if (p == null) say('There is no free ' + fmtU(H(it)) + ' slot at the ' + sideOf(it) + '.');
+      else { it.pos2 = p; sel = it.id; touch(); render(); say(fullName(info(it)) + ' placed back at ' + uRange(p, H(it)) + atBack(it) + '.'); }
       break;
     }
     case 'done': { const k = a.dataset.k; if (state.done[k]) delete state.done[k]; else state.done[k] = true; renderBuild(); save(); break; }
@@ -1253,8 +1340,8 @@ document.addEventListener('click', async e => {
     case 'wz-add': { const dev = wzDevices().find(d => d.id === a.dataset.dev); if (dev) wz.picks.push({ dev: dev.id, group: dev.group, mount: bestMount(dev), qty: 1 }); $('#wz-picked').innerHTML = wzPicked(); $('#wz-results').innerHTML = wzResults(); break; }
     case 'wz-qty': { const i = +a.dataset.i, p = wz.picks[i]; p.qty = Math.min(8, p.qty + +a.dataset.d); if (p.qty < 1) wz.picks.splice(i, 1); $('#wz-picked').innerHTML = wzPicked(); $('#wz-results').innerHTML = wzResults(); break; }
     case 'wz-create': wzCreate(); break;
-    case 'air-blank': fillGaps(blankKeys(), 'blank panel'); break;
-    case 'air-add': addItem({ key: a.dataset.key }, +a.dataset.pos); break;
+    case 'air-blank': fillGaps(blankKeys(), 'blank panel', 'front'); break;
+    case 'air-add': addItem({ key: a.dataset.key, side: 'front' }, +a.dataset.pos); break;
     case 'fan-dir': if (FAN_DIRS.includes(a.dataset.v)) { setFanDir(a.dataset.ref, a.dataset.v); touch(); render(); hideTip(); } break;
     case 'air-top': if (LIB[a.dataset.key]) { state.top = a.dataset.key; state.topDir = null; touch(); render(); renderLib(); say(fullName(LIB[a.dataset.key]) + ' now sits on top of the rack.'); } break;
     case 'air-back': state.back = a.dataset.v === 'closed' ? 'closed' : 'open'; touch(); render(); break;
@@ -1283,16 +1370,29 @@ document.addEventListener('click', async e => {
       catch (err) { say('The part could not be generated here.'); }
       break;
     }
-    case 'pack': buildPack(); break;
-    case 'pdf': {
-      if (!window.LRPdf) { say('The PDF module is not available.'); break; }
-      say('Preparing the build plan…');
-      try { const bytes = await window.LRPdf.make(pdfData()); await saveFile(slug(state.label || 'lab-rax') + '-' + state.h + 'u-build-plan.pdf', new Blob([bytes], { type: 'application/pdf' })); }
-      catch (err) { say('The build plan could not be made: ' + (err && err.message || 'unknown error') + '.'); }
-      break;
-    }
+    case 'pack': openFinalize('pack'); break;
+    case 'final-download': { const format = $('#finalize-build').dataset.format; $('#finalize-build').close(); if (format === 'pack') buildPack(); else downloadPDF(); break; }
+    case 'final-close': $('#finalize-build').close(); break;
+    case 'pdf': openFinalize('pdf'); break;
     case 'v3d': if (window.LRView3D) window.LRView3D.action(a.dataset.v); break;
   }
+});
+document.addEventListener('change', e => {
+  if(e.target.id!=='final-market'&&e.target.id!=='final-currency')return;
+  const dialog=$('#finalize-build'),format=dialog.dataset.format;
+  if(e.target.id==='final-market'){state.market=e.target.value;changeCurrency(window.LRMarket.regions[state.market].currency);}
+  else changeCurrency(e.target.value);
+  save();renderBuild();dialog.close();openFinalize(format);
+});
+document.addEventListener('change', e => {
+  const key=e.target.dataset.cost;if(!key)return;
+  ui.sec.costs = true; saveUI();
+  state.costs=window.LREstimate.settings(state.costs);
+  const value=e.target.value.trim()===''?null:Number(e.target.value);
+  if(key.startsWith('owned:') || key.startsWith('stock:')) { const name=key.startsWith('owned:')?'owned':'filamentOwned'; const id=key.slice(key.indexOf(':')+1); if(value===null)delete state.costs[name][id];else if(Number.isFinite(value)&&value>=0)state.costs[name][id]=Math.floor(value); }
+  else if(key.startsWith('price:')) { if(value===null)delete state.costs.prices[key.slice(6)];else if(Number.isFinite(value)&&value>=0)state.costs.prices[key.slice(6)]=value; }
+  else state.costs[key]=value;
+  state.costs=window.LREstimate.settings(state.costs);save();renderBuild(); updateFinalize();
 });
 document.addEventListener('input', e => {
   const id = e.target.id;
@@ -1328,7 +1428,7 @@ host.addEventListener('pointermove', e => {
 host.addEventListener('pointerup', () => {
   if (!drag) return; const d = drag; drag = null;
   if (!d.moved) { sel = d.id; render(); focusSel(); return; }
-  const it = find(d.id); if (d.p != null && d.p !== it.pos2) { it.pos2 = d.p; touch(); say(fullName(info(it)) + ' moved to ' + uRange(d.p, H(it)) + '.'); }
+  const it = find(d.id); if (d.p != null && d.p !== it.pos2) { it.pos2 = d.p; touch(); say(fullName(info(it)) + ' moved to ' + uRange(d.p, H(it)) + atBack(it) + '.' + clashText(it)); }
   sel = d.id; render();
 });
 host.addEventListener('pointercancel', () => { if (drag) { drag = null; render(); } });
@@ -1393,13 +1493,16 @@ function copyText(text, okMsg) {
 
 /* ---------- view switching ---------- */
 async function setView(v) {
-  view = v; renderControls(); hideTip();
+  const from = view;
+  view = v; if (v !== '3d') rackSide = v === 'back' ? 'back' : 'front';
+  if (sel != null && (v === 'front' || v === 'back') && find(sel) && sideOf(find(sel)) !== v) sel = null; // the selected part is on the other side
+  renderControls(); renderSel(); if (CAT) renderBuild(); hideTip();
   const on3d = v === '3d';
   if (!on3d && CAT) renderRack();
   $('#view3d').hidden = !on3d; $('#rackHost').style.visibility = on3d ? 'hidden' : ''; $('#meas').style.visibility = on3d ? 'hidden' : '';
   if (on3d) {
     if (!window.LRView3D) { $('#view3d').innerHTML = '<div class="v3d-msg">The 3D view is not available.</div>'; return; }
-    try { await window.LRView3D.mount($('#view3d'), snapshot()); }
+    try { await window.LRView3D.mount($('#view3d'), snapshot()); if (from === 'back') window.LRView3D.action('back'); } // coming from the Back view: look at the back
     catch (e) { $('#view3d').innerHTML = '<div class="v3d-msg">The 3D library could not be loaded. Check your connection and try again.</div>'; }
   } else if (window.LRView3D) window.LRView3D.pause();
 }
@@ -1420,7 +1523,7 @@ function cycleTheme() { theme = THEMES[(THEMES.indexOf(theme) + 1) % 3]; try { l
 
 /* ---------- share link (own page only) ---------- */
 function shareLink() {
-  const o = { h: state.h, version: state.version, frame: state.frame, panel: state.panel, accent: state.accent, label: state.label, top: state.top, extras: state.extras, back: state.back, sides: state.sides, items: state.items, nextId: state.nextId };
+  const o = { h: state.h, version: state.version, frame: state.frame, panel: state.panel, accent: state.accent, label: state.label, top: state.top, extras: state.extras, market: state.market, costs: state.costs, back: state.back, sides: state.sides, items: state.items, nextId: state.nextId };
   const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   return location.origin + location.pathname + location.search + '#l=' + b64;
 }
