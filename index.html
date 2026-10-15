@@ -360,7 +360,10 @@ details.sec > summary::-webkit-details-marker{display:none}
 /* shopping list and build guide */
 .sgroup{margin:10px 0 2px;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .slist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
-.srow{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.srow{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:5px 10px;padding:8px 0;border-top:1px solid var(--line)}
+/* name and details left, quantity right, the shop buttons on their own line: side by side they squeezed the name in a narrow column */
+.srow > .sqty{grid-column:2;grid-row:1}
+.srow > .slinks{grid-column:1 / -1;margin-left:0}
 .stx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
 .stx b{font-weight:600;font-size:13.5px}
 .stx small{font-size:12px;color:var(--muted)}
