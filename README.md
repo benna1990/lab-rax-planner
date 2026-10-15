@@ -4,7 +4,7 @@ Plan your 3D-printed [Lab Rax](https://the-diy-life.com/introducing-lab-rax-a-3d
 
 **Open the planner: https://benna1990.github.io/lab-rax-planner/**
 
-- **Pick from ~440 community parts**: device mounts (UniFi, TP-Link, MikroTik, Netgear, Zyxel, mini PCs, Mac mini, Raspberry Pi, Mini-ITX, NAS and drive bays…), panels, top mounts and frame mods, each linked to its model page.
+- **Pick from ~500 community parts**: device mounts (UniFi, TP-Link, MikroTik, Netgear, Zyxel, mini PCs, thin clients, firewall boxes, Mac mini, Raspberry Pi, Mini-ITX, NAS and drive bays…), panels (power, keystone and D-type patch panels, fans, shelves), top mounts and frame mods, each linked to its model page.
 - **Lay it out** at real scale. Whole-U panels snap to the hole pattern; ½U panels fit either half of a U.
 - **Look around in 3D**, and load your own downloaded STL or 3MF files onto a part to see them in place. Those files never leave your browser.
 - **Make custom parts**: blank, vent (slots or hexagons), keystone and label panels, and a shelf sized to your device. They export as STL, ready to print without supports: panels and shelves face-down, label plates face-up.

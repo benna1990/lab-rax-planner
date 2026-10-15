@@ -660,6 +660,139 @@
      "estimated": true,
      "face": "blank",
      "url": "https://makerworld.com/en/models/475945"
+    },
+    {
+     "id": "mw576762",
+     "name": "Keystone patch panel, 12 ports",
+     "u": 1,
+     "face": "ks",
+     "url": "https://makerworld.com/en/models/576762-10in-server-rack-patch-panels-1u-12-keystone-jacks",
+     "author": "Dawnchaser"
+    },
+    {
+     "id": "mw1080303",
+     "name": "Numbered keystone patch panel, 12 ports",
+     "u": 1,
+     "face": "ks",
+     "url": "https://makerworld.com/en/models/1080303-10-rack-labeled-patch-panel",
+     "author": "Hixagon",
+     "estimated": true
+    },
+    {
+     "id": "mw1348740",
+     "name": "Patch panel, 8 ports, keystone or fibre adapters",
+     "u": 1,
+     "face": "ks",
+     "url": "https://makerworld.com/en/models/1348740-10-inch-1u-8-port-patch-panel",
+     "author": "神楽千雪"
+    },
+    {
+     "id": "mw1744531",
+     "name": "Keystone patch panel, 8 ports with vents",
+     "u": 1,
+     "face": "ks",
+     "url": "https://makerworld.com/en/models/1744531-10-inch-1u-keystone-patchpanel-8-with-vent-holes",
+     "author": "matataa"
+    },
+    {
+     "id": "mw1656992",
+     "name": "Keystone patch panel, 8 ports",
+     "u": 1,
+     "face": "ks",
+     "url": "https://makerworld.com/en/models/1656992-10-inch-keystone-patchpanel-x8-ports",
+     "author": "LiPA",
+     "estimated": true
+    },
+    {
+     "id": "mw1674470",
+     "name": "Sturdy keystone patch panel, 10 ports",
+     "u": 1,
+     "face": "ks",
+     "url": "https://makerworld.com/en/models/1674470-stable-10-inch-10-port-keystone-patchpanel",
+     "estimated": true
+    },
+    {
+     "id": "mw842002",
+     "name": "Keystone patch panel",
+     "u": 1,
+     "face": "ks",
+     "url": "https://makerworld.com/en/models/842002-10-patch-panel",
+     "author": "Titanen",
+     "estimated": true
+    },
+    {
+     "id": "mw1427297",
+     "name": "Keystone patch panel",
+     "u": 1,
+     "face": "ks",
+     "url": "https://makerworld.com/en/models/1427297",
+     "estimated": true
+    },
+    {
+     "id": "mw1141339",
+     "name": "Keystone patch panel, 8 ports + temperature display",
+     "u": 1,
+     "face": "ks",
+     "url": "https://makerworld.com/en/models/1141339-10-inch-patchpanel-temp-and-humidity-sensor",
+     "estimated": true
+    },
+    {
+     "id": "mw442928",
+     "name": "½U keystone panel, 1–12 ports (customizable)",
+     "u": 0.5,
+     "face": "ks",
+     "url": "https://makerworld.com/en/models/442928-10-inch-patch-panel-12-keystone-module-1-2-u",
+     "author": "Kitten 3D",
+     "estimated": true
+    },
+    {
+     "id": "mw1951351",
+     "name": "½U keystone panel, 12 ports",
+     "u": 0.5,
+     "face": "ks",
+     "url": "https://makerworld.com/en/models/1951351-12-port-blank-keystone-patch-panel-10-inch-0-5u"
+    },
+    {
+     "id": "pr142384",
+     "name": "Keystone patch panel, 12 ports (RJ45 or HDMI)",
+     "u": 1,
+     "face": "ks",
+     "url": "https://www.printables.com/model/142384-10-rack-patch-panel",
+     "author": "Karel"
+    },
+    {
+     "id": "pr1246812",
+     "name": "Patch panel, 10 ports",
+     "u": 1,
+     "face": "ks",
+     "url": "https://www.printables.com/model/1246812-10-inch-10-port-patch-panel",
+     "author": "Darkrym",
+     "estimated": true
+    },
+    {
+     "id": "pr1262750",
+     "name": "Neutrik D-type patch panel",
+     "u": 1,
+     "face": "d",
+     "url": "https://www.printables.com/model/1262750-neutrik-connectors-d-type-10-inch-patch-panel",
+     "author": "MrMdemiC"
+    },
+    {
+     "id": "pr965743",
+     "name": "Neutrik D-series panel, 6 holes (XLR and more)",
+     "u": 1,
+     "face": "d",
+     "url": "https://www.printables.com/model/965743-10-rack-panel-for-neutrik-d-series-for-xlr-and-mor",
+     "author": "Madi"
+    },
+    {
+     "id": "mw1546022",
+     "name": "Brush panel · Lab Rax",
+     "u": 1,
+     "face": "blank",
+     "url": "https://makerworld.com/en/models/1546022-10-inch-rack-brush-panel-1u-lab-rax",
+     "author": "BKG",
+     "labrax": true
     }
    ]
   },
@@ -701,6 +834,22 @@
      "url": "https://makerworld.com/en/models/1357259-lab-rax-1u-shelf-with-slots",
      "author": "CyberGWJ",
      "labrax": true
+    },
+    {
+     "id": "mw1845503",
+     "name": "Shelf with 1–3 drawers",
+     "u": 1,
+     "face": "shelf",
+     "url": "https://makerworld.com/en/models/1845503",
+     "estimated": true
+    },
+    {
+     "id": "mw1430506",
+     "name": "RackMod 1U chassis with slide-in modules (drawer, keystones)",
+     "u": 1,
+     "face": "shelf",
+     "url": "https://makerworld.com/en/models/1430506-rackmod-1u-10-inch-modular-server-rack",
+     "author": "tomtechie"
     }
    ]
   },
@@ -884,6 +1033,102 @@
      "estimated": true,
      "face": "blank",
      "url": "https://makerworld.com/en/models/1395747-10-inch-rack-mount-panel-for-the-atx-psu-2-ssd"
+    },
+    {
+     "id": "mw2338081",
+     "name": "HANYCONY 12-outlet power strip · Lab Rax",
+     "u": 1,
+     "face": "blank",
+     "url": "https://makerworld.com/en/models/2338081-10-inch-rack-1u-mount-hanycony-power-strip",
+     "author": "mavr1k",
+     "labrax": true
+    },
+    {
+     "id": "mw2330298",
+     "name": "Power strip / PDU mount · Lab Rax",
+     "u": 1,
+     "face": "blank",
+     "url": "https://makerworld.com/en/models/2330298-labrax-power-strip-pdu-mount",
+     "author": "Mus",
+     "estimated": true,
+     "labrax": true
+    },
+    {
+     "id": "mw2265037",
+     "name": "12-outlet power strip with rack backplate",
+     "u": 1.5,
+     "face": "blank",
+     "url": "https://makerworld.com/en/models/2265037-a-better-cheaper-12-port-10-rack-power-strip-pdu",
+     "author": "Syvel Engineering",
+     "estimated": true
+    },
+    {
+     "id": "mw1346592",
+     "name": "Rear power strip holder, 3 sockets",
+     "u": 1,
+     "face": "blank",
+     "url": "https://makerworld.com/en/models/1346592-10-inch-server-power-strip-holder",
+     "author": "unknown_one",
+     "estimated": true
+    },
+    {
+     "id": "mw3258614",
+     "name": "Power strip holder, 6 outlets (KWS)",
+     "u": 1,
+     "face": "blank",
+     "url": "https://makerworld.com/en/models/3258614-10in-server-rack-power-strip-holder-kws",
+     "author": "Cash2000",
+     "estimated": true
+    },
+    {
+     "id": "mw2168035",
+     "name": "Shelly Power Strip 4 holder",
+     "u": 2,
+     "face": "blank",
+     "url": "https://makerworld.com/en/models/2168035-10-rack-mount-holder-for-shelly-power-strip-4",
+     "estimated": true
+    },
+    {
+     "id": "mw976734",
+     "name": "USB power supply panel",
+     "u": 1,
+     "face": "blank",
+     "url": "https://makerworld.com/en/models/976734-rack-10-inch-usb-power-supply-mk1",
+     "estimated": true
+    },
+    {
+     "id": "mw1965658",
+     "name": "Power supply panel",
+     "u": 1,
+     "face": "blank",
+     "url": "https://makerworld.com/en/models/1965658-10-minirack-power-supply",
+     "estimated": true
+    },
+    {
+     "id": "pr1582956",
+     "name": "USB-C PDU, 5× 65 W",
+     "u": 1,
+     "face": "blank",
+     "url": "https://www.printables.com/model/1582956-10-inch-rack-usb-c-pdu",
+     "author": "Ozpyn"
+    },
+    {
+     "id": "pr1576653",
+     "name": "IEC PDU, switched inlet + 6 outlets · Lab Rax",
+     "u": 1,
+     "face": "blank",
+     "url": "https://www.printables.com/model/1576653-10-inch-1u-rack-mount-iec-power-distribution-unit",
+     "author": "cbmartin",
+     "labrax": true
+    },
+    {
+     "id": "pr1295107",
+     "name": "Power distribution unit (PDU)",
+     "u": 1,
+     "face": "blank",
+     "url": "https://www.printables.com/model/1295107-10-rack-power-distribution-unit-pdu",
+     "author": "JeffCurless",
+     "estimated": true
     }
    ]
   },
@@ -2225,6 +2470,19 @@
      ]
     },
     {
+     "device": "MikroTik RB4011",
+     "mounts": [
+      {
+       "id": "mw792413",
+       "label": "Mounting bracket",
+       "u": 1,
+       "estimated": true,
+       "face": "switch",
+       "url": "https://makerworld.com/en/models/792413-mounting-bracket-for-rb4011-router-in-10-rack"
+      }
+     ]
+    },
+    {
      "device": "MikroTik CSS610-8G-2S+",
      "mounts": [
       {
@@ -2385,6 +2643,21 @@
      ]
     },
     {
+     "device": "Ubiquiti EdgeRouter 4",
+     "mounts": [
+      {
+       "id": "pr37814",
+       "label": "Rack mount",
+       "u": 1,
+       "estimated": true,
+       "face": "switch",
+       "author": "no-brake",
+       "url": "https://www.printables.com/model/37814-ubiquiti-edgerouter-4-er-4-10-inch-rack-mount",
+       "note": "Use short screws; long ones can damage the board."
+      }
+     ]
+    },
+    {
      "device": "GL.iNet Slate 7",
      "mounts": [
       {
@@ -2395,6 +2668,15 @@
        "author": "mklements",
        "url": "https://makerworld.com/en/models/3247005-1u-shelf-for-gl-inet-slate-7",
        "note": "By the Lab Rax designer."
+      },
+      {
+       "id": "pr1333183",
+       "label": "Rack mount",
+       "u": 1,
+       "estimated": true,
+       "face": "switch",
+       "author": "Amrut Prabhu",
+       "url": "https://www.printables.com/model/1333183-glinet-slate-7-10-inch-rack-mount"
       }
      ]
     },
@@ -2428,21 +2710,6 @@
      ]
     },
     {
-     "device": "Protectli Vault FW4B / FW4C",
-     "mounts": [
-      {
-       "id": "mw1531176",
-       "label": "Tray with keystones",
-       "u": 1,
-       "estimated": true,
-       "face": "switch",
-       "author": "snapwich",
-       "url": "https://makerworld.com/en/models/1531176-10-inch-rack-mount-kit-protectli-vault-fw4b-fw4c",
-       "note": "Ports are brought to the front with short patch cables to keystones."
-      }
-     ]
-    },
-    {
      "device": "Zyxel GS1200-5HP v2",
      "mounts": [
       {
@@ -2452,19 +2719,6 @@
        "face": "switch",
        "author": "nilrog",
        "url": "https://www.printables.com/model/1379840-zyxel-gs1200-5hpv2-10-inch-1u-rack-mount"
-      }
-     ]
-    },
-    {
-     "device": "Firewalla Purple",
-     "mounts": [
-      {
-       "id": "pr980517",
-       "label": "1U mount",
-       "u": 1,
-       "face": "switch",
-       "author": "TimPrints",
-       "url": "https://www.printables.com/model/980517-firewalla-purple-10-inch-rack-mount"
       }
      ]
     }
@@ -2620,6 +2874,20 @@
        "note": "Requires taking the FRITZ!Box apart."
       }
      ]
+    },
+    {
+     "device": "Starlink router (Gen 2)",
+     "mounts": [
+      {
+       "id": "pr1520550",
+       "label": "Mount with Ethernet adapter slot",
+       "u": 2,
+       "estimated": true,
+       "face": "shelf",
+       "author": "Scoobert",
+       "url": "https://www.printables.com/model/1520550-starlink-gen-2-router-10-rack-mount-w-ethernet-ada"
+      }
+     ]
     }
    ]
   },
@@ -2684,6 +2952,29 @@
        "estimated": true,
        "author": "towilab",
        "url": "https://www.printables.com/model/1022804"
+      },
+      {
+       "id": "mw2763086",
+       "label": "M715q mount",
+       "u": 1,
+       "estimated": true,
+       "url": "https://makerworld.com/en/models/2763086-lenovo-thinkcentre-tiny-10-rack-mount-m715q"
+      },
+      {
+       "id": "pr934429",
+       "label": "M625q mount",
+       "u": 1,
+       "estimated": true,
+       "author": "Morty",
+       "url": "https://www.printables.com/model/934429-10-network-rack-lenovo-thinkcentre-m625q-tiny"
+      },
+      {
+       "id": "mw642751",
+       "label": "Rack mount",
+       "u": 1,
+       "estimated": true,
+       "url": "https://makerworld.com/en/models/642751-thinkcenter-10-inch-rack-mount",
+       "note": "The PC hangs on two M3 screws."
       }
      ]
     },
@@ -2753,6 +3044,26 @@
        "face": "shelf",
        "url": "https://makerworld.com/en/models/1645139",
        "note": "Front piece works on its own; optional rear mount is sized for Mod10 rack depth, so check it against Lab Rax depth."
+      },
+      {
+       "id": "mw2959495",
+       "label": "1U tray · Lab Rax",
+       "u": 1,
+       "labrax": true,
+       "url": "https://makerworld.com/en/models/2959495-labrax-10-1u-hp-mini-pc-rack",
+       "note": "Made for a ProDesk 600 G3 Mini; a base plate screws to the PC."
+      },
+      {
+       "id": "mw1184110",
+       "label": "1U mount with 2 keystones",
+       "u": 1,
+       "url": "https://makerworld.com/en/models/1184110-10-rack-mount-for-hp-elite-prodesk-mini"
+      },
+      {
+       "id": "mw1361089",
+       "label": "1U holder",
+       "u": 1,
+       "url": "https://makerworld.com/en/models/1361089-hp-prodesk-mini-pc-holder-10-rack"
       }
      ]
     },
@@ -2983,6 +3294,251 @@
        "author": "SKYBOT",
        "labrax": true,
        "url": "https://makerworld.com/en/models/2406832"
+      }
+     ]
+    },
+    {
+     "device": "Any mini PC (parametric shelf)",
+     "mounts": [
+      {
+       "id": "mw1320972",
+       "label": "2U shelf (OpenSCAD)",
+       "u": 2,
+       "face": "shelf",
+       "author": "Sherlock Homo",
+       "url": "https://makerworld.com/en/models/1320972-2u-mini-pc-10in-rack-mounts",
+       "note": "Built for a Minisforum NAB9 and a fanless Topgro PC; set the size in the customizer."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "group": "Thin clients & firewalls",
+   "items": [
+    {
+     "device": "Dell Wyse 3040",
+     "mounts": [
+      {
+       "id": "mw1416417",
+       "label": "Rack mount with power-button pusher",
+       "u": 1,
+       "estimated": true,
+       "url": "https://makerworld.com/en/models/1416417-dell-wyse-3040-10-rack-mount"
+      },
+      {
+       "id": "mw2123109",
+       "label": "Cluster mount for several units",
+       "u": 3,
+       "estimated": true,
+       "author": "BA7LYA",
+       "url": "https://makerworld.com/en/models/2123109-10-inch-wyse-3040-cluster"
+      }
+     ]
+    },
+    {
+     "device": "Dell Wyse 5070",
+     "mounts": [
+      {
+       "id": "mw2261662",
+       "label": "1U module",
+       "u": 1,
+       "author": "ghost_of_3d",
+       "url": "https://makerworld.com/en/models/2261662-dell-wyse-5070-rack-10-module",
+       "note": "For the standard 5070, not the Extended; the page also mentions a 19″ rack, so check the width."
+      },
+      {
+       "id": "pr1376758",
+       "label": "Rack mount with side vents",
+       "u": 1,
+       "estimated": true,
+       "author": "NasiPadang",
+       "url": "https://www.printables.com/model/1376758-dell-wyse-5070-10-inch-rack-mount"
+      },
+      {
+       "id": "pr883739",
+       "label": "Rack mount",
+       "u": 1,
+       "estimated": true,
+       "author": "Post24",
+       "url": "https://www.printables.com/model/883739-dell-wyseclient-5070-10inch-rack-mont",
+       "note": "Print in PETG or ASA; the rack gets warm."
+      },
+      {
+       "id": "pr1318020",
+       "label": "Customizable mount",
+       "u": 1,
+       "estimated": true,
+       "author": "kraavs",
+       "url": "https://www.printables.com/model/1318020-customizable-10-rack-mount-for-dell-wyse-5070-clie",
+       "note": "Made for the Mod10 rack; check the hole spacing."
+      }
+     ]
+    },
+    {
+     "device": "HP t620 / t630",
+     "mounts": [
+      {
+       "id": "mw1965282",
+       "label": "Mount with custom front posts · Lab Rax",
+       "u": 2,
+       "estimated": true,
+       "author": "Prophet254",
+       "labrax": true,
+       "url": "https://makerworld.com/en/models/1965282-lab-rax-hp-t630-thin-client-rack-mount",
+       "note": "The t630 is wider than the opening between the posts: print the replacement front posts or cut the clearance."
+      },
+      {
+       "id": "mw2225742",
+       "label": "Custom front for 3 units · Lab Rax",
+       "u": 5,
+       "estimated": true,
+       "face": "vent",
+       "author": "Ingz",
+       "labrax": true,
+       "url": "https://makerworld.com/en/models/2225742-lab-rax-hp-t630-thin-client-rack-mount-custom",
+       "note": "Replaces the front posts so three t620s or t630s fit in one rack."
+      }
+     ]
+    },
+    {
+     "device": "HP t640",
+     "mounts": [
+      {
+       "id": "mw2068819",
+       "label": "1U mount · Lab Rax",
+       "u": 1,
+       "author": "Mason's3DPrintsAndDesigns",
+       "labrax": true,
+       "url": "https://makerworld.com/en/models/2068819-hp-t640-10-network-rack-mount"
+      }
+     ]
+    },
+    {
+     "device": "Fujitsu Futro S740",
+     "mounts": [
+      {
+       "id": "pr1097358",
+       "label": "Rack mount",
+       "u": 1,
+       "estimated": true,
+       "author": "manzel",
+       "url": "https://www.printables.com/model/1097358-fujitsu-futro-s740-10-inch-rack-mount",
+       "note": "Fix the Futro with two M2.5×6 flat-head screws."
+      },
+      {
+       "id": "pr1371342",
+       "label": "1U mount with 2 keystones",
+       "u": 1,
+       "author": "Pablo",
+       "url": "https://www.printables.com/model/1371342-10-rack-mount-1u-w-keystone-jacks-fujitsu-futro-s7"
+      },
+      {
+       "id": "pr1660951",
+       "label": "Rack mount (also S7011, ESPRIMO G)",
+       "u": 1,
+       "estimated": true,
+       "author": "B0rax",
+       "url": "https://www.printables.com/model/1660951-fujitsu-futro-s740-s7011-esprimo-g-series-10-rack"
+      }
+     ]
+    },
+    {
+     "device": "Topton / CWWK N100 firewall PC",
+     "mounts": [
+      {
+       "id": "mw1319571",
+       "label": "2U mount",
+       "u": 2,
+       "face": "shelf",
+       "author": "Plaag",
+       "url": "https://makerworld.com/en/models/1319571-cwwk-topton-mini-pc-10-inch-2u-rackmount",
+       "note": "Fusion 360 source included for other box sizes."
+      },
+      {
+       "id": "pr1423678",
+       "label": "1U mount (N5105 / N100 / N150, 4× i226-V)",
+       "u": 1,
+       "face": "switch",
+       "author": "chuandinh",
+       "url": "https://www.printables.com/model/1423678-1u-10-rack-mount-topton-n5105-i226-v-n150-n100-min"
+      },
+      {
+       "id": "pr1706706",
+       "label": "2U case with ports and temperature display at the front",
+       "u": 2,
+       "face": "switch",
+       "author": "Miich94",
+       "url": "https://www.printables.com/model/1706706-topton-n100-10-rack"
+      }
+     ]
+    },
+    {
+     "device": "Qotom quad-NIC firewall",
+     "mounts": [
+      {
+       "id": "pr1415240",
+       "label": "1.5U mount",
+       "u": 1.5,
+       "face": "switch",
+       "author": "vrsn3ptoh",
+       "url": "https://www.printables.com/model/1415240-qotomtopton-quad-nic-firewall-10-15u-rack-mount",
+       "note": "Made for a fanless Qotom J1900; similar Topton boxes may fit."
+      }
+     ]
+    },
+    {
+     "device": "Protectli Vault VP2420",
+     "mounts": [
+      {
+       "id": "pr1672522",
+       "label": "1U plate, needs 1.5U of height",
+       "u": 1.5,
+       "face": "switch",
+       "author": "Seshan Ravikumar",
+       "url": "https://www.printables.com/model/1672522-protectli-vp2420-10-rack-mount-15u1u"
+      }
+     ]
+    },
+    {
+     "device": "Firewalla Gold",
+     "mounts": [
+      {
+       "id": "pr1196399",
+       "label": "Rack mount",
+       "u": 1,
+       "estimated": true,
+       "face": "switch",
+       "author": "SwaggyMike",
+       "url": "https://www.printables.com/model/1196399-firewalla-gold-10-rack-mount"
+      }
+     ]
+    },
+    {
+     "device": "Protectli Vault FW4B / FW4C",
+     "mounts": [
+      {
+       "id": "mw1531176",
+       "label": "Tray with keystones",
+       "u": 1,
+       "estimated": true,
+       "face": "switch",
+       "author": "snapwich",
+       "url": "https://makerworld.com/en/models/1531176-10-inch-rack-mount-kit-protectli-vault-fw4b-fw4c",
+       "note": "Ports are brought to the front with short patch cables to keystones."
+      }
+     ]
+    },
+    {
+     "device": "Firewalla Purple",
+     "mounts": [
+      {
+       "id": "pr980517",
+       "label": "1U mount",
+       "u": 1,
+       "face": "switch",
+       "author": "TimPrints",
+       "url": "https://www.printables.com/model/980517-firewalla-purple-10-inch-rack-mount"
       }
      ]
     }
@@ -3799,6 +4355,18 @@
        "note": "Made because other prints, including GL.iNet's official ones, were too tight; tested in a KWS rack."
       }
      ]
+    },
+    {
+     "device": "GL.iNet Comet (GL-RM1)",
+     "mounts": [
+      {
+       "id": "mw1628051",
+       "label": "1U mount for 2 units",
+       "u": 1,
+       "face": "switch",
+       "url": "https://makerworld.com/en/models/1628051-dual-gl-inet-comet-1u-10inch-rack"
+      }
+     ]
     }
    ]
   },
@@ -3877,6 +4445,30 @@
        "author": "Andsten",
        "url": "https://makerworld.com/en/models/590818-home-assistant-green-poe-splitter-10-rack-mount",
        "note": "Holds a TP-Link TL-POE10R PoE splitter to power the Green."
+      }
+     ]
+    },
+    {
+     "device": "IKEA Dirigera",
+     "mounts": [
+      {
+       "id": "mw1560477",
+       "label": "Rack mount",
+       "u": 2,
+       "estimated": true,
+       "face": "shelf",
+       "author": "Mauker",
+       "url": "https://makerworld.com/en/models/1560477-ikea-dirigera-10-inch-rack-mount"
+      },
+      {
+       "id": "mw2312353",
+       "label": "Mount with PoE injector",
+       "u": 2,
+       "estimated": true,
+       "face": "shelf",
+       "author": "PlutoWRC",
+       "url": "https://makerworld.com/en/models/2312353-ikea-dirigera-poe-injector-rackmount",
+       "note": "Powers the hub over PoE instead of its USB-C adapter."
       }
      ]
     },
@@ -4139,6 +4731,13 @@
      "name": "Long handles for +50 mm sides",
      "author": "obibi",
      "url": "https://makerworld.com/en/models/2364486-long-handles-for-longer-sides-lab-rax"
+    },
+    {
+     "id": "mw2350077",
+     "name": "Sides +50 mm, bolted",
+     "label": "Pair with the long handles",
+     "author": "obibi",
+     "url": "https://makerworld.com/en/models/2350077-lab-rax-sides-50mm-longer-bolt-together-version"
     }
    ]
   },
@@ -4298,6 +4897,11 @@
      "id": "mw1490030",
      "name": "SKÅDIS side panels",
      "url": "https://makerworld.com/en/models/1490030-lab-rax-skadis-side-panels"
+    },
+    {
+     "id": "mw1994910",
+     "name": "Multiboard side panels",
+     "url": "https://makerworld.com/en/models/1994910"
     }
    ]
   },
@@ -4441,6 +5045,13 @@
      "id": "mw2326543",
      "name": "Vertical cable management",
      "url": "https://makerworld.com/en/models/2326543-labrax-vertical-cable-management"
+    },
+    {
+     "id": "mw1773035",
+     "name": "Keystone cable pass-through inserts",
+     "label": "3–7 mm holes, fit any keystone slot",
+     "author": "klayf",
+     "url": "https://makerworld.com/en/models/1773035-keystone-insert-passthrough-various-sizes"
     }
    ]
   }
