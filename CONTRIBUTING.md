@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping make the Lab Rax Planner better. Most contributions add a device mount, a panel or a frame mod to `catalog.json`. You don't need to touch any code for that.
+Thanks for helping make the Mini Rack Planner better. Most contributions add a device mount, a panel or a frame mod to `catalog.json`. You don't need to touch any code for that.
 
 ## Where things go in `catalog.json`
 

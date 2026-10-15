@@ -1,6 +1,6 @@
-# Lab Rax Planner (RackBuilder)
+# Mini Rack Planner (RackBuilder)
 
-Static web app for planning 3D-printed Lab Rax 10" homelab racks. No build step, no framework. UI text is English.
+Static web app for planning 3D-printed 10" homelab racks: Lab Rax and more. Formerly "Lab Rax Planner": the localStorage keys (`labrax-planner-*`) keep their old names so saved layouts survive, and "Lab Rax" stays where it means the frame design. No build step, no framework. UI text is English.
 
 ## Files
 - `index.html` — markup and all CSS (light/dark tokens on `:root`, `data-theme` toggle).

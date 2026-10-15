@@ -1,4 +1,4 @@
-/* Lab Rax Planner — parametric parts for 10" racks, STL export and a small ZIP writer. MIT licensed.
+/* Mini Rack Planner — parametric parts for 10" racks, STL export and a small ZIP writer. MIT licensed.
    Dimensions follow the 10" rack standard used by Lab Rax:
    1U = 44.45 mm, panel height = n·44.45 − 0.79 mm, hole spacing 236.525 mm (centre to centre),
    222 mm clear width between the posts, holes at 6.35 / 22.225 / 38.1 mm inside each U, M6 screws. */
@@ -196,7 +196,7 @@ function toSTL(geoms, name, faceUp) {
   const ys = faceUp ? 1 : -1;
   let z0 = Infinity; for (const g of parts) { const a = g.attributes.position.array; for (let i = 2; i < a.length; i += 3) z0 = Math.min(z0, ys * a[i]); }
   const buf = new ArrayBuffer(84 + tris * 50), dv = new DataView(buf);
-  const head = ('Lab Rax Planner part: ' + (name || '')).slice(0, 79);
+  const head = ('Mini Rack Planner part: ' + (name || '')).slice(0, 79);
   for (let i = 0; i < head.length; i++) dv.setUint8(i, head.charCodeAt(i) & 127);
   dv.setUint32(80, tris, true);
   let o = 84;

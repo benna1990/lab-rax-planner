@@ -1,4 +1,4 @@
-/* Lab Rax Planner — 3D view (three.js r128). MIT licensed.
+/* Mini Rack Planner — 3D view (three.js r128). MIT licensed.
    Units are millimetres. x = width, y = height, z = depth (front face at z = 0, rack extends to −z).
    FRAME holds the Lab Rax frame dimensions used for the model; adjust them here when they are re-measured. */
 (function () {

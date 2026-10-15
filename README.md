@@ -1,6 +1,6 @@
-# Lab Rax Planner
+# Mini Rack Planner
 
-Plan your 3D-printed [Lab Rax](https://the-diy-life.com/introducing-lab-rax-a-3d-printable-modular-10-rack-system/) 10″ homelab rack before you print it.
+**Plan your 3D-printed 10″ rack · Lab Rax and more.** Plan a [Lab Rax](https://the-diy-life.com/introducing-lab-rax-a-3d-printable-modular-10-rack-system/) or another 3D-printed 10″ homelab rack before you print it. (Formerly the Lab Rax Planner; it is an independent planner, not an official Lab Rax tool.)
 
 **Open the planner: https://benna1990.github.io/lab-rax-planner/**
 
