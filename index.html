@@ -325,6 +325,12 @@ details.abd .hint{margin-top:6px}
 .lghead[aria-expanded="true"] .chev,details.sec[open] > summary .chev{transform:rotate(90deg)}
 .lrows{display:flex;flex-direction:column;gap:2px;padding:0 0 10px}
 .lrow-wrap{display:flex;align-items:center;gap:4px}
+/* modular parts: how many slots are used, a name per slot */
+.slotset{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding-top:8px;border-top:1px solid var(--line);margin-top:4px}
+.slotset .slab{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.slotset .hint{flex:1;min-width:160px}
+.slotnames{flex-basis:100%;display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px}
+.slotnames .field{width:100%;min-width:0}
 .lrow[data-fit]{opacity:.72}
 .lrow[data-fit]::after{content:attr(data-fit);flex:none;margin-left:auto;font-size:11px;font-weight:700;color:var(--muted);border:1px dashed var(--line-2);border-radius:999px;padding:1px 7px;white-space:nowrap} /* doesn't fit at this side: the rack height it needs */
 .lrow{flex:1;min-width:0;display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:10px;border:1px solid transparent;background:none;color:var(--ink);text-align:left;cursor:pointer}

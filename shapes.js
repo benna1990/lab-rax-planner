@@ -460,24 +460,29 @@ function buildMod(S, m, x, y, z, ms, ctx) {
     }
     case 'sbc': {
       const n = num(m.sbc === true ? 1 : m.sbc, 1), kind = m.board || 'pi5';
+      // the builder's choice (app.js): fill boards in the first slots, the rest blank; a name per slot printed on its plate
+      const fill = m.fill != null ? Math.max(0, Math.min(n, m.fill)) : n, names = Array.isArray(m.names) ? m.names : [];
+      const label = (i, bx, bw, PH, z, col, onBoard) => { const t = names[i]; if (!t) return; const ink = shade(col, lum(col) > .5 ? -.5 : .5);
+        S.obj(2).push(onBoard ? { t: 'text', x: bx + bw / 2, y: PH - 12, z, s: 3.2, str: String(t).slice(0, 9), c: ink } : { t: 'text', x: bx + bw / 2, y: PH / 2, z, s: Math.min(6, bw * .3), str: String(t).slice(0, 16), c: ink, rot: -90 }); };
       if (ms.vert) {
         const bh = ms.b.edge, PH = ctx.H || H;
         for (let i = 0; i < n; i++) {
           const bx = x + i * ms.pitch;
           if (m.tray) { // a printed blade in front of the holder, as tall as the panel and screwed on top and bottom: a window per
             // port, the board on a carrier behind it with its circuit board 7.2 mm from the blade's left edge (measured from mklements' 2U SBC holder)
-            const bw = ms.pitch - .7, win = boardFront(S, kind, bx + 7.2, PH / 2 - bh / 2 - 5.7, true, m.hat);
+            const bw = ms.pitch - .7, on = i < fill, win = on ? boardFront(S, kind, bx + 7.2, PH / 2 - bh / 2 - 5.7, true, m.hat) : null;
             hole(rectP(bx + bw / 2 - (ms.pitch - 2.2) / 2, 8, ms.pitch - 2.2, PH - 16, 1.5)); // the holder's slot behind the blade
-            const P = front(), wins = win.ports.map(([qx, qy, qw, qh]) => rectP(qx - .5, qy - .7, qw + 1, qh + 1.4, .8));
+            const P = front(), wins = on ? win.ports.map(([qx, qy, qw, qh]) => rectP(qx - .5, qy - .7, qw + 1, qh + 1.4, .8)) : []; // a blank blade where no board sits
             P.push(ext(rectP(bx, 0, bw, PH, 1.2), wins, PLATE, PLATE, ctx.trayColor || c));
             for (const sy of [4.2, PH - 4.2]) P.push(cyl(bx + bw / 2, sy, PLATE + .9, 2.3, .9, C.metal));
-          } else {
+            label(i, bx, bw, PH, PLATE + .2, ctx.trayColor || c, on);
+          } else if (i < fill) {
             const win = boardFront(S, kind, bx, y + (ms.h - bh) / 2, true, m.hat);
             hole(rectP(win.x - 1.4, win.y - 1.4, win.w + 2.8, win.h + 2.8, 1.5));
-          }
+          } else label(i, bx, ms.pitch, y * 2 + ms.h, .2, c, false); // no board: the plate stays closed
         }
       } else {
-        for (let i = 0; i < n; i++) {
+        for (let i = 0; i < fill; i++) {
           const bx = x + i * ms.pitch, win = boardFront(S, kind, bx, y, false, m.hat);
           hole(rectP(win.x - 1.4, win.y - 1.4, win.w + 2.8, win.h + 2.8, 1.5));
         }
@@ -492,7 +497,9 @@ function buildMod(S, m, x, y, z, ms, ctx) {
         hole(rectP(kx, ky, 14.9, 16.4, .6));
         const P = back(), zf = -PLATE - .2;
         P.push(box(kx + .2, ky + .2, zf, 14.5, 16, 26, col), box(kx + 1.6, ky + 2.6, zf + .1, 11.7, 9.8, .2, C.hole), box(kx + 4.7, ky + 12.2, zf + .1, 5.5, 2.4, .2, C.hole));
-        if (m.blank && k2 >= m.n - m.blank) P.push(box(kx + .2, ky + .2, zf + .3, 14.5, 16, .3, col));
+        const nb = m.fill != null ? ms.n - m.fill : m.blank || 0; // blank inserts in the last jacks
+        if (nb && k2 >= ms.n - nb) P.push(box(kx + .2, ky + .2, zf + .3, 14.5, 16, .3, col));
+        if (ms.rows === 1 && Array.isArray(m.names) && m.names[k2]) S.obj(2).push({ t: 'text', x: kx + 7.45, y: ky - 3.4, z: .2, s: 2.6, str: String(m.names[k2]).slice(0, 7), c: shade(c, lum(c) > .5 ? -.5 : .5) });
       }
       return;
     }
@@ -501,6 +508,13 @@ function buildMod(S, m, x, y, z, ms, ctx) {
       for (let r = 0; r < ms.rows; r++) for (let i = 0; i < ms.per && k2 < ms.n; i++, k2++) {
         const bx = x + i * (ms.bw + 3), by = y + ms.h - ms.bh - r * (ms.bh + 3);
         hole(rectP(bx - .6, by - .6, ms.bw + 1.2, ms.bh + 1.2, 1.4));
+        const nm = Array.isArray(m.names) && m.names[k2], ink = shade(ctx.sledColor || c, lum(ctx.sledColor || c) > .5 ? -.5 : .5);
+        if (m.fill != null && k2 >= m.fill) { // no drive: a blank cover
+          front().push(box(bx, by, 0, ms.bw, ms.bh, PLATE + 1, ctx.sledColor || c, 1.2));
+          if (nm) S.obj(2).push({ t: 'text', x: bx + ms.bw / 2, y: by + ms.bh / 2 - 1.5, z: PLATE + 1.2, s: Math.min(5, ms.bh * .3, ms.bw * .3), str: String(nm).slice(0, 16), c: ink, rot: ms.vert ? -90 : 0 });
+          continue;
+        }
+        if (nm) S.obj(2).push({ t: 'text', x: bx + ms.bw / 2, y: by + 2, z: PLATE + 3.2, s: Math.min(3.4, ms.bh * .22), str: String(nm).slice(0, 16), c: ink, rot: ms.vert ? -90 : 0 });
         const P = back();
         if (ms.vert) P.push(box(bx + 1.5, by + 1.5, -PLATE - 6, ms.bw - 3, ms.bh - 3, ms.size === 3.5 ? 147 : 100, C.drive));
         else P.push(box(bx + 1.5, by + 1.5, -PLATE - 6, ms.bw - 3, ms.bh - 3, ms.size === 3.5 ? 147 : 100, C.drive));
@@ -1187,7 +1201,7 @@ function sideScene(mods, depth, height, color, out) {
   (sh.studs || []).forEach(([a, b]) => S.obj(2).push(flat('x', circP(a, b, 4.8, 14), [], out > 0 ? t : -1.8, 1.8, shade(color, .06))));
   return S;
 }
-const ckey = (d, o) => (d.key || '') + '|' + (o.color || '') + '|' + (o.accent || '') + '|' + (o.frame || '') + '|' + (o.depth || '') + (o.upper ? '|^' : '');
+const ckey = (d, o) => (d.key || '') + (d.variant || '') + '|' + (o.color || '') + '|' + (o.accent || '') + '|' + (o.frame || '') + '|' + (o.depth || '') + (o.upper ? '|^' : '');
 function sceneFor(d, o) {
   o = Object.assign({ lookup: lookupFn }, o || {});
   if (d.top) return compileTop(d, o);

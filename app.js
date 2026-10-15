@@ -120,6 +120,8 @@ function sanitize() {
     if (i.key === 'custom') { i.name = String(i.name || 'Own device').slice(0, 40); if (typeof i.url !== 'string' || !/^https:\/\//.test(i.url)) delete i.url; }
     if (i.label != null && typeof i.label !== 'string') delete i.label;
     if (i.watts != null && !(typeof i.watts === 'number' && i.watts >= 0 && i.watts <= 500)) delete i.watts;
+    if (i.fill != null && !(Number.isInteger(i.fill) && i.fill >= 0 && i.fill <= 48)) delete i.fill;
+    if (i.names != null) { if (Array.isArray(i.names) && i.names.length <= 48) i.names = i.names.map(t => typeof t === 'string' ? t.slice(0, 16) : ''); else delete i.names; }
     if (i.dir != null && !FAN_DIRS.includes(i.dir)) delete i.dir;
     if (i.poe != null && typeof i.poe !== 'boolean') delete i.poe; // on PoE or on its own power supply, for parts that can run on PoE
     if (i.poeBudget != null && !(typeof i.poeBudget === 'number' && i.poeBudget >= 0 && i.poeBudget <= 1000)) delete i.poeBudget; // a PoE switch's budget with the builder's power adapter
@@ -147,8 +149,40 @@ let rackSide = 'front'; // the side new parts go to: the back while the Back vie
 const info = it => {
   if (it.key === 'custom') return { custom: true, name: it.name, h2: it.h2, face: 'custom', url: it.url || null, hardware: [] };
   if (it.key === 'gen') return { gen: true, name: it.name, label: genLabel(it.params), h2: Math.round(it.params.u * 2), face: genFace(it.params), params: it.params, url: null, hardware: genHardware(it.params) };
-  return LIB[it.key];
+  return it.fill != null || it.names ? modded(it, LIB[it.key]) : LIB[it.key];
 };
+/* Modular parts: a row of like slots (boards, drive sleds, keystone jacks). A placed part may fill fewer slots (it.fill; the rest
+   get a blank plate, cover or insert) and name each slot (it.names, printed on its plate). info() then hands out the part with
+   that choice in its shape, a variant for the drawing caches and its heat scaled to the boards in it. */
+const MOD_KINDS = ['sbc', 'bay', 'ks'], SLOT_NOUN = { sbc: ['board', 'boards', 'blank blade'], bay: ['drive', 'drives', 'blank cover'], ks: ['jack', 'jacks', 'blank insert'] };
+function modOf(d) { // { kind, n, idx } of the first module with 2 or more slots, else null
+  const row = d && d.shape && Array.isArray(d.shape.row) ? d.shape.row : null; if (!row) return null;
+  for (let i = 0; i < row.length; i++) { const m = row[i]; if (m && typeof m === 'object') for (const k of MOD_KINDS) if (typeof m[k] === 'number' && m[k] >= 2) return { kind: k, n: m[k], idx: i }; }
+  return null;
+}
+const modMemo = new Map();
+function modded(it, base) {
+  const md = modOf(base); if (!md) return base;
+  const k = Math.max(0, Math.min(md.n, it.fill != null ? it.fill : md.n)), names = (it.names || []).slice(0, md.n), variant = '~' + k + '~' + names.join('|');
+  const mk = it.key + variant; if (modMemo.has(mk)) return modMemo.get(mk);
+  const row = base.shape.row.map((m, i) => i === md.idx ? Object.assign({}, m, { fill: k, names }) : m);
+  const d = Object.assign({}, base, { shape: Object.assign({}, base.shape, { row }), variant, fill: k, slots: md.n }); // keystone jacks carry no heat
+  if (typeof base.watts === 'number' && md.kind !== 'ks') d.watts = Math.round(base.watts * k / md.n * 10) / 10;
+  if (modMemo.size > 300) modMemo.clear(); modMemo.set(mk, d); return d;
+}
+// "3 of 7 boards, 4 blank blades; text on: …" for the print list and the selection, '' when all slots are used and unnamed
+function slotText(it) {
+  const md = modOf(LIB[it.key]); if (!md || (it.fill == null && !it.names)) return '';
+  const k = it.fill != null ? it.fill : md.n, nn = SLOT_NOUN[md.kind], blanks = md.n - k, named = (it.names || []).filter(Boolean);
+  return k + ' of ' + md.n + ' ' + nn[1] + (blanks ? ', ' + blanks + ' ' + nn[2] + (blanks > 1 ? 's' : '') : '') + (named.length ? '; text: ' + named.join(', ') + ' (add it with your slicer’s text tool)' : '');
+}
+function slotsHTML(it) {
+  const md = modOf(LIB[it.key]); if (!md) return '';
+  const k = it.fill != null ? it.fill : md.n, nn = SLOT_NOUN[md.kind], names = it.names || [], cap = w => w[0].toUpperCase() + w.slice(1);
+  return '<div class="slotset"><span class="slab">' + cap(nn[1]) + '</span><div class="stepper small"><button type="button" data-act="fill" data-d="-1" aria-label="One ' + nn[0] + ' fewer"' + (k <= 0 ? ' disabled' : '') + '>−</button><output>' + k + ' of ' + md.n + '</output><button type="button" data-act="fill" data-d="1" aria-label="One ' + nn[0] + ' more"' + (k >= md.n ? ' disabled' : '') + '>+</button></div>' +
+    '<span class="hint">' + (k < md.n ? (md.n - k) + ' ' + nn[2] + (md.n - k > 1 ? 's' : '') + ' in the last slots. ' : '') + 'A name per slot is printed on its plate.</span>' +
+    '<div class="slotnames">' + Array.from({ length: md.n }, (_, i) => '<input class="field mini" type="text" data-slot="' + i + '" maxlength="16" placeholder="' + (i < k ? cap(nn[0]) + ' ' + (i + 1) : 'Blank ' + (i + 1)) + '" value="' + esc(names[i] || '') + '" aria-label="Name on slot ' + (i + 1) + '">').join('') + '</div></div>';
+}
 const H = it => info(it).h2;
 const slots = () => state.h * 2;
 const placed = () => state.items.filter(i => i.pos2 != null);
@@ -624,7 +658,7 @@ function renderSel() {
     '<button type="button" class="btn small" data-act="dup">Duplicate</button><button type="button" class="btn small danger" data-act="del">Remove</button>' +
     '<div class="selcolor"><span>Colour</span><div class="swatches">' + FIL.map(([n, c]) => '<button type="button" class="sw" style="--c:' + c + '" data-act="part-color" data-c="' + c + '" aria-label="' + n + '" title="PETG ' + n.toLowerCase() + '" aria-pressed="' + (it.color === c) + '"></button>').join('') + '</div>' +
     '<input type="color" id="sel-color" value="' + colorOf(it) + '" aria-label="Any colour" title="Any colour">' +
-    '<button type="button" class="btn small ghost" data-act="part-color" data-c=""' + (it.color ? '' : ' disabled') + '>Use default (' + esc(colorName(state.panel)) + ')</button></div>';
+    '<button type="button" class="btn small ghost" data-act="part-color" data-c=""' + (it.color ? '' : ' disabled') + '>Use default (' + esc(colorName(state.panel)) + ')</button></div>' + slotsHTML(it);
 }
 function renderUnplaced() {
   const un = state.items.filter(i => i.pos2 == null), box = $('#unplaced');
@@ -748,7 +782,7 @@ function printPack() {
     const col = i.color ? ' · ' + colorName(i.color) : '';
     if (i.key === 'gen') { add(i.name, genLabel(i.params) + ' · ' + uRange(i.pos2, d.h2) + atBack(i) + col + ' · in the build pack', null, 1, 'gen', null, itemPieces(i, d)); return; }
     if (!d.url) { if (d.custom) missing++; return; }
-    add(fullName(d), (i.label || shortName(d)) + ' · ' + uRange(i.pos2, d.h2) + atBack(i) + col, d.url, 1, 'mw', variant(d), itemPieces(i, d));
+    add(fullName(d), (i.label || shortName(d)) + ' · ' + uRange(i.pos2, d.h2) + atBack(i) + col + (slotText(i) ? ' · ' + slotText(i) : ''), d.url, 1, 'mw', variant(d), itemPieces(i, d));
   });
   // a page with several variants lists them, e.g. "½U ×2, 1U ×1", so it's clear which files to print
   out.forEach(x => {
@@ -1046,7 +1080,7 @@ function rackModel() {
 }
 const airMemo = new Map();
 function airflow() {
-  const sig = JSON.stringify([state.h, state.items.map(i => [i.key, i.pos2, i.watts, i.dir, i.params, i.side]), state.top, state.topDir, state.extras, state.xdir, state.back, state.room]);
+  const sig = JSON.stringify([state.h, state.items.map(i => [i.key, i.pos2, i.watts, i.dir, i.params, i.side, i.fill]), state.top, state.topDir, state.extras, state.xdir, state.back, state.room]);
   if (airMemo.has(sig)) return airMemo.get(sig);
   const m = rackModel(), r = window.LRAir.solve(m.model), flow = {};
   r.openings.forEach(o => { flow[o.id] = o.flow; }); r.fans.forEach(f => { flow[f.id] = f.flow; });
@@ -1165,7 +1199,7 @@ function powerOf(d, it) {
   const mods = modsOf(d), own = mods.filter(x => x.dev === true).reduce((n, x) => n + (x.n || 1), 0), extraProvs = [];
   let boards = 0, extra = 0;
   mods.forEach(x => {
-    if (x.sbc) { const n = typeof x.sbc === 'number' ? x.sbc : 1, b = x.board || 'pi5'; if (NO_LAN.test(b)) return; if (!own && OWN_BOARDS.test(b)) boards += n; else extra += n; }
+    if (x.sbc) { const n = typeof x.sbc === 'number' ? (x.fill != null ? x.fill : x.sbc) : 1, b = x.board || 'pi5'; if (NO_LAN.test(b)) return; if (!own && OWN_BOARDS.test(b)) boards += n; else extra += n; }
     else if (typeof x.dev === 'string' && PWDEV[x.dev]) { const o = PWDEV[x.dev], n = x.n || 1, p = provPorts(o); for (let k = 0; k < n; k++) if (p) extraProvs.push(p); else extra += o.eth != null ? o.eth : 1; }
   });
   const n = own || boards || 1, isDev = !!d.pwDev, poeIn = f('poeIn'), ports = isDev ? provPorts(dev) : 0;
@@ -1736,6 +1770,7 @@ document.addEventListener('click', async e => {
     case 'view': setView(a.dataset.v); break;
     case 'h-': shrink(state.h - 1); break;
     case 'hist-undo': histGo(-1); break;
+    case 'fill': { const it = find(sel), md = it && modOf(LIB[it.key]); if (!md) break; const k = Math.max(0, Math.min(md.n, (it.fill != null ? it.fill : md.n) + +a.dataset.d)); if (k === md.n) delete it.fill; else it.fill = k; touch(); render(); say(fullName(LIB[it.key]) + ': ' + (slotText(it) || 'all ' + md.n + ' ' + SLOT_NOUN[md.kind][1]) + '.'); break; }
     case 'hist-redo': histGo(1); break;
     case 'h+': setHeight(state.h + 1); break;
     case 'ver': state.version = a.dataset.v; touch(); render(); break;
@@ -1847,6 +1882,7 @@ document.addEventListener('input', e => {
   if (id === 'wz-name') { wz.label = e.target.value.slice(0, 16); $('#wz-logo').textContent = wz.label || 'Lab Rax'; return; }
   if (id === 'sel-color') { const it = find(sel); if (!it || !HEX.test(e.target.value)) return; it.color = e.target.value; touch(); renderRack(); save(); if (view === '3d' && window.LRView3D) window.LRView3D.update(snapshot()); return; }
   if (id === 'sel-watts') { const it = find(sel); if (!it) return; const v = e.target.value.trim(); if (v === '' || isNaN(+v)) delete it.watts; else it.watts = Math.max(0, Math.min(500, Math.round(+v))); touch(); save(); renderBuild(); if (view === 'air') renderRack(); hideTip(); return; }
+  if (e.target.dataset && e.target.dataset.slot != null) { const it = find(sel); if (!it) return; const i = +e.target.dataset.slot, names = (it.names || []).slice(); for (let j = 0; j < i; j++) if (names[j] == null) names[j] = ''; names[i] = e.target.value.slice(0, 16); while (names.length && !names[names.length - 1]) names.pop(); if (names.length) it.names = names; else delete it.names; touch(); renderRack(); save(); return; }
   if (id === 'sel-label') { const it = find(sel); if (!it) return; it.label = e.target.value.slice(0, 24) || undefined; touch(); renderRack(); save(); return; }
   if (id && id.indexOf('mk-') === 0 && id !== 'mk-name') mkChange(id);
 });
