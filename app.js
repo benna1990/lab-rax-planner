@@ -251,10 +251,11 @@ function renderRack() {
   const inset = (137 - P.PANEL_W / 2) * s; // printed panels are 250 mm wide, the frame 274 mm across the posts
   let items = '';
   byPos().forEach(it => {
-    const d = info(it), c = colorOf(it), fc = dark(c) ? '#F1F3F4' : '#16191C', lc = Math.abs(lum(state.accent) - lum(c)) > 70 ? state.accent : fc;
-    items += '<div class="item' + (it.id === sel ? ' sel' : '') + '" data-id="' + it.id + '" role="button" tabindex="0" aria-label="' + esc(fullName(d) + ', ' + uTxt(d) + ', ' + uRange(it.pos2, d.h2)) + '"' +
-      ' style="top:' + (it.pos2 * HU).toFixed(1) + 'px;height:' + (d.h2 * HU - 1).toFixed(1) + 'px;left:' + inset.toFixed(1) + 'px;right:' + inset.toFixed(1) + 'px;padding:0 ' + (5 * s).toFixed(1) + 'px;--c:' + c + ';--fc:' + fc + ';--lc:' + lc + ';--hole:' + holeFor(c) + '">' +
-      '<i class="screw"></i><span class="lbl"><b>' + esc(it.label || shortName(d)) + '</b><small>' + uTxt(d) + '</small></span><span class="face">' + faceHTML(d.face) + '</span><i class="screw"></i></div>';
+    // no text on the panels, so the faces show what is placed; the name is in the tooltip and the aria-label
+    const d = info(it), c = colorOf(it);
+    items += '<div class="item' + (it.id === sel ? ' sel' : '') + '" data-id="' + it.id + '" role="button" tabindex="0" aria-label="' + esc((it.label ? it.label + ': ' : '') + fullName(d) + ', ' + uTxt(d) + ', ' + uRange(it.pos2, d.h2)) + '"' +
+      ' style="top:' + (it.pos2 * HU).toFixed(1) + 'px;height:' + (d.h2 * HU - 1).toFixed(1) + 'px;left:' + inset.toFixed(1) + 'px;right:' + inset.toFixed(1) + 'px;padding:0 ' + (5 * s).toFixed(1) + 'px;--c:' + c + ';--hole:' + holeFor(c) + '">' +
+      '<i class="screw"></i><span class="face">' + faceHTML(d.face) + '</span><i class="screw"></i></div>';
   });
   const ap = state.top ? '<span class="ap" title="' + esc(fullName(LIB[state.top])) + '"><i class="disc"></i><i class="leg" style="left:30%"></i><i class="leg" style="right:30%"></i></span>' : '';
   const marginTop = Math.round(state.top ? Math.max(66 * s, frameW * .12 + 6) : frameW * .12 + 6);
@@ -280,6 +281,24 @@ function showGhost(p, h2) {
   const ins = (137 - P.PANEL_W / 2) * G.s;
   g.hidden = false; g.style.top = (p * G.HU) + 'px'; g.style.height = (h2 * G.HU - 1) + 'px'; g.style.left = ins + 'px'; g.style.right = ins + 'px';
 }
+
+/* ---------- hover tooltip: what a part is, without text on the panels ---------- */
+function tipHTML(it) {
+  const d = info(it);
+  return '<b>' + esc(it.label || d.name) + '</b>' +
+    (it.label ? '<span>' + esc(fullName(d)) + '</span>' : d.label ? '<span>' + esc(d.label) + '</span>' : '') +
+    '<span class="mono">' + uTxt(d) + ' · ' + uRange(it.pos2, d.h2) + '</span>' + (d.author ? '<span>by ' + esc(d.author) + '</span>' : '');
+}
+function showTip(id, x, y) {
+  const it = find(id), t = $('#tip');
+  if (!it || it.pos2 == null || drag) { hideTip(); return; }
+  if (t.dataset.id !== String(id)) { t.innerHTML = tipHTML(it); t.dataset.id = id; }
+  t.hidden = false;
+  const r = t.getBoundingClientRect(), vw = document.documentElement.clientWidth;
+  t.style.left = Math.max(8, Math.min(x + 14, vw - r.width - 8)) + 'px';
+  t.style.top = (y + 20 + r.height > innerHeight ? y - r.height - 12 : y + 20) + 'px';
+}
+function hideTip() { const t = $('#tip'); if (t && !t.hidden) { t.hidden = true; delete t.dataset.id; } }
 
 /* ---------- render: selection, unplaced, settings ---------- */
 function renderSel() {
@@ -382,7 +401,7 @@ function renderBuild() {
         (x.url ? '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">Open</a>' : '<span class="badge">STL</span>') + '</li>';
     }).join('') + '</ul>' +
     (pk.missing ? '<p class="hint">' + pk.missing + ' own device' + (pk.missing > 1 ? 's' : '') + ' without a link.</p>' : '') +
-    '<p class="hint">Download community models from MakerWorld as 3MF to keep their print profiles. Custom parts are in your build pack.</p>';
+    '<p class="hint">Download community models from MakerWorld as 3MF to keep their print profiles. Your build pack has the custom parts and a download list to click through the rest.</p>';
 
   const ol = orderList(), tagged = CAT.shops && CAT.shops.amazon && CAT.shops.amazon.en && CAT.shops.amazon.en.tag;
   html += '<div class="boxcard"><h3 class="sub">Shopping list</h3><dl class="kv">' +
@@ -456,16 +475,51 @@ async function genSTL(item) {
   return P.toSTL(part.geoms, item.name, part.faceUp);
 }
 const slug = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'part';
+/* download-list.html in the build pack: every community model to open, download on its own site and tick off.
+   Community files can't be in the pack (most licences forbid redistribution and MakerWorld needs a login), so this is the fast path.
+   The page stands alone, with no fonts or scripts from elsewhere, and remembers the ticks in the browser where it can. */
+const DL_CSS = ':root{--bg:#F3F4F2;--card:#fff;--ink:#16181B;--muted:#6A6F76;--line:#E3E5E2;--accent:#17824A;--on-accent:#fff;color-scheme:light dark}' +
+  '@media (prefers-color-scheme:dark){:root{--bg:#141517;--card:#1B1C1F;--ink:#ECEDEE;--muted:#9A9EA4;--line:#2A2C30;--accent:#3CC27A;--on-accent:#0E1A13}}' +
+  '*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}' +
+  'main{max-width:760px;margin:0 auto;padding:28px 16px 48px}h1{font-size:24px;margin:0 0 4px}h2{font-size:16px;margin:28px 0 8px}p{margin:0 0 14px;color:var(--muted)}' +
+  '.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.bar{height:6px;border-radius:9px;background:var(--line);overflow:hidden;margin:8px 0 18px}.bar i{display:block;height:100%;width:0;background:var(--accent)}' +
+  'button{font:inherit;font-weight:700;height:40px;padding:0 18px;border-radius:999px;border:0;background:var(--accent);color:var(--on-accent);cursor:pointer}' +
+  'ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}li{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card)}' +
+  'li label{flex:1;display:flex;gap:12px;align-items:center;min-width:0;cursor:pointer}li input{width:20px;height:20px;accent-color:var(--accent);flex:none}li span{display:flex;flex-direction:column;min-width:0}' +
+  'li small{color:var(--muted);font-size:13px}li a{color:var(--accent);font-weight:700;text-decoration:none;white-space:nowrap;font-size:14px}li.opened{border-color:var(--accent)}li.done b{text-decoration:line-through;color:var(--muted)}' +
+  '.tag{font:12px ui-monospace,Menlo,monospace;color:var(--muted)}@media (max-width:520px){li{flex-wrap:wrap}li a{margin-left:32px}}@media print{button,.bar{display:none}}';
+const DL_JS = '(function(){var K=document.body.dataset.key,done={};try{done=JSON.parse(localStorage.getItem(K))||{}}catch(e){}' +
+  'var rows=[].slice.call(document.querySelectorAll("li[data-i]")),next=0;function save(){try{localStorage.setItem(K,JSON.stringify(done))}catch(e){}}' +
+  'function update(){var n=rows.filter(function(r){return done[r.dataset.i]}).length;document.getElementById("count").textContent=n+" of "+rows.length+" downloaded";' +
+  'document.getElementById("bar").style.width=(rows.length?n/rows.length*100:100)+"%";rows.forEach(function(r){r.classList.toggle("done",!!done[r.dataset.i]);r.querySelector("input").checked=!!done[r.dataset.i]})}' +
+  'rows.forEach(function(r){r.querySelector("input").addEventListener("change",function(e){if(e.target.checked)done[r.dataset.i]=1;else delete done[r.dataset.i];save();update()});' +
+  'r.querySelector("a").addEventListener("click",function(){r.classList.add("opened");next=rows.indexOf(r)+1})});' +
+  'var nb=document.getElementById("next");if(nb)nb.addEventListener("click",function(){var order=rows.slice(next).concat(rows.slice(0,next)),r=order.filter(function(x){return!done[x.dataset.i]})[0];' +
+  'if(!r)return;r.classList.add("opened");next=rows.indexOf(r)+1;window.open(r.querySelector("a").href,"_blank","noopener");r.scrollIntoView({block:"center"})});update()})();';
+function downloadListHTML(pk) {
+  const title = (state.label || 'Lab Rax') + ' · ' + state.h + 'U', models = pk.filter(x => x.url), own = pk.filter(x => !x.url);
+  const site = u => /printables\.com/.test(u) ? 'Printables' : /makerworld\.com/.test(u) ? 'MakerWorld' : 'the model page';
+  const key = 'labrax-download-list-' + P.crc32(new TextEncoder().encode(models.map(x => x.url).join('\n'))).toString(36);
+  const name = x => '<b>' + esc((x.qty > 1 ? x.qty + '× ' : '') + x.name) + '</b><small>' + esc(x.subs.join(', ')) + '</small>';
+  return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Download list · ' + esc(title) + '</title><style>' + DL_CSS + '</style></head>' +
+    '<body data-key="' + key + '"><main><h1>Download list</h1><p>' + esc(title) + '. Open each model, download it there (MakerWorld asks you to sign in; the 3MF keeps the print profile) and tick it off. Your ticks are remembered in this browser.</p>' +
+    (models.length ? '<div class="top"><strong id="count"></strong><button type="button" id="next">Open next ↗</button></div><div class="bar"><i id="bar"></i></div><ul>' +
+      models.map((x, i) => '<li data-i="' + i + '"><label><input type="checkbox"><span>' + name(x) + '</span></label><a href="' + esc(x.url) + '" target="_blank" rel="noopener">Open on ' + site(x.url) + ' ↗</a></li>').join('') + '</ul>'
+      : '<p>There are no community models in this layout.</p>') +
+    (own.length ? '<h2>Custom parts</h2><p>Already in this pack, in custom-parts/. Panels and shelves print face-down, label plates face-up.</p><ul>' + own.map(x => '<li><span style="flex:1">' + name(x) + '</span><span class="tag">STL</span></li>').join('') + '</ul>' : '') +
+    '</main><script>' + DL_JS + '</script></body></html>';
+}
 async function buildPack() {
   say('Preparing your build pack…');
   const files = [], base = slug(state.label || 'lab-rax') + '-' + state.h + 'u';
   const gens = byPos().filter(i => i.key === 'gen');
   for (const g of gens) files.push({ name: 'custom-parts/' + uRange(g.pos2, H(g)).replace('–', '-') + '-' + slug(g.name) + '.stl', data: await genSTL(g) });
   const pk = printPack();
+  files.push({ name: 'download-list.html', data: downloadListHTML(pk) });
   files.push({ name: 'print-list.csv', data: csv([['Qty', 'Part', 'Where', 'Link'], ...pk.map(x => [x.qty, x.name, x.subs.join('; '), x.url || 'custom-parts/'])]) });
   files.push({ name: 'shopping-list.csv', data: csv([['Qty', 'Item', 'Buy'], ...orderList().map(x => [x.qty, x.name, x.buy || ''])]) });
   files.push({ name: 'README.txt', data: 'Lab Rax build pack — ' + (state.label || 'Lab Rax') + ', ' + state.h + 'U\n\n' + listText() +
-    '\n\nCommunity models stay on MakerWorld under their own licenses: open each link in print-list.csv and download the 3MF there.\nCustom parts in custom-parts/ were generated by the Lab Rax Planner (MIT) and print without supports: panels and shelves face-down, label plates face-up.\n' });
+    '\n\nCommunity models stay on MakerWorld under their own licenses: open download-list.html, download each model there as 3MF and tick it off.\nCustom parts in custom-parts/ were generated by the Lab Rax Planner (MIT) and print without supports: panels and shelves face-down, label plates face-up.\n' });
   try { if (window.LRPdf) files.push({ name: base + '-build-plan.pdf', data: await window.LRPdf.make(pdfData()) }); } catch (e) { /* PDF is optional in the pack */ }
   await saveFile(base + '-build-pack.zip', P.zip(files));
 }
@@ -621,6 +675,10 @@ host.addEventListener('pointerup', () => {
   sel = d.id; render();
 });
 host.addEventListener('pointercancel', () => { if (drag) { drag = null; render(); } });
+host.addEventListener('pointermove', e => { const el = e.pointerType === 'mouse' && e.target.closest('.item'); if (el) showTip(+el.dataset.id, e.clientX, e.clientY); else hideTip(); });
+host.addEventListener('pointerleave', hideTip);
+host.addEventListener('focusin', e => { const el = e.target.closest('.item'); if (el && el.matches(':focus-visible')) { const r = el.getBoundingClientRect(); showTip(+el.dataset.id, r.left + r.width / 2, r.bottom - 14); } });
+host.addEventListener('focusout', hideTip);
 host.addEventListener('keydown', e => { const el = e.target.closest('.item'); if (el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); sel = +el.dataset.id; render(); focusSel(); } });
 document.addEventListener('dragstart', e => {
   const b = e.target.closest('[data-act="lib"]'); if (!b || !CAT) return; const d = LIB[b.dataset.key]; if (d.top || d.extra) return;
@@ -652,7 +710,7 @@ function copyText(text, okMsg) {
 
 /* ---------- view switching ---------- */
 async function setView(v) {
-  view = v; renderControls();
+  view = v; renderControls(); hideTip();
   const on3d = v === '3d';
   $('#view3d').hidden = !on3d; $('#rackHost').style.visibility = on3d ? 'hidden' : ''; $('#meas').style.visibility = on3d ? 'hidden' : '';
   if (on3d) {
@@ -716,5 +774,5 @@ fetch('catalog.json', { cache: 'no-cache' })
   })
   .catch(() => { $('#cards').innerHTML = '<p class="hint">The parts catalog could not be loaded. Reload the page to try again.</p>'; });
 
-window.LRApp = { snapshot, select: id => { sel = id; render(); }, say };
+window.LRApp = { snapshot, select: id => { sel = id; render(); }, say, tip: (id, x, y) => id == null ? hideTip() : showTip(id, x, y) };
 })();

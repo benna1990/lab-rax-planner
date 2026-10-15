@@ -85,16 +85,20 @@ function faceTex(item, accent) {
     const hole = lightFace ? 'rgba(0,0,0,.32)' : 'rgba(0,0,0,.55)';
     // screws
     for (const x of [28, w - 28]) { const g = ctx.createRadialGradient(x - 4, h / 2 - 4, 1, x, h / 2, 13); g.addColorStop(0, '#F5F6F7'); g.addColorStop(1, '#6E747A'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, h / 2, 11, 0, Math.PI * 2); ctx.fill(); }
-    ctx.font = '700 ' + Math.min(30, h * .42) + 'px "Plus Jakarta Sans", sans-serif'; ctx.textBaseline = 'middle';
-    ctx.fillStyle = accent; ctx.fillText(item.name, 62, h / 2);
-    const x0 = 420, x1 = w - 70; ctx.fillStyle = hole;
+    // no text on the face: the name shows in the tooltip, the face shows what is mounted, centred between the screws
+    const cx = w / 2, row = (n, step, draw) => { for (let i = 0; i < n; i++) draw(cx + (i - (n - 1) / 2) * step); };
+    ctx.fillStyle = hole;
     const f = item.face;
-    if (f === 'vent') for (let x = x0 - 160; x < x1; x += 22) ctx.fillRect(x, h * .25, 10, h * .5);
-    else if (f === 'fan') for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.arc(x1 - 40 - i * 92, h / 2, h * .38, 0, Math.PI * 2); ctx.fill(); }
-    else if (f === 'ks') for (let i = 0; i < 12; i++) ctx.fillRect(x1 - 30 - i * 40, h * .22, 26, h * .56);
-    else if (f === 'sbc') for (let i = 0; i < 7; i++) ctx.fillRect(x1 - 20 - i * 58, h * .12, 12, h * .76);
-    else if (f === 'drv2' || f === 'drv4') { const n = f === 'drv2' ? 2 : 4; for (let i = 0; i < n; i++) ctx.fillRect(x1 - (i + 1) * (520 / n), h * .2, 520 / n - 16, h * .6); }
-    else if (f === 'switch' || f === 'shelf' || f === 'cut') { ctx.fillRect(x0, h * .16, x1 - x0, h * .68); if (f === 'switch') { ctx.fillStyle = item.color; for (let i = 0; i < 8; i++) ctx.fillRect(x1 - 60 - i * 34, h * .32, 22, h * .36); } ctx.fillStyle = '#4ADE80'; ctx.beginPath(); ctx.arc(x1 - 20, h / 2, 5, 0, 7); ctx.fill(); }
+    if (f === 'vent') for (let x = 70; x < w - 76; x += 22) ctx.fillRect(x, h * .25, 10, h * .5);
+    else if (f === 'fan') row(5, 150, x => { ctx.beginPath(); ctx.arc(x, h / 2, Math.min(h * .4, 66), 0, Math.PI * 2); ctx.fill(); });
+    else if (f === 'ks') row(12, 64, x => ctx.fillRect(x - 21, h * .22, 42, h * .56));
+    else if (f === 'sbc') row(7, 96, x => ctx.fillRect(x - 7, h * .12, 14, h * .76));
+    else if (f === 'drv2' || f === 'drv4') { const n = f === 'drv2' ? 2 : 4, bw = 760 / n; row(n, bw, x => ctx.fillRect(x - bw / 2 + 8, h * .2, bw - 16, h * .6)); }
+    else if (f === 'switch' || f === 'shelf' || f === 'cut') {
+      const x0 = 150, x1 = w - 150; ctx.fillRect(x0, h * .16, x1 - x0, h * .68);
+      if (f === 'switch') { ctx.fillStyle = item.color; row(8, 48, x => ctx.fillRect(x - 14, h * .32, 28, h * .36)); }
+      ctx.fillStyle = '#4ADE80'; ctx.beginPath(); ctx.arc(x1 - 22, h / 2, 6, 0, 7); ctx.fill();
+    }
   });
 }
 
@@ -251,9 +255,15 @@ async function mount(container, snap) {
     ui.querySelector('#v3d-file').addEventListener('change', e => { if (e.target.files.length) loadFiles(e.target.files); e.target.value = ''; });
     R = { container, renderer, scene, camera, controls, ground, rack: null, running: false, sides: false, fitted: false, down: null };
     if (window.ResizeObserver) new ResizeObserver(() => resize()).observe(container); else window.addEventListener('resize', resize);
-    // a click selects a part; a drag that orbits the view does not
-    renderer.domElement.addEventListener('pointerdown', e => { R.down = [e.clientX, e.clientY]; });
+    // a click selects a part; a drag that orbits the view does not. Hovering a part shows its name.
+    renderer.domElement.addEventListener('pointerdown', e => { R.down = [e.clientX, e.clientY]; window.LRApp.tip(null); });
     renderer.domElement.addEventListener('click', e => { if (R.down && Math.hypot(e.clientX - R.down[0], e.clientY - R.down[1]) < 5) pick(e); });
+    renderer.domElement.addEventListener('pointermove', e => {
+      if (e.pointerType !== 'mouse' || e.buttons) return;
+      R.hover = e; if (R.hoverQueued) return; R.hoverQueued = true;
+      requestAnimationFrame(() => { R.hoverQueued = false; if (R.hover) window.LRApp.tip(hitId(R.hover), R.hover.clientX, R.hover.clientY); });
+    });
+    renderer.domElement.addEventListener('pointerleave', () => { R.hover = null; window.LRApp.tip(null); });
   }
   R.container.hidden = false;
   resize();
@@ -279,15 +289,17 @@ async function rebuild(snap) {
   if (R.rack) { R.scene.remove(R.rack); dispose(R.rack); }
   R.rack = g; R.scene.add(g);
 }
-function pick(e) {
+function hitId(e) {
+  if (!R.rack) return null;
   const r = R.renderer.domElement.getBoundingClientRect(), m = new T.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
   const ray = new T.Raycaster(); ray.setFromCamera(m, R.camera);
-  const hit = ray.intersectObjects(R.rack ? R.rack.children : [], true)[0];
+  const hit = ray.intersectObjects(R.rack.children, true)[0];
   let o = hit && hit.object; while (o && o.userData.id == null && o.parent) o = o.parent;
-  if (o && o.userData.id != null) window.LRApp.select(o.userData.id);
+  return o && o.userData.id != null ? o.userData.id : null;
 }
+function pick(e) { const id = hitId(e); if (id != null) window.LRApp.select(id); }
 function update(snap) { if (R && R.running) rebuild(snap); }
-function pause() { if (R) R.running = false; }
+function pause() { if (R) { R.running = false; R.hover = null; } }
 function theme() { if (R) R.ground.material.color.copy(lin(themeColors().line)); }
 async function action(v) {
   if (!R) return;
