@@ -3,7 +3,7 @@
    FRAME holds the Lab Rax frame dimensions used for the model; adjust them here when they are re-measured. */
 (function () {
 'use strict';
-const P = window.LRParts;
+const P = window.LRParts, LS = window.LRShapes;
 
 /* Sources (see README): clear width 222 and hole spacing 236.525 from the Lab Rax article; total depth ≈240 mm from the depth-spacer
    remix; outer width ≈280 mm from the LowProfile remix. The shape follows the photos in the Lab Rax article: top and bottom rings of
@@ -41,6 +41,10 @@ function themeColors() {
 // colours are picked as sRGB hex; three.js r128 expects linear colours when the output is sRGB
 const lin = c => new T.Color(c).convertSRGBToLinear();
 function mat(color, opts) { return new T.MeshStandardMaterial(Object.assign({ color: lin(color), roughness: .82, metalness: .02 }, opts || {})); }
+// shared materials for the parts drawn by shapes.js (their meshes are cached, so the materials stay too)
+const matCache = new Map();
+const METAL = new Set(['#C4C9CE', '#8F969D', '#C9A55A']);
+function cmat(c) { if (!matCache.has(c)) matCache.set(c, mat(c, METAL.has(c) ? { metalness: .5, roughness: .4 } : c === '#F1F2F3' || c === '#F4F5F6' ? { roughness: .55 } : null)); return matCache.get(c); }
 function boxMesh(w, h, d, x, y, z, m) { const g = new T.BoxGeometry(w, h, d); const me = new T.Mesh(g, m); me.position.set(x + w / 2, y + h / 2, z - d / 2); return me; }
 
 /* A closed rectangular ring with one cross-section all the way round and 45° mitred corners, like the printed horizontal and edge pieces.
@@ -64,108 +68,112 @@ function canvasTex(w, h, draw) {
   const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h);
   const t = new T.CanvasTexture(c); t.anisotropy = 4; if (T.sRGBEncoding) t.encoding = T.sRGBEncoding; return t;
 }
-function grilleTex(frameColor, accent, label) {
+function grilleTex(frameColor, accent, label, mods) {
+  mods = mods || {};
   return canvasTex(1024, 112, (ctx, w, h) => {
     ctx.fillStyle = frameColor; ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = '#070809';
+    if (label && mods.corner) { // keystones (or an LED matrix) in the top corner instead of the grille
+      if (mods.corner === 'matrix') { ctx.fillStyle = '#121314'; ctx.fillRect(w * .2, h * .2, w * .6, h * .6); for (let i = 0; i < 32; i++) for (let j = 0; j < 8; j++) { ctx.fillStyle = (i * 7 + j * 3) % 5 ? '#3A1416' : '#FF4D4D'; ctx.beginPath(); ctx.arc(w * .2 + (i + .5) * w * .6 / 32, h * .2 + (j + .5) * h * .6 / 8, 3.6, 0, 7); ctx.fill(); } return; }
+      const n = Math.min(12, mods.corner), kw = 58, kh = 64, gap = 12, x0 = (w - n * kw - (n - 1) * gap) / 2;
+      for (let i = 0; i < n; i++) { ctx.fillStyle = '#18191C'; ctx.fillRect(x0 + i * (kw + gap), (h - kh) / 2, kw, kh); ctx.fillStyle = '#050506'; ctx.fillRect(x0 + i * (kw + gap) + 6, (h - kh) / 2 + 10, kw - 12, kh * .54); }
+      return;
+    }
+    ctx.fillStyle = mods.logo === 'hexbar' ? accent : '#070809';
+    if (mods.logo === 'hexbar') { ctx.shadowColor = accent; ctx.shadowBlur = 10; }
     const R0 = 12, W0 = Math.sqrt(3) * R0;
     for (let row = 0, y = 15; y < h - 8; row++, y += R0 * 1.5)
       for (let x = 22 + (row % 2) * W0 / 2; x < w - 16; x += W0) { ctx.beginPath(); for (let k = 0; k < 6; k++) { const a = Math.PI / 3 * k + Math.PI / 6; ctx.lineTo(x + R0 * .8 * Math.cos(a), y + R0 * .8 * Math.sin(a)); } ctx.fill(); }
+    ctx.shadowBlur = 0;
     if (!label) return;
     const fs = Math.min(74, 860 / Math.max(4, label.length) / .74);
     ctx.font = fs + 'px Audiowide, "Plus Jakarta Sans", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.lineWidth = 7; ctx.strokeStyle = frameColor; ctx.strokeText(label, w / 2, h / 2 + 2); ctx.fillStyle = accent; ctx.fillText(label, w / 2, h / 2 + 2);
+    ctx.lineWidth = 7; ctx.strokeStyle = frameColor; ctx.strokeText(label, w / 2, h / 2 + 2);
+    if (mods.logo === 'neopixel') { ctx.shadowColor = accent; ctx.shadowBlur = 18; }
+    ctx.fillStyle = accent; ctx.fillText(label, w / 2, h / 2 + 2); ctx.shadowBlur = 0;
   });
 }
-function faceTex(item, accent) {
-  // 4 px per mm both ways (250 mm wide panel), so circles stay round
-  const hpx = Math.max(32, Math.round((item.h2 * P.U / 2 - P.CLEAR) * 4));
-  return canvasTex(1000, hpx, (ctx, w, h) => {
-    ctx.fillStyle = item.color; ctx.fillRect(0, 0, w, h);
-    const lightFace = (parseInt(item.color.slice(1), 16) >> 16) > 140;
-    const hole = lightFace ? 'rgba(0,0,0,.32)' : 'rgba(0,0,0,.55)';
-    // screws
-    for (const x of [28, w - 28]) { const g = ctx.createRadialGradient(x - 4, h / 2 - 4, 1, x, h / 2, 13); g.addColorStop(0, '#F5F6F7'); g.addColorStop(1, '#6E747A'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, h / 2, 11, 0, Math.PI * 2); ctx.fill(); }
-    // no text on the face: the name shows in the tooltip, the face shows what is mounted, centred between the screws
-    const cx = w / 2, row = (n, step, draw) => { for (let i = 0; i < n; i++) draw(cx + (i - (n - 1) / 2) * step); };
-    ctx.fillStyle = hole;
-    const f = item.face;
-    if (f === 'vent') for (let x = 70; x < w - 76; x += 22) ctx.fillRect(x, h * .25, 10, h * .5);
-    else if (f === 'fan') row(5, 150, x => { ctx.beginPath(); ctx.arc(x, h / 2, Math.min(h * .4, 66), 0, Math.PI * 2); ctx.fill(); });
-    else if (f === 'ks') row(12, 64, x => ctx.fillRect(x - 21, h * .22, 42, h * .56));
-    else if (f === 'sbc') row(7, 96, x => ctx.fillRect(x - 7, h * .12, 14, h * .76));
-    else if (f === 'drv2' || f === 'drv4') { const n = f === 'drv2' ? 2 : 4, bw = 760 / n; row(n, bw, x => ctx.fillRect(x - bw / 2 + 8, h * .2, bw - 16, h * .6)); }
-    else if (f === 'switch' || f === 'shelf' || f === 'cut') {
-      const x0 = 150, x1 = w - 150; ctx.fillRect(x0, h * .16, x1 - x0, h * .68);
-      if (f === 'switch') { ctx.fillStyle = item.color; row(8, 48, x => ctx.fillRect(x - 14, h * .32, 28, h * .36)); }
-      ctx.fillStyle = '#4ADE80'; ctx.beginPath(); ctx.arc(x1 - 22, h / 2, 6, 0, 7); ctx.fill();
-    }
-  });
-}
-
 /* ---------- rack model ---------- */
 async function genGeoms(params) {
   const k = JSON.stringify(params);
   if (!genCache.has(k)) genCache.set(k, (await P.build(params)).geoms);
   return genCache.get(k);
 }
-function handleMesh(m) {
-  // an arch along the side edge: two sloping legs and a grip, open underneath
-  const L = FRAME.depth * FRAME.handleLen, H = FRAME.handleH, leg = 14, bar = 10, sl = .35, s = new T.Shape();
+function handleMesh(m, F, kind) {
+  // an arch along the side edge: two sloping legs and a grip, open underneath; stackable handles are flat-topped boxes with a slot
+  const L = F.depth * F.handleLen, H = kind === 'stackable' ? 26 : F.handleH, leg = 14, bar = 10, sl = kind === 'stackable' ? 0 : .35, s = new T.Shape();
   s.moveTo(0, 0); s.lineTo(leg, 0); s.lineTo(leg + (H - bar) * sl, H - bar); s.lineTo(L - leg - (H - bar) * sl, H - bar); s.lineTo(L - leg, 0);
   s.lineTo(L, 0); s.lineTo(L - H * sl, H); s.lineTo(H * sl, H); s.lineTo(0, 0);
-  const g = new T.ExtrudeGeometry(s, { depth: FRAME.handleW - 2, bevelEnabled: true, bevelThickness: 1, bevelSize: 1, bevelSegments: 2, curveSegments: 4 });
+  const g = new T.ExtrudeGeometry(s, { depth: F.handleW - 2, bevelEnabled: true, bevelThickness: 1, bevelSize: 1, bevelSegments: 2, curveSegments: 4 });
   g.translate(0, 1, 1); g.rotateY(Math.PI / 2);
   return new T.Mesh(g, m);
 }
-function postHoles(g, snap, y0, inner) {
+function postHoles(g, snap, y0, inner, F) {
   // three holes per U in every post; the heat-set version shows the brass inserts
   const n = snap.h * 3 * 4, holes = new T.InstancedMesh(new T.CircleGeometry(3.3, 20), new T.MeshBasicMaterial({ color: 0x060708 }), n);
   const brass = snap.version === 'bolted' ? null : new T.InstancedMesh(new T.RingGeometry(3.3, 4.3, 20), mat('#C9A55A', { metalness: .55, roughness: .38 }), n);
   const m = new T.Matrix4(), one = new T.Vector3(1, 1, 1), front = new T.Quaternion(), back = new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), Math.PI);
   let k = 0;
   for (const sx of [-1, 1]) for (const isFront of [true, false]) for (let u = 0; u < snap.h; u++) for (const off of HOLE_Y) {
-    m.compose(new T.Vector3(sx * HOLE_X, y0 + inner - u * P.U - off, isFront ? .15 : -FRAME.depth - .15), isFront ? front : back, one);
+    m.compose(new T.Vector3(sx * HOLE_X, y0 + inner - u * P.U - off, isFront ? .15 : -F.depth - .15), isFront ? front : back, one);
     holes.setMatrixAt(k, m); if (brass) brass.setMatrixAt(k, m); k++;
   }
   g.add(holes); if (brass) g.add(brass);
 }
 async function buildRack(snap) {
-  const g = new T.Group(), F = FRAME, inner = snap.h * P.U, hw = F.outer / 2, hd = F.depth / 2, t = F.ring;
+  // frame extras: deeper sides, other handles, bigger feet or casters, a drawer under the base (see shapes.js frameMods)
+  const mods = snap.mods || {}, F = Object.assign({}, FRAME, { depth: FRAME.depth + (mods.depthAdd || 0), foot: mods.feet === 'casters' ? 46 : mods.feet === 'big' ? 14 : FRAME.foot, handleLen: mods.handles === 'long' ? .7 : FRAME.handleLen });
+  const g = new T.Group(), inner = snap.h * P.U, hw = F.outer / 2, hd = F.depth / 2, t = F.ring, drawerH = mods.drawer ? 30 : 0;
   const frameM = mat(snap.frame, { side: T.DoubleSide }), postM = mat(snap.frame);
-  const y0 = F.foot + F.bottom, yTop = y0 + inner, topY = yTop + F.top;
+  const y0 = F.foot + drawerH + F.bottom, yTop = y0 + inner, topY = yTop + F.top;
   // bottom and top rings: front and back horizontal pieces plus the side edge pieces, bevelled and mitred at the corners
   const bottom = new T.Mesh(ringGeom([[0, F.bottom], [0, F.bottomBevel], [-F.bottomBevel, 0], [-t, 0], [-t, F.bottom]], hw, hd), frameM);
-  bottom.position.set(0, F.foot, -hd); g.add(bottom);
+  bottom.position.set(0, F.foot + drawerH, -hd); g.add(bottom);
   const top = new T.Mesh(ringGeom([[0, 0], [0, F.top - F.topBevel], [-F.topBevel, F.top], [-t, F.top], [-t, 0]], hw, hd), frameM);
   top.position.set(0, yTop, -hd); g.add(top);
   // hex grille on the front and back bevels, with the rack's name at the front
   for (const isFront of [true, false]) {
     const c = F.topBevel, n = .25 / Math.SQRT2;
-    const grille = new T.Mesh(new T.PlaneGeometry(F.outer - 2 * c - 10, c * Math.SQRT2 - 3), new T.MeshStandardMaterial({ map: grilleTex(snap.frame, snap.accent, isFront ? snap.label : ''), roughness: .8 }));
+    const lit = isFront && (mods.logo === 'neopixel' || mods.logo === 'hexbar'), tex = grilleTex(snap.frame, snap.accent, isFront ? snap.label : '', isFront ? mods : null);
+    const grille = new T.Mesh(new T.PlaneGeometry(F.outer - 2 * c - 10, c * Math.SQRT2 - 3), new T.MeshStandardMaterial(Object.assign({ map: tex, roughness: .8 }, lit ? { emissive: new T.Color(0xffffff), emissiveMap: tex, emissiveIntensity: .35 } : {})));
     grille.position.set(0, topY - c / 2 + n, isFront ? -c / 2 + n : -F.depth + c / 2 - n);
     grille.rotation.set(isFront ? -Math.PI / 4 : Math.PI / 4, isFront ? 0 : Math.PI, 0);
     g.add(grille);
   }
   // posts with their holes
   for (const sx of [-1, 1]) for (const z of [0, -(F.depth - F.postDepth)]) g.add(boxMesh(F.post, inner, F.postDepth, sx < 0 ? -F.clear / 2 - F.post : F.clear / 2, y0, z, postM));
-  postHoles(g, snap, y0, inner);
+  postHoles(g, snap, y0, inner, F);
   // top and bottom panels sit in a rebate inside the rings
   const pw = F.outer - 2 * t + 6, pd = F.depth - 2 * t + 6, pz = -(F.depth - pd) / 2;
-  if (!snap.top) g.add(boxMesh(pw, F.side, pd, -pw / 2, topY - 6, pz, mat(snap.accent)));
-  else {
-    const disc = new T.Mesh(new T.CylinderGeometry(103, 103, 46, 48), mat('#F2F3F4', { roughness: .5 }));
-    disc.rotation.x = -Math.PI / 4; disc.position.set(0, topY + 70, -hd + 10); g.add(disc);
-    for (const sx of [-1, 1]) g.add(boxMesh(14, 63, 14, sx * 50 - 7, topY - 3, -hd + 7, mat(snap.frame)));
+  if (!snap.topPart) g.add(boxMesh(pw, F.side, pd, -pw / 2, topY - 6, pz, mat(snap.accent)));
+  else { // the top mount as drawn by shapes.js: access point on its arms, a fan or mesh top, Gridfinity
+    const top = LS.topMeshes(T, snap.topPart, { color: snap.panel, frame: snap.frame, accent: snap.accent, depth: F.depth }, cmat);
+    top.position.set(0, topY - 3, 0); g.add(top);
   }
   g.add(boxMesh(pw, F.side, pd, -pw / 2, y0 - 4, pz, mat(snap.frame)));
   // side panels: printed in the frame colour, or tinted acrylic you can see through
+  // patterned side panels (hex, Kumiko, SKÅDIS, a fan…) come from the extras; otherwise printed or acrylic
   const sideM = snap.sides === 'acrylic' ? mat('#1C2127', { transparent: true, opacity: .4, roughness: .12, metalness: .1, depthWrite: false }) : mat(snap.frame);
-  for (const sx of [-1, 1]) g.add(boxMesh(F.side, inner + 8, F.depth - 2 * F.postDepth + 8, sx < 0 ? -hw : hw - F.side, y0 - 4, -F.postDepth + 4, sideM));
+  const sd = F.depth - 2 * F.postDepth + 8, sh = inner + 8;
+  if (mods.side || mods.sideFan) for (const sx of [-1, 1]) { const sp = LS.sideMeshes(T, mods, sd, sh, snap.frame, sx, cmat); sp.position.set(sx < 0 ? -hw : hw - F.side, y0 - 4, -F.postDepth + 4); g.add(sp); }
+  else for (const sx of [-1, 1]) g.add(boxMesh(F.side, sh, sd, sx < 0 ? -hw : hw - F.side, y0 - 4, -F.postDepth + 4, sideM));
   // handles on the flat strip of the side edges, feet under the bottom edges
   const hx = hw - (t + F.topBevel) / 2 - F.handleW / 2;
-  for (const sx of [-1, 1]) { const hm = handleMesh(frameM); hm.position.set(sx < 0 ? -hx - F.handleW : hx, topY, -F.depth * (1 - F.handleLen) / 2); g.add(hm); }
-  for (const sx of [-1, 1]) for (const z of [-8, -(F.depth - 30)]) g.add(boxMesh(28, F.foot, 22, sx < 0 ? -hw + 4 : hw - 32, 0, z, mat('#1A1B1D')));
+  if (mods.handles === 'side') for (const sx of [-1, 1]) { // grips on the side panels instead of handles on top
+    const gl = F.depth * .45, grip = new T.Mesh(new T.BoxGeometry(12, 26, gl), frameM); grip.position.set(sx * (hw + 6), y0 + inner * .62, -F.depth / 2); g.add(grip);
+  } else for (const sx of [-1, 1]) { const hm = handleMesh(frameM, F, mods.handles); hm.position.set(sx < 0 ? -hx - F.handleW : hx, topY, -F.depth * (1 - F.handleLen) / 2); g.add(hm); }
+  for (const sx of [-1, 1]) for (const z of [-8, -(F.depth - 30)]) {
+    const fx = sx < 0 ? -hw + 4 : hw - 32;
+    if (mods.feet === 'casters') { // a caster: plate, fork and wheel
+      g.add(boxMesh(28, 6, 22, fx, F.foot - 6, z, mat('#3A3D42')));
+      const wheel = new T.Mesh(new T.CylinderGeometry(18, 18, 14, 24), mat('#1A1B1D')); wheel.rotation.z = Math.PI / 2; wheel.position.set(fx + 14, 18, z - 11); g.add(wheel);
+      g.add(boxMesh(20, F.foot - 24, 4, fx + 4, 20, z - 9, mat('#8F969D', { metalness: .5, roughness: .4 })));
+    } else g.add(boxMesh(28, F.foot, 22, fx, 0, z, mat('#1A1B1D')));
+  }
+  if (drawerH) { // the bottom drawer: a box under the base with a pull
+    g.add(boxMesh(F.outer - 12, drawerH - 2, F.depth - 20, -F.outer / 2 + 6, F.foot + 1, -2, frameM));
+    g.add(boxMesh(60, 7, 6, -30, F.foot + drawerH / 2 - 3.5, 4, mat(snap.accent)));
+  }
+  if (mods.wall) g.add(boxMesh(F.outer - 40, 40, 10, -F.outer / 2 + 20, y0 + inner / 2 - 20, -F.depth - 1, mat(snap.frame))); // wall cleat behind
   // equipment, screwed to the front of the posts
   for (const it of snap.items) {
     const yBottom = y0 + inner - (it.pos2 + it.h2) * P.U / 2 + P.CLEAR / 2, ph = it.h2 * P.U / 2 - P.CLEAR;
@@ -173,11 +181,9 @@ async function buildRack(snap) {
     if (it.gen) {
       const geoms = await genGeoms(it.gen), m = mat(it.color);
       geoms.forEach(gg => { const me = new T.Mesh(gg, m); me.userData.cached = true; holder.add(me); });
-    } else {
-      const face = new T.Mesh(new T.BoxGeometry(P.PANEL_W, ph, 3), [mat(it.color), mat(it.color), mat(it.color), mat(it.color), new T.MeshStandardMaterial({ map: faceTex(it, snap.accent), roughness: .8 }), mat(it.color)]);
-      face.position.set(0, ph / 2, -1.5); holder.add(face);
-      const dep = Math.min(it.depth || (it.face === 'vent' || it.face === 'fan' || it.face === 'ks' || it.face === 'blank' ? 0 : 120), F.depth - 25);
-      if (dep > 0) holder.add(boxMesh(Math.min(200, F.clear - 14), Math.max(4, ph - 8), dep, -Math.min(100, F.clear / 2 - 7), 4, -3, mat('#3A3D42', { roughness: .6 })));
+    } else { // the panel, what is mounted in it and the device behind it, as real geometry from the part's shape (shapes.js)
+      const look = it.look || { key: 'face:' + it.face, face: it.face, h2: it.h2 };
+      holder.add(LS.partMeshes(T, look, { color: it.color, accent: snap.accent, frame: snap.frame, maxDepth: F.depth - 25 }, cmat));
     }
     holder.position.set(0, yBottom, 3);
     if (it.sel) { const sel = new T.BoxHelper(holder, 0x3CC27A); holder.userData.helper = sel; }

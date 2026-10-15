@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Part looks</title>
+<style>
+:root{--bg:#F3F4F2;--card:#fff;--ink:#16181B;--muted:#6A6F76;--line:#E3E5E2;--sunk:#F1F2F0}
+@media (prefers-color-scheme:dark){:root{--bg:#141517;--card:#202124;--ink:#ECEDEE;--muted:#9BA1A8;--line:#33353A;--sunk:#232428}}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,sans-serif;padding:16px}
+h1{font-size:18px;margin:0 0 4px}p{margin:0 0 12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.c{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.t{height:72px;border-radius:8px;background:var(--sunk);display:grid;place-items:center;overflow:hidden}
+.t svg{width:150px;height:66px}
+.f{background:#2B2D31;border-radius:6px;padding:6px;display:flex;justify-content:center}
+.f svg{display:block}
+.n{font-weight:700;font-size:13px}.m{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.v3{height:260px;border-radius:8px;background:var(--sunk)}
+input{font:inherit;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);width:280px}
+</style>
+</head>
+<body>
+<h1>Part looks</h1>
+<p>Every catalog part drawn from its <code>shape</code> by shapes.js, the way the planner draws it: library drawing, front view at 1.2 px/mm, and with <code>&amp;3d=1</code> the 3D model. Add <code>?ids=sbc7,ucgmax1</code> to show only those parts. Run a local server and open tools/looks.html.</p>
+<p><input id="q" placeholder="Filter by name, id or author"></p>
+<div class="grid" id="g"></div>
+<script src="../parts.js"></script>
+<script src="../shapes.js"></script>
+<script>
+(async function () {
+  const qs = new URLSearchParams(location.search), ids = qs.get('ids') ? qs.get('ids').split(',') : null, want3d = qs.get('3d');
+  const cat = await (await fetch('../catalog.json', { cache: 'no-store' })).json();
+  const L = window.LRShapes, sizes = {}, parts = [], colors = { color: '#26282B', accent: '#B5CF2A', frame: '#26282B' };
+  // the same entries the planner builds (app.js buildCatalog)
+  (cat.panels || []).forEach(g => g.items.forEach(i => parts.push({ key: i.id, name: i.name, label: g.group, author: i.author, u: i.u, h2: i.u * 2, face: i.face || 'blank', shape: i.shape })));
+  (cat.devices || []).forEach(g => g.items.forEach(d => {
+    const dev = d.size ? { device: d.device, size: d.size, color: d.color, io: d.io } : null;
+    if (dev) sizes[d.device] = dev;
+    d.mounts.forEach(m => { if (!m.ref) parts.push({ key: m.id, name: d.device, label: m.label, author: m.author, u: m.u, h2: (m.u || 0) * 2, top: m.position === 'top', face: m.face || 'shelf', shape: m.shape, device: dev, depth: m.depth }); });
+  }));
+  (cat.extras || []).forEach(g => g.items.forEach(i => parts.push({ key: i.id, name: i.name, label: i.label || g.group, author: i.author, extra: true, shape: i.shape })));
+  L.devices(n => sizes[n] || null);
+  const host = document.getElementById('g');
+  function draw(q) {
+    host.innerHTML = '';
+    parts.filter(p => (!ids || ids.includes(p.key)) && (!q || (p.key + p.name + (p.label || '') + (p.author || '')).toLowerCase().includes(q))).forEach(p => {
+      const el = document.createElement('div'); el.className = 'c';
+      let thumb = '', front = '';
+      try {
+        thumb = L.thumbFor(p, p.extra ? { accent: colors.accent } : colors);
+        if (p.top) { const t = L.topFor(p, colors); if (t.h > 1.5) front = t.svg.replace('<svg ', '<svg style="width:' + Math.round(t.w * 1.1) + 'px;height:' + Math.round(t.h * 1.1) + 'px" '); }
+        else if (!p.extra) front = L.frontFor(p, colors).replace('<svg ', '<svg style="width:' + Math.round(250 * 1.2) + 'px;height:' + Math.round(L.panelH(p.u) * 1.2) + 'px" ');
+      } catch (e) { thumb = '<span style="color:#C8372D">' + e.message + '</span>'; console.error(p.key, e); }
+      el.innerHTML = '<div class="t">' + thumb + '</div>' + (front ? '<div class="f">' + front + '</div>' : '') + '<div class="n">' + p.name + '</div><div class="m">' + (p.label || '') + ' · ' + p.key + (p.u ? ' · ' + p.u + 'U' : '') + (p.author ? ' · ' + p.author : '') + (p.device ? ' · ' + p.device.size.join(' × ') + ' mm' : '') + '</div>' + (want3d && !p.extra ? '<div class="v3"></div>' : '');
+      host.appendChild(el);
+      if (want3d && !p.extra) show3d(el.querySelector('.v3'), p);
+    });
+  }
+  async function show3d(box, p) {
+    const T = await window.LRParts.loadThree();
+    const r = new T.WebGLRenderer({ antialias: true, alpha: true }); r.setPixelRatio(2); r.setSize(box.clientWidth, 260); if (T.sRGBEncoding) r.outputEncoding = T.sRGBEncoding; box.appendChild(r.domElement);
+    const scene = new T.Scene(), cam = new T.PerspectiveCamera(30, box.clientWidth / 260, 5, 5000);
+    scene.add(new T.HemisphereLight(0xffffff, 0x444444, .75)); const d1 = new T.DirectionalLight(0xffffff, .7); d1.position.set(300, 500, 400); scene.add(d1); const d2 = new T.DirectionalLight(0xffffff, .35); d2.position.set(-400, 200, -200); scene.add(d2);
+    const mat = c => new T.MeshStandardMaterial({ color: new T.Color(c).convertSRGBToLinear(), roughness: .8, metalness: .02 });
+    const g = p.top ? L.topMeshes(T, p, colors, mat) : L.partMeshes(T, p, colors, mat);
+    scene.add(g);
+    const b = new T.Box3().setFromObject(g), c = new T.Vector3(), s = new T.Vector3(); b.getCenter(c); b.getSize(s);
+    const dist = Math.max(s.x, s.y, s.z) * 1.5 + 40; cam.position.set(c.x + dist * .5, c.y + dist * .35, c.z + dist * .85); cam.lookAt(c);
+    const ctl = new T.OrbitControls(cam, r.domElement); ctl.target.copy(c); ctl.update();
+    (function loop() { if (!box.isConnected) return; ctl.update(); r.render(scene, cam); requestAnimationFrame(loop); })();
+  }
+  draw('');
+  document.getElementById('q').addEventListener('input', e => draw(e.target.value.trim().toLowerCase()));
+})();
+</script>
+</body>
+</html>

@@ -16,19 +16,25 @@ const FIL = [['Black', '#26282B'], ['Grey', '#7D848B'], ['White', '#E9EBEC'], ['
 const TABS = [['devices', 'Devices'], ['panels', 'Panels'], ['top', 'Top mounts'], ['extras', 'Frame & extras'], ['custom', 'Custom']];
 
 /* ---------- catalog ---------- */
-let CAT = null, LIB = {};
+let CAT = null, LIB = {}, SIZES = {};
+const LS = window.LRShapes; // how parts look: shapes.js
 function buildCatalog(c) {
-  CAT = c; LIB = {};
+  CAT = c; LIB = {}; SIZES = {};
   // src: the catalog entry, for its heat and airflow fields
   const add = (id, o, src) => { LIB[id] = Object.assign({ key: id, h2: o.u ? Math.round(o.u * 2) : 0 }, o, { watts: src.watts, wattsEst: !!src.wattsEstimated, fanDir: src.fanDir, vent: src.vent, at: src.at, fanAt: src.fanAt }); };
-  (c.panels || []).forEach(g => g.items.forEach(i => add(i.id, { name: i.name, label: null, u: i.u, est: !!i.estimated, face: i.face || 'blank', url: i.url || null, author: i.author || '', hardware: i.hardware || [], group: g.group, tab: 'panels' }, i)));
-  (c.devices || []).forEach(g => g.items.forEach(d => d.mounts.forEach(m => {
-    if (m.ref) { m.key = m.ref; return; }
-    m.key = m.id;
-    const top = m.position === 'top';
-    add(m.id, { name: d.device, label: m.label, u: top ? 0 : m.u, top, est: !!m.estimated, face: m.face || 'shelf', url: m.url || null, author: m.author || '', hardware: m.hardware || [], note: m.note, depth: m.depth, group: g.group, tab: top ? 'top' : 'devices' }, m);
-  })));
-  (c.extras || []).forEach(g => g.items.forEach(i => add(i.id, { name: i.name, label: i.label || null, u: 0, extra: true, url: i.url, author: i.author || '', hardware: i.hardware || [], note: i.note, group: g.group, tab: 'extras' }, i)));
+  (c.panels || []).forEach(g => g.items.forEach(i => add(i.id, { name: i.name, label: null, u: i.u, est: !!i.estimated, face: i.face || 'blank', shape: i.shape, url: i.url || null, author: i.author || '', hardware: i.hardware || [], group: g.group, tab: 'panels' }, i)));
+  (c.devices || []).forEach(g => g.items.forEach(d => {
+    const dev = d.size ? { device: d.device, size: d.size, color: d.color, io: d.io } : null;
+    if (dev) SIZES[d.device] = dev;
+    d.mounts.forEach(m => {
+      if (m.ref) { m.key = m.ref; return; }
+      m.key = m.id;
+      const top = m.position === 'top';
+      add(m.id, { name: d.device, label: m.label, u: top ? 0 : m.u, top, est: !!m.estimated, face: m.face || 'shelf', shape: m.shape, device: dev, url: m.url || null, author: m.author || '', hardware: m.hardware || [], note: m.note, depth: m.depth, group: g.group, tab: top ? 'top' : 'devices' }, m);
+    });
+  }));
+  (c.extras || []).forEach(g => g.items.forEach(i => add(i.id, { name: i.name, label: i.label || null, u: 0, extra: true, shape: i.shape, url: i.url, author: i.author || '', hardware: i.hardware || [], note: i.note, group: g.group, tab: 'extras' }, i)));
+  LS.devices(n => SIZES[n] || null);
 }
 
 /* ---------- state ---------- */
@@ -97,7 +103,7 @@ let sel = null, undo = null, G = {}, drag = null, libKey = null, dropP = null, t
 
 const info = it => {
   if (it.key === 'custom') return { custom: true, name: it.name, h2: it.h2, face: 'custom', url: it.url || null, hardware: [] };
-  if (it.key === 'gen') return { gen: true, name: it.name, label: genLabel(it.params), h2: Math.round(it.params.u * 2), face: genFace(it.params), url: null, hardware: [] };
+  if (it.key === 'gen') return { gen: true, name: it.name, label: genLabel(it.params), h2: Math.round(it.params.u * 2), face: genFace(it.params), params: it.params, url: null, hardware: [] };
   return LIB[it.key];
 };
 const H = it => info(it).h2;
@@ -112,9 +118,6 @@ const uTxt = d => (d.est ? '≈' : '') + fmtU(d.h2);
 const shortName = d => d.name;
 const fullName = d => d.label ? d.name + ' – ' + d.label : d.name;
 function uRange(p, h2) { const hi = state.h - Math.floor(p / 2), lo = state.h - Math.floor((p + h2 - 1) / 2); return lo === hi ? 'U' + hi : 'U' + lo + '–' + hi; }
-function lum(hex) { const n = parseInt(hex.slice(1), 16); return .2126 * (n >> 16) + .7152 * (n >> 8 & 255) + .0722 * (n & 255); }
-const dark = hex => lum(hex) < 140;
-const holeFor = hex => dark(hex) ? 'rgba(255,255,255,.16)' : 'rgba(0,0,0,.30)';
 const GEN_NAMES = { blank: 'Blank panel', vent: 'Vent panel', keystone: 'Keystone panel', shelf: 'Shelf', label: 'Label plate' };
 function genLabel(p) {
   if (p.type === 'keystone') return (p.ports || 12) * (p.rows || 1) + ' ports';
@@ -172,34 +175,22 @@ function fillGaps(keys, noun) {
 function focusSel() { const el = document.querySelector('.item[data-id="' + sel + '"]'); if (el) el.focus({ preventScroll: true }); }
 
 /* ---------- drawing helpers ---------- */
-function faceHTML(f) {
-  const r = (n, h) => Array(n).fill(h).join('');
-  switch (f) {
-    case 'vent': return '<i class="f-vent"></i>';
-    case 'fan': return r(5, '<i class="f-fan"></i>');
-    case 'ks': return r(12, '<i class="f-ks"></i>');
-    case 'd': return r(4, '<i class="f-fan" style="aspect-ratio:2;border-radius:3px"></i>');
-    case 'switch': return '<span class="f-dev">' + r(8, '<i class="f-port"></i>') + '<i class="f-led"></i></span>';
-    case 'shelf': return '<span class="f-dev"><i class="f-led"></i></span>';
-    case 'sbc': return r(7, '<i class="f-sbc"></i>');
-    case 'drv2': return r(2, '<i class="f-drv"></i>');
-    case 'drv4': return r(4, '<i class="f-drv"></i>');
-    case 'cut': return '<i class="f-cut"></i>';
-    default: return '';
-  }
+// a part as it looks from the front (rack view) and as a small 3D-looking drawing (library), drawn by shapes.js from its shape
+const colorsFor = c => ({ color: c || state.panel, accent: state.accent, frame: state.frame });
+const faceSVG = (d, c) => LS.frontFor(d, colorsFor(c));
+const thumbSVG = d => LS.thumbFor(d, d.extra ? { accent: state.accent } : colorsFor());
+const frameMods = () => LS.frameMods(state.extras.map(k => LIB[k]));
+// seen from the front a handle is the end of an arch along the side edge: 12 mm wide, 34 mm high, centred 23 mm in from the outside;
+// stackable handles are flat-topped and lower, side handles sit on the side panels instead
+function handleSVG(s, side, kind) {
+  if (kind === 'side') return '';
+  const hh = kind === 'stackable' ? 26 : 34;
+  return '<i class="handle' + (kind === 'stackable' ? ' flat' : '') + '" style="' + side + ':' + (17 * s).toFixed(1) + 'px;width:' + (12 * s).toFixed(1) + 'px;height:' + (hh * s).toFixed(1) + 'px" aria-hidden="true"></i>';
 }
-// seen from the front a handle is the end of an arch along the side edge: 12 mm wide, 34 mm high, centred 23 mm in from the outside
-function handleSVG(s, side) { return '<i class="handle" style="' + side + ':' + (17 * s).toFixed(1) + 'px;width:' + (12 * s).toFixed(1) + 'px;height:' + (34 * s).toFixed(1) + 'px" aria-hidden="true"></i>'; }
 function hexSVG(s) {
   const R = Math.max(3, 4.6 * s), W = Math.sqrt(3) * R, r = R * .78;
   const hx = (cx, cy) => { let p = ''; for (let k = 0; k < 6; k++) { const a = Math.PI / 180 * (60 * k - 30); p += (cx + r * Math.cos(a)).toFixed(2) + ',' + (cy + r * Math.sin(a)).toFixed(2) + ' '; } return '<polygon points="' + p + '"/>'; };
   return '<svg class="hexgrill" aria-hidden="true"><defs><pattern id="hexpat" width="' + W.toFixed(2) + '" height="' + (3 * R).toFixed(2) + '" patternUnits="userSpaceOnUse"><g fill="#070809">' + hx(W / 2, R * .5) + hx(0, R * 2) + hx(W, R * 2) + hx(W / 2, R * 3.5) + '</g></pattern></defs><rect width="100%" height="100%" fill="url(#hexpat)"/></svg>';
-}
-function thumbHTML(d) {
-  if (d.top) return '<span style="width:96px;height:18px;border-radius:50%;background:#F2F3F4;box-shadow:inset 0 -4px 0 #CBD0D4,0 0 0 1px rgba(0,0,0,.12)"></span>';
-  if (d.extra) return '<svg width="54" height="40" viewBox="0 0 54 40" fill="none" stroke="var(--muted)" stroke-width="1.6" aria-hidden="true"><rect x="6" y="4" width="42" height="32" rx="3"/><path d="M12 4v32M42 4v32"/></svg>';
-  const h = Math.max(10, Math.min(56, d.h2 * 11));
-  return '<span class="item" style="position:relative;width:132px;height:' + h + 'px;cursor:inherit;--c:#26282B;--hole:rgba(255,255,255,.16);padding:0 6px">' + '<span class="face" style="justify-content:center">' + faceHTML(d.face) + '</span></span>';
 }
 function logoSize(fw, th) { const n = Math.max(4, (state.label || 'Lab Rax').length); return Math.min(th * .64, fw * .8 / (n * .74)); }
 
@@ -214,11 +205,7 @@ function renderTabs() {
   $('#tabs').innerHTML = TABS.map(([k, l]) => '<button type="button" class="pill" data-act="tab" data-t="' + k + '" aria-pressed="' + (tab === k) + '">' + l + '</button>').join('') +
     (tab === 'devices' || tab === 'panels' || tab === 'top' ? '<button type="button" class="pill lr" data-act="lib-lr" aria-pressed="' + ui.lr + '" title="Only parts made for or tested in Lab Rax">Lab Rax only</button>' : '');
 }
-function miniThumb(d) {
-  if (d.top) return '<span class="disc-mini"></span>';
-  if (d.extra) return '<svg width="30" height="22" viewBox="0 0 54 40" fill="none" stroke="var(--muted)" stroke-width="2.4" aria-hidden="true"><rect x="6" y="4" width="42" height="32" rx="3"/><path d="M12 4v32M42 4v32"/></svg>';
-  return '<span class="item mini" style="height:' + Math.max(9, Math.min(26, d.h2 * 6 + 3)) + 'px;--c:#26282B;--hole:rgba(255,255,255,.18)"><span class="face">' + faceHTML(d.face) + '</span></span>';
-}
+function miniThumb(d) { return thumbSVG(d); }
 const inRack = key => placed().filter(i => i.key === key).length;
 function rowHTML(key, name, sub, extra) {
   const d = LIB[key], on = (d.top && state.top === key) || (d.extra && state.extras.includes(key)), n = d.top || d.extra ? 0 : inRack(key);
@@ -301,24 +288,36 @@ function renderRack() {
     // no text on the panels, so the faces show what is placed; the name is in the tooltip and the aria-label
     const d = info(it), c = colorOf(it);
     items += '<div class="item' + (it.id === sel ? ' sel' : '') + '" data-id="' + it.id + '" role="button" tabindex="0" aria-label="' + esc((it.label ? it.label + ': ' : '') + fullName(d) + ', ' + uTxt(d) + ', ' + uRange(it.pos2, d.h2)) + '"' +
-      ' style="top:' + (it.pos2 * HU).toFixed(1) + 'px;height:' + (d.h2 * HU - 1).toFixed(1) + 'px;left:' + inset.toFixed(1) + 'px;right:' + inset.toFixed(1) + 'px;padding:0 ' + (5 * s).toFixed(1) + 'px;--c:' + c + ';--hole:' + holeFor(c) + '">' +
-      '<i class="screw"></i><span class="face">' + faceHTML(d.face) + '</span><i class="screw"></i></div>';
+      ' style="top:' + (it.pos2 * HU).toFixed(1) + 'px;height:' + (d.h2 * HU - 1).toFixed(1) + 'px;left:' + inset.toFixed(1) + 'px;right:' + inset.toFixed(1) + 'px;--c:' + c + '">' +
+      faceSVG(d, c) + '</div>';
   });
-  const ap = state.top ? '<span class="ap" title="' + esc(fullName(LIB[state.top])) + '"><i class="disc"></i><i class="leg" style="left:30%"></i><i class="leg" style="right:30%"></i></span>' : '';
-  const marginTop = Math.round(state.top ? Math.max(66 * s, frameW * .12 + 6) : frameW * .12 + 6);
+  // the top mount, drawn above the frame at the same scale (280 mm across the outside of the frame)
+  const tf = state.top ? LS.topFor(LIB[state.top], colorsFor()) : null;
+  const ap = tf && tf.h > 1.5 ? '<span class="ap" title="' + esc(fullName(LIB[state.top])) + '" style="width:' + (tf.w * s).toFixed(1) + 'px;height:' + (tf.h * s).toFixed(1) + 'px;margin-left:' + (-tf.w * s / 2).toFixed(1) + 'px">' + tf.svg + '</span>' : '';
+  const mods = frameMods(), below = (mods.drawer ? 30 : 0) + (mods.feet === 'casters' ? 40 : mods.feet === 'big' ? 8 : 0);
+  const marginTop = Math.round(Math.max(ap ? tf.h * s + 4 : 0, frameW * .12 + 6));
+  // extras seen from the front: keystones or an LED matrix in the top corner, a lit logo, a switch in the edge, grips on the sides,
+  // bigger feet or casters and a drawer under the base
+  const crown = mods.corner === 'matrix' ? '<span class="corner-mx" aria-hidden="true"></span>'
+    : mods.corner ? '<span class="corner-ks" aria-hidden="true">' + '<i></i>'.repeat(Math.min(12, mods.corner)) + '</span>'
+    : hexSVG(s).replace('class="hexgrill"', 'class="hexgrill' + (mods.logo === 'hexbar' ? ' lit' : '') + '"') + '<span class="logo' + (mods.logo === 'neopixel' ? ' glow' : '') + '" style="font-size:' + logoSize(frameW, topH).toFixed(1) + 'px">' + esc(state.label || 'Lab Rax') + '</span>';
+  const feet = mods.feet === 'casters' ? '<i class="caster" style="left:4%;width:' + (32 * s).toFixed(1) + 'px;height:' + (32 * s).toFixed(1) + 'px;top:calc(100% + ' + ((mods.drawer ? 30 : 0) * s + 8 * s).toFixed(1) + 'px)"></i><i class="caster" style="right:4%;width:' + (32 * s).toFixed(1) + 'px;height:' + (32 * s).toFixed(1) + 'px;top:calc(100% + ' + ((mods.drawer ? 30 : 0) * s + 8 * s).toFixed(1) + 'px)"></i>'
+    : ['left', 'right'].map(sd => '<i class="foot" style="' + sd + ':3%;height:' + ((mods.feet === 'big' ? 14 : 6) * s).toFixed(1) + 'px' + (mods.drawer ? ';top:calc(100% + ' + (30 * s).toFixed(1) + 'px)' : '') + '"></i>').join('');
+  const drawer = mods.drawer ? '<i class="drawer" style="height:' + (28 * s).toFixed(1) + 'px"><i></i></i>' : '';
+  const grips = mods.handles === 'side' ? '<i class="sgrip" style="left:' + (-12 * s).toFixed(1) + 'px;width:' + (12 * s).toFixed(1) + 'px"></i><i class="sgrip" style="right:' + (-12 * s).toFixed(1) + 'px;width:' + (12 * s).toFixed(1) + 'px"></i>' : '';
   $('#rackHost').innerHTML =
     '<div class="rack' + (state.version === 'brass' ? ' brass' : '') + (air ? ' airv' : '') + '" id="rack" style="--frame:' + state.frame + ';--acc:' + state.accent + ';--bev:' + (20 * s).toFixed(1) + 'px;--hs:' + Math.max(3.5, 5 * s).toFixed(1) + 'px;grid-template-columns:34px ' + frameW.toFixed(1) + 'px ' + (air ? 90 : 34) + 'px;grid-template-rows:' + topH.toFixed(1) + 'px ' + bodyH.toFixed(1) + 'px ' + edge + 'px auto;margin-top:' + marginTop + 'px">' +
-      '<div></div><div class="edge top">' + (state.top ? '' : '<span class="tp-band" style="height:' + Math.round(7 * s) + 'px"></span>') + handleSVG(s, 'left') + handleSVG(s, 'right') + hexSVG(s) +
-        '<span class="logo" style="font-size:' + logoSize(frameW, topH).toFixed(1) + 'px">' + esc(state.label || 'Lab Rax') + '</span>' + ap + (air ? airEnd(air, 'top') : '') + '</div><div></div>' +
+      '<div></div><div class="edge top">' + (state.top ? '' : '<span class="tp-band" style="height:' + Math.round(7 * s) + 'px"></span>') + handleSVG(s, 'left', mods.handles) + handleSVG(s, 'right', mods.handles) + crown +
+        (mods.edgeSwitch ? '<i class="eswitch" style="width:' + (14 * s).toFixed(1) + 'px;height:' + (12 * s).toFixed(1) + 'px"></i>' : '') + ap + (air ? airEnd(air, 'top') : '') + '</div><div></div>' +
       '<div class="ulab">' + labels + '</div>' +
-      '<div class="rframe" style="width:' + frameW.toFixed(1) + 'px">' +
+      '<div class="rframe" style="width:' + frameW.toFixed(1) + 'px">' + grips +
         '<div class="post" style="left:0;width:' + postW.toFixed(1) + 'px">' + holesL + '</div>' +
         '<div class="bay" style="left:' + postW.toFixed(1) + 'px;width:' + bayW.toFixed(1) + 'px"></div>' +
         '<div class="post" style="right:0;width:' + postW.toFixed(1) + 'px">' + holesR + '</div>' +
         '<div class="mount" id="mount">' + items + (air ? airLayer(air, inset) : '') + '<div class="dropghost" id="ghost" hidden></div></div>' +
       '</div>' + (air ? airSide(air) : '<div></div>') +
-      '<div></div><div class="edge bot"><i class="foot" style="left:3%"></i><i class="foot" style="right:3%"></i>' + (air ? airEnd(air, 'bottom') : '') + '</div><div></div>' +
-      '<div></div><div class="floor"></div><div></div>' +
+      '<div></div><div class="edge bot">' + drawer + feet + (air ? airEnd(air, 'bottom') : '') + '</div><div></div>' +
+      '<div></div><div class="floor"' + (below ? ' style="margin-top:' + (4 + below * s).toFixed(1) + 'px"' : '') + '></div><div></div>' +
     '</div>';
   if (air) $('#meas').innerHTML = airLegend(air);
   else $('#meas').textContent = '222 mm usable width · ' + (state.h * P.U).toFixed(1) + ' mm inner height · ' + state.h + 'U';
@@ -787,7 +786,8 @@ function render() { renderControls(); renderRack(); renderSel(); renderUnplaced(
 function snapshot() {
   return {
     h: state.h, version: state.version, sides: state.sides, frame: state.frame, panel: state.panel, accent: state.accent, label: state.label || 'Lab Rax', top: state.top ? fullName(LIB[state.top]) : null,
-    items: byPos().map(i => { const d = info(i); return { id: i.id, pos2: i.pos2, h2: d.h2, name: i.label || shortName(d), face: d.face, color: colorOf(i), depth: d.depth || (i.key === 'gen' && i.params.type === 'shelf' ? i.params.dd : null), gen: i.key === 'gen' ? i.params : null, sel: i.id === sel }; })
+    topPart: state.top ? LIB[state.top] : null, mods: frameMods(),
+    items: byPos().map(i => { const d = info(i); return { id: i.id, pos2: i.pos2, h2: d.h2, name: i.label || shortName(d), face: d.face, look: d, color: colorOf(i), depth: d.depth || (i.key === 'gen' && i.params.type === 'shelf' ? i.params.dd : null), gen: i.key === 'gen' ? i.params : null, sel: i.id === sel }; })
   };
 }
 
@@ -987,7 +987,7 @@ function miniRack(st) { // a small static front view of a layout
   const s = 10;
   return '<div class="wz-rack" style="--frame:' + st.frame + ';--acc:' + st.accent + '"><span class="wz-rack-top">' + esc(st.label || 'Lab Rax') + '</span><div class="wz-rack-body" style="height:' + st.h * 2 * s + 'px">' +
     st.items.filter(i => i.pos2 != null).map(i => { const d = LIB[i.key], c = i.color || st.panel;
-      return '<div class="item" style="top:' + i.pos2 * s + 'px;height:' + (d.h2 * s - 1) + 'px;left:5px;right:5px;padding:0 4px;cursor:default;--c:' + c + ';--hole:' + holeFor(c) + '"><span class="face">' + faceHTML(d.face) + '</span></div>'; }).join('') + '</div></div>';
+      return '<div class="item" style="top:' + i.pos2 * s + 'px;height:' + (d.h2 * s - 1) + 'px;left:5px;right:5px;cursor:default;--c:' + c + '">' + LS.frontFor(d, { color: c, accent: st.accent, frame: st.frame }) + '</div>'; }).join('') + '</div></div>';
 }
 function wzOption(key, title, opts) {
   return '<fieldset class="wz-opt"><legend>' + title + '</legend><div class="wz-cards">' + opts.map(([v, l, t]) =>
@@ -1183,6 +1183,32 @@ host.addEventListener('pointermove', e => { const el = e.pointerType === 'mouse'
 host.addEventListener('pointerleave', hideTip);
 host.addEventListener('focusin', e => { const el = e.target.closest('.item'); if (el && el.matches(':focus-visible')) { const r = el.getBoundingClientRect(); showTip(+el.dataset.id, r.left + r.width / 2, r.bottom - 14); } });
 host.addEventListener('focusout', hideTip);
+/* library: a larger drawing of the part while the pointer rests on its row, with the device's real size */
+const lprev = $('#lprev');
+let lpKey = null;
+function hidePreview() { lpKey = null; if (lprev) lprev.hidden = true; }
+function previewHTML(d) {
+  const size = d.device && d.device.size ? d.device.size.map(v => Math.round(v)).join(' × ') + ' mm' : '';
+  let front = '';
+  if (d.top) { const t = LS.topFor(d, colorsFor()); if (t.h > 1.5) front = '<div class="lp-front" style="aspect-ratio:' + t.w + '/' + t.h.toFixed(1) + '">' + t.svg + '</div>'; }
+  else if (!d.extra) front = '<div class="lp-front" style="aspect-ratio:250/' + LS.panelH(d.h2 / 2).toFixed(1) + '">' + faceSVG(d) + '</div>';
+  return '<div class="lp-3d">' + thumbSVG(d) + '</div>' + front + (size ? '<span class="mono">' + esc(d.name) + ' · ' + size + '</span>' : '');
+}
+$('#cards').addEventListener('pointermove', e => {
+  if (e.pointerType !== 'mouse' || !lprev || drag) return;
+  const row = e.target.closest('.lrow[data-key]');
+  if (!row || !LIB[row.dataset.key]) { hidePreview(); return; }
+  if (row.dataset.key === lpKey && !lprev.hidden) return;
+  lpKey = row.dataset.key; lprev.innerHTML = previewHTML(LIB[lpKey]); lprev.hidden = false;
+  const r = row.getBoundingClientRect(), w = lprev.offsetWidth, h = lprev.offsetHeight;
+  let x = r.right + 12; if (x + w > innerWidth - 8) x = r.left - w - 12;
+  if (x < 8) { x = Math.max(8, Math.min(innerWidth - w - 8, r.left)); lprev.style.top = Math.min(innerHeight - h - 8, r.bottom + 6) + 'px'; }
+  else lprev.style.top = Math.max(8, Math.min(innerHeight - h - 8, r.top + r.height / 2 - h / 2)) + 'px';
+  lprev.style.left = x + 'px';
+});
+$('#cards').addEventListener('pointerleave', hidePreview);
+$('#cards').addEventListener('pointerdown', hidePreview);
+window.addEventListener('scroll', hidePreview, true);
 host.addEventListener('keydown', e => { const el = e.target.closest('.item'); if (el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); sel = +el.dataset.id; render(); focusSel(); } });
 document.addEventListener('dragstart', e => {
   const b = e.target.closest('[data-act="lib"]'); if (!b || !CAT) return; const d = LIB[b.dataset.key]; if (d.top || d.extra) return;

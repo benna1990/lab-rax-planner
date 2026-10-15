@@ -16,11 +16,14 @@ Thanks for helping make the Lab Rax Planner better. Most contributions add a dev
 Find the device's group under `devices`, then add a mount to the device, or add the device:
 
 ```json
-{ "device": "USW-Lite-8-PoE", "mounts": [
-  { "id": "mw2117690", "label": "1U mount · Lab Rax", "u": 1, "face": "switch",
+{ "device": "USW-Lite-8-PoE", "size": [163.7, 31.7, 99.6], "color": "#E9EBEC", "io": ["rj45x8"], "mounts": [
+  { "id": "mw2117690", "label": "1U mount · Lab Rax", "u": 1, "watts": 8, "face": "switch",
+    "shape": { "row": [{ "dev": true }], "shelf": true },
     "author": "Hawkish", "labrax": true, "url": "https://makerworld.com/models/2117690" }
 ] }
 ```
+
+A new device needs `size`, `color` and `io` (see [How parts look](#how-parts-look)).
 
 | Field | Required | Meaning |
 |---|---|---|
@@ -28,20 +31,21 @@ Find the device's group under `devices`, then add a mount to the device, or add 
 | `label` | yes | What the mount is, in a few words: "1U mount with keystones". Add "· Lab Rax" when it was made for Lab Rax. |
 | `u` | yes, unless `position` is `top` | Height in rack units: 0.5 to 10 in steps of 0.5. |
 | `estimated` | no | `true` when the model page doesn't state the height. Shown as ≈. Remove it once someone has checked. |
-| `face` | no | How the front is drawn: `shelf` (default), `switch`, `vent`, `fan`, `ks` (keystone), `sbc`, `drv2`, `drv4`, `blank`. |
+| `face` | no | The kind of part: `shelf` (default), `switch`, `vent`, `fan`, `ks` (keystone), `sbc`, `drv2`, `drv4`, `d`, `blank`. The cooling estimate uses it, and a part without a `shape` is drawn from it. |
+| `shape` | no | What the part looks like: see [How parts look](#how-parts-look). |
 | `author` | no | The maker's name. |
 | `labrax` | no | `true` when the page says it was made for or tested in Lab Rax. |
 | `url` | yes | The original model page on MakerWorld or Printables. Never a mirror or re-upload. |
 | `position` | no | `top` for parts that replace the top panel. |
 | `hardware` | no | Extra parts to buy: `[{ "part": "fan80", "qty": 2 }]`. |
 | `note` | no | One sentence the builder should know. |
-| `depth` | no | Device depth in mm, used by the 3D view. |
+| `depth` | no | Shelf depth in mm, only when it differs from the device's `size`. |
 | `watts` | yes | Typical heat the device gives off in W, used by the cooling estimate. See [Watts](#watts) below. |
 | `wattsEstimated` | no | `true` when `watts` is a guess rather than a spec or a measurement. Shown as ≈. |
 | `fanDir` | no | For parts with fans in `hardware`: which way they blow by default, `intake` or `exhaust`, or `cross` for a pair: one in and one out, in the two side panels or in the bottom and top panel. Builders can turn each part around. |
 | `vent` | no | For openings: the open share of the panel, 0 to 1. A hex mesh top is about `0.5`, a vent panel `0.4`. |
 
-Panels use `id`, `name`, `u`, `face`, `url`, `author`, `labrax`, `estimated`, `hardware`, `watts`, `wattsEstimated`, `fanDir` and `vent`; `watts` only when the panel makes heat (power supplies, chargers, displays). Extras use `id`, `name`, `label`, `author`, `url`, `hardware`, `fanDir` and `vent`, plus `at`: where the extra lets air through, `side`, `back` or `top` (`top` also covers a matching bottom panel; `fanAt` when its fans sit elsewhere). For example a pair of side panels with an 80 mm fan each:
+Panels use `id`, `name`, `u`, `face`, `shape`, `url`, `author`, `labrax`, `estimated`, `hardware`, `watts`, `wattsEstimated`, `fanDir` and `vent`; `watts` only when the panel makes heat (power supplies, chargers, displays). Extras use `id`, `name`, `label`, `shape`, `author`, `url`, `hardware`, `fanDir` and `vent`, plus `at`: where the extra lets air through, `side`, `back` or `top` (`top` also covers a matching bottom panel; `fanAt` when its fans sit elsewhere). For example a pair of side panels with an 80 mm fan each:
 
 ```json
 { "id": "mw1460771", "name": "Side panels with an 80 mm fan", "url": "https://makerworld.com/models/1460771",
@@ -61,6 +65,45 @@ Panels use `id`, `name`, `u`, `face`, `url`, `author`, `labrax`, `estimated`, `h
 ### Fans
 
 Fans are entries in `hardware` with their size, rated flow and maximum static pressure, at full speed in free air: `"fan80": { "name": "80 mm fan", "mm": 80, "cfm": 30, "pa": 23 }`. The values are typical for good case fans (Noctua, Arctic); a part refers to them by `part` and `qty`.
+
+### How parts look
+
+The library drawing, the front view and the 3D model of every part are drawn by `shapes.js` from the catalog, never from the model files. Run a local server and open `tools/looks.html` to see them all; `tools/looks.html?ids=mw2117690&3d=1` shows one part, also in 3D.
+
+**Devices** carry the size and the face that shows at the front of the rack, from the maker's spec sheet:
+
+| Field | Meaning |
+|---|---|
+| `size` | `[width, height, depth]` in mm as the device sits in its mounts; width is across the side that faces out. |
+| `color` | Body colour, like `"#E9EBEC"`. |
+| `io` | What is on that side, left to right; `xN` repeats one: `rj45x8`. Tokens: `rj45`, `sfp`, `usba`, `usba3`, `usbc`, `hdmi`, `mhdmi`, `dp`, `phone`, `coax`, `antenna`, `audio`, `power`, `btn`, `led`, `ledw`, `ledb`, `lcd` (`lcd@24x12` sets its size in mm), `oled`, `sd`, `fan`, `vent`, `grille`, `iec`, `rocker`, `handle`, `terminal`, `vbay` (a NAS drive tray), `bay35`, `bay25`, `logo`, `gap`, and `space`, which pushes what follows to the right. Ten or more ports stack in two rows when the face is tall enough. |
+
+**Mounts and panels** have a `shape`: the pieces across the panel, left to right, and what is behind it.
+
+```json
+"shape": { "row": [{ "ks": 1 }, { "dev": true }, { "ks": 1 }], "shelf": true }
+```
+
+| Piece | Draws |
+|---|---|
+| `{ "dev": true }` | The mount's device behind a window. `"dev": "JetKVM"` uses another catalog device; `n` repeats it, `"rot": 90` stands it on its side, `"win"` is `full` (default), `ports` or `frame`. |
+| `{ "sbc": 7, "board": "pi5", "orient": "v", "tray": true }` | Single-board computers with their ports to the front: `pi5`, `pi4`, `pi3`, `zero`, `opiz3`, `rock5b`, `uno`. `"orient": "v"` stands them up (2U and more), `"tray"` adds a printed blade per board. |
+| `{ "ks": 12, "rows": 1 }` | Keystone jacks; `"jack": "white"` for white ones. |
+| `{ "bay": 3.5, "n": 2 }` | Drive sleds with handles, 3.5 or 2.5″; `rows`, `"orient": "v"` for upright bays, `w` and `h` in mm. |
+| `{ "fan": 80, "n": 2 }` | Fans behind round openings; `"grille": "hex"` or `"wire"`. |
+| `{ "vent": "hex" }` | A vent: `hex`, `slots`, `round`, `perf`, `grid`, `diamond`, `y` or `crown`. It fills the free width unless `w` is set. |
+| `{ "screen": 7, "ratio": 1.667 }` | A display, diagonal in inches (or `w` and `h` in mm); `n` for several. |
+| `{ "out": 4, "type": "schuko" }` | Sockets: `schuko`, `us`, `uk`, `ch`, `au`, `iec`, `usbc`, `usba`. |
+| `open`, `slot`, `brush`, `drawer`, `comb`, `ring`, `hook` | An open shelf front, a cable slot, a brush strip, drawers, a cable comb, D-rings, hooks. |
+| `inlet`, `rocker`, `btn`, `knob`, `oled`, `usb`, `dtype`, `matrix`, `pcie`, `text`, `gap`, `col` | A mains inlet (`"fuse": true`), switches, a push button, a knob, a small display, USB ports, Neutrik D-type holes, an LED matrix, a PCIe bracket, text, a spacer, and a column of pieces. |
+
+Around the row: `"shelf": true` adds a shelf behind it (`"floor": "hex"` or `"slots"`), `"depth"` sets the shelf depth, `"plate": "hex"` perforates what the pieces leave free, and `"rows": [[…], […]]` stacks rows.
+
+**Top mounts** (`"position": "top"`): `{ "ap": "U7 Pro", "tilt": 45 }` for an access point (`U7 Pro`, `U7 Pro Max`, `U7 Pro XG`, `U6+`, `U6 Pro`, `U6 Lite`, `U7 Lite`), `{ "plate": "hex", "fan": 120 }` for a mesh or fan top (`"n"` fans), `{ "plate": "gridfinity" }`.
+
+**Extras** say what they change on the frame: `{ "side": "hex" }` (or `kumiko`, `skadis`, `multiboard`, `honeycomb`, `brick`, `vent`, `grid`) and `{ "fan": 80 }` for side panels, `{ "handles": "stackable" }` (`side`, `long`), `{ "feet": "big" }` or `"casters"`, `{ "drawer": true }`, `{ "logo": "neopixel" }` or `"hexbar"`, `{ "corner": 11 }` for keystones in the top corner (`"matrix"` for an LED matrix), `{ "depth": 50 }` for deeper sides, `{ "edge": "switch" }`, `{ "wall": true }` for a wall cleat behind, and for the card only `"u"`, `"frame"` (`lowprofile`, `matx`), `"inside"` (`comb`, `guide`, `atx`, `matx`, `fans`, `bracket`, `device`, `keystone`) and `"hl"` to highlight the `posts`, `handles`, `base` or `top`.
+
+`node tools/validate.mjs` checks shapes, sizes and `io` tokens.
 
 Run `node tools/validate.mjs`, then open a pull request.
 

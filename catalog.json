@@ -138,6 +138,7 @@
      "name": "Vent panel",
      "u": 0.5,
      "face": "vent",
+     "shape": {"row": [{"vent": "hex"}]},
      "url": "https://makerworld.com/en/models/1304233-1-2u-ventilation-panel-for-10-rack",
      "author": "mklements",
      "labrax": true
@@ -147,6 +148,7 @@
      "name": "Vent panel",
      "u": 1,
      "face": "vent",
+     "shape": {"row": [{"vent": "hex"}]},
      "url": "https://makerworld.com/en/models/1293799-1u-ventilation-panel-for-10-rack",
      "author": "mklements",
      "labrax": true
@@ -156,6 +158,7 @@
      "name": "Fan panel, 5× 40 mm",
      "u": 1,
      "face": "fan",
+     "shape": {"row": [{"fan": 40, "n": 5}]},
      "url": "https://makerworld.com/en/models/1293794-1u-5x40mm-fan-panel-for-10-rack",
      "author": "mklements",
      "labrax": true,
@@ -172,6 +175,7 @@
      "name": "Fan holder, 2× 80 mm",
      "u": 2,
      "face": "fan",
+     "shape": {"row": [{"fan": 80, "n": 2}]},
      "url": "https://makerworld.com/en/models/1385530-2u-two-80mm-cooling-fan-holder-for-10-rack",
      "author": "mklements",
      "labrax": true,
@@ -188,6 +192,7 @@
      "name": "Blank cover plate",
      "u": 0.5,
      "face": "blank",
+     "shape": {"row": []},
      "url": "https://makerworld.com/en/models/1385541-1-2u-1u-and-2u-blank-cover-plates-for-10-rack",
      "author": "mklements",
      "labrax": true
@@ -197,6 +202,7 @@
      "name": "Blank cover plate",
      "u": 1,
      "face": "blank",
+     "shape": {"row": []},
      "url": "https://makerworld.com/en/models/1385541-1-2u-1u-and-2u-blank-cover-plates-for-10-rack",
      "author": "mklements",
      "labrax": true
@@ -206,6 +212,7 @@
      "name": "Blank cover plate",
      "u": 2,
      "face": "blank",
+     "shape": {"row": []},
      "url": "https://makerworld.com/en/models/1385541-1-2u-1u-and-2u-blank-cover-plates-for-10-rack",
      "author": "mklements",
      "labrax": true
@@ -215,6 +222,7 @@
      "name": "Keystone panel, 12 ports",
      "u": 0.5,
      "face": "ks",
+     "shape": {"row": [{"ks": 12}]},
      "url": "https://makerworld.com/en/models/1293816-1-2u-12-port-keystone-panel-for-10-rack",
      "author": "mklements",
      "labrax": true
@@ -224,6 +232,7 @@
      "name": "Open shelf",
      "u": 1,
      "face": "shelf",
+     "shape": {"row": [{"open": true}], "depth": 150},
      "url": "https://makerworld.com/en/models/1297318-1u-open-shelf-for-10-rack",
      "author": "mklements",
      "labrax": true,
@@ -236,6 +245,7 @@
      "watts": 8,
      "wattsEstimated": true,
      "face": "switch",
+     "shape": {"row": [{"dev": {"size": [166, 27, 100], "color": "#1F2023", "io": ["logo", "btn", "space", "rj45x2", "gap", "rj45x3", "space", "power"]}}], "shelf": true},
      "url": "https://makerworld.com/en/models/1297329-1u-shelf-for-qnap-switch-for-10-rack",
      "author": "mklements",
      "labrax": true
@@ -247,6 +257,7 @@
      "watts": 6,
      "wattsEstimated": true,
      "face": "shelf",
+     "shape": {"row": [{"vent": "hex", "w": 78}, {"inlet": true}, {"vent": "hex", "w": 78}]},
      "url": "https://makerworld.com/en/models/2624647",
      "author": "mklements",
      "labrax": true
@@ -261,6 +272,7 @@
      "name": "Crown-pattern vent cover · Lab Rax",
      "u": 1,
      "face": "vent",
+     "shape": {"row": [{"vent": "crown"}]},
      "url": "https://makerworld.com/en/models/2124961",
      "author": "Hawkish",
      "labrax": true
@@ -270,6 +282,7 @@
      "name": "“Blackout” blanking panel · Lab Rax",
      "u": 1,
      "face": "blank",
+     "shape": {"row": []},
      "url": "https://makerworld.com/en/models/2424189",
      "author": "lhaenschke",
      "labrax": true
@@ -279,6 +292,7 @@
      "name": "Blank panel",
      "u": 1,
      "face": "blank",
+     "shape": {"row": []},
      "url": "https://makerworld.com/en/models/2098881",
      "author": "BadPixel"
     },
@@ -287,6 +301,7 @@
      "name": "Customizable vent & blank panels (½–10U)",
      "u": 1,
      "face": "vent",
+     "shape": {"row": [{"vent": "hex"}]},
      "url": "https://makerworld.com/en/models/1872040",
      "author": "Kiwiworks",
      "estimated": true
@@ -296,6 +311,7 @@
      "name": "Panel generator, blank & vented (½–10U)",
      "u": 1,
      "face": "vent",
+     "shape": {"row": [{"vent": "round"}]},
      "url": "https://makerworld.com/en/models/2961946",
      "author": "RULERULAS",
      "estimated": true
@@ -306,6 +322,7 @@
      "u": 1,
      "estimated": true,
      "face": "blank",
+     "shape": {"row": []},
      "url": "https://makerworld.com/en/models/2917513"
     },
     {
@@ -313,6 +330,7 @@
      "name": "1U blank filler panel set (2/4/6 holes, standard or loose fit)",
      "u": 1,
      "face": "blank",
+     "shape": {"row": []},
      "url": "https://makerworld.com/en/models/3085010"
     },
     {
@@ -320,6 +338,7 @@
      "name": "Panels 1U–6U, solid, vented, reinforced",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"vent": "hex"}]},
      "url": "https://makerworld.com/en/models/2951988-10-rack-panels-1u-6u-solid-vented-reinforced",
      "author": "RULERULAS"
     },
@@ -328,6 +347,7 @@
      "name": "Vented panel, Y pattern",
      "u": 1,
      "face": "vent",
+     "shape": {"row": [{"vent": "y"}]},
      "url": "https://makerworld.com/en/models/2098947"
     },
     {
@@ -335,6 +355,7 @@
      "name": "Blank panels 1U / 2U / 3U",
      "u": 1,
      "face": "blank",
+     "shape": {"row": []},
      "url": "https://makerworld.com/en/models/1565867-1u-2u-3u-10-inch-rack-panel",
      "author": "RiHi36"
     },
@@ -344,6 +365,7 @@
      "u": 1,
      "estimated": true,
      "face": "vent",
+     "shape": {"row": [{"vent": "slots"}]},
      "url": "https://makerworld.com/en/models/1192269-10-inch-rack-vent-panels",
      "author": "n3rding"
     },
@@ -352,6 +374,7 @@
      "name": "Blank plate",
      "u": 1,
      "face": "blank",
+     "shape": {"row": []},
      "url": "https://makerworld.com/en/models/2296997-10-inch-rack-1u-blank-plate"
     },
     {
@@ -359,6 +382,7 @@
      "name": "Blank panel, solid or honeycomb",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"comb": 12}]},
      "url": "https://makerworld.com/en/models/765071-10-inch-rack-mount-blanks"
     },
     {
@@ -367,6 +391,7 @@
      "u": 1,
      "estimated": true,
      "face": "blank",
+     "shape": {"row": []},
      "url": "https://makerworld.com/en/models/778907"
     },
     {
@@ -375,6 +400,7 @@
      "u": 1,
      "estimated": true,
      "face": "blank",
+     "shape": {"row": []},
      "url": "https://makerworld.com/en/models/1972748-parametric-10in-mini-rack-panels"
     }
    ]
@@ -387,6 +413,7 @@
      "name": "120 mm fan mount (USB-C)",
      "u": 3,
      "face": "fan",
+     "shape": {"row": [{"fan": 120, "n": 1}]},
      "url": "https://makerworld.com/en/models/775288",
      "author": "Mauker",
      "estimated": true,
@@ -403,6 +430,7 @@
      "name": "140 mm fan mount with controller",
      "u": 4,
      "face": "fan",
+     "shape": {"row": [{"fan": 140, "n": 1}, {"knob": true}]},
      "url": "https://makerworld.com/en/models/1856702",
      "author": "laadam",
      "estimated": true,
@@ -419,6 +447,7 @@
      "name": "Dual 80 mm fan mount",
      "u": 2,
      "face": "fan",
+     "shape": {"row": [{"fan": 80, "n": 2}]},
      "url": "https://makerworld.com/en/models/3254100",
      "author": "3D Prints Lab",
      "estimated": true,
@@ -435,6 +464,7 @@
      "name": "2× 80 mm fans with honeycomb grille",
      "u": 2,
      "face": "fan",
+     "shape": {"row": [{"fan": 80, "n": 2}]},
      "url": "https://makerworld.com/en/models/1632349",
      "author": "Bastel42",
      "hardware": [
@@ -450,6 +480,7 @@
      "name": "USB fan controller · Lab Rax",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"knob": true}, {"oled": true, "w": 22, "h": 10}, {"usb": 2, "type": "c"}]},
      "url": "https://makerworld.com/en/models/3139016",
      "author": "Khaddict",
      "labrax": true
@@ -459,6 +490,7 @@
      "name": "PWM fan controller panel",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"knob": true}, {"oled": true}, {"rocker": true}]},
      "url": "https://makerworld.com/en/models/1781320",
      "author": "RyzerPhenix"
     },
@@ -467,6 +499,7 @@
      "name": "Fan panel, 4× 40 mm · Lab Rax",
      "u": 1,
      "face": "fan",
+     "shape": {"row": [{"fan": 40, "n": 4}]},
      "url": "https://makerworld.com/en/models/1587548-10-inch-40x40-fan-panel-1u-lab-rax",
      "author": "BKG",
      "labrax": true,
@@ -483,6 +516,7 @@
      "name": "Fan bay, 1–4× 40 mm",
      "u": 1,
      "face": "fan",
+     "shape": {"row": [{"fan": 40, "n": 4}]},
      "url": "https://makerworld.com/en/models/1192039-10-inch-1u-fan-bays-40mm-fans",
      "author": "n3rding",
      "hardware": [
@@ -499,6 +533,7 @@
      "u": 1,
      "estimated": true,
      "face": "fan",
+     "shape": {"row": [{"fan": 40, "n": 5}]},
      "url": "https://makerworld.com/en/models/1878745-customizable-fan-mount-plates-for-10-inch-rack",
      "author": "Kiwiworks",
      "hardware": [
@@ -514,6 +549,7 @@
      "name": "Fan mounts, 120 mm or 3× 40 mm",
      "u": 3,
      "face": "fan",
+     "shape": {"row": [{"fan": 120, "n": 1}]},
      "url": "https://makerworld.com/en/models/1642989-10-inch-rack-3u-fan-mounts",
      "author": "tyler",
      "hardware": [
@@ -530,6 +566,7 @@
      "u": 5,
      "estimated": true,
      "face": "fan",
+     "shape": {"row": [{"fan": 200, "n": 1}]},
      "url": "https://makerworld.com/en/models/1494707-200-mm-fan-10-inch-rack-mount",
      "hardware": [
       {
@@ -545,6 +582,7 @@
      "u": 2,
      "estimated": true,
      "face": "fan",
+     "shape": {"row": [{"fan": 80, "n": 2}]},
      "url": "https://www.printables.com/model/1293301-10-inch-rack-front-panel-universal-fan-mount",
      "author": "Diew",
      "hardware": [
@@ -561,6 +599,7 @@
      "u": 1,
      "estimated": true,
      "face": "blank",
+     "shape": {"row": [{"oled": true}, {"knob": true}, {"btn": 12}]},
      "url": "https://makerworld.com/en/models/1655816-10in-rack-fan-controller"
     }
    ]
@@ -573,6 +612,7 @@
      "name": "Keystone patch panel (10″/19″)",
      "u": 1,
      "face": "ks",
+     "shape": {"row": [{"ks": 10}]},
      "url": "https://makerworld.com/en/models/1896205",
      "author": "Tomas Franzén"
     },
@@ -581,6 +621,7 @@
      "name": "Parametric keystone patch panel",
      "u": 1,
      "face": "ks",
+     "shape": {"row": [{"ks": 10}]},
      "url": "https://makerworld.com/en/models/3150622",
      "author": "Alphaszene"
     },
@@ -589,6 +630,7 @@
      "name": "Keystone patch panel, 10 ports",
      "u": 1,
      "face": "ks",
+     "shape": {"row": [{"ks": 10}]},
      "url": "https://makerworld.com/en/models/825894",
      "author": "Mauker",
      "estimated": true
@@ -598,6 +640,7 @@
      "name": "Keystone patch panel, 16 ports",
      "u": 1,
      "face": "ks",
+     "shape": {"row": [{"ks": 16, "rows": 2}]},
      "url": "https://makerworld.com/en/models/1080768",
      "author": "Mauker",
      "estimated": true
@@ -607,6 +650,7 @@
      "name": "Keystone patch panel, 8 ports",
      "u": 0.5,
      "face": "ks",
+     "shape": {"row": [{"ks": 8}]},
      "url": "https://www.printables.com/model/1180979",
      "author": "Mauker"
     },
@@ -615,6 +659,7 @@
      "name": "Patch cable management panel · Lab Rax",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"ring": 3}]},
      "url": "https://makerworld.com/en/models/2090185",
      "author": "Cheetah",
      "labrax": true
@@ -624,6 +669,7 @@
      "name": "Cable duct / organiser",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"comb": 16}]},
      "url": "https://makerworld.com/en/models/2990240",
      "author": "Mauker",
      "estimated": true
@@ -633,6 +679,7 @@
      "name": "Cable guide with modular hooks",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"hook": 4}]},
      "url": "https://makerworld.com/en/models/2990525",
      "author": "Mauker",
      "estimated": true
@@ -642,6 +689,7 @@
      "name": "Pass-through blank",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"slot": true, "w": 160}]},
      "url": "https://makerworld.com/en/models/2990619",
      "author": "Mauker",
      "estimated": true
@@ -652,6 +700,7 @@
      "u": 1,
      "estimated": true,
      "face": "ks",
+     "shape": {"row": [{"ks": 10}]},
      "url": "https://makerworld.com/en/models/1417062-keystone-patch-panel-with-number-10-rack",
      "author": "3D Garage"
     },
@@ -660,6 +709,7 @@
      "name": "½U keystone panels",
      "u": 0.5,
      "face": "ks",
+     "shape": {"row": [{"ks": 12, "rows": 2}]},
      "url": "https://makerworld.com/en/models/2406553-10-inch-rack-1-2-u-keystone-panels"
     },
     {
@@ -668,6 +718,7 @@
      "u": 1,
      "estimated": true,
      "face": "ks",
+     "shape": {"row": [{"ks": 10}], "shelf": true, "depth": 120},
      "url": "https://makerworld.com/en/models/2394819-10inch-rack-mount-shelf-with-keystone-patch-panel",
      "author": "Stratnode",
      "labrax": true
@@ -677,6 +728,7 @@
      "name": "Keystone panel with cable pass-through",
      "u": 0.5,
      "face": "ks",
+     "shape": {"row": [{"ks": 12, "rows": 2}, {"slot": true, "w": 40}]},
      "url": "https://makerworld.com/en/models/1245700-10-0-5u-keystone-patchpanel-cable-passthrough",
      "author": "Willow (GHOST)"
     },
@@ -686,6 +738,7 @@
      "u": 1,
      "estimated": true,
      "face": "ks",
+     "shape": {"row": [{"ks": 10}]},
      "url": "https://makerworld.com/en/models/907994"
     },
     {
@@ -693,6 +746,7 @@
      "name": "Cable management blank with removable insert",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"slot": true, "w": 170}]},
      "url": "https://makerworld.com/en/models/1911962-network-cable-managment-for-10-inch-mini-rack",
      "author": "generatorlabs"
     },
@@ -702,6 +756,7 @@
      "u": 1,
      "estimated": true,
      "face": "blank",
+     "shape": {"row": [{"comb": 12}]},
      "url": "https://makerworld.com/en/models/1531135-10-inch-server-rack-comb-cable-manager",
      "author": "snapwich"
     },
@@ -711,6 +766,7 @@
      "u": 1,
      "estimated": true,
      "face": "blank",
+     "shape": {"row": [{"brush": true}]},
      "url": "https://makerworld.com/en/models/1179057-10-inch-rack-mount-for-cable-brush-management",
      "author": "T Ben",
      "vent": 0.2
@@ -721,6 +777,7 @@
      "u": 1,
      "estimated": true,
      "face": "blank",
+     "shape": {"row": [{"slot": true, "w": 170}]},
      "url": "https://makerworld.com/en/models/1240599-mod10-modular-10-server-rack-cable-management"
     },
     {
@@ -729,6 +786,7 @@
      "u": 1,
      "estimated": true,
      "face": "blank",
+     "shape": {"row": [{"ring": 3}]},
      "url": "https://makerworld.com/en/models/475945"
     },
     {
@@ -736,6 +794,7 @@
      "name": "Keystone patch panel, 12 ports",
      "u": 1,
      "face": "ks",
+     "shape": {"row": [{"ks": 12, "rows": 2}]},
      "url": "https://makerworld.com/en/models/576762-10in-server-rack-patch-panels-1u-12-keystone-jacks",
      "author": "Dawnchaser"
     },
@@ -744,6 +803,7 @@
      "name": "Numbered keystone patch panel, 12 ports",
      "u": 1,
      "face": "ks",
+     "shape": {"row": [{"ks": 12, "rows": 2}]},
      "url": "https://makerworld.com/en/models/1080303-10-rack-labeled-patch-panel",
      "author": "Hixagon",
      "estimated": true
@@ -753,6 +813,7 @@
      "name": "Patch panel, 8 ports, keystone or fibre adapters",
      "u": 1,
      "face": "ks",
+     "shape": {"row": [{"ks": 8}]},
      "url": "https://makerworld.com/en/models/1348740-10-inch-1u-8-port-patch-panel",
      "author": "神楽千雪"
     },
@@ -761,6 +822,7 @@
      "name": "Keystone patch panel, 8 ports with vents",
      "u": 1,
      "face": "ks",
+     "shape": {"row": [{"ks": 8}, {"vent": "hex", "w": 50}]},
      "url": "https://makerworld.com/en/models/1744531-10-inch-1u-keystone-patchpanel-8-with-vent-holes",
      "author": "matataa"
     },
@@ -769,6 +831,7 @@
      "name": "Keystone patch panel, 8 ports",
      "u": 1,
      "face": "ks",
+     "shape": {"row": [{"ks": 8}]},
      "url": "https://makerworld.com/en/models/1656992-10-inch-keystone-patchpanel-x8-ports",
      "author": "LiPA",
      "estimated": true
@@ -778,6 +841,7 @@
      "name": "Sturdy keystone patch panel, 10 ports",
      "u": 1,
      "face": "ks",
+     "shape": {"row": [{"ks": 10}]},
      "url": "https://makerworld.com/en/models/1674470-stable-10-inch-10-port-keystone-patchpanel",
      "estimated": true
     },
@@ -786,6 +850,7 @@
      "name": "Keystone patch panel",
      "u": 1,
      "face": "ks",
+     "shape": {"row": [{"ks": 10}]},
      "url": "https://makerworld.com/en/models/842002-10-patch-panel",
      "author": "Titanen",
      "estimated": true
@@ -795,6 +860,7 @@
      "name": "Keystone patch panel",
      "u": 1,
      "face": "ks",
+     "shape": {"row": [{"ks": 10}]},
      "url": "https://makerworld.com/en/models/1427297",
      "estimated": true
     },
@@ -803,6 +869,7 @@
      "name": "Keystone patch panel, 8 ports + temperature display",
      "u": 1,
      "face": "ks",
+     "shape": {"row": [{"ks": 8}, {"oled": true}]},
      "url": "https://makerworld.com/en/models/1141339-10-inch-patchpanel-temp-and-humidity-sensor",
      "estimated": true
     },
@@ -811,6 +878,7 @@
      "name": "½U keystone panel, 1–12 ports (customizable)",
      "u": 0.5,
      "face": "ks",
+     "shape": {"row": [{"ks": 12, "rows": 2}]},
      "url": "https://makerworld.com/en/models/442928-10-inch-patch-panel-12-keystone-module-1-2-u",
      "author": "Kitten 3D",
      "estimated": true
@@ -820,6 +888,7 @@
      "name": "½U keystone panel, 12 ports",
      "u": 0.5,
      "face": "ks",
+     "shape": {"row": [{"ks": 12, "rows": 2}]},
      "url": "https://makerworld.com/en/models/1951351-12-port-blank-keystone-patch-panel-10-inch-0-5u"
     },
     {
@@ -827,6 +896,7 @@
      "name": "Keystone patch panel, 12 ports (RJ45 or HDMI)",
      "u": 1,
      "face": "ks",
+     "shape": {"row": [{"ks": 12, "rows": 2}]},
      "url": "https://www.printables.com/model/142384-10-rack-patch-panel",
      "author": "Karel"
     },
@@ -835,6 +905,7 @@
      "name": "Patch panel, 10 ports",
      "u": 1,
      "face": "ks",
+     "shape": {"row": [{"ks": 10}]},
      "url": "https://www.printables.com/model/1246812-10-inch-10-port-patch-panel",
      "author": "Darkrym",
      "estimated": true
@@ -844,6 +915,7 @@
      "name": "Neutrik D-type patch panel",
      "u": 1,
      "face": "d",
+     "shape": {"row": [{"dtype": 6}]},
      "url": "https://www.printables.com/model/1262750-neutrik-connectors-d-type-10-inch-patch-panel",
      "author": "MrMdemiC"
     },
@@ -852,6 +924,7 @@
      "name": "Neutrik D-series panel, 6 holes (XLR and more)",
      "u": 1,
      "face": "d",
+     "shape": {"row": [{"dtype": 6}]},
      "url": "https://www.printables.com/model/965743-10-rack-panel-for-neutrik-d-series-for-xlr-and-mor",
      "author": "Madi"
     },
@@ -860,6 +933,7 @@
      "name": "Brush panel · Lab Rax",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"brush": true}]},
      "url": "https://makerworld.com/en/models/1546022-10-inch-rack-brush-panel-1u-lab-rax",
      "author": "BKG",
      "labrax": true,
@@ -875,6 +949,7 @@
      "name": "Ventilated open shelf · Lab Rax",
      "u": 1,
      "face": "shelf",
+     "shape": {"row": [{"open": true}], "shelf": true, "depth": 150, "floor": "hex"},
      "url": "https://makerworld.com/en/models/1414106",
      "author": "Alexkill536ITA",
      "labrax": true,
@@ -885,6 +960,7 @@
      "name": "Shelf, slot or hex vents",
      "u": 1,
      "face": "shelf",
+     "shape": {"row": [{"open": true}], "shelf": true, "depth": 150, "floor": "hex"},
      "url": "https://makerworld.com/en/models/1040526",
      "author": "Mauker",
      "estimated": true,
@@ -895,6 +971,7 @@
      "name": "Universal cantilever shelf",
      "u": 1,
      "face": "shelf",
+     "shape": {"row": [{"open": true}], "shelf": true, "depth": 150},
      "url": "https://www.printables.com/model/1187903",
      "author": "Diew",
      "estimated": true,
@@ -905,6 +982,7 @@
      "name": "Shelf with slots · Lab Rax",
      "u": 1,
      "face": "shelf",
+     "shape": {"row": [{"open": true}], "shelf": true, "depth": 150, "floor": "slots"},
      "url": "https://makerworld.com/en/models/1357259-lab-rax-1u-shelf-with-slots",
      "author": "CyberGWJ",
      "labrax": true,
@@ -915,6 +993,7 @@
      "name": "Shelf with 1–3 drawers",
      "u": 1,
      "face": "shelf",
+     "shape": {"row": [{"drawer": 3}]},
      "url": "https://makerworld.com/en/models/1845503",
      "estimated": true
     },
@@ -923,6 +1002,7 @@
      "name": "RackMod 1U chassis with slide-in modules (drawer, keystones)",
      "u": 1,
      "face": "shelf",
+     "shape": {"row": [{"ks": 10}]},
      "url": "https://makerworld.com/en/models/1430506-rackmod-1u-10-inch-modular-server-rack",
      "author": "tomtechie"
     }
@@ -936,6 +1016,7 @@
      "name": "Power bar housing · Lab Rax",
      "u": 2,
      "face": "blank",
+     "shape": {"row": [{"out": 5, "type": "schuko"}]},
      "url": "https://makerworld.com/en/models/2148166",
      "author": "Hawkish",
      "labrax": true
@@ -945,6 +1026,7 @@
      "name": "Recessed PDU, 1U · tested in Lab Rax",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"out": 6, "type": "us"}]},
      "url": "https://makerworld.com/en/models/2010724-fixed-1u-recessed-pdu-ears-mount-for-10-inch-rack",
      "author": "hodapp",
      "labrax": true
@@ -954,6 +1036,7 @@
      "name": "Recessed PDU ears",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"out": 6, "type": "us"}, {"rocker": true}]},
      "url": "https://makerworld.com/en/models/1767774-recessed-pdu-ears-mount-for-10-inch-rack",
      "author": "Omelette"
     },
@@ -962,6 +1045,7 @@
      "name": "Universal power strip, 1U",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"out": 4, "type": "schuko"}]},
      "url": "https://makerworld.com/en/models/2519395",
      "author": "FamousDirector"
     },
@@ -970,6 +1054,7 @@
      "name": "Parametric power strip insert, 2U",
      "u": 2,
      "face": "blank",
+     "shape": {"row": [{"out": 4, "type": "schuko"}]},
      "url": "https://makerworld.com/en/models/2341131",
      "author": "lukas.duus"
     },
@@ -978,6 +1063,7 @@
      "name": "Power strip, sockets facing up",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"dev": "strip", "win": "full"}]},
      "url": "https://makerworld.com/en/models/2755138",
      "author": "Piotrek",
      "estimated": true
@@ -987,6 +1073,7 @@
      "name": "DIY PDU with switched outlets",
      "u": 2,
      "face": "blank",
+     "shape": {"rows": [[{"out": 4, "type": "us"}], [{"rocker": true, "n": 4}]]},
      "url": "https://makerworld.com/en/models/1691049",
      "author": "imnotjames",
      "estimated": true,
@@ -997,6 +1084,7 @@
      "name": "PDU ears (HHSOET 16-in-1)",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"out": 6, "type": "us"}, {"usb": 2}]},
      "url": "https://makerworld.com/en/models/1127998",
      "author": "Ok-Junket",
      "estimated": true
@@ -1006,6 +1094,7 @@
      "name": "Mains inlet panel · Lab Rax",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"inlet": true, "fuse": true}, {"rocker": "kcd4"}]},
      "url": "https://makerworld.com/en/models/1738565-10-inch-mains-inlet-panel-1u-lab-rax",
      "author": "BKG",
      "labrax": true
@@ -1017,6 +1106,7 @@
      "watts": 4,
      "wattsEstimated": true,
      "face": "blank",
+     "shape": {"row": [{"ks": 1}, {"usb": 4, "type": "c"}, {"ks": 1}]},
      "url": "https://makerworld.com/en/models/1880141",
      "author": "yan_thu"
     },
@@ -1025,6 +1115,7 @@
      "name": "Anker Prime 200W charger",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"dev": {"size": [100, 34, 70], "color": "#2B2D31", "io": ["usbcx4", "usbax2"]}}]},
      "url": "https://www.printables.com/model/1101911",
      "author": "RynoShark",
      "estimated": true,
@@ -1038,6 +1129,7 @@
      "watts": 10,
      "wattsEstimated": true,
      "face": "blank",
+     "shape": {"row": [{"dev": "server-psu"}, {"vent": "hex", "w": 60}]},
      "url": "https://makerworld.com/en/models/2911659",
      "author": "spuder",
      "labrax": true
@@ -1049,6 +1141,7 @@
      "watts": 8,
      "wattsEstimated": true,
      "face": "blank",
+     "shape": {"row": [{"dev": "server-psu"}, {"usb": 2}, {"btn": 12}]},
      "url": "https://www.printables.com/model/568430",
      "author": "ayanev"
     },
@@ -1059,6 +1152,7 @@
      "watts": 3,
      "wattsEstimated": true,
      "face": "blank",
+     "shape": {"row": [{"dev": "brick", "win": "frame"}, {"vent": "slots", "w": 80}]},
      "url": "https://makerworld.com/en/models/707149-1u-10-inch-power-brick-mount",
      "author": "michaelclaw"
     },
@@ -1069,6 +1163,7 @@
      "watts": 8,
      "wattsEstimated": true,
      "face": "blank",
+     "shape": {"row": [{"dev": "meanwell"}]},
      "url": "https://makerworld.com/en/models/2807989",
      "author": "Ivek"
     },
@@ -1079,6 +1174,7 @@
      "watts": 6,
      "wattsEstimated": true,
      "face": "blank",
+     "shape": {"row": [{"dev": "brick", "n": 3}], "shelf": true},
      "url": "https://makerworld.com/en/models/2383010-2u-power-supplies-shelf-for-kws-rack",
      "author": "Ilan Kushnir"
     },
@@ -1087,6 +1183,7 @@
      "name": "Power supply shelf",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"dev": "brick", "n": 2}], "shelf": true},
      "url": "https://www.printables.com/model/1276517",
      "author": "k8md",
      "estimated": true,
@@ -1099,6 +1196,7 @@
      "u": 1,
      "estimated": true,
      "face": "blank",
+     "shape": {"row": [{"out": 4, "type": "us"}, {"usb": 2}]},
      "url": "https://makerworld.com/en/models/1132933-10in-mini-rack-power-strip-mount"
     },
     {
@@ -1108,6 +1206,7 @@
      "watts": 10,
      "wattsEstimated": true,
      "face": "blank",
+     "shape": {"row": [{"dev": {"size": [32, 62, 120], "color": "#202124", "io": ["led"]}, "n": 6}], "shelf": true},
      "url": "https://makerworld.com/en/models/2225665-power-brick-rack"
     },
     {
@@ -1116,6 +1215,7 @@
      "u": 1,
      "estimated": true,
      "face": "blank",
+     "shape": {"row": [{"rocker": true, "n": 4}]},
      "url": "https://makerworld.com/en/models/1427286-10-inch-power-switch-panel-for-server-rack",
      "author": "stefan"
     },
@@ -1127,6 +1227,7 @@
      "watts": 12,
      "wattsEstimated": true,
      "face": "blank",
+     "shape": {"row": [{"dev": "atx-psu"}, {"bay": 2.5, "n": 2, "rows": 2}]},
      "url": "https://makerworld.com/en/models/1395747-10-inch-rack-mount-panel-for-the-atx-psu-2-ssd"
     },
     {
@@ -1134,6 +1235,7 @@
      "name": "HANYCONY 12-outlet power strip · Lab Rax",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"out": 6, "type": "us"}]},
      "url": "https://makerworld.com/en/models/2338081-10-inch-rack-1u-mount-hanycony-power-strip",
      "author": "mavr1k",
      "labrax": true
@@ -1143,6 +1245,7 @@
      "name": "Power strip / PDU mount · Lab Rax",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"out": 4, "type": "schuko"}]},
      "url": "https://makerworld.com/en/models/2330298-labrax-power-strip-pdu-mount",
      "author": "Mus",
      "estimated": true,
@@ -1153,6 +1256,7 @@
      "name": "12-outlet power strip with rack backplate",
      "u": 1.5,
      "face": "blank",
+     "shape": {"row": [{"out": 6, "type": "us"}]},
      "url": "https://makerworld.com/en/models/2265037-a-better-cheaper-12-port-10-rack-power-strip-pdu",
      "author": "Syvel Engineering",
      "estimated": true
@@ -1162,6 +1266,7 @@
      "name": "Rear power strip holder, 3 sockets",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"out": 3, "type": "schuko"}]},
      "url": "https://makerworld.com/en/models/1346592-10-inch-server-power-strip-holder",
      "author": "unknown_one",
      "estimated": true
@@ -1171,6 +1276,7 @@
      "name": "Power strip holder, 6 outlets (KWS)",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"out": 6, "type": "schuko"}]},
      "url": "https://makerworld.com/en/models/3258614-10in-server-rack-power-strip-holder-kws",
      "author": "Cash2000",
      "estimated": true
@@ -1180,6 +1286,7 @@
      "name": "Shelly Power Strip 4 holder",
      "u": 2,
      "face": "blank",
+     "shape": {"row": [{"out": 4, "type": "schuko", "color": "#ECEEEF"}]},
      "url": "https://makerworld.com/en/models/2168035-10-rack-mount-holder-for-shelly-power-strip-4",
      "estimated": true,
      "watts": 1,
@@ -1190,6 +1297,7 @@
      "name": "USB power supply panel",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"usb": 4}, {"btn": 10}]},
      "url": "https://makerworld.com/en/models/976734-rack-10-inch-usb-power-supply-mk1",
      "estimated": true,
      "watts": 3,
@@ -1200,6 +1308,7 @@
      "name": "Power supply panel",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"inlet": true}, {"rocker": true}, {"usb": 2}]},
      "url": "https://makerworld.com/en/models/1965658-10-minirack-power-supply",
      "estimated": true,
      "watts": 5,
@@ -1212,6 +1321,7 @@
      "watts": 5,
      "wattsEstimated": true,
      "face": "blank",
+     "shape": {"row": [{"usb": 5, "type": "c"}]},
      "url": "https://www.printables.com/model/1582956-10-inch-rack-usb-c-pdu",
      "author": "Ozpyn"
     },
@@ -1220,6 +1330,7 @@
      "name": "IEC PDU, switched inlet + 6 outlets · Lab Rax",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"inlet": true, "fuse": true}, {"out": 6, "type": "iec"}]},
      "url": "https://www.printables.com/model/1576653-10-inch-1u-rack-mount-iec-power-distribution-unit",
      "author": "cbmartin",
      "labrax": true
@@ -1229,6 +1340,7 @@
      "name": "Power distribution unit (PDU)",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"out": 6, "type": "us"}]},
      "url": "https://www.printables.com/model/1295107-10-rack-power-distribution-unit-pdu",
      "author": "JeffCurless",
      "estimated": true
@@ -1245,6 +1357,7 @@
      "watts": 3,
      "wattsEstimated": true,
      "face": "blank",
+     "shape": {"row": [{"screen": 7, "ratio": 1.667}]},
      "url": "https://makerworld.com/en/models/2556657",
      "author": "M_Frosty"
     },
@@ -1253,6 +1366,7 @@
      "name": "Raspberry Pi 7″ screen tray · Lab Rax",
      "u": 3,
      "face": "blank",
+     "shape": {"row": [{"screen": 7, "ratio": 1.667}]},
      "url": "https://makerworld.com/en/models/2720332",
      "author": "mateorzan",
      "estimated": true,
@@ -1267,6 +1381,7 @@
      "watts": 2,
      "wattsEstimated": true,
      "face": "blank",
+     "shape": {"row": [{"screen": 5, "ratio": 1.667}]},
      "url": "https://makerworld.com/en/models/1931553",
      "author": "Mauker"
     },
@@ -1277,6 +1392,7 @@
      "watts": 3,
      "wattsEstimated": true,
      "face": "blank",
+     "shape": {"row": [{"screen": true, "w": 190.5, "h": 59.5}]},
      "url": "https://makerworld.com/en/models/532155",
      "author": "Rex Tang"
     },
@@ -1287,6 +1403,7 @@
      "watts": 8,
      "wattsEstimated": true,
      "face": "blank",
+     "shape": {"row": [{"screen": true, "w": 150, "h": 47}, {"oled": true}, {"ks": 2, "rows": 2}]},
      "url": "https://makerworld.com/en/models/2233953-screen-module-for-10-inch-rack-raspberry-pi-2u",
      "author": "Ilan Kushnir"
     },
@@ -1297,6 +1414,7 @@
      "watts": 9,
      "wattsEstimated": true,
      "face": "blank",
+     "shape": {"row": [{"screen": 3.2, "ratio": 1.333, "n": 2}]},
      "url": "https://makerworld.com/en/models/2648073",
      "author": "waheiko81",
      "labrax": true
@@ -1308,6 +1426,7 @@
      "watts": 1,
      "wattsEstimated": true,
      "face": "blank",
+     "shape": {"row": [{"matrix": 4}]},
      "url": "https://makerworld.com/en/models/2043316",
      "author": "Lajoix"
     },
@@ -1318,6 +1437,7 @@
      "watts": 1,
      "wattsEstimated": true,
      "face": "blank",
+     "shape": {"row": [{"screen": 2.8, "ratio": 1.333, "n": 2}]},
      "url": "https://makerworld.com/en/models/2739908-2u-10-rack-panel-for-dual-cyd"
     },
     {
@@ -1328,6 +1448,7 @@
      "watts": 1,
      "wattsEstimated": true,
      "face": "blank",
+     "shape": {"row": [{"screen": 1.69, "ratio": 0.857, "n": 4}]},
      "url": "https://makerworld.com/en/models/1197418-10-inch-rack-mount-4-waveshare-1-69-lcd-displays",
      "author": "michaelclaw"
     }
@@ -1341,6 +1462,7 @@
      "name": "Unraid logo panel",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"text": "UNRAID", "size": 14}]},
      "url": "https://makerworld.com/en/models/2384530-1u-10-inch-rack-panel-with-unraid-logo-252x42mm",
      "author": "NADEAVELi"
     },
@@ -1349,6 +1471,7 @@
      "name": "Customizable label panel",
      "u": 1,
      "face": "blank",
+     "shape": {"row": [{"text": "HOMELAB", "size": 12}]},
      "url": "https://makerworld.com/en/models/3175269"
     }
    ]
@@ -1360,11 +1483,15 @@
    "items": [
     {
      "device": "UCG-Max",
+     "size": [141.8, 30, 127.6],
+     "color": "#E9EBEC",
+     "io": ["lcd@24x12"],
      "mounts": [
       {
        "id": "ucgmax1",
        "label": "1U mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 10,
        "author": "DToX",
        "url": "https://makerworld.com/en/models/1175026"
@@ -1373,6 +1500,7 @@
        "id": "mw2113543",
        "label": "1U mount · Lab Rax",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 10,
        "author": "Hawkish",
        "labrax": true,
@@ -1382,6 +1510,7 @@
        "id": "mw783611",
        "label": "Mount for UXG-Max / UCG-Ultra / UCG-Max",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 10,
        "author": "Mauker",
@@ -1391,11 +1520,15 @@
     },
     {
      "device": "UCG-Ultra",
+     "size": [141.8, 30, 127.6],
+     "color": "#E9EBEC",
+     "io": ["lcd@24x12"],
      "mounts": [
       {
        "id": "mw2113543ucgult",
        "label": "1U mount · Lab Rax (same size as UCG-Max)",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 4,
        "author": "Hawkish",
        "labrax": true,
@@ -1405,6 +1538,7 @@
        "id": "pr942972",
        "label": "1U mount with 3 keystones",
        "u": 1,
+       "shape": {"row": [{"ks": 1, "rows": 1}, {"dev": true}, {"ks": 2, "rows": 1}], "shelf": true},
        "watts": 4,
        "author": "AccessDenied",
        "url": "https://www.printables.com/model/942972"
@@ -1413,6 +1547,7 @@
        "id": "mw783611ucgult",
        "label": "Mount for UXG-Max / UCG-Ultra / UCG-Max",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 4,
        "author": "Mauker",
@@ -1424,6 +1559,7 @@
        "u": 1,
        "watts": 4,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "n3rding",
        "url": "https://makerworld.com/en/models/815547-ucg-ultra-ucg-max-uxg-max-10-inch-1u-rack-mount",
        "note": "Also fits UCG-Max and UXG-Max; use the vented version for the Max."
@@ -1432,11 +1568,15 @@
     },
     {
      "device": "UXG-Max",
+     "size": [141.8, 30, 127.6],
+     "color": "#E9EBEC",
+     "io": ["led"],
      "mounts": [
       {
        "id": "mw783611uxgmax",
        "label": "Mount for UXG-Max / UCG-Ultra / UCG-Max",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 6,
        "author": "Mauker",
@@ -1449,6 +1589,7 @@
        "estimated": true,
        "watts": 6,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Samuel Orsenne",
        "url": "https://makerworld.com/en/models/499929-rack-mount-unifi-uxg-max-ucg-ultra-ucg-max-19-10",
        "note": "Same size as UCG-Ultra and UCG-Max (display not visible); print the 10″ file."
@@ -1457,6 +1598,9 @@
     },
     {
      "device": "UXG Lite",
+     "size": [98, 30, 98],
+     "color": "#E9EBEC",
+     "io": ["led"],
      "mounts": [
       {
        "id": "mw2732600",
@@ -1464,6 +1608,7 @@
        "u": 1,
        "watts": 4,
        "face": "switch",
+       "shape": {"row": [{"dev": true}, {"dev": "USW-Flex-Mini"}], "shelf": true},
        "author": "463n7",
        "url": "https://makerworld.com/en/models/2732600"
       }
@@ -1471,11 +1616,15 @@
     },
     {
      "device": "UCG-Fiber",
+     "size": [212.8, 30, 127.6],
+     "color": "#E9EBEC",
+     "io": ["lcd@24x12"],
      "mounts": [
       {
        "id": "mw1228299",
        "label": "Rack mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 18,
        "author": "Mauker",
@@ -1485,6 +1634,7 @@
        "id": "mw2944966",
        "label": "Rack mount (alternative)",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 18,
        "url": "https://makerworld.com/en/models/2944966"
@@ -1495,6 +1645,7 @@
        "u": 1,
        "watts": 18,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "DToX",
        "url": "https://makerworld.com/en/models/1411169-10in-mini-rack-ucg-fiber-1u-mount"
       },
@@ -1505,6 +1656,7 @@
        "estimated": true,
        "watts": 18,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Mixmeister",
        "url": "https://makerworld.com/en/models/1184712-unifi-ucg-fiber-10-inch-rack-mount"
       },
@@ -1515,6 +1667,7 @@
        "estimated": true,
        "watts": 18,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "user_4091937325",
        "url": "https://makerworld.com/en/models/1161498-unifi-cloud-gateway-fiber-10-inch-rack-10-mount"
       },
@@ -1525,17 +1678,22 @@
        "estimated": true,
        "watts": 18,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/1170234-rack-10-pouces-cloud-gateway-fiber-unifi"
       }
      ]
     },
     {
      "device": "UCG-Fiber power supply",
+     "size": [63, 34.7, 118.5],
+     "color": "#1E1E1E",
+     "io": ["power"],
      "mounts": [
       {
        "id": "mw1667041",
        "label": "Rack mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 3,
        "wattsEstimated": true,
@@ -1546,11 +1704,15 @@
     },
     {
      "device": "UniFi Express 7",
+     "size": [117, 42.5, 117],
+     "color": "#E9EBEC",
+     "io": ["lcd"],
      "mounts": [
       {
        "id": "mw2263413",
        "label": "1U mount with keystones · Lab Rax",
        "u": 1,
+       "shape": {"row": [{"dev": true}, {"ks": 1}], "shelf": true},
        "watts": 12,
        "author": "Rockwilderness",
        "labrax": true,
@@ -1563,6 +1725,7 @@
        "estimated": true,
        "watts": 12,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "SamW",
        "url": "https://makerworld.com/en/models/1361481-unifi-express-7-10-inch-rack-mount",
        "note": "Uses the 1U hole pattern but the plate is 7.5 mm taller; leave a ½U gap above it."
@@ -1574,6 +1737,7 @@
        "estimated": true,
        "watts": 12,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Ignite",
        "url": "https://makerworld.com/en/models/1259297-unifi-express-7-10-inch-rack-shelf-mount"
       }
@@ -1581,11 +1745,15 @@
     },
     {
      "device": "USG-3P",
+     "size": [135, 28.3, 135],
+     "color": "#E9EBEC",
+     "io": ["led", "rj45x4"],
      "mounts": [
       {
        "id": "mw2097503",
        "label": "Rack mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 5,
        "author": "DWN3D",
@@ -1595,6 +1763,7 @@
        "id": "mw1867689",
        "label": "Rack mount (earlier version)",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 5,
        "author": "DWN3D",
@@ -1604,11 +1773,15 @@
     },
     {
      "device": "Cloud Key Gen2 / Gen2 Plus",
+     "size": [131.2, 27.1, 134.2],
+     "color": "#E9EBEC",
+     "io": ["lcd"],
      "mounts": [
       {
        "id": "mw2438481",
        "label": "Mount with keystone",
        "u": 1,
+       "shape": {"row": [{"dev": true}, {"ks": 1}], "shelf": true},
        "estimated": true,
        "watts": 8,
        "author": "DWN3D",
@@ -1618,6 +1791,7 @@
        "id": "mw1371851",
        "label": "Mount with keystone (earlier version)",
        "u": 1,
+       "shape": {"row": [{"dev": true}, {"ks": 1}], "shelf": true},
        "estimated": true,
        "watts": 8,
        "author": "DWN3D",
@@ -1630,6 +1804,7 @@
        "estimated": true,
        "watts": 8,
        "face": "shelf",
+       "shape": {"row": [{"ks": 1, "rows": 1}, {"dev": true}, {"ks": 2, "rows": 1}], "shelf": true},
        "author": "Jonas_2603",
        "url": "https://makerworld.com/en/models/1466944-unifi-cloud-key-gen-2-rack-mount-keystone",
        "note": "Also fits Cloud Key Gen2 (same housing)."
@@ -1641,6 +1816,7 @@
        "estimated": true,
        "watts": 8,
        "face": "shelf",
+       "shape": {"row": [{"ks": 1}, {"dev": true}], "shelf": true},
        "author": "Mixmeister",
        "url": "https://makerworld.com/en/models/2135770-unifi-cloud-key-gen2-10-inch-rack-mount",
        "note": "Gen2 Plus has the same housing."
@@ -1649,6 +1825,9 @@
     },
     {
      "device": "UniFi Express",
+     "size": [98, 30, 98],
+     "color": "#E9EBEC",
+     "io": ["lcd"],
      "mounts": [
       {
        "id": "mw1262197",
@@ -1657,6 +1836,7 @@
        "estimated": true,
        "watts": 6,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Infernal",
        "url": "https://makerworld.com/en/models/1262197-unifi-express-10-rack-mount",
        "note": "For the original UniFi Express (UX), not the Express 7."
@@ -1668,6 +1848,7 @@
        "estimated": true,
        "watts": 6,
        "face": "switch",
+       "shape": {"row": [{"dev": true}, {"ks": 1}], "shelf": true},
        "url": "https://makerworld.com/en/models/1393122"
       },
       {
@@ -1677,6 +1858,7 @@
        "estimated": true,
        "watts": 6,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/3083590"
       }
      ]
@@ -1688,6 +1870,9 @@
    "items": [
     {
      "device": "USW-Ultra",
+     "size": [203, 33, 76],
+     "color": "#E9EBEC",
+     "io": ["rj45x8"],
      "mounts": [
       {
        "id": "mw773130",
@@ -1696,6 +1881,7 @@
        "estimated": true,
        "watts": 6,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Mauker",
        "url": "https://makerworld.com/en/models/773130"
       },
@@ -1705,6 +1891,7 @@
        "u": 1,
        "watts": 6,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "DToX",
        "url": "https://makerworld.com/en/models/1175054-10in-mini-rack-usw-ultra-60w-1u-mount"
       },
@@ -1715,6 +1902,7 @@
        "estimated": true,
        "watts": 6,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "BlackCatPeanut",
        "url": "https://makerworld.com/en/models/1013999-unifi-ultra-switch-10-rack-mount"
       }
@@ -1722,11 +1910,15 @@
     },
     {
      "device": "USW-Ultra 210W power supply",
+     "size": [86, 26, 190],
+     "color": "#1E1E1E",
+     "io": ["power"],
      "mounts": [
       {
        "id": "mw1295688",
        "label": "Rack mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 4,
        "wattsEstimated": true,
@@ -1736,6 +1928,9 @@
     },
     {
      "device": "USW-Lite-8-PoE",
+     "size": [163.7, 31.7, 99.6],
+     "color": "#E9EBEC",
+     "io": ["rj45x8"],
      "mounts": [
       {
        "id": "mw2117690",
@@ -1743,6 +1938,7 @@
        "u": 1,
        "watts": 5,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Hawkish",
        "labrax": true,
        "url": "https://makerworld.com/en/models/2117690"
@@ -1754,6 +1950,7 @@
        "estimated": true,
        "watts": 5,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Mauker",
        "url": "https://makerworld.com/en/models/775127"
       },
@@ -1764,6 +1961,7 @@
        "estimated": true,
        "watts": 5,
        "face": "switch",
+       "shape": {"row": [{"ks": 1, "rows": 1}, {"dev": true}, {"ks": 1, "rows": 1}], "shelf": true},
        "author": "Nautilus Forge",
        "url": "https://www.printables.com/model/1202332"
       }
@@ -1771,6 +1969,9 @@
     },
     {
      "device": "USW-Lite-16-PoE",
+     "size": [192, 44, 185],
+     "color": "#E9EBEC",
+     "io": ["rj45x16"],
      "mounts": [
       {
        "id": "mw815550",
@@ -1778,6 +1979,7 @@
        "u": 1,
        "watts": 10,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "n3rding",
        "url": "https://makerworld.com/en/models/815550"
       },
@@ -1788,6 +1990,7 @@
        "estimated": true,
        "watts": 10,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "DWN3D",
        "url": "https://makerworld.com/en/models/1867653"
       },
@@ -1798,6 +2001,7 @@
        "estimated": true,
        "watts": 10,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Mauker",
        "url": "https://makerworld.com/en/models/1174099-usw-lite-16-poe-10-inch-rack-mount"
       }
@@ -1805,6 +2009,9 @@
     },
     {
      "device": "USW-Flex",
+     "size": [122.5, 28, 107.1],
+     "color": "#E9EBEC",
+     "io": ["rj45x5"],
      "mounts": [
       {
        "id": "mw2521345",
@@ -1813,6 +2020,7 @@
        "estimated": true,
        "watts": 3,
        "face": "switch",
+       "shape": {"row": [{"ks": 1, "rows": 1}, {"dev": true}, {"ks": 1, "rows": 1}], "shelf": true},
        "author": "Mauker",
        "url": "https://makerworld.com/en/models/2521345"
       }
@@ -1820,6 +2028,9 @@
     },
     {
      "device": "USW-Flex-Mini",
+     "size": [107, 21, 70],
+     "color": "#E9EBEC",
+     "io": ["rj45x5"],
      "mounts": [
       {
        "id": "flexmini05",
@@ -1827,6 +2038,7 @@
        "u": 0.5,
        "watts": 2,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/1201955"
       },
       {
@@ -1835,6 +2047,7 @@
        "u": 1,
        "watts": 7,
        "face": "switch",
+       "shape": {"row": [{"dev": true}, {"sbc": 1, "board": "pi5"}], "shelf": true},
        "author": "M_Frosty",
        "url": "https://makerworld.com/en/models/2381776"
       },
@@ -1845,6 +2058,7 @@
        "estimated": true,
        "watts": 2,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "DWN3D",
        "url": "https://makerworld.com/en/models/2103667"
       },
@@ -1855,6 +2069,7 @@
        "estimated": true,
        "watts": 2,
        "face": "switch",
+       "shape": {"row": [{"dev": true}, {"ks": 1}], "shelf": true},
        "author": "DWN3D",
        "url": "https://makerworld.com/en/models/1866316"
       },
@@ -1865,6 +2080,7 @@
        "estimated": true,
        "watts": 4,
        "face": "switch",
+       "shape": {"row": [{"dev": true, "n": 2}], "shelf": true},
        "author": "DWN3D",
        "url": "https://makerworld.com/en/models/1950460"
       },
@@ -1874,6 +2090,7 @@
        "u": 1,
        "watts": 2,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "n3rding",
        "url": "https://makerworld.com/en/models/815554-usw-flex-mini-10-inch-rack-mount"
       },
@@ -1884,12 +2101,16 @@
        "estimated": true,
        "watts": 2,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/775179-ubiquiti-unifi-usw-flex-mini-10-inch-rack-mount"
       }
      ]
     },
     {
      "device": "USW-Flex-2.5G-5",
+     "size": [117.1, 21.2, 90],
+     "color": "#E9EBEC",
+     "io": ["rj45x5"],
      "mounts": [
       {
        "id": "mw3395385",
@@ -1897,6 +2118,7 @@
        "u": 1,
        "watts": 4,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "vvyroubal",
        "labrax": true,
        "url": "https://makerworld.com/en/models/3395385"
@@ -1908,6 +2130,7 @@
        "estimated": true,
        "watts": 4,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Mauker",
        "url": "https://makerworld.com/en/models/752336"
       },
@@ -1918,6 +2141,7 @@
        "estimated": true,
        "watts": 4,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/1636027"
       },
       {
@@ -1927,6 +2151,7 @@
        "estimated": true,
        "watts": 4,
        "face": "switch",
+       "shape": {"row": [{"ks": 2, "rows": 1}, {"dev": true}, {"ks": 3, "rows": 1}], "shelf": true},
        "author": "Mixmeister",
        "url": "https://makerworld.com/en/models/2201556-unifi-flex-mini-2-5g-5xkeystone-10-inch-rackmount"
       },
@@ -1936,6 +2161,7 @@
        "u": 1,
        "watts": 6,
        "face": "switch",
+       "shape": {"row": [{"dev": true}, {"dev": "JetKVM"}], "shelf": true},
        "author": "DToX",
        "url": "https://makerworld.com/en/models/1411355-10-inch-mini-rack-jetkvm-usw-flex-mini-2-5g-1u",
        "note": "Holds a JetKVM beside the switch."
@@ -1944,6 +2170,9 @@
     },
     {
      "device": "USW-Flex-2.5G-8",
+     "size": [212.9, 33.5, 76],
+     "color": "#E9EBEC",
+     "io": ["rj45x8", "rj45", "sfp"],
      "mounts": [
       {
        "id": "mw1024889",
@@ -1952,6 +2181,7 @@
        "estimated": true,
        "watts": 9,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Mauker",
        "url": "https://makerworld.com/en/models/1024889"
       }
@@ -1959,6 +2189,9 @@
     },
     {
      "device": "USW-Flex-2.5G-8-PoE",
+     "size": [212.9, 33.5, 99.4],
+     "color": "#E9EBEC",
+     "io": ["rj45x8", "rj45", "sfp"],
      "mounts": [
       {
        "id": "mw1024496",
@@ -1967,6 +2200,7 @@
        "estimated": true,
        "watts": 10,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Mauker",
        "url": "https://makerworld.com/en/models/1024496"
       },
@@ -1977,6 +2211,7 @@
        "estimated": true,
        "watts": 10,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "mr4lexndr",
        "url": "https://makerworld.com/en/models/2000285"
       }
@@ -1984,6 +2219,9 @@
     },
     {
      "device": "USW-Pro-XG-8-PoE",
+     "size": [210.4, 43.7, 173.8],
+     "color": "#E9EBEC",
+     "io": ["rj45x8", "sfpx2"],
      "mounts": [
       {
        "id": "mw1490785",
@@ -1991,6 +2229,7 @@
        "u": 1,
        "watts": 40,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "DToX",
        "url": "https://makerworld.com/en/models/1490785"
       }
@@ -1998,11 +2237,15 @@
     },
     {
      "device": "UACC-PoE++ injector",
+     "size": [63, 34, 106],
+     "color": "#1E1E1E",
+     "io": ["rj45", "rj45", "led"],
      "mounts": [
       {
        "id": "mw3418637",
        "label": "Dual injector mount",
        "u": 1,
+       "shape": {"row": [{"dev": true, "n": 2}], "shelf": true},
        "estimated": true,
        "watts": 5,
        "wattsEstimated": true,
@@ -2013,6 +2256,9 @@
     },
     {
      "device": "US-8-60W",
+     "size": [148, 31, 100],
+     "color": "#E9EBEC",
+     "io": ["rj45x8"],
      "mounts": [
       {
        "id": "mw1393047",
@@ -2021,6 +2267,7 @@
        "estimated": true,
        "watts": 7,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Mixmeister",
        "url": "https://makerworld.com/en/models/1393047-unifi-switch-us-8-60w-10-inch-rackmount",
        "note": "Gen 1 US-8-60W, not the USW-Lite-8."
@@ -2029,6 +2276,9 @@
     },
     {
      "device": "UniFi PoE injector",
+     "size": [46, 33, 86],
+     "color": "#E9EBEC",
+     "io": ["rj45", "rj45", "led"],
      "mounts": [
       {
        "id": "mw1214393",
@@ -2037,6 +2287,7 @@
        "watts": 2,
        "wattsEstimated": true,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "commucore",
        "url": "https://makerworld.com/en/models/1214393-rack-mount-unifi-poe-injector-uni-sided-10in"
       }
@@ -2049,11 +2300,15 @@
    "items": [
     {
      "device": "U7 Pro",
+     "size": [206, 46, 206],
+     "color": "#F4F5F6",
+     "io": ["led"],
      "mounts": [
       {
        "id": "u7pro45",
        "label": "45° mount, replaces the top panel",
        "position": "top",
+       "shape": {"ap": "U7 Pro", "tilt": 45},
        "watts": 13,
        "labrax": true,
        "url": "https://makerworld.com/en/models/3181762-unifi-u7-pro-45deg-mount-for-lab-rax-homelab-rack",
@@ -2069,6 +2324,7 @@
        "id": "mw3217818",
        "label": "Top plate with U7 Pro mount",
        "position": "top",
+       "shape": {"ap": "U7 Pro", "tilt": 0},
        "watts": 13,
        "author": "Loonie Merker",
        "labrax": true,
@@ -2083,6 +2339,9 @@
    "items": [
     {
      "device": "TL-SG105-M2",
+     "size": [209, 26, 126],
+     "color": "#2E3033",
+     "io": ["rj45x5", "led"],
      "mounts": [
       {
        "id": "tplink",
@@ -2090,6 +2349,7 @@
        "u": 1,
        "watts": 4,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "mklements",
        "labrax": true,
        "url": "https://makerworld.com/en/models/1304250-1u-shelf-for-tp-link-switch-for-10-rack"
@@ -2101,6 +2361,7 @@
        "estimated": true,
        "watts": 4,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Mauker",
        "url": "https://makerworld.com/en/models/1990494"
       }
@@ -2108,6 +2369,9 @@
     },
     {
      "device": "TL-SG105",
+     "size": [99.8, 25, 98],
+     "color": "#2E3033",
+     "io": ["rj45x5", "power"],
      "mounts": [
       {
        "id": "mw1351609",
@@ -2116,6 +2380,7 @@
        "estimated": true,
        "watts": 2,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Srigger",
        "url": "https://makerworld.com/en/models/1351609"
       },
@@ -2126,6 +2391,7 @@
        "estimated": true,
        "watts": 2,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Mauker",
        "url": "https://makerworld.com/en/models/773229"
       },
@@ -2135,6 +2401,7 @@
        "u": 1,
        "watts": 2,
        "face": "switch",
+       "shape": {"row": [{"ks": 3, "rows": 1}, {"dev": true}, {"ks": 3, "rows": 1}], "shelf": true},
        "author": "3D Garage",
        "url": "https://makerworld.com/en/models/2720418"
       }
@@ -2142,6 +2409,9 @@
     },
     {
      "device": "TL-SG108",
+     "size": [158, 25, 101],
+     "color": "#2E3033",
+     "io": ["rj45x8", "power"],
      "mounts": [
       {
        "id": "mw1765496",
@@ -2149,6 +2419,7 @@
        "u": 1,
        "watts": 3,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "FadyFaheem",
        "url": "https://makerworld.com/en/models/1765496"
       },
@@ -2159,6 +2430,7 @@
        "estimated": true,
        "watts": 3,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Srigger",
        "url": "https://makerworld.com/en/models/2235240"
       },
@@ -2169,6 +2441,7 @@
        "estimated": true,
        "watts": 3,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Mauker",
        "url": "https://makerworld.com/en/models/1476615"
       }
@@ -2176,6 +2449,9 @@
     },
     {
      "device": "TL-SG108E",
+     "size": [158, 25, 101],
+     "color": "#2E3033",
+     "io": ["rj45x8", "power"],
      "mounts": [
       {
        "id": "mw2457791",
@@ -2184,6 +2460,7 @@
        "estimated": true,
        "watts": 3,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "mserpis125",
        "labrax": true,
        "url": "https://makerworld.com/en/models/2457791"
@@ -2192,6 +2469,9 @@
     },
     {
      "device": "TL-SG108S-M2",
+     "size": [158, 25.4, 101],
+     "color": "#2E3033",
+     "io": ["rj45x8", "power"],
      "mounts": [
       {
        "id": "mw1908617",
@@ -2200,6 +2480,7 @@
        "estimated": true,
        "watts": 4,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Mauker",
        "url": "https://makerworld.com/en/models/1908617"
       }
@@ -2207,6 +2488,9 @@
     },
     {
      "device": "TL-SG108PE",
+     "size": [158, 25, 101],
+     "color": "#2E3033",
+     "io": ["rj45x8", "power"],
      "mounts": [
       {
        "id": "pr1166364",
@@ -2214,6 +2498,7 @@
        "u": 1,
        "watts": 5,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "ThoreB",
        "url": "https://www.printables.com/model/1166364"
       }
@@ -2221,6 +2506,9 @@
     },
     {
      "device": "TP-Link LS1008G",
+     "size": [127, 23, 66.5],
+     "color": "#2E3033",
+     "io": ["rj45x8", "power"],
      "mounts": [
       {
        "id": "pr568385",
@@ -2228,6 +2516,7 @@
        "u": 1,
        "watts": 3,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "ayanev",
        "url": "https://www.printables.com/model/568385"
       }
@@ -2235,6 +2524,9 @@
     },
     {
      "device": "TP-Link G2206P",
+     "size": [158, 25, 101],
+     "color": "#2E3033",
+     "io": ["rj45x6", "led"],
      "mounts": [
       {
        "id": "mw2622617",
@@ -2243,6 +2535,7 @@
        "watts": 6,
        "wattsEstimated": true,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Seagulll",
        "url": "https://makerworld.com/en/models/2622617"
       }
@@ -2250,11 +2543,15 @@
     },
     {
      "device": "Omada ER605",
+     "size": [158, 25, 101],
+     "color": "#2E3033",
+     "io": ["usba", "rj45x5", "led"],
      "mounts": [
       {
        "id": "pr1210271",
        "label": "Rack mount with 2 keystones",
        "u": 1,
+       "shape": {"row": [{"ks": 1, "rows": 1}, {"dev": true}, {"ks": 1, "rows": 1}], "shelf": true},
        "estimated": true,
        "watts": 6,
        "author": "Michael Jones",
@@ -2264,6 +2561,7 @@
        "id": "mw664449",
        "label": "Omada set: OC200, ER605, SG2210P",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 6,
        "author": "Dawnchaser",
@@ -2276,6 +2574,7 @@
        "estimated": true,
        "watts": 6,
        "face": "switch",
+       "shape": {"row": [{"ks": 1, "rows": 1}, {"dev": true}, {"ks": 1, "rows": 1}], "shelf": true},
        "author": "Mixmeister",
        "url": "https://makerworld.com/en/models/1944875"
       },
@@ -2286,6 +2585,7 @@
        "estimated": true,
        "watts": 6,
        "face": "switch",
+       "shape": {"row": [{"ks": 1, "rows": 1}, {"dev": true}, {"ks": 1, "rows": 1}], "shelf": true},
        "url": "https://makerworld.com/en/models/1845492-10-inch-rack-tp-link-er605-sg108",
        "note": "Also fits TL-SG108-size switches (158×101×25 mm)."
       }
@@ -2293,11 +2593,15 @@
     },
     {
      "device": "Omada ER707-M2 / ES210XPP-M2",
+     "size": [226, 35, 131],
+     "color": "#2E3033",
+     "io": ["usba", "rj45x6", "sfp", "led"],
      "mounts": [
       {
        "id": "mw2952687",
        "label": "Rack mount · Lab Rax",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 6,
        "wattsEstimated": true,
@@ -2309,6 +2613,9 @@
     },
     {
      "device": "Mercusys MS108GS",
+     "size": [158, 25.2, 99.1],
+     "color": "#1E1E1E",
+     "io": ["rj45x8", "power"],
      "mounts": [
       {
        "id": "mw3064874",
@@ -2317,6 +2624,7 @@
        "estimated": true,
        "watts": 3,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "AlbertoFernandezHid",
        "url": "https://makerworld.com/en/models/3064874"
       }
@@ -2324,6 +2632,9 @@
     },
     {
      "device": "TP-Link SG2210P",
+     "size": [209, 26, 126],
+     "color": "#2E3033",
+     "io": ["rj45x8", "sfpx2", "led"],
      "mounts": [
       {
        "id": "mw1845495",
@@ -2332,6 +2643,7 @@
        "estimated": true,
        "watts": 10,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/1845495-10-inch-rack-tp-link-sg2210p-sg2008-sg105-m2",
        "note": "Also SG2008 and other 209×126×26 mm TP-Link switches; loose fit by design."
       }
@@ -2344,6 +2656,9 @@
    "items": [
     {
      "device": "Netgear GS305 / GS305P",
+     "size": [101, 29, 94],
+     "color": "#1C1C1E",
+     "io": ["rj45x5", "power"],
      "mounts": [
       {
        "id": "mw1519577",
@@ -2351,6 +2666,7 @@
        "u": 1,
        "watts": 2,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Zeroday",
        "url": "https://makerworld.com/en/models/1519577"
       },
@@ -2361,6 +2677,7 @@
        "estimated": true,
        "watts": 2,
        "face": "switch",
+       "shape": {"row": [{"ks": 2, "rows": 1}, {"dev": true}, {"ks": 3, "rows": 1}], "shelf": true},
        "author": "Pierre_Grd",
        "url": "https://makerworld.com/en/models/2634326"
       },
@@ -2371,6 +2688,7 @@
        "estimated": true,
        "watts": 6,
        "face": "switch",
+       "shape": {"row": [{"dev": true}, {"dev": "MikroTik hEX S"}], "shelf": true},
        "author": "mserpis125",
        "labrax": true,
        "url": "https://makerworld.com/en/models/2460943"
@@ -2382,12 +2700,16 @@
        "estimated": true,
        "watts": 2,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/939132-netgear-gs305-10-rack-mount"
       }
      ]
     },
     {
      "device": "Netgear GS305EP",
+     "size": [158, 27, 101],
+     "color": "#1C1C1E",
+     "io": ["rj45x5", "led"],
      "mounts": [
       {
        "id": "mw2338175",
@@ -2396,6 +2718,7 @@
        "estimated": true,
        "watts": 4,
        "face": "switch",
+       "shape": {"row": [{"dev": true}, {"ks": 1}], "shelf": true},
        "author": "TheAppleFreak",
        "url": "https://makerworld.com/en/models/2338175"
       }
@@ -2403,6 +2726,9 @@
     },
     {
      "device": "Netgear GS308E",
+     "size": [158, 29, 101],
+     "color": "#1C1C1E",
+     "io": ["rj45x8", "power"],
      "mounts": [
       {
        "id": "mw1427073",
@@ -2411,6 +2737,7 @@
        "estimated": true,
        "watts": 3,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Manta",
        "url": "https://makerworld.com/en/models/1427073"
       },
@@ -2421,6 +2748,7 @@
        "estimated": true,
        "watts": 3,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Shrektastic",
        "url": "https://makerworld.com/en/models/1859737-netgear-gs308e-screwless-10-inch-rack-mount"
       },
@@ -2431,6 +2759,7 @@
        "estimated": true,
        "watts": 3,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Michi12",
        "url": "https://makerworld.com/en/models/929102-10-inch-rack-for-netgear-gs308e"
       },
@@ -2441,6 +2770,7 @@
        "estimated": true,
        "watts": 3,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Layershift Designs",
        "url": "https://makerworld.com/en/models/1500074-netgear-gs308e-10-rack-shelf"
       }
@@ -2448,6 +2778,9 @@
     },
     {
      "device": "Netgear GS105E",
+     "size": [94, 27, 101],
+     "color": "#2F4A66",
+     "io": ["rj45x5", "led"],
      "mounts": [
       {
        "id": "mw1928510",
@@ -2456,6 +2789,7 @@
        "estimated": true,
        "watts": 2,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Steffie",
        "labrax": true,
        "url": "https://makerworld.com/en/models/1928510"
@@ -2464,11 +2798,15 @@
     },
     {
      "device": "MikroTik hEX S",
+     "size": [113, 28, 89],
+     "color": "#F2F2F2",
+     "io": ["power", "rj45x5", "sfp", "usba"],
      "mounts": [
       {
        "id": "mw2396355",
        "label": "Rack mount · Lab Rax",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 4,
        "author": "mserpis125",
@@ -2482,12 +2820,16 @@
        "estimated": true,
        "watts": 4,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/3000250-mikrotik-hex-s-10-rack-fit"
       }
      ]
     },
     {
      "device": "MikroTik CRS305",
+     "size": [141, 28, 115],
+     "color": "#C5C9CD",
+     "io": ["sfpx4", "led"],
      "mounts": [
       {
        "id": "mw1566709",
@@ -2496,6 +2838,7 @@
        "estimated": true,
        "watts": 7,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Mauker",
        "url": "https://makerworld.com/en/models/1566709"
       }
@@ -2503,6 +2846,9 @@
     },
     {
      "device": "Zyxel GS108B",
+     "size": [155, 26, 85],
+     "color": "#3A3A3A",
+     "io": ["rj45x8", "power"],
      "mounts": [
       {
        "id": "mw1719364",
@@ -2510,6 +2856,7 @@
        "u": 1,
        "watts": 3,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Nozzle1",
        "url": "https://makerworld.com/en/models/1719364"
       }
@@ -2517,6 +2864,9 @@
     },
     {
      "device": "YuanLey YS25-0802T",
+     "size": [190, 27, 100],
+     "color": "#1E1E1E",
+     "io": ["rj45x8", "rj45x2"],
      "mounts": [
       {
        "id": "mw2418622",
@@ -2525,6 +2875,7 @@
        "watts": 8,
        "wattsEstimated": true,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Scraxxer",
        "labrax": true,
        "url": "https://makerworld.com/en/models/2418622"
@@ -2533,6 +2884,9 @@
     },
     {
      "device": "GoodTop 8-port SFP+ switch",
+     "size": [200, 27, 120],
+     "color": "#1E1E1E",
+     "io": ["sfpx8", "led"],
      "mounts": [
       {
        "id": "mw2424279",
@@ -2541,6 +2895,7 @@
        "watts": 15,
        "wattsEstimated": true,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "lhaenschke",
        "labrax": true,
        "url": "https://makerworld.com/en/models/2424279"
@@ -2549,6 +2904,9 @@
     },
     {
      "device": "Any 5-port desktop switch",
+     "size": [100, 25, 98],
+     "color": "#2E3033",
+     "io": ["rj45x5", "power"],
      "mounts": [
       {
        "id": "mw2829954",
@@ -2557,6 +2915,7 @@
        "watts": 2,
        "wattsEstimated": true,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "S_C_H_1_Z_0",
        "labrax": true,
        "url": "https://makerworld.com/en/models/2829954"
@@ -2565,6 +2924,9 @@
     },
     {
      "device": "Sodola SL902",
+     "size": [165, 27, 100],
+     "color": "#3A3D40",
+     "io": ["rj45x8", "sfp", "led"],
      "mounts": [
       {
        "id": "pr1358412",
@@ -2574,6 +2936,7 @@
        "watts": 8,
        "wattsEstimated": true,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "dereulenspiegel",
        "url": "https://www.printables.com/model/1358412"
       }
@@ -2581,11 +2944,15 @@
     },
     {
      "device": "GL.iNet Opal",
+     "size": [118, 30, 85],
+     "color": "#E3E4E6",
+     "io": ["usbc", "usba", "rj45x3"],
      "mounts": [
       {
        "id": "mw2238156",
        "label": "Rack mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 4,
        "author": "SylMan",
@@ -2595,11 +2962,15 @@
     },
     {
      "device": "GL.iNet Beryl AX + Raspberry Pi 4",
+     "size": [208, 34, 83],
+     "color": "#3B4652",
+     "io": ["usbc", "rj45", "rj45", "usba"],
      "mounts": [
       {
        "id": "pr1238568",
        "label": "Rack mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 9,
        "author": "Casey",
@@ -2609,6 +2980,9 @@
     },
     {
      "device": "Netgear GS308EP",
+     "size": [158, 27, 101],
+     "color": "#1C1C1E",
+     "io": ["rj45x8", "led"],
      "mounts": [
       {
        "id": "mw1155380",
@@ -2617,6 +2991,7 @@
        "estimated": true,
        "watts": 4,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "The Tech Dane",
        "url": "https://makerworld.com/en/models/1155380-10-rack-mount-for-netgear-gs308-switches-a1-mini"
       }
@@ -2624,6 +2999,9 @@
     },
     {
      "device": "Netgear GS308",
+     "size": [158, 29, 101],
+     "color": "#1C1C1E",
+     "io": ["rj45x8", "power"],
      "mounts": [
       {
        "id": "mw1081245",
@@ -2632,6 +3010,7 @@
        "estimated": true,
        "watts": 3,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Hixagon",
        "url": "https://makerworld.com/en/models/1081245-10-rack-netgear-gs308-mount"
       }
@@ -2639,6 +3018,9 @@
     },
     {
      "device": "Netgear GS108PE v3",
+     "size": [158, 29, 101],
+     "color": "#2F4A66",
+     "io": ["rj45x8", "led"],
      "mounts": [
       {
        "id": "mw1646055",
@@ -2646,6 +3028,7 @@
        "u": 1,
        "watts": 4,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "SilvestreDesignLab",
        "url": "https://makerworld.com/en/models/1646055-network-switch-netgear-gs108pev3-10in-rack-1u"
       }
@@ -2653,6 +3036,9 @@
     },
     {
      "device": "Netgear GS108",
+     "size": [158, 27, 102],
+     "color": "#2F4A66",
+     "io": ["rj45x8", "led"],
      "mounts": [
       {
        "id": "mw1469962",
@@ -2661,12 +3047,16 @@
        "estimated": true,
        "watts": 3,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/1469962-10-inch-rack-mount-for-netgear-gs108"
       }
      ]
     },
     {
      "device": "MikroTik RB5009",
+     "size": [220, 22, 125],
+     "color": "#34373B",
+     "io": ["power", "usba", "rj45", "rj45x7", "sfp"],
      "mounts": [
       {
        "id": "mw442934",
@@ -2675,6 +3065,7 @@
        "estimated": true,
        "watts": 9,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Kitten 3D Enthusiastic",
        "url": "https://makerworld.com/en/models/442934-mikrotik-rb5009ug-10-inch-or-19inch-rackmount-kit",
        "note": "RB5009 is ~220 mm wide, a tight fit between 10″ posts."
@@ -2686,6 +3077,7 @@
        "estimated": true,
        "watts": 9,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/1927696",
        "note": "For racks where standard RB5009 ears don't fit."
       },
@@ -2695,6 +3087,7 @@
        "u": 0.5,
        "watts": 9,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "mseidler",
        "url": "https://www.printables.com/model/1236191-mikrotik-rb5009-10-inch-rack-mount"
       },
@@ -2704,6 +3097,7 @@
        "u": 1,
        "watts": 9,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "LYPTUS",
        "url": "https://www.printables.com/model/735766-mikrotik-rb5009ug-10-inch-rack-mount-1u"
       }
@@ -2711,6 +3105,9 @@
     },
     {
      "device": "MikroTik RB4011",
+     "size": [228, 30, 120],
+     "color": "#1F1F1F",
+     "io": ["rj45x10", "sfp"],
      "mounts": [
       {
        "id": "mw792413",
@@ -2719,12 +3116,16 @@
        "estimated": true,
        "watts": 10,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/792413-mounting-bracket-for-rb4011-router-in-10-rack"
       }
      ]
     },
     {
      "device": "MikroTik CSS610-8G-2S+",
+     "size": [200, 44, 164],
+     "color": "#E5E7E8",
+     "io": ["rj45x8", "sfpx2"],
      "mounts": [
       {
        "id": "mw1341259",
@@ -2734,6 +3135,7 @@
        "watts": 6,
        "wattsEstimated": true,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "unimonkey",
        "url": "https://makerworld.com/en/models/1341259-mikrotik-switch-10-rack-mount"
       }
@@ -2741,6 +3143,9 @@
     },
     {
      "device": "MikroTik CRS310-8G+2S+",
+     "size": [200, 44, 206.1],
+     "color": "#E5E7E8",
+     "io": ["rj45x8", "sfpx2", "usba"],
      "mounts": [
       {
        "id": "mw1190849",
@@ -2749,6 +3154,7 @@
        "estimated": true,
        "watts": 12,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/1190849-mikrotik-10-inch-mini-rack-ears-rmk-2-10-alternati",
        "note": "Other 200 mm MikroTik units are listed as compatible."
       },
@@ -2758,12 +3164,16 @@
        "u": 1,
        "watts": 12,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://www.printables.com/model/1369349-10-rack-mount-1u-mikrotik-crs310-8g2sin"
       }
      ]
     },
     {
      "device": "MikroTik hAP ax S",
+     "size": [156.3, 35.7, 127.7],
+     "color": "#F2F2F2",
+     "io": ["power", "rj45x5", "sfp", "usba"],
      "mounts": [
       {
        "id": "mw2218899",
@@ -2772,6 +3182,7 @@
        "watts": 7,
        "wattsEstimated": true,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/2218899-mikrotik-hap-ax-s-10-inch-rack-mount",
        "note": "Leaves 65 mm free beside the router."
       }
@@ -2779,6 +3190,9 @@
     },
     {
      "device": "MikroTik hAP",
+     "size": [113, 28, 89],
+     "color": "#F2F2F2",
+     "io": ["power", "rj45x5", "usba"],
      "mounts": [
       {
        "id": "mw1493804",
@@ -2787,12 +3201,16 @@
        "estimated": true,
        "watts": 3,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/1493804-mikrotik-hap-10-rackmount"
       }
      ]
     },
     {
      "device": "Zyxel GS1900-8",
+     "size": [250, 27, 104],
+     "color": "#E6E6E6",
+     "io": ["rj45x8", "led"],
      "mounts": [
       {
        "id": "mw25905",
@@ -2800,6 +3218,7 @@
        "u": 1,
        "watts": 4,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "WingOver",
        "url": "https://makerworld.com/en/models/25905-switch-1u-10-inch-rackmount-zyxel-gs1900",
        "note": "Also GS1900-8HP, GS1900-10HP and XMG1915-10."
@@ -2808,6 +3227,9 @@
     },
     {
      "device": "Zyxel MG-108",
+     "size": [240, 26, 106],
+     "color": "#2E2E2E",
+     "io": ["rj45x8", "led"],
      "mounts": [
       {
        "id": "mw1081187",
@@ -2816,6 +3238,7 @@
        "estimated": true,
        "watts": 6,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "teelur",
        "url": "https://makerworld.com/en/models/1081187-zyxel-mg-108-10-inch-rack",
        "note": "The switch slides in from the side, so the side panel must come off."
@@ -2824,6 +3247,9 @@
     },
     {
      "device": "Zyxel GS1100-16 v3",
+     "size": [215, 42, 133],
+     "color": "#9A9EA2",
+     "io": ["rj45x16", "led"],
      "mounts": [
       {
        "id": "mw2015313",
@@ -2832,6 +3258,7 @@
        "estimated": true,
        "watts": 6,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Jawbones",
        "url": "https://makerworld.com/en/models/2015313-zyxel-gs1100-16v3-10-rack-mounts"
       }
@@ -2839,6 +3266,9 @@
     },
     {
      "device": "Cisco Catalyst 2960-C / 3560-CX",
+     "size": [269, 44, 213],
+     "color": "#E3E4E5",
+     "io": ["rj45x8", "sfpx2", "rj45"],
      "mounts": [
       {
        "id": "mw200540",
@@ -2848,6 +3278,7 @@
        "watts": 15,
        "wattsEstimated": true,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Per Mejdal Rasmussen",
        "url": "https://makerworld.com/en/models/200540-cisco-catalyst-desktop-switch-for-10-inch-rack",
        "note": "Asymmetric ears keep the USB port free but block the last SFP port."
@@ -2856,6 +3287,9 @@
     },
     {
      "device": "Cisco CBS110-8T-D",
+     "size": [160, 30, 104],
+     "color": "#3B3E42",
+     "io": ["rj45x8", "led"],
      "mounts": [
       {
        "id": "mw1426651",
@@ -2864,12 +3298,16 @@
        "estimated": true,
        "watts": 3,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/1426651-10-rackmount-cisco-cbs110-8t-d"
       }
      ]
     },
     {
      "device": "Ubiquiti EdgeRouter X SFP",
+     "size": [142, 23, 75],
+     "color": "#1E1E1E",
+     "io": ["rj45x5", "sfp", "led"],
      "mounts": [
       {
        "id": "mw236922",
@@ -2878,6 +3316,7 @@
        "estimated": true,
        "watts": 4,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "AnthonyDesigns",
        "url": "https://makerworld.com/en/models/236922-edgerouter-x-sfp-10-rack-mount",
        "note": "Not for the plain ER-X; needs a left-angle C5 power cable."
@@ -2886,6 +3325,9 @@
     },
     {
      "device": "Ubiquiti EdgeRouter X",
+     "size": [110, 22, 75],
+     "color": "#1E1E1E",
+     "io": ["rj45x5", "led"],
      "mounts": [
       {
        "id": "mw2529136",
@@ -2894,12 +3336,16 @@
        "estimated": true,
        "watts": 3,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/2529136"
       }
      ]
     },
     {
      "device": "Ubiquiti EdgeRouter 4",
+     "size": [229, 31.1, 136.5],
+     "color": "#1E1E1E",
+     "io": ["rj45", "usba", "rj45x3", "sfp"],
      "mounts": [
       {
        "id": "pr37814",
@@ -2908,6 +3354,7 @@
        "estimated": true,
        "watts": 9,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "no-brake",
        "url": "https://www.printables.com/model/37814-ubiquiti-edgerouter-4-er-4-10-inch-rack-mount",
        "note": "Use short screws; long ones can damage the board."
@@ -2916,6 +3363,9 @@
     },
     {
      "device": "GL.iNet Slate 7",
+     "size": [130, 34, 91],
+     "color": "#222222",
+     "io": ["usbc", "rj45", "rj45", "usba"],
      "mounts": [
       {
        "id": "mw3247005",
@@ -2923,6 +3373,7 @@
        "u": 1,
        "watts": 7,
        "face": "switch",
+       "shape": {"row": [{"ks": 1, "rows": 1}, {"dev": true}, {"ks": 1, "rows": 1}], "shelf": true},
        "author": "mklements",
        "url": "https://makerworld.com/en/models/3247005-1u-shelf-for-gl-inet-slate-7",
        "note": "By the Lab Rax designer."
@@ -2934,6 +3385,7 @@
        "estimated": true,
        "watts": 7,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Amrut Prabhu",
        "url": "https://www.printables.com/model/1333183-glinet-slate-7-10-inch-rack-mount"
       }
@@ -2941,6 +3393,9 @@
     },
     {
      "device": "GL.iNet Beryl AX",
+     "size": [120, 34, 83],
+     "color": "#3B4652",
+     "io": ["usbc", "rj45", "rj45", "usba"],
      "mounts": [
       {
        "id": "mw1416079",
@@ -2949,6 +3404,7 @@
        "estimated": true,
        "watts": 5,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/1416079-gl-inet-beryl-ax-6-inch-or-10-inch-rack-mount",
        "note": "Antennas stick up; keep the U above free."
       }
@@ -2956,6 +3412,9 @@
     },
     {
      "device": "UGREEN CM742 PoE switch",
+     "size": [200, 32, 100],
+     "color": "#3A3D40",
+     "io": ["rj45x10", "led"],
      "mounts": [
       {
        "id": "mw2533145",
@@ -2965,6 +3424,7 @@
        "watts": 3,
        "wattsEstimated": true,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "DanielSmart92",
        "labrax": true,
        "url": "https://makerworld.com/en/models/2533145-labrax-ugreen-cm742-switch-mount"
@@ -2973,6 +3433,9 @@
     },
     {
      "device": "Zyxel GS1200-5HP v2",
+     "size": [193, 26, 84],
+     "color": "#3A3A3A",
+     "io": ["rj45x5", "led"],
      "mounts": [
       {
        "id": "pr1379840",
@@ -2980,6 +3443,7 @@
        "u": 1,
        "watts": 3,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "nilrog",
        "url": "https://www.printables.com/model/1379840-zyxel-gs1200-5hpv2-10-inch-1u-rack-mount"
       }
@@ -2992,11 +3456,15 @@
    "items": [
     {
      "device": "FRITZ!Box 7590",
+     "size": [250, 48, 185],
+     "color": "#F4F4F4",
+     "io": ["dsl", "phonex2", "rj45", "rj45x4", "usbax2", "power"],
      "mounts": [
       {
        "id": "mw1443771",
        "label": "Rack bracket",
        "u": 1.5,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 12,
        "author": "VRKTTR",
@@ -3006,11 +3474,15 @@
     },
     {
      "device": "FRITZ!Box 7362 SL",
+     "size": [226, 47, 160],
+     "color": "#2B2B2B",
+     "io": ["dsl", "phonex2", "rj45x4", "usba", "power"],
      "mounts": [
       {
        "id": "mw1443786",
        "label": "Rack bracket",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 7,
        "wattsEstimated": true,
@@ -3021,11 +3493,15 @@
     },
     {
      "device": "Arris SURFboard S33 / S34",
+     "size": [133, 46, 120],
+     "color": "#F2F2F2",
+     "io": ["coax", "rj45", "rj45", "power"],
      "mounts": [
       {
        "id": "mw2376717",
        "label": "1U horizontal mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 10,
        "wattsEstimated": true,
        "author": "RJ_March",
@@ -3039,17 +3515,22 @@
        "watts": 10,
        "wattsEstimated": true,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/1185010-arris-s33-modem-10-rack-mount"
       }
      ]
     },
     {
      "device": "Spectrum EU2251 modem",
+     "size": [180, 50, 160],
+     "color": "#F0F0F0",
+     "io": ["coax", "rj45x4", "power"],
      "mounts": [
       {
        "id": "mw664461",
        "label": "2U mount",
        "u": 2,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 10,
        "wattsEstimated": true,
        "author": "Dawnchaser",
@@ -3059,11 +3540,15 @@
     },
     {
      "device": "XPON ONU PL8800Z",
+     "size": [110, 28, 85],
+     "color": "#F2F2F2",
+     "io": ["power", "rj45", "btn"],
      "mounts": [
       {
        "id": "mw2855425",
        "label": "1U mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 4,
        "wattsEstimated": true,
        "author": "Apollo917",
@@ -3073,11 +3558,15 @@
     },
     {
      "device": "Fibre termination box 86×86 mm",
+     "size": [86, 86, 25],
+     "color": "#F4F4F4",
+     "io": [],
      "mounts": [
       {
        "id": "mw2739136",
        "label": "Rack module",
        "u": 2,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 0,
        "author": "Piotrek",
@@ -3087,6 +3576,9 @@
     },
     {
      "device": "Motorola MB8611",
+     "size": [200, 57, 184],
+     "color": "#1E1E1E",
+     "io": ["coax", "rj45", "power", "btn"],
      "mounts": [
       {
        "id": "mw1945622",
@@ -3096,6 +3588,7 @@
        "watts": 10,
        "wattsEstimated": true,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/1945622-motorola-cable-modem-rack-mount-1-3u-10-rack",
        "note": "1.3U plate; plan 1.5U. Also MB8600 and MB7621."
       }
@@ -3103,6 +3596,9 @@
     },
     {
      "device": "FRITZ!Box 7583",
+     "size": [250, 48, 185],
+     "color": "#F4F4F4",
+     "io": ["dsl", "phonex2", "rj45", "rj45x4", "usbax2", "power"],
      "mounts": [
       {
        "id": "mw954943",
@@ -3111,6 +3607,7 @@
        "watts": 15,
        "wattsEstimated": true,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "EdaBee",
        "url": "https://makerworld.com/en/models/954943-10-inch-rack-mount-for-avm-fritz-box-7583-2u"
       }
@@ -3118,6 +3615,9 @@
     },
     {
      "device": "FRITZ!Box 7530 AX",
+     "size": [200, 45, 152],
+     "color": "#F4F4F4",
+     "io": ["dsl", "phone", "rj45x4", "usba", "power"],
      "mounts": [
       {
        "id": "mw937232",
@@ -3126,6 +3626,7 @@
        "estimated": true,
        "watts": 8,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "McUtty",
        "url": "https://makerworld.com/en/models/937232-10-inch-fritzbox-7530-ax"
       },
@@ -3136,6 +3637,7 @@
        "estimated": true,
        "watts": 8,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "BigEndian",
        "url": "https://makerworld.com/en/models/947096-10-rack-insert-for-fritzbox-7530ax"
       }
@@ -3143,6 +3645,9 @@
     },
     {
      "device": "FRITZ!Box 7560",
+     "size": [226, 47, 160],
+     "color": "#F4F4F4",
+     "io": ["dsl", "phonex2", "rj45x4", "usba", "power"],
      "mounts": [
       {
        "id": "mw1659365",
@@ -3152,6 +3657,7 @@
        "watts": 7,
        "wattsEstimated": true,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "KnoppersDE",
        "url": "https://makerworld.com/en/models/1659365-fritzbox-7560-10inch-rackmount",
        "note": "Requires taking the FRITZ!Box apart."
@@ -3160,6 +3666,9 @@
     },
     {
      "device": "Starlink router (Gen 2)",
+     "size": [173, 40, 117],
+     "color": "#F2F2F2",
+     "io": ["power", "power"],
      "mounts": [
       {
        "id": "pr1520550",
@@ -3169,6 +3678,7 @@
        "watts": 11,
        "wattsEstimated": true,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}, {"dev": "nvme"}], "shelf": true},
        "author": "Scoobert",
        "url": "https://www.printables.com/model/1520550-starlink-gen-2-router-10-rack-mount-w-ethernet-ada"
       }
@@ -3181,11 +3691,15 @@
    "items": [
     {
      "device": "Lenovo ThinkCentre Tiny",
+     "size": [179, 34.5, 182.9],
+     "color": "#1F1F1F",
+     "io": ["btn", "usbc", "usba", "audio"],
      "mounts": [
       {
        "id": "tiny1",
        "label": "Rack mount (tested in Lab Rax)",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 12,
        "author": "Ropsu11",
@@ -3195,6 +3709,7 @@
        "id": "mw2213343",
        "label": "Lab Rax Lenovo Tiny",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 12,
        "author": "Rubén García",
@@ -3205,6 +3720,7 @@
        "id": "mw1945283",
        "label": "1U mount (M720q and similar)",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 12,
        "author": "Timmi101",
        "url": "https://makerworld.com/en/models/1945283"
@@ -3213,6 +3729,7 @@
        "id": "mw1141511",
        "label": "Rack mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 12,
        "author": "just actual kevin",
@@ -3222,6 +3739,7 @@
        "id": "mw1808598",
        "label": "M920q mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 12,
        "author": "Mixmeister",
@@ -3231,6 +3749,7 @@
        "id": "mw2000519",
        "label": "M920q / M920x panel case",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 12,
        "author": "mr4lexndr",
@@ -3240,6 +3759,7 @@
        "id": "pr1022804",
        "label": "M910q mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 12,
        "author": "towilab",
@@ -3249,6 +3769,7 @@
        "id": "mw2763086",
        "label": "M715q mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 12,
        "url": "https://makerworld.com/en/models/2763086-lenovo-thinkcentre-tiny-10-rack-mount-m715q"
@@ -3257,6 +3778,7 @@
        "id": "pr934429",
        "label": "M625q mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 12,
        "author": "Morty",
@@ -3266,6 +3788,7 @@
        "id": "mw642751",
        "label": "Rack mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 12,
        "url": "https://makerworld.com/en/models/642751-thinkcenter-10-inch-rack-mount",
@@ -3275,11 +3798,15 @@
     },
     {
      "device": "HP EliteDesk / ProDesk Mini",
+     "size": [177, 34, 175],
+     "color": "#2A2A2A",
+     "io": ["btn", "usbc", "usbax2", "audio"],
      "mounts": [
       {
        "id": "mw2864237",
        "label": "G6–G9 mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 12,
        "author": "raduta.alex",
@@ -3289,6 +3816,7 @@
        "id": "mw1138723",
        "label": "G3 / G4 mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 12,
        "author": "just actual kevin",
@@ -3298,6 +3826,7 @@
        "id": "mw2795063",
        "label": "G2 mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 12,
        "author": "AvatarO",
@@ -3307,6 +3836,7 @@
        "id": "mw2199119",
        "label": "Mount with keystone",
        "u": 1,
+       "shape": {"row": [{"dev": true}, {"ks": 1}], "shelf": true},
        "estimated": true,
        "watts": 12,
        "author": "Phdzrn",
@@ -3316,6 +3846,7 @@
        "id": "pr894425",
        "label": "ProDesk Mini G4, 1U",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 12,
        "author": "claypeng",
        "url": "https://www.printables.com/model/894425"
@@ -3324,6 +3855,7 @@
        "id": "pr1175661",
        "label": "Mount with JetKVM",
        "u": 1,
+       "shape": {"row": [{"dev": true}, {"dev": "JetKVM"}], "shelf": true},
        "estimated": true,
        "watts": 14,
        "author": "kaspar",
@@ -3333,6 +3865,7 @@
        "id": "pr484617",
        "label": "Rack adapter",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 12,
        "author": "D4rk Helmet",
@@ -3345,6 +3878,7 @@
        "estimated": true,
        "watts": 12,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/1645139",
        "note": "Front piece works on its own; optional rear mount is sized for Mod10 rack depth, so check it against Lab Rax depth."
       },
@@ -3352,6 +3886,7 @@
        "id": "mw2959495",
        "label": "1U tray · Lab Rax",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 12,
        "labrax": true,
        "url": "https://makerworld.com/en/models/2959495-labrax-10-1u-hp-mini-pc-rack",
@@ -3361,6 +3896,7 @@
        "id": "mw1184110",
        "label": "1U mount with 2 keystones",
        "u": 1,
+       "shape": {"row": [{"ks": 1, "rows": 1}, {"dev": true}, {"ks": 1, "rows": 1}], "shelf": true},
        "watts": 12,
        "url": "https://makerworld.com/en/models/1184110-10-rack-mount-for-hp-elite-prodesk-mini"
       },
@@ -3368,6 +3904,7 @@
        "id": "mw1361089",
        "label": "1U holder",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 12,
        "url": "https://makerworld.com/en/models/1361089-hp-prodesk-mini-pc-holder-10-rack"
       }
@@ -3375,11 +3912,15 @@
     },
     {
      "device": "Dell OptiPlex Micro",
+     "size": [182, 36, 178],
+     "color": "#232323",
+     "io": ["btn", "usbc", "usba", "audio"],
      "mounts": [
       {
        "id": "mw2533485",
        "label": "Mount (tested in Lab Rax)",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 12,
        "author": "Ropsu11",
@@ -3389,6 +3930,7 @@
        "id": "mw2955221",
        "label": "Rack mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 12,
        "author": "Phili_Boy",
@@ -3398,6 +3940,7 @@
        "id": "mw2885067",
        "label": "3040–7070 mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 12,
        "author": "Oliva Anto",
@@ -3407,6 +3950,7 @@
        "id": "mw2116002",
        "label": "Shelf with rear bracket",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 12,
        "author": "Psychobob",
@@ -3416,11 +3960,15 @@
     },
     {
      "device": "Intel NUC",
+     "size": [117, 54, 112],
+     "color": "#2B2B2B",
+     "io": ["btn", "usbax2", "audio"],
      "mounts": [
       {
        "id": "pr444291",
        "label": "11th–13th gen, 1.5U",
        "u": 1.5,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 12,
        "author": "virten",
        "url": "https://www.printables.com/model/444291"
@@ -3429,6 +3977,7 @@
        "id": "pr450104",
        "label": "10th gen, 1.5U",
        "u": 1.5,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 12,
        "author": "virten",
        "url": "https://www.printables.com/model/450104"
@@ -3437,6 +3986,7 @@
        "id": "pr450054",
        "label": "8th gen, 1.5U",
        "u": 1.5,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 12,
        "author": "virten",
        "url": "https://www.printables.com/model/450054"
@@ -3445,6 +3995,7 @@
        "id": "pr449010",
        "label": "7th gen, 1.5U",
        "u": 1.5,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 12,
        "author": "virten",
        "url": "https://www.printables.com/model/449010"
@@ -3453,6 +4004,7 @@
        "id": "mw2190577",
        "label": "5th–6th gen",
        "u": 1.5,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 10,
        "author": "stormbl8",
@@ -3462,6 +4014,7 @@
        "id": "pr1132542",
        "label": "Skull Canyon, 1U",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 18,
        "wattsEstimated": true,
        "author": "themassofthesun",
@@ -3471,11 +4024,15 @@
     },
     {
      "device": "Beelink S12 / S13",
+     "size": [115, 39, 102],
+     "color": "#3A3D42",
+     "io": ["btn", "usbax2", "audio"],
      "mounts": [
       {
        "id": "mw1208991",
        "label": "Rack mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 8,
        "url": "https://makerworld.com/en/models/1208991"
@@ -3484,6 +4041,7 @@
        "id": "mw2712801",
        "label": "S12 Pro / EQ12 with keystone options",
        "u": 1,
+       "shape": {"row": [{"ks": 1, "rows": 1}, {"dev": true}, {"ks": 1, "rows": 1}], "shelf": true},
        "watts": 8,
        "author": "EMB3D",
        "url": "https://makerworld.com/en/models/2712801"
@@ -3492,6 +4050,7 @@
        "id": "mw1369982",
        "label": "S12 Pro mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 8,
        "author": "glenbayley",
        "url": "https://makerworld.com/en/models/1369982"
@@ -3500,11 +4059,15 @@
     },
     {
      "device": "Beelink SER6",
+     "size": [126, 42, 113],
+     "color": "#4A4D52",
+     "io": ["btn", "usbc", "usba", "audio"],
      "mounts": [
       {
        "id": "mw2277764",
        "label": "Rack mount",
        "u": 1.5,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 15,
        "author": "dreed10",
@@ -3514,11 +4077,15 @@
     },
     {
      "device": "Minisforum MS-01 / MS-A2",
+     "size": [196, 48, 189],
+     "color": "#8C9196",
+     "io": ["btn", "usbax3", "audio"],
      "mounts": [
       {
        "id": "mw2569296",
        "label": "2U enclosure (3U/4U multi-node too)",
        "u": 2,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 30,
        "author": "Blenda",
        "url": "https://makerworld.com/en/models/2569296"
@@ -3527,6 +4094,7 @@
        "id": "mw483912",
        "label": "Dual mount 2U",
        "u": 2,
+       "shape": {"row": [{"dev": true, "n": 2}], "shelf": true},
        "watts": 60,
        "author": "sightlessace",
        "url": "https://makerworld.com/en/models/483912"
@@ -3535,11 +4103,15 @@
     },
     {
      "device": "Minisforum UN305C",
+     "size": [136, 39, 121],
+     "color": "#5E6166",
+     "io": ["btn", "usbax2", "audio"],
      "mounts": [
       {
        "id": "mw2750512",
        "label": "Mount + 2× 2.5″ SSD",
        "u": 1,
+       "shape": {"row": [{"dev": true}, {"bay": 2.5, "n": 2, "rows": 2}], "shelf": true},
        "estimated": true,
        "watts": 10,
        "author": "bastian123f",
@@ -3549,11 +4121,15 @@
     },
     {
      "device": "Minisforum GK41",
+     "size": [125, 30, 113],
+     "color": "#1E1E1E",
+     "io": ["usbax4"],
      "mounts": [
       {
        "id": "pr1349227",
        "label": "1U bracket",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 6,
        "author": "Pichon",
        "url": "https://www.printables.com/model/1349227"
@@ -3562,11 +4138,15 @@
     },
     {
      "device": "GMKtec K6 / M5 Plus / K7 Plus",
+     "size": [128.8, 47.8, 127],
+     "color": "#3A3A3A",
+     "io": ["btn", "usbc", "usbax2", "audio"],
      "mounts": [
       {
        "id": "mw1248370",
        "label": "1.5U mount",
        "u": 1.5,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 12,
        "author": "Ratler",
        "url": "https://makerworld.com/en/models/1248370"
@@ -3575,11 +4155,15 @@
     },
     {
      "device": "GMKtec G3 Plus",
+     "size": [114, 42.5, 106],
+     "color": "#3A3A3A",
+     "io": ["btn", "usbax2", "audio"],
      "mounts": [
       {
        "id": "mw1900594",
        "label": "1U mount for 3 units",
        "u": 1,
+       "shape": {"row": [{"dev": true, "n": 3}], "shelf": true},
        "watts": 21,
        "author": "Jacob Lindquist",
        "url": "https://makerworld.com/en/models/1900594"
@@ -3588,11 +4172,15 @@
     },
     {
      "device": "GMKtec NucBox K10",
+     "size": [188.6, 38.9, 178],
+     "color": "#1E1E1E",
+     "io": ["btn", "usbc", "usbax2", "audio"],
      "mounts": [
       {
        "id": "mw1545533",
        "label": "1U shelf · Lab Rax",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 20,
        "wattsEstimated": true,
        "url": "https://makerworld.com/en/models/1545533"
@@ -3601,11 +4189,15 @@
     },
     {
      "device": "Acemagic Vista V1",
+     "size": [100, 33, 100],
+     "color": "#2A2A2A",
+     "io": ["btn", "usbax2", "audio"],
      "mounts": [
       {
        "id": "mw1601792",
        "label": "Rack mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 7,
        "wattsEstimated": true,
@@ -3616,11 +4208,15 @@
     },
     {
      "device": "Fujitsu ESPRIMO G9012",
+     "size": [146.5, 36, 164.5],
+     "color": "#1F1F1F",
+     "io": ["btn", "usbc", "usbax2", "audio"],
      "mounts": [
       {
        "id": "mw2406832",
        "label": "Mount · Lab Rax",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 10,
        "wattsEstimated": true,
@@ -3632,6 +4228,9 @@
     },
     {
      "device": "Any mini PC (parametric shelf)",
+     "size": [125, 42, 113],
+     "color": "#2A2A2A",
+     "io": ["btn", "usbax2", "audio"],
      "mounts": [
       {
        "id": "mw1320972",
@@ -3640,6 +4239,7 @@
        "watts": 12,
        "wattsEstimated": true,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Sherlock Homo",
        "url": "https://makerworld.com/en/models/1320972-2u-mini-pc-10in-rack-mounts",
        "note": "Built for a Minisforum NAB9 and a fanless Topgro PC; set the size in the customizer."
@@ -3653,11 +4253,15 @@
    "items": [
     {
      "device": "Dell Wyse 3040",
+     "size": [101.6, 27.9, 101.6],
+     "color": "#1E1E1E",
+     "io": ["btn", "usbax2", "audio"],
      "mounts": [
       {
        "id": "mw1416417",
        "label": "Rack mount with power-button pusher",
        "u": 1,
+       "shape": {"row": [{"dev": true}, {"btn": 12}], "shelf": true},
        "estimated": true,
        "watts": 4,
        "url": "https://makerworld.com/en/models/1416417-dell-wyse-3040-10-rack-mount"
@@ -3666,6 +4270,7 @@
        "id": "mw2123109",
        "label": "Cluster mount for several units",
        "u": 3,
+       "shape": {"row": [{"dev": true, "n": 3, "rot": 90}], "shelf": true},
        "estimated": true,
        "watts": 16,
        "wattsEstimated": true,
@@ -3676,11 +4281,15 @@
     },
     {
      "device": "Dell Wyse 5070",
+     "size": [184, 35.6, 184],
+     "color": "#1E1E1E",
+     "io": ["btn", "usbc", "usbax2", "audio"],
      "mounts": [
       {
        "id": "mw2261662",
        "label": "1U module",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 6,
        "author": "ghost_of_3d",
        "url": "https://makerworld.com/en/models/2261662-dell-wyse-5070-rack-10-module",
@@ -3690,6 +4299,7 @@
        "id": "pr1376758",
        "label": "Rack mount with side vents",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 6,
        "author": "NasiPadang",
@@ -3699,6 +4309,7 @@
        "id": "pr883739",
        "label": "Rack mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 6,
        "author": "Post24",
@@ -3709,6 +4320,7 @@
        "id": "pr1318020",
        "label": "Customizable mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 6,
        "author": "kraavs",
@@ -3719,11 +4331,15 @@
     },
     {
      "device": "HP t620 / t630",
+     "size": [195, 35, 195],
+     "color": "#1E1E1E",
+     "io": ["btn", "usbax2", "audio"],
      "mounts": [
       {
        "id": "mw1965282",
        "label": "Mount with custom front posts · Lab Rax",
        "u": 2,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 10,
        "author": "Prophet254",
@@ -3738,6 +4354,7 @@
        "estimated": true,
        "watts": 30,
        "face": "vent",
+       "shape": {"plate": "hex", "row": [{"dev": true, "n": 3, "rot": 90, "gap": 22}]},
        "author": "Ingz",
        "labrax": true,
        "url": "https://makerworld.com/en/models/2225742-lab-rax-hp-t630-thin-client-rack-mount-custom",
@@ -3747,11 +4364,15 @@
     },
     {
      "device": "HP t640",
+     "size": [196, 35, 196],
+     "color": "#1E1E1E",
+     "io": ["btn", "usbc", "usbax2", "audio"],
      "mounts": [
       {
        "id": "mw2068819",
        "label": "1U mount · Lab Rax",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 8,
        "wattsEstimated": true,
        "author": "Mason's3DPrintsAndDesigns",
@@ -3762,11 +4383,15 @@
     },
     {
      "device": "Fujitsu Futro S740",
+     "size": [147, 36, 165],
+     "color": "#1E1E1E",
+     "io": ["btn", "usbax2", "audio"],
      "mounts": [
       {
        "id": "pr1097358",
        "label": "Rack mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 5,
        "author": "manzel",
@@ -3777,6 +4402,7 @@
        "id": "pr1371342",
        "label": "1U mount with 2 keystones",
        "u": 1,
+       "shape": {"row": [{"ks": 1, "rows": 1}, {"dev": true}, {"ks": 1, "rows": 1}], "shelf": true},
        "watts": 5,
        "author": "Pablo",
        "url": "https://www.printables.com/model/1371342-10-rack-mount-1u-w-keystone-jacks-fujitsu-futro-s7"
@@ -3785,6 +4411,7 @@
        "id": "pr1660951",
        "label": "Rack mount (also S7011, ESPRIMO G)",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 5,
        "author": "B0rax",
@@ -3794,6 +4421,9 @@
     },
     {
      "device": "Topton / CWWK N100 firewall PC",
+     "size": [128, 41, 128],
+     "color": "#3A3A3A",
+     "io": ["rj45x4", "hdmi", "dp", "usbax2", "power"],
      "mounts": [
       {
        "id": "mw1319571",
@@ -3801,6 +4431,7 @@
        "u": 2,
        "watts": 10,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Plaag",
        "url": "https://makerworld.com/en/models/1319571-cwwk-topton-mini-pc-10-inch-2u-rackmount",
        "note": "Fusion 360 source included for other box sizes."
@@ -3811,6 +4442,7 @@
        "u": 1,
        "watts": 10,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "chuandinh",
        "url": "https://www.printables.com/model/1423678-1u-10-rack-mount-topton-n5105-i226-v-n150-n100-min"
       },
@@ -3820,6 +4452,7 @@
        "u": 2,
        "watts": 10,
        "face": "switch",
+       "shape": {"row": [{"dev": true}, {"oled": true}], "shelf": true},
        "author": "Miich94",
        "url": "https://www.printables.com/model/1706706-topton-n100-10-rack"
       }
@@ -3827,6 +4460,9 @@
     },
     {
      "device": "Qotom quad-NIC firewall",
+     "size": [134, 37, 126],
+     "color": "#2E2E2E",
+     "io": ["power", "usbax2", "rj45x4"],
      "mounts": [
       {
        "id": "pr1415240",
@@ -3835,6 +4471,7 @@
        "watts": 10,
        "wattsEstimated": true,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "vrsn3ptoh",
        "url": "https://www.printables.com/model/1415240-qotomtopton-quad-nic-firewall-10-15u-rack-mount",
        "note": "Made for a fanless Qotom J1900; similar Topton boxes may fit."
@@ -3843,6 +4480,9 @@
     },
     {
      "device": "Protectli Vault VP2420",
+     "size": [146, 50, 127],
+     "color": "#1E1E1E",
+     "io": ["btn", "usbax2", "rj45x4"],
      "mounts": [
       {
        "id": "pr1672522",
@@ -3851,6 +4491,7 @@
        "watts": 8,
        "wattsEstimated": true,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Seshan Ravikumar",
        "url": "https://www.printables.com/model/1672522-protectli-vp2420-10-rack-mount-15u1u"
       }
@@ -3858,6 +4499,9 @@
     },
     {
      "device": "Firewalla Gold",
+     "size": [130, 34, 110],
+     "color": "#2A2A2A",
+     "io": ["rj45x4", "usbax2", "power"],
      "mounts": [
       {
        "id": "pr1196399",
@@ -3867,6 +4511,7 @@
        "watts": 9,
        "wattsEstimated": true,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "SwaggyMike",
        "url": "https://www.printables.com/model/1196399-firewalla-gold-10-rack-mount"
       }
@@ -3874,6 +4519,9 @@
     },
     {
      "device": "Protectli Vault FW4B / FW4C",
+     "size": [115, 39, 107.5],
+     "color": "#1E1E1E",
+     "io": ["btn", "rj45x4"],
      "mounts": [
       {
        "id": "mw1531176",
@@ -3883,6 +4531,7 @@
        "watts": 7,
        "wattsEstimated": true,
        "face": "switch",
+       "shape": {"row": [{"dev": true}, {"ks": 1}], "shelf": true},
        "author": "snapwich",
        "url": "https://makerworld.com/en/models/1531176-10-inch-rack-mount-kit-protectli-vault-fw4b-fw4c",
        "note": "Ports are brought to the front with short patch cables to keystones."
@@ -3891,6 +4540,9 @@
     },
     {
      "device": "Firewalla Purple",
+     "size": [100, 30, 100],
+     "color": "#6B3FA0",
+     "io": ["rj45x2", "usbc"],
      "mounts": [
       {
        "id": "pr980517",
@@ -3899,6 +4551,7 @@
        "watts": 4,
        "wattsEstimated": true,
        "face": "switch",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "TimPrints",
        "url": "https://www.printables.com/model/980517-firewalla-purple-10-inch-rack-mount"
       }
@@ -3911,11 +4564,15 @@
    "items": [
     {
      "device": "Mac mini (M4)",
+     "size": [127, 50, 127],
+     "color": "#D6D7D9",
+     "io": ["usbcx2", "audio"],
      "mounts": [
       {
        "id": "mw2203795",
        "label": "2U mount + 2× NVMe",
        "u": 2,
+       "shape": {"plate": "hex", "plateR": 3.4, "row": [{"dev": true}, {"dev": "nvme", "n": 2}], "shelf": true},
        "watts": 10,
        "author": "bastian123f",
        "url": "https://makerworld.com/en/models/2203795"
@@ -3924,6 +4581,7 @@
        "id": "pr1386672",
        "label": "1.5U mount with keystone",
        "u": 1.5,
+       "shape": {"row": [{"dev": true}, {"ks": 1}], "shelf": true},
        "watts": 7,
        "author": "LyricPants",
        "url": "https://www.printables.com/model/1386672"
@@ -3932,6 +4590,7 @@
        "id": "mw2313892",
        "label": "Mount with power button",
        "u": 2,
+       "shape": {"row": [{"dev": true}, {"btn": 12}], "shelf": true},
        "estimated": true,
        "watts": 7,
        "author": "RobDrivesCars",
@@ -3941,6 +4600,7 @@
        "id": "mw1432600",
        "label": "Mount + 2× 2.5″ USB drive",
        "u": 2,
+       "shape": {"row": [{"dev": true}, {"bay": 2.5, "n": 2, "rows": 1}], "shelf": true},
        "estimated": true,
        "watts": 11,
        "url": "https://makerworld.com/en/models/1432600"
@@ -3949,6 +4609,7 @@
        "id": "mw1700692",
        "label": "Rack mount",
        "u": 2,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 7,
        "url": "https://makerworld.com/en/models/1700692"
@@ -3957,6 +4618,7 @@
        "id": "mw2775171",
        "label": "Rack mount (alternative)",
        "u": 2,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 7,
        "url": "https://makerworld.com/en/models/2775171"
@@ -3965,11 +4627,15 @@
     },
     {
      "device": "Mac mini (2012–M2)",
+     "size": [197, 36, 197],
+     "color": "#D6D7D9",
+     "io": ["led"],
      "mounts": [
       {
        "id": "mw1670911",
        "label": "1U shelf",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 9,
        "wattsEstimated": true,
        "author": "hollowen",
@@ -3984,11 +4650,15 @@
    "items": [
     {
      "device": "Raspberry Pi 5",
+     "size": [56, 20, 85],
+     "color": "#1E7B3B",
+     "io": ["usbax2", "usbax2", "rj45"],
      "mounts": [
       {
        "id": "mw2319976",
        "label": "1.5U tray & slide frames (NVMe PoE HAT)",
        "u": 1.5,
+       "shape": {"row": [{"sbc": 1, "board": "pi5", "hat": true}], "shelf": true},
        "watts": 6,
        "wattsEstimated": true,
        "author": "TryCatch",
@@ -3998,6 +4668,7 @@
        "id": "mw1646434",
        "label": "Pi 5 + 2× Orange Pi Zero 3, 1U · Lab Rax",
        "u": 1,
+       "shape": {"row": [{"sbc": 1, "board": "pi5"}, {"sbc": 2, "board": "opiz3"}], "shelf": true},
        "watts": 8,
        "author": "SilvestreDesignLab",
        "labrax": true,
@@ -4007,6 +4678,7 @@
        "id": "mw475996",
        "label": "2U pineboards HAT modules",
        "u": 2,
+       "shape": {"row": [{"sbc": 1, "board": "pi5", "hat": true}], "shelf": true},
        "watts": 12,
        "wattsEstimated": true,
        "author": "RiHi36",
@@ -4016,6 +4688,7 @@
        "id": "mw3319485",
        "label": "2U kit, tray and ears",
        "u": 2,
+       "shape": {"row": [{"sbc": 1, "board": "pi5"}], "shelf": true},
        "watts": 10,
        "wattsEstimated": true,
        "author": "PrintSprout lab",
@@ -4025,6 +4698,7 @@
        "id": "mw1538790",
        "label": "PiKVM V2 + Pi 5 caddies, 2U",
        "u": 2,
+       "shape": {"row": [{"sbc": 3, "board": "pi4", "orient": "v"}, {"vent": "hex"}]},
        "watts": 9,
        "author": "Noop",
        "url": "https://makerworld.com/en/models/1538790"
@@ -4035,6 +4709,7 @@
        "u": 1,
        "watts": 9,
        "face": "sbc",
+       "shape": {"row": [{"sbc": 1, "board": "pi5"}, {"dev": "switch5"}], "shelf": true},
        "author": "Le0n._.",
        "url": "https://makerworld.com/en/models/1444002",
        "note": "Holds a Pi 5 (PoE HAT with M.2 NVMe) next to a Linksys LGS105 5-port switch held by printed twist locks."
@@ -4043,11 +4718,15 @@
     },
     {
      "device": "Raspberry Pi (any)",
+     "size": [56.5, 17, 85.6],
+     "color": "#1E7B3B",
+     "io": ["rj45", "usbax2", "usbax2"],
      "mounts": [
       {
        "id": "mw2501403",
        "label": "Rack mount v2",
        "u": 1,
+       "shape": {"row": [{"sbc": 2, "board": "pi5"}], "shelf": true},
        "estimated": true,
        "watts": 5,
        "url": "https://makerworld.com/en/models/2501403"
@@ -4056,6 +4735,7 @@
        "id": "pr891228",
        "label": "Double Pi, 1U",
        "u": 1,
+       "shape": {"row": [{"sbc": 2, "board": "pi5"}], "shelf": true},
        "watts": 10,
        "author": "Zapster",
        "url": "https://www.printables.com/model/891228"
@@ -4064,6 +4744,7 @@
        "id": "pr1185545",
        "label": "2× Pi 2B–5B",
        "u": 1,
+       "shape": {"row": [{"sbc": 2, "board": "pi5"}], "shelf": true},
        "estimated": true,
        "watts": 9,
        "author": "Mauker",
@@ -4073,6 +4754,7 @@
        "id": "mw2156118",
        "label": "Pi 4 series (OLED, keystone)",
        "u": 1,
+       "shape": {"row": [{"sbc": 2, "board": "pi4"}, {"ks": 1}, {"oled": true}], "shelf": true},
        "estimated": true,
        "watts": 4,
        "author": "3D Prints Lab",
@@ -4082,6 +4764,7 @@
        "id": "pr843923",
        "label": "2× Pi 4B",
        "u": 1,
+       "shape": {"row": [{"sbc": 2, "board": "pi4"}], "shelf": true},
        "estimated": true,
        "watts": 8,
        "author": "Brian Berkley",
@@ -4091,6 +4774,7 @@
        "id": "pr915024",
        "label": "2× Pi 4 + SSDs",
        "u": 1,
+       "shape": {"row": [{"sbc": 2, "board": "pi4"}, {"bay": 2.5, "n": 2, "rows": 2}], "shelf": true},
        "estimated": true,
        "watts": 10,
        "author": "Staubi",
@@ -4100,6 +4784,7 @@
        "id": "pr287982",
        "label": "Modular enclosure with Mean Well PSU, 1U",
        "u": 1,
+       "shape": {"row": [{"sbc": 2, "board": "pi5"}, {"dev": "meanwell"}], "shelf": true},
        "watts": 6,
        "wattsEstimated": true,
        "author": "Thomas Croonen",
@@ -4111,6 +4796,7 @@
        "u": 1,
        "watts": 5,
        "face": "sbc",
+       "shape": {"row": [{"sbc": 2, "board": "pi5"}], "shelf": true},
        "author": "Frostyy",
        "url": "https://makerworld.com/en/models/2413981-raspberry-pi-1u-10-rack-mount-with-standoffs",
        "note": "Single Pi on printed standoffs, no screws needed; fits the Pi 5 and boards with the same footprint."
@@ -4122,6 +4808,7 @@
        "watts": 15,
        "wattsEstimated": true,
        "face": "sbc",
+       "shape": {"row": [{"sbc": 3, "board": "pi5"}, {"ks": 2}], "shelf": true},
        "author": "Frostyy",
        "url": "https://makerworld.com/en/models/2800258-raspberry-pi-1u-10-rack-mount"
       }
@@ -4129,6 +4816,9 @@
     },
     {
      "device": "Raspberry Pi cluster",
+     "size": [56, 20, 85],
+     "color": "#1E7B3B",
+     "io": ["usbax2", "usbax2", "rj45"],
      "mounts": [
       {
        "id": "sbc7",
@@ -4136,6 +4826,7 @@
        "u": 2,
        "watts": 35,
        "face": "sbc",
+       "shape": {"row": [{"sbc": 7, "board": "pi5", "orient": "v", "tray": true}]},
        "author": "mklements",
        "labrax": true,
        "url": "https://makerworld.com/en/models/1293865-2u-7-sbc-holder-for-10-rack"
@@ -4147,6 +4838,7 @@
        "watts": 20,
        "wattsEstimated": true,
        "face": "sbc",
+       "shape": {"row": [{"sbc": 4, "board": "pi5", "orient": "v"}]},
        "author": "Henryk",
        "labrax": true,
        "url": "https://makerworld.com/en/models/2319407"
@@ -4157,6 +4849,7 @@
        "u": 4,
        "watts": 20,
        "face": "sbc",
+       "shape": {"row": [{"sbc": 4, "board": "pi5", "orient": "v"}]},
        "author": "ravelox",
        "url": "https://www.printables.com/model/1479451"
       },
@@ -4166,6 +4859,7 @@
        "u": 2,
        "watts": 23,
        "face": "sbc",
+       "shape": {"row": [{"dev": "ZimaBlade", "rot": 90}, {"sbc": 3, "board": "pi5", "orient": "v"}, {"bay": 2.5, "n": 2, "orient": "v"}]},
        "author": "Austin Geoge",
        "url": "https://makerworld.com/en/models/2589324"
       },
@@ -4175,6 +4869,7 @@
        "u": 2,
        "watts": 20,
        "face": "sbc",
+       "shape": {"row": [{"sbc": 4, "board": "pi5", "orient": "v"}]},
        "url": "https://makerworld.com/en/models/3319482",
        "note": "Same dovetail system as the Pi Rack Kit (3319485); each upright cassette pulls out on its own."
       },
@@ -4186,6 +4881,7 @@
        "watts": 40,
        "wattsEstimated": true,
        "face": "sbc",
+       "shape": {"row": [{"sbc": 8, "board": "pi5", "orient": "v"}]},
        "author": "ilanKushnir",
        "url": "https://makerworld.com/en/models/2314737-rack-snap-in-system-8-bay-raspberry-pi-cluster",
        "note": "Part of the KWS Rack system; push-to-lock modules for up to 8 Pi 4/5 (also Pi Zero and JetKVM snap mounts)."
@@ -4194,11 +4890,15 @@
     },
     {
      "device": "Raspberry Pi 5 NAS",
+     "size": [56, 20, 85],
+     "color": "#1E7B3B",
+     "io": ["usbax2", "usbax2", "rj45"],
      "mounts": [
       {
        "id": "naspi",
        "label": "1U Pi NAS shelf",
        "u": 1,
+       "shape": {"row": [{"text": "Pi NAS"}, {"sbc": 1, "board": "pi5"}, {"oled": true}], "shelf": true, "depth": 110},
        "watts": 8,
        "wattsEstimated": true,
        "author": "mklements",
@@ -4209,6 +4909,7 @@
        "id": "mw1190016",
        "label": "Pi RAID with Radxa Penta SATA HAT",
        "u": 2,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 13,
        "wattsEstimated": true,
@@ -4219,11 +4920,15 @@
     },
     {
      "device": "ZimaBoard 2",
+     "size": [140, 31, 81.4],
+     "color": "#A7AAAD",
+     "io": ["power", "mhdmi", "usbax2", "rj45x2"],
      "mounts": [
       {
        "id": "naszima",
        "label": "1U NAS shelf",
        "u": 1,
+       "shape": {"row": [{"text": "Zima"}, {"dev": true, "win": "ports"}], "shelf": true},
        "watts": 10,
        "wattsEstimated": true,
        "author": "mklements",
@@ -4234,6 +4939,7 @@
        "id": "mw2878014",
        "label": "1U with 4 keystones and PCIe card",
        "u": 1,
+       "shape": {"row": [{"ks": 2, "rows": 1}, {"dev": true}, {"pcie": true}, {"ks": 2, "rows": 1}], "shelf": true},
        "watts": 10,
        "author": "Snorp",
        "url": "https://makerworld.com/en/models/2878014"
@@ -4242,6 +4948,7 @@
        "id": "mw1346315",
        "label": "Rack panel",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 8,
        "author": "DesignBot",
@@ -4251,6 +4958,7 @@
        "id": "mw1927437",
        "label": "With dual NVMe PCIe card",
        "u": 1,
+       "shape": {"row": [{"dev": true, "n": 2}, {"pcie": true}], "shelf": true},
        "estimated": true,
        "watts": 11,
        "author": "DesignBot",
@@ -4260,11 +4968,15 @@
     },
     {
      "device": "ZimaBoard (v1)",
+     "size": [138.7, 34.9, 81.4],
+     "color": "#A7AAAD",
+     "io": ["power", "mhdmi", "usbax2", "rj45x2"],
      "mounts": [
       {
        "id": "pr211338",
        "label": "1U mount with SSD",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 7,
        "author": "MartinRowan",
        "url": "https://www.printables.com/model/211338"
@@ -4273,11 +4985,15 @@
     },
     {
      "device": "Radxa Rock 5B / 5B+",
+     "size": [100, 25, 72],
+     "color": "#1E1E1E",
+     "io": ["rj45", "usbax4"],
      "mounts": [
       {
        "id": "pr1274334",
        "label": "Panel, recessed",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 6,
        "author": "ottk3",
@@ -4287,6 +5003,7 @@
        "id": "pr1274281",
        "label": "Panel, flat",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 6,
        "author": "ottk3",
@@ -4296,11 +5013,15 @@
     },
     {
      "device": "Home Assistant Yellow",
+     "size": [123, 36, 123],
+     "color": "#ECECEC",
+     "io": ["power", "usbc", "usbax2", "rj45"],
      "mounts": [
       {
        "id": "mw2430201",
        "label": "Rack mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 4,
        "author": "Syvel Engineering",
@@ -4310,6 +5031,9 @@
     },
     {
      "device": "Raspberry Pi Zero",
+     "size": [65, 8, 30],
+     "color": "#1E7B3B",
+     "io": ["hdmi", "usbc", "usbc"],
      "mounts": [
       {
        "id": "mw982725",
@@ -4317,6 +5041,7 @@
        "u": 1,
        "watts": 3,
        "face": "sbc",
+       "shape": {"row": [{"sbc": 3, "board": "zero"}], "shelf": true},
        "url": "https://makerworld.com/en/models/982725",
        "note": "Fits Pi Zero, Zero W and Zero 2 W."
       }
@@ -4324,6 +5049,9 @@
     },
     {
      "device": "ZimaBlade",
+     "size": [107, 23, 80],
+     "color": "#9EA3A8",
+     "io": ["usbc", "mhdmi", "usbax2", "rj45"],
      "mounts": [
       {
        "id": "mw1358611",
@@ -4332,6 +5060,7 @@
        "watts": 12,
        "wattsEstimated": true,
        "face": "sbc",
+       "shape": {"row": [{"dev": true, "rot": 90, "squash": false}, {"pcie": true, "io": ["rj45x2"]}], "shelf": true},
        "url": "https://makerworld.com/en/models/1358611-10-inch-rack-for-zimablade-with-pcie-2-5g-ports",
        "note": "ZimaBlades stand vertically on one 1U bracket, with room for a PCIe 2.5G NIC."
       }
@@ -4339,6 +5068,9 @@
     },
     {
      "device": "Arduino Uno",
+     "size": [53.4, 15, 68.6],
+     "color": "#00979D",
+     "io": ["usba", "power"],
      "mounts": [
       {
        "id": "mw1011789",
@@ -4346,6 +5078,7 @@
        "u": 2,
        "watts": 1,
        "face": "sbc",
+       "shape": {"row": [{"sbc": 3, "board": "uno", "orient": "v"}], "shelf": true},
        "url": "https://makerworld.com/en/models/1011789"
       }
      ]
@@ -4357,11 +5090,15 @@
    "items": [
     {
      "device": "Mini-ITX PC",
+     "size": [170, 60, 170],
+     "color": "#2A2A2A",
+     "io": ["usbax4", "rj45", "hdmi", "dp", "audio"],
      "mounts": [
       {
        "id": "mw2624645",
        "label": "2U shelf, ports forward",
        "u": 2,
+       "shape": {"row": [{"dev": "itx-io"}, {"btn": 16}], "shelf": true},
        "watts": 35,
        "wattsEstimated": true,
        "author": "mklements",
@@ -4372,6 +5109,7 @@
        "id": "mw2624649",
        "label": "2U shelf, ports to the back",
        "u": 2,
+       "shape": {"row": [{"vent": "hex"}, {"btn": 16}], "shelf": true, "depth": 200},
        "watts": 35,
        "wattsEstimated": true,
        "author": "mklements",
@@ -4382,6 +5120,7 @@
        "id": "mw1908782",
        "label": "1U tray · Lab Rax",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 25,
        "wattsEstimated": true,
        "author": "Craig",
@@ -4392,6 +5131,7 @@
        "id": "pr719246",
        "label": "2U case with PCIe",
        "u": 2,
+       "shape": {"row": [{"dev": true}, {"pcie": true}], "shelf": true},
        "watts": 40,
        "wattsEstimated": true,
        "author": "heron",
@@ -4401,6 +5141,7 @@
        "id": "mw1716698",
        "label": "2U with Flex ATX PSU",
        "u": 2,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 40,
        "wattsEstimated": true,
        "author": "RiHi36",
@@ -4413,6 +5154,7 @@
        "watts": 48,
        "wattsEstimated": true,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/2920368",
        "note": "Also takes 2× 2.5″ SSDs. Weighs about 4.5 kg built."
       },
@@ -4424,6 +5166,7 @@
        "watts": 60,
        "wattsEstimated": true,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/2945456",
        "note": "GPU version of the 3U Mini-ITX case."
       },
@@ -4434,6 +5177,7 @@
        "watts": 40,
        "wattsEstimated": true,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/1360827",
        "note": "Takes a full-size ATX PSU."
       },
@@ -4444,6 +5188,7 @@
        "watts": 30,
        "wattsEstimated": true,
        "face": "shelf",
+       "shape": {"row": [{"dev": true, "n": 2}], "shelf": true},
        "url": "https://makerworld.com/en/models/1523227",
        "note": "Add-on for the 2U Mini-ITX case with ATX PSU."
       },
@@ -4454,17 +5199,22 @@
        "watts": 35,
        "wattsEstimated": true,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}, {"ks": 1}], "shelf": true},
        "url": "https://makerworld.com/en/models/1765662-2u-mini-itx-case-for-10-rack-with-keystones"
       }
      ]
     },
     {
      "device": "Thin Mini-ITX / Turing Pi 2",
+     "size": [170, 40, 170],
+     "color": "#1F1F1F",
+     "io": ["rj45x2", "usbax2", "hdmi", "power"],
      "mounts": [
       {
        "id": "mw3011956",
        "label": "1U and 2U case",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 25,
        "wattsEstimated": true,
        "author": "SillyGoosePrints",
@@ -4479,6 +5229,9 @@
    "items": [
     {
      "device": "3.5″ drives",
+     "size": [101.6, 26.1, 147],
+     "color": "#B8BBBF",
+     "io": [],
      "mounts": [
       {
        "id": "nas35",
@@ -4486,6 +5239,7 @@
        "u": 1,
        "watts": 12,
        "face": "drv2",
+       "shape": {"row": [{"bay": 3.5, "n": 2}]},
        "author": "mklements",
        "labrax": true,
        "url": "https://makerworld.com/en/models/1838737-1u-two-3-5-drive-rack-for-10-rack"
@@ -4496,6 +5250,7 @@
        "u": 1,
        "watts": 12,
        "face": "drv2",
+       "shape": {"row": [{"bay": 3.5, "n": 2}]},
        "author": "Nautilus Forge",
        "url": "https://makerworld.com/en/models/1400538"
       },
@@ -4505,6 +5260,7 @@
        "u": 1,
        "watts": 16,
        "face": "drv2",
+       "shape": {"row": [{"bay": 3.5, "n": 2, "w": 72}, {"bay": 2.5, "n": 2, "rows": 2}]},
        "author": "Toxvaerd",
        "url": "https://makerworld.com/en/models/2353245"
       },
@@ -4514,6 +5270,7 @@
        "u": 2,
        "watts": 28,
        "face": "drv4",
+       "shape": {"row": [{"bay": 3.5, "n": 4, "rows": 2, "w": 88}, {"bay": 2.5, "n": 2, "rows": 2}]},
        "author": "RULERULAS",
        "url": "https://makerworld.com/en/models/3089077"
       },
@@ -4523,6 +5280,7 @@
        "u": 3,
        "watts": 36,
        "face": "drv4",
+       "shape": {"row": [{"bay": 3.5, "n": 4, "orient": "v", "w": 27.5}, {"bay": 2.5, "n": 6, "orient": "v"}]},
        "author": "RULERULAS",
        "url": "https://makerworld.com/en/models/3073718"
       },
@@ -4532,6 +5290,7 @@
        "u": 3,
        "watts": 48,
        "face": "drv4",
+       "shape": {"row": [{"bay": 3.5, "n": 8, "orient": "v", "w": 25.0}]},
        "author": "GK-ken",
        "labrax": true,
        "url": "https://makerworld.com/en/models/2825111"
@@ -4542,6 +5301,7 @@
        "u": 3,
        "watts": 48,
        "face": "drv4",
+       "shape": {"row": [{"bay": 3.5, "n": 8, "orient": "v", "w": 25.0}]},
        "url": "https://makerworld.com/en/models/2729652",
        "note": "Also 6-bay 2.5U (2× 92 mm fans) and 10-bay 4U versions; uses Dell PowerEdge trays, and the rear support matches Lab Rax depth (~240 mm).",
        "hardware": [
@@ -4558,6 +5318,7 @@
        "u": 3,
        "watts": 42,
        "face": "drv4",
+       "shape": {"row": [{"bay": 3.5, "n": 7, "orient": "v", "w": 28.6}]},
        "url": "https://makerworld.com/en/models/2885471",
        "note": "Author recommends active cooling."
       },
@@ -4567,6 +5328,7 @@
        "u": 3,
        "watts": 42,
        "face": "drv4",
+       "shape": {"row": [{"bay": 3.5, "n": 7, "orient": "v", "w": 28.6}]},
        "url": "https://makerworld.com/en/models/1078841",
        "note": "Uses CoolerMaster-style tool-less rails (printable), 40 mm rear fans; needs a 254×254 mm print bed."
       },
@@ -4576,6 +5338,7 @@
        "u": 3,
        "watts": 36,
        "face": "drv4",
+       "shape": {"row": [{"bay": 3.5, "n": 6, "orient": "v"}]},
        "author": "Shaztech.info",
        "url": "https://makerworld.com/en/models/955904",
        "note": "Trays for 3.5″ or 2.5″ drives; no electronics, drives connect with long SATA/SAS cables."
@@ -4587,6 +5350,7 @@
        "watts": 12,
        "wattsEstimated": true,
        "face": "drv2",
+       "shape": {"row": [{"bay": 3.5, "n": 1}, {"vent": "hex"}]},
        "url": "https://makerworld.com/en/models/1388411",
        "note": "Matches the 2U Mini-ITX case series."
       },
@@ -4597,6 +5361,7 @@
        "watts": 12,
        "wattsEstimated": true,
        "face": "drv2",
+       "shape": {"row": [{"bay": 3.5, "n": 1}, {"vent": "hex"}]},
        "url": "https://makerworld.com/en/models/1430035",
        "note": "Deeper version of the 1U 3.5″ enclosure."
       }
@@ -4604,6 +5369,9 @@
     },
     {
      "device": "2.5″ drives",
+     "size": [69.8, 7, 100.5],
+     "color": "#B8BBBF",
+     "io": [],
      "mounts": [
       {
        "id": "nas25",
@@ -4611,6 +5379,7 @@
        "u": 1,
        "watts": 8,
        "face": "drv4",
+       "shape": {"row": [{"bay": 2.5, "n": 4, "rows": 2}]},
        "author": "mklements",
        "labrax": true,
        "url": "https://makerworld.com/en/models/1838721-1u-four-2-5-drive-rack-for-10-rack"
@@ -4621,6 +5390,7 @@
        "u": 1,
        "watts": 8,
        "face": "drv4",
+       "shape": {"row": [{"bay": 2.5, "n": 4, "rows": 2}]},
        "author": "Yury Komarov",
        "url": "https://www.printables.com/model/1371725"
       },
@@ -4630,6 +5400,7 @@
        "u": 0.5,
        "watts": 4,
        "face": "drv2",
+       "shape": {"row": [{"ks": 1}, {"bay": 2.5, "n": 2, "rows": 1}, {"ks": 1}]},
        "url": "https://makerworld.com/en/models/2897826",
        "note": "Hot-swap possible; tolerances are tight, print face down without supports and with strong cooling."
       },
@@ -4640,6 +5411,7 @@
        "watts": 10,
        "wattsEstimated": true,
        "face": "drv4",
+       "shape": {"row": [{"bay": 2.5, "n": 4, "rows": 4}, {"dev": "sfx-psu"}]},
        "url": "https://makerworld.com/en/models/3305282",
        "note": "Hot-swap needs extra SATA adapters; airflow runs across the drives."
       }
@@ -4647,11 +5419,15 @@
     },
     {
      "device": "Synology DS224+",
+     "size": [108, 165, 232.2],
+     "color": "#1E1E1E",
+     "io": ["led", "vbayx2", "btn", "usba"],
      "mounts": [
       {
        "id": "mw3359426",
        "label": "Upright mount · Lab Rax",
        "u": 4,
+       "shape": {"row": [{"dev": true, "rot": 90}], "shelf": true},
        "estimated": true,
        "watts": 15,
        "author": "AlexR242",
@@ -4662,11 +5438,15 @@
     },
     {
      "device": "Synology DS920+ / DS923+ (4-bay)",
+     "size": [199, 166, 223],
+     "color": "#1E1E1E",
+     "io": ["led", "btn", "vbayx4", "usba"],
      "mounts": [
       {
        "id": "mw1364059",
        "label": "4U rack",
        "u": 4,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 33,
        "url": "https://makerworld.com/en/models/1364059"
       },
@@ -4674,6 +5454,7 @@
        "id": "mw2254100",
        "label": "4U module (KWS rack)",
        "u": 4,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 33,
        "author": "Ilan Kushnir",
        "url": "https://makerworld.com/en/models/2254100"
@@ -4682,11 +5463,15 @@
     },
     {
      "device": "UGREEN NASync DXP480T",
+     "size": [142, 52, 179],
+     "color": "#8A8D91",
+     "io": ["btn", "led", "usbc"],
      "mounts": [
       {
        "id": "pr1404934",
        "label": "Mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 17,
        "author": "Tim S.",
@@ -4696,11 +5481,15 @@
     },
     {
      "device": "IcyBox IB-RD3720-C3",
+     "size": [117, 65, 200],
+     "color": "#1E1E1E",
+     "io": ["vbayx2", "led"],
      "mounts": [
       {
        "id": "mw2643748",
        "label": "2U mount",
        "u": 2,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 14,
        "wattsEstimated": true,
        "author": "HighestLevel",
@@ -4710,6 +5499,9 @@
     },
     {
      "device": "UniFi UNVR Instant",
+     "size": [220, 47, 220],
+     "color": "#E9EBEC",
+     "io": ["rj45", "rj45x6", "hdmi", "iec"],
      "mounts": [
       {
        "id": "mw2424584",
@@ -4717,6 +5509,7 @@
        "u": 2,
        "watts": 13,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Mixmeister",
        "url": "https://makerworld.com/en/models/2424584-unifi-nvr-instant-10-inch-rackmount",
        "note": "Tight fit: needs 222 mm between the posts."
@@ -4727,6 +5520,7 @@
        "u": 2,
        "watts": 13,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "CaptainIvey",
        "url": "https://makerworld.com/en/models/2429883-unvr-instant-2u-10in",
        "note": "Heavy unit: print the rear support wings."
@@ -4735,6 +5529,9 @@
     },
     {
      "device": "UniFi UNAS 2",
+     "size": [135, 129, 223.7],
+     "color": "#E9EBEC",
+     "io": ["lcd", "vbayx2"],
      "mounts": [
       {
        "id": "mw2447426",
@@ -4743,6 +5540,7 @@
        "watts": 20,
        "wattsEstimated": true,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Mixmeister",
        "url": "https://makerworld.com/en/models/2447426-unifi-unas-2-10-inch-rackmount"
       },
@@ -4753,6 +5551,7 @@
        "watts": 20,
        "wattsEstimated": true,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Mixmeister",
        "url": "https://makerworld.com/en/models/2497747-unifi-unas-2-10-inch-3u-rackmount"
       }
@@ -4760,6 +5559,9 @@
     },
     {
      "device": "WD easystore external HDD",
+     "size": [166, 48, 135],
+     "color": "#1E1E1E",
+     "io": ["led"],
      "mounts": [
       {
        "id": "mw2974418",
@@ -4767,6 +5569,7 @@
        "u": 2,
        "watts": 6,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "sinterworks",
        "url": "https://makerworld.com/en/models/2974418",
        "note": "Made for the 14 TB easystore; 8, 18 and 20 TB versions appear to share the size; tight fit, tested in a KWS rack."
@@ -4780,11 +5583,15 @@
    "items": [
     {
      "device": "JetKVM",
+     "size": [43, 31, 60],
+     "color": "#2A2A2A",
+     "io": ["lcd"],
      "mounts": [
       {
        "id": "mw1077099",
        "label": "Mount for 1–3 JetKVMs with keystones",
        "u": 1,
+       "shape": {"row": [{"dev": true, "n": 3}, {"ks": 1}], "shelf": true},
        "estimated": true,
        "watts": 4,
        "wattsEstimated": true,
@@ -4795,6 +5602,7 @@
        "id": "pr1105303",
        "label": "1U for 1–4 JetKVMs",
        "u": 1,
+       "shape": {"row": [{"dev": true, "n": 4}], "shelf": true},
        "watts": 4,
        "wattsEstimated": true,
        "author": "JaredC01",
@@ -4804,6 +5612,7 @@
        "id": "pr1419539",
        "label": "Flush mount + HDD shelf",
        "u": 1,
+       "shape": {"row": [{"dev": true}, {"bay": 3.5, "n": 1}], "shelf": true},
        "estimated": true,
        "watts": 4,
        "wattsEstimated": true,
@@ -4814,11 +5623,15 @@
     },
     {
      "device": "PiKVM (Pi 4)",
+     "size": [56.5, 35, 85.6],
+     "color": "#1E7B3B",
+     "io": ["rj45", "usbax2", "usbax2"],
      "mounts": [
       {
        "id": "mw1021492",
        "label": "Dual PiKVM 1U with keystones",
        "u": 1,
+       "shape": {"row": [{"dev": true, "n": 2}, {"ks": 1}], "shelf": true},
        "watts": 8,
        "author": "RoBroLabs",
        "url": "https://makerworld.com/en/models/1021492"
@@ -4827,6 +5640,9 @@
     },
     {
      "device": "GL.iNet Comet Pro (GL-RM10)",
+     "size": [93, 47, 84],
+     "color": "#3A3A3A",
+     "io": ["lcd"],
      "mounts": [
       {
        "id": "mw2974010",
@@ -4835,6 +5651,7 @@
        "watts": 4,
        "wattsEstimated": true,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "sinterworks",
        "url": "https://makerworld.com/en/models/2974010",
        "note": "Made because other prints, including GL.iNet's official ones, were too tight; tested in a KWS rack."
@@ -4843,6 +5660,9 @@
     },
     {
      "device": "GL.iNet Comet (GL-RM1)",
+     "size": [60, 17.5, 80],
+     "color": "#3A3A3A",
+     "io": ["hdmi", "usbc", "rj45"],
      "mounts": [
       {
        "id": "mw1628051",
@@ -4851,6 +5671,7 @@
        "watts": 5,
        "wattsEstimated": true,
        "face": "switch",
+       "shape": {"row": [{"dev": true, "n": 2}], "shelf": true},
        "url": "https://makerworld.com/en/models/1628051-dual-gl-inet-comet-1u-10inch-rack"
       }
      ]
@@ -4862,11 +5683,15 @@
    "items": [
     {
      "device": "Philips Hue Bridge",
+     "size": [88, 26, 88],
+     "color": "#F4F4F4",
+     "io": ["power", "rj45"],
      "mounts": [
       {
        "id": "mw2401804",
        "label": "1U slide-in with 5 keystones",
        "u": 1,
+       "shape": {"row": [{"ks": 2, "rows": 1}, {"dev": true}, {"ks": 3, "rows": 1}], "shelf": true},
        "watts": 2,
        "author": "lukas.duus",
        "url": "https://makerworld.com/en/models/2401804"
@@ -4875,11 +5700,15 @@
     },
     {
      "device": "Zigbee, Z-Wave & hubs",
+     "size": [80, 25, 55],
+     "color": "#F2F2F2",
+     "io": ["usbc", "rj45"],
      "mounts": [
       {
        "id": "mw2379935",
        "label": "15 inserts: Hue, Sonoff, Z-Wave, SwitchBot, Fritz!Box… · Lab Rax",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "estimated": true,
        "watts": 3,
        "wattsEstimated": true,
@@ -4891,6 +5720,7 @@
        "id": "mw1774546",
        "label": "SMLIGHT SLZB-MR1 mount",
        "u": 1,
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "watts": 2,
        "author": "Hypnos_Zzz",
        "url": "https://makerworld.com/en/models/1774546"
@@ -4899,6 +5729,9 @@
     },
     {
      "device": "Home Assistant Green",
+     "size": [112, 32, 112],
+     "color": "#2E2E2E",
+     "io": ["power", "rj45", "usbax2", "hdmi"],
      "mounts": [
       {
        "id": "mw1897572",
@@ -4907,6 +5740,7 @@
        "estimated": true,
        "watts": 2,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Felix Granvik Design",
        "url": "https://makerworld.com/en/models/1897572-home-assistant-green-rack-mount-10-inch-rack"
       },
@@ -4917,6 +5751,7 @@
        "estimated": true,
        "watts": 2,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}, {"dev": "brick"}, {"ks": 1}], "shelf": true},
        "author": "Fabian",
        "url": "https://makerworld.com/en/models/1974297-10-inch-rack-mount-for-home-assistant-green"
       },
@@ -4927,6 +5762,7 @@
        "estimated": true,
        "watts": 2,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Andsten",
        "url": "https://makerworld.com/en/models/1816406-home-assistant-green-10-rack-mount"
       },
@@ -4937,6 +5773,7 @@
        "estimated": true,
        "watts": 3,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}, {"dev": "brick"}], "shelf": true},
        "author": "Andsten",
        "url": "https://makerworld.com/en/models/590818-home-assistant-green-poe-splitter-10-rack-mount",
        "note": "Holds a TP-Link TL-POE10R PoE splitter to power the Green."
@@ -4945,6 +5782,9 @@
     },
     {
      "device": "IKEA Dirigera",
+     "size": [112, 27, 112],
+     "color": "#F4F4F4",
+     "io": ["usbc", "rj45"],
      "mounts": [
       {
        "id": "mw1560477",
@@ -4953,6 +5793,7 @@
        "estimated": true,
        "watts": 2,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "Mauker",
        "url": "https://makerworld.com/en/models/1560477-ikea-dirigera-10-inch-rack-mount"
       },
@@ -4963,6 +5804,7 @@
        "estimated": true,
        "watts": 3,
        "face": "shelf",
+       "shape": {"row": [{"dev": true}, {"dev": "brick"}], "shelf": true},
        "author": "PlutoWRC",
        "url": "https://makerworld.com/en/models/2312353-ikea-dirigera-poe-injector-rackmount",
        "note": "Powers the hub over PoE instead of its USB-C adapter."
@@ -4971,6 +5813,9 @@
     },
     {
      "device": "IKEA Dirigera + Philips Hue Bridge",
+     "size": [200, 27, 112],
+     "color": "#F4F4F4",
+     "io": ["usbc", "rj45", "power", "rj45"],
      "mounts": [
       {
        "id": "mw1953246",
@@ -4978,6 +5823,7 @@
        "u": 1,
        "watts": 4,
        "face": "shelf",
+       "shape": {"row": [{"dev": true, "n": 2}], "shelf": true},
        "author": "Crampy",
        "url": "https://makerworld.com/en/models/1953246-10in-mini-rack-mount-ikea-dirigera-philips-hue"
       }
@@ -4995,6 +5841,7 @@
        "id": "mw1596899",
        "label": "Gridfinity top",
        "position": "top",
+       "shape": {"plate": "gridfinity"},
        "watts": 0,
        "author": "ckass90",
        "labrax": true,
@@ -5004,6 +5851,7 @@
        "id": "mw1896816",
        "label": "Hex mesh top panel",
        "position": "top",
+       "shape": {"plate": "hex"},
        "watts": 0,
        "author": "Shubham Patel",
        "labrax": true,
@@ -5014,6 +5862,7 @@
        "id": "mw1963322",
        "label": "Top panel for 2× 92 or 80 mm fans",
        "position": "top",
+       "shape": {"plate": "solid", "fan": 92, "n": 2},
        "watts": 0,
        "author": "Flying4T",
        "labrax": true,
@@ -5030,6 +5879,7 @@
        "id": "mw1901514",
        "label": "Customizable mesh top & bottom panel",
        "position": "top",
+       "shape": {"plate": "mesh"},
        "watts": 0,
        "labrax": true,
        "url": "https://makerworld.com/en/models/1901514-customizable-mesh-top-bottom-panel-for-lab-rax",
@@ -5039,6 +5889,7 @@
        "id": "mw1875867",
        "label": "Hex top/bottom panel with 120 mm fan",
        "position": "top",
+       "shape": {"plate": "hex", "fan": 120},
        "watts": 0,
        "author": "Noelson",
        "labrax": true,
@@ -5055,6 +5906,7 @@
        "id": "mw1470892",
        "label": "140 mm fan panels",
        "position": "top",
+       "shape": {"fan": 140},
        "watts": 0,
        "author": "clemon8",
        "labrax": true,
@@ -5076,6 +5928,9 @@
    "items": [
     {
      "device": "HDHomeRun",
+     "size": [86, 20, 86],
+     "color": "#1E1E1E",
+     "io": ["coax", "rj45", "power"],
      "mounts": [
       {
        "id": "mw1071284",
@@ -5084,6 +5939,7 @@
        "estimated": true,
        "watts": 9,
        "face": "sbc",
+       "shape": {"row": [{"dev": true}, {"sbc": 1, "board": "pi5"}], "shelf": true},
        "author": "F12057",
        "url": "https://makerworld.com/en/models/1071284-raspberry-pi-5-and-hdhomerun-10-inch-rack-mount",
        "note": "Check that your HDHomeRun model fits."
@@ -5100,18 +5956,21 @@
     {
      "id": "mw1294478",
      "name": "Posts & side panels 1–5U",
+     "shape": {"u": 5},
      "author": "mklements",
      "url": "https://makerworld.com/en/models/1294478-lab-rax-1-5u-posts-panels"
     },
     {
      "id": "mw1304384",
      "name": "Extension side panels & post joiners",
+     "shape": {"u": 6, "hl": "posts"},
      "author": "mklements",
      "url": "https://makerworld.com/en/models/1304384-lab-rax-extension-side-panels-post-joiner"
     },
     {
      "id": "mw3211714",
      "name": "Upgraded 1U extension module",
+     "shape": {"u": 4, "hl": "posts"},
      "author": "mklements",
      "url": "https://makerworld.com/en/models/3211714"
     },
@@ -5119,60 +5978,70 @@
      "id": "mw2452007",
      "name": "5U for A1 mini (split parts)",
      "label": "For 180 mm beds",
+     "shape": {"u": 5},
      "author": "cwlsmith",
      "url": "https://makerworld.com/en/models/2452007"
     },
     {
      "id": "mw1585859",
      "name": "6U bolted",
+     "shape": {"u": 6},
      "author": "Cowasaur",
      "url": "https://makerworld.com/en/models/1585859"
     },
     {
      "id": "mw2518831",
      "name": "6U bolted, complete",
+     "shape": {"u": 6},
      "author": "Shiv",
      "url": "https://makerworld.com/en/models/2518831"
     },
     {
      "id": "mw2791796",
      "name": "4U, brass insert edition",
+     "shape": {"u": 4},
      "author": "Frostyy",
      "url": "https://makerworld.com/en/models/2791796-4u-lab-rax"
     },
     {
      "id": "mw3286521",
      "name": "3U / 4U with improved nut holders",
+     "shape": {"u": 4},
      "author": "Piotrek",
      "url": "https://makerworld.com/en/models/3286521"
     },
     {
      "id": "mw1787687",
      "name": "LowProfile frame",
+     "shape": {"frame": "lowprofile"},
      "author": "keineantwort",
      "url": "https://makerworld.com/en/models/1787687"
     },
     {
      "id": "mw1893186",
      "name": "LowProfile frame, bolted (280 × 240 mm)",
+     "shape": {"frame": "lowprofile"},
      "author": "iGoX",
      "url": "https://makerworld.com/en/models/1893186"
     },
     {
      "id": "mw3039779",
      "name": "Top & bottom mod frame (+2U, handle styles)",
+     "shape": {"u": 5, "handles": "stackable"},
      "author": "RULERULAS",
      "url": "https://makerworld.com/en/models/3039779"
     },
     {
      "id": "mw1398316",
      "name": "Base parts with nut pockets",
+     "shape": {"hl": "base"},
      "author": "CyberGWJ",
      "url": "https://makerworld.com/en/models/1398316"
     },
     {
      "id": "mw3050275",
      "name": "Full mATX frame (244 × 244 mm)",
+     "shape": {"frame": "matx", "u": 5},
      "author": "Xtian85",
      "url": "https://makerworld.com/en/models/3050275"
     },
@@ -5180,6 +6049,7 @@
      "id": "mw1351551",
      "name": "EasyMount Edition",
      "label": "Standard M3 screws",
+     "shape": {"u": 3},
      "author": "Srigger",
      "url": "https://makerworld.com/en/models/1351551-easymount-edition-lab-rax-10-server-rack"
     }
@@ -5191,66 +6061,77 @@
     {
      "id": "mw2086724",
      "name": "Deeper sides (+50 mm)",
+     "shape": {"depth": 50},
      "author": "Caraful",
      "url": "https://makerworld.com/en/models/2086724"
     },
     {
      "id": "mw2467685",
      "name": "Bolted 5U extended (+50 mm)",
+     "shape": {"depth": 50, "u": 5},
      "author": "malves257",
      "url": "https://makerworld.com/en/models/2467685"
     },
     {
      "id": "mw2657818",
      "name": "Braces & handles for 330 mm depth",
+     "shape": {"depth": 90, "handles": "long"},
      "author": "RDas",
      "url": "https://makerworld.com/en/models/2657818"
     },
     {
      "id": "mw1321019",
      "name": "Customisable depth spacers (OpenSCAD)",
+     "shape": {"depth": 40},
      "author": "Jeffrey",
      "url": "https://makerworld.com/en/models/1321019"
     },
     {
      "id": "mw1839684",
      "name": "Sturdy long post joiner",
+     "shape": {"u": 6, "hl": "posts"},
      "author": "Kiwiworks",
      "url": "https://makerworld.com/en/models/1839684"
     },
     {
      "id": "mw1862122",
      "name": "Side panel connector & post joiner V2",
+     "shape": {"u": 6, "hl": "posts"},
      "author": "Kiwiworks",
      "url": "https://makerworld.com/en/models/1862122"
     },
     {
      "id": "mw2865309",
      "name": "Tandem: two racks + 19″ converter",
+     "shape": {"u": 4, "hl": "top"},
      "author": "J0RN",
      "url": "https://makerworld.com/en/models/2865309"
     },
     {
      "id": "mw2366022",
      "name": "19″ brace set (bolted)",
+     "shape": {"u": 4, "hl": "posts"},
      "author": "RDas",
      "url": "https://makerworld.com/en/models/2366022"
     },
     {
      "id": "mw2176697",
      "name": "19″ cross members",
+     "shape": {"u": 4, "hl": "posts"},
      "author": "STREUKANTE",
      "url": "https://makerworld.com/en/models/2176697"
     },
     {
      "id": "mw3202642",
      "name": "KWS depth rack (260 mm)",
+     "shape": {"depth": 20},
      "author": "matterlord1",
      "url": "https://makerworld.com/en/models/3202642-lab-rax-kws-depth-rack"
     },
     {
      "id": "mw2364486",
      "name": "Long handles for +50 mm sides",
+     "shape": {"handles": "long", "depth": 50},
      "author": "obibi",
      "url": "https://makerworld.com/en/models/2364486-long-handles-for-longer-sides-lab-rax"
     },
@@ -5258,6 +6139,7 @@
      "id": "mw2350077",
      "name": "Sides +50 mm, bolted",
      "label": "Pair with the long handles",
+     "shape": {"depth": 50},
      "author": "obibi",
      "url": "https://makerworld.com/en/models/2350077-lab-rax-sides-50mm-longer-bolt-together-version"
     }
@@ -5269,60 +6151,70 @@
     {
      "id": "mw2317435",
      "name": "Stackable replacement handles",
+     "shape": {"handles": "stackable"},
      "author": "mklements",
      "url": "https://makerworld.com/en/models/2317435"
     },
     {
      "id": "mw1896714",
      "name": "Handles without supports",
+     "shape": {"handles": "plain", "hl": "handles"},
      "author": "Shubham Patel",
      "url": "https://makerworld.com/en/models/1896714"
     },
     {
      "id": "mw1931511",
      "name": "Side handles",
+     "shape": {"handles": "side"},
      "author": "Blind Badger",
      "url": "https://makerworld.com/en/models/1931511"
     },
     {
      "id": "mw1941244",
      "name": "Rails for larger bolt heads",
+     "shape": {"hl": "posts"},
      "author": "Blind Badger",
      "url": "https://makerworld.com/en/models/1941244"
     },
     {
      "id": "mw1917141",
      "name": "Feet for larger screw heads",
+     "shape": {"feet": "big"},
      "author": "Blind Badger",
      "url": "https://makerworld.com/en/models/1917141"
     },
     {
      "id": "mw2960364",
      "name": "Bigger feet",
+     "shape": {"feet": "big"},
      "author": "fincrawmcq",
      "url": "https://makerworld.com/en/models/2960364"
     },
     {
      "id": "mw3212268",
      "name": "Wall mounting cleats",
+     "shape": {"wall": true},
      "author": "mklements",
      "url": "https://makerworld.com/en/models/3212268"
     },
     {
      "id": "mw2403180",
      "name": "Vertical wall mount system",
+     "shape": {"wall": true},
      "author": "RDas",
      "url": "https://makerworld.com/en/models/2403180"
     },
     {
      "id": "mw1772709",
      "name": "Wall mount",
+     "shape": {"wall": true},
      "url": "https://makerworld.com/en/models/1772709-lab-rax-wallmount"
     },
     {
      "id": "mw2757835",
      "name": "Caster chassis (mobile base)",
      "label": "Needs 4 casters and M4 inserts",
+     "shape": {"feet": "casters"},
      "author": "Pepe_Lopez",
      "url": "https://makerworld.com/en/models/2757835"
     }
@@ -5334,6 +6226,7 @@
     {
      "id": "mw1577920",
      "name": "Hex vent side panels 3–5U",
+     "shape": {"side": "hex"},
      "author": "AlanMG",
      "url": "https://makerworld.com/en/models/1577920",
      "at": "side",
@@ -5342,6 +6235,7 @@
     {
      "id": "mw1618034",
      "name": "Hex extension panels 4U / 5U",
+     "shape": {"side": "hex", "u": 5},
      "author": "AlanMG",
      "url": "https://makerworld.com/en/models/1618034",
      "at": "side",
@@ -5351,6 +6245,7 @@
      "id": "mw2759654",
      "name": "Side panel for a 180/200 mm fan",
      "label": "Needs a 180 or 200 mm fan",
+     "shape": {"fan": 180, "u": 5},
      "author": "GK-ken",
      "url": "https://makerworld.com/en/models/2759654",
      "hardware": [
@@ -5365,6 +6260,7 @@
     {
      "id": "mw2178053",
      "name": "Raised hex panel set (side, top, 120 mm fan)",
+     "shape": {"side": "hex"},
      "author": "463n7",
      "url": "https://makerworld.com/en/models/2178053",
      "hardware": [
@@ -5381,6 +6277,7 @@
     {
      "id": "mw1862143",
      "name": "Kumiko side panel, customizable",
+     "shape": {"side": "kumiko"},
      "author": "Kiwiworks",
      "url": "https://makerworld.com/en/models/1862143",
      "at": "side",
@@ -5389,6 +6286,7 @@
     {
      "id": "mw1365647",
      "name": "Honeycomb storage wall panels",
+     "shape": {"side": "honeycomb"},
      "author": "Jeffrey",
      "url": "https://makerworld.com/en/models/1365647",
      "at": "side",
@@ -5397,12 +6295,14 @@
     {
      "id": "mw2668114",
      "name": "Construction brick side panel",
+     "shape": {"side": "brick"},
      "author": "Jeffrey",
      "url": "https://makerworld.com/en/models/2668114"
     },
     {
      "id": "mw1718939",
      "name": "SKÅDIS side panels 8U",
+     "shape": {"side": "skadis", "u": 8},
      "author": "user_154579053",
      "url": "https://makerworld.com/en/models/1718939",
      "at": "side",
@@ -5411,6 +6311,7 @@
     {
      "id": "mw3070181",
      "name": "Panel generator, side / top / bottom",
+     "shape": {"side": "grid"},
      "author": "Eightbit",
      "url": "https://makerworld.com/en/models/3070181",
      "at": "side",
@@ -5419,6 +6320,7 @@
     {
      "id": "mw2517201",
      "name": "Hex side panels 1–5U, bolted",
+     "shape": {"side": "hex"},
      "author": "Pepe_Lopez",
      "url": "https://makerworld.com/en/models/2517201-lab-rax-1-5u-hex-side-panels-bolted-version",
      "at": "side",
@@ -5428,6 +6330,7 @@
      "id": "mw1460771",
      "name": "Side panels with an 80 mm fan",
      "label": "Left + right, 80 mm fan",
+     "shape": {"fan": 80},
      "url": "https://makerworld.com/en/models/1460771-side-panel-80mm-fan-left-right-lab-rax-10-inch",
      "hardware": [
       {
@@ -5441,6 +6344,7 @@
     {
      "id": "mw1438705",
      "name": "Multiboard side panel, customisable",
+     "shape": {"side": "multiboard"},
      "url": "https://makerworld.com/en/models/1438705-labrax-multiboard-side-panel-customisable",
      "at": "side",
      "vent": 0.15
@@ -5448,6 +6352,7 @@
     {
      "id": "mw3159387",
      "name": "Side panel generator, 20+ patterns",
+     "shape": {"side": "kumiko"},
      "author": "RULERULAS",
      "url": "https://makerworld.com/en/models/3159387-labrax-side-panel-generator-20-patterns-vented",
      "at": "side",
@@ -5456,6 +6361,7 @@
     {
      "id": "mw1943808",
      "name": "Side panel with vents",
+     "shape": {"side": "vent"},
      "author": "Stheev",
      "url": "https://makerworld.com/en/models/1943808-labrax-side-panel-with-vents",
      "at": "side",
@@ -5464,6 +6370,7 @@
     {
      "id": "mw1490030",
      "name": "SKÅDIS side panels",
+     "shape": {"side": "skadis"},
      "url": "https://makerworld.com/en/models/1490030-lab-rax-skadis-side-panels",
      "at": "side",
      "vent": 0.1
@@ -5471,6 +6378,7 @@
     {
      "id": "mw1994910",
      "name": "Multiboard side panels",
+     "shape": {"side": "multiboard"},
      "url": "https://makerworld.com/en/models/1994910",
      "at": "side",
      "vent": 0.15
@@ -5484,24 +6392,28 @@
      "id": "mw3212396",
      "name": "NeoPixel light-up logo",
      "label": "16 LEDs in the front edge",
+     "shape": {"logo": "neopixel"},
      "author": "mklements",
      "url": "https://makerworld.com/en/models/3212396"
     },
     {
      "id": "mw3232859",
      "name": "NeoPixel logo, nut version",
+     "shape": {"logo": "neopixel"},
      "author": "fo0bar",
      "url": "https://makerworld.com/en/models/3232859"
     },
     {
      "id": "mw3272376",
      "name": "LED hex bar",
+     "shape": {"logo": "hexbar"},
      "author": "Avaviel",
      "url": "https://makerworld.com/en/models/3272376"
     },
     {
      "id": "mw1651742",
      "name": "Vented edge with 16 mm power switch",
+     "shape": {"edge": "switch"},
      "author": "The Layer",
      "url": "https://makerworld.com/en/models/1651742"
     },
@@ -5509,18 +6421,21 @@
      "id": "mw1917602",
      "name": "½U top corner",
      "label": "Adds a ½U keystone spot",
+     "shape": {"corner": 6},
      "author": "Blind Badger",
      "url": "https://makerworld.com/en/models/1917602-lab-rax-0-5u-1-2u-top-corner"
     },
     {
      "id": "mw2963512",
      "name": "½U corner with 11 keystone ports",
+     "shape": {"corner": 11},
      "author": "Lighthouse actual",
      "url": "https://makerworld.com/en/models/2963512"
     },
     {
      "id": "mw3213318",
      "name": "Integrated 12-keystone top corner",
+     "shape": {"corner": 12},
      "author": "DarkLight72",
      "url": "https://makerworld.com/en/models/3213318"
     },
@@ -5528,16 +6443,19 @@
      "id": "mw2457279",
      "name": "½U horizontal front/back corner",
      "label": "Adds a ½U spot, hex nuts",
+     "shape": {"corner": 6},
      "url": "https://makerworld.com/en/models/2457279"
     },
     {
      "id": "mw2352149",
      "name": "4-keystone plate for the ½U top corner",
+     "shape": {"corner": 4},
      "url": "https://makerworld.com/en/models/2352149-lab-rax-0-5u-top-corner-4x-keystone-jack"
     },
     {
      "id": "mw2202743",
      "name": "Upper corner for a MAX7219 LED matrix",
+     "shape": {"corner": "matrix"},
      "author": "Lajoix",
      "url": "https://makerworld.com/en/models/2202743-lab-rax-10-upper-corner-for-max7219-led-matrix"
     }
@@ -5550,30 +6468,35 @@
      "id": "mw3212362",
      "name": "Bottom drawer",
      "label": "Replaces the base, takes no rack units",
+     "shape": {"drawer": true},
      "author": "mklements",
      "url": "https://makerworld.com/en/models/3212362"
     },
     {
      "id": "mw3215912",
      "name": "Cable guide",
+     "shape": {"inside": "guide"},
      "author": "mklements",
      "url": "https://makerworld.com/en/models/3215912"
     },
     {
      "id": "mw3215942",
      "name": "Cable management combs",
+     "shape": {"inside": "comb"},
      "author": "mklements",
      "url": "https://makerworld.com/en/models/3215942"
     },
     {
      "id": "mw1376106",
      "name": "Front-to-back cable bracket",
+     "shape": {"inside": "bracket"},
      "author": "Jeffrey",
      "url": "https://makerworld.com/en/models/1376106"
     },
     {
      "id": "mw1651940",
      "name": "80 mm intake / outlet fans",
+     "shape": {"inside": "fans"},
      "author": "SilvestreDesignLab",
      "url": "https://makerworld.com/en/models/1651940",
      "hardware": [
@@ -5588,48 +6511,56 @@
     {
      "id": "mw1682896",
      "name": "Synology DS920+ backplate",
+     "shape": {"inside": "bracket"},
      "author": "sflabbe",
      "url": "https://makerworld.com/en/models/1682896"
     },
     {
      "id": "mw3310115",
      "name": "Vertical ATX motherboard mount",
+     "shape": {"inside": "atx"},
      "author": "Ruben",
      "url": "https://makerworld.com/en/models/3310115"
     },
     {
      "id": "mw2753491",
      "name": "mATX motherboard mount",
+     "shape": {"inside": "matx"},
      "author": "austin.18",
      "url": "https://makerworld.com/en/models/2753491"
     },
     {
      "id": "mw2138882",
      "name": "UniFi PoE+++ injector side mount",
+     "shape": {"inside": "device"},
      "author": "BadPixel",
      "url": "https://makerworld.com/en/models/2138882"
     },
     {
      "id": "mw2404914",
      "name": "MikroTik hEX S side mount",
+     "shape": {"inside": "device"},
      "author": "mserpis125",
      "url": "https://makerworld.com/en/models/2404914"
     },
     {
      "id": "pr1513212",
      "name": "MikroTik hAP ac³ / ax³ holder",
+     "shape": {"inside": "device"},
      "author": "Robert Sedláček",
      "url": "https://www.printables.com/model/1513212"
     },
     {
      "id": "mw2326543",
      "name": "Vertical cable management",
+     "shape": {"inside": "comb"},
      "url": "https://makerworld.com/en/models/2326543-labrax-vertical-cable-management"
     },
     {
      "id": "mw1773035",
      "name": "Keystone cable pass-through inserts",
      "label": "3–7 mm holes, fit any keystone slot",
+     "shape": {"inside": "keystone"},
      "author": "klayf",
      "url": "https://makerworld.com/en/models/1773035-keystone-insert-passthrough-various-sizes"
     }

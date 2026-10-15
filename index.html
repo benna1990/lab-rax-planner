@@ -158,26 +158,29 @@ h3.sub{font-size:14px;font-weight:700;margin:0}
 .item:hover{filter:brightness(1.07)}
 .item.sel{outline:2px solid var(--accent);outline-offset:1px;z-index:2}
 .item.drag{z-index:3;opacity:.94;cursor:grabbing;box-shadow:0 10px 24px rgba(0,0,0,.4)}
-.screw{flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#F5F6F7 0,#B9BEC3 45%,#6E747A 100%);box-shadow:0 1px 1px rgba(0,0,0,.5)}
-.face{flex:1 1 auto;min-width:0;height:100%;display:flex;align-items:center;justify-content:center;gap:3px;overflow:hidden}
+/* each part's face is an SVG drawn by shapes.js at the part's real size */
+.item > svg.pf{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
 .tip{position:fixed;z-index:40;max-width:280px;padding:8px 11px;border-radius:10px;background:var(--ink);color:var(--bg);font-size:12.5px;line-height:1.35;display:flex;flex-direction:column;gap:1px;pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.28)}
 .tip b{font-weight:700}
 .tip span{opacity:.82}
 .tip .mono{font-family:var(--f-mono);font-size:11.5px}
-.f-vent{flex:1;height:50%;background:repeating-linear-gradient(90deg,var(--hole) 0 3px,transparent 3px 7px);border-radius:2px}
-.f-fan{height:76%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,var(--c) 0 18%,var(--hole) 19% 100%);flex:0 0 auto}
-.f-ks{width:6px;height:52%;background:var(--hole);border-radius:1px;flex:0 0 auto}
-.f-dev{height:64%;flex:0 1 70%;border-radius:2px;background:var(--hole);display:flex;align-items:center;justify-content:flex-end;gap:2px;padding:0 5px;min-width:0;overflow:hidden}
-.f-port{width:5px;height:42%;background:var(--c);opacity:.85;flex:0 0 auto}
-.f-led{width:4px;height:4px;border-radius:50%;background:#4ADE80;margin-left:4px;flex:0 0 auto}
-.f-sbc{width:3px;height:74%;background:var(--hole);flex:0 0 auto;margin-left:4px}
-.f-drv{height:58%;flex:0 1 54px;border-radius:2px;background:var(--hole)}
-.f-cut{height:70%;flex:0 1 60%;border-radius:2px;background:#0C0D0F;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
 .dropghost{position:absolute;border:2px dashed var(--accent);background:color-mix(in srgb,var(--accent) 22%,transparent);border-radius:3px;pointer-events:none;z-index:4}
-.ap{position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);width:62%;height:58px;pointer-events:none}
-.ap i.disc{position:absolute;left:0;right:0;top:4px;height:24px;border-radius:50%;background:#F2F3F4;box-shadow:inset 0 -5px 0 #D5D9DC,0 2px 4px rgba(0,0,0,.3);display:grid;place-items:center}
-.ap i.disc::after{content:"";width:9%;height:4px;border-radius:2px;background:#3B82F6}
-.ap i.leg{position:absolute;bottom:0;width:7%;height:34px;background:var(--frame);border-radius:3px 3px 0 0}
+/* the top mount above the frame, and frame extras that show from the front */
+.ap{position:absolute;bottom:100%;left:50%;pointer-events:none}
+.ap svg{display:block;width:100%;height:100%}
+.rack.airv .ap{opacity:.4}
+.handle.flat{border-radius:2px 2px 0 0}
+.hexgrill.lit g{fill:var(--acc)}
+.hexgrill.lit{filter:drop-shadow(0 0 3px var(--acc))}
+.logo.glow{text-shadow:0 0 1px #000,0 0 6px var(--acc),0 0 14px var(--acc)}
+.corner-ks{position:absolute;left:10%;right:10%;top:22%;bottom:22%;display:flex;justify-content:center;align-items:stretch;gap:1.4%}
+.corner-ks i{aspect-ratio:14.9/16.4;border-radius:1px;background:linear-gradient(#18191C 0 16%,#050506 16% 70%,#18191C 70%);box-shadow:0 0 0 1px rgba(0,0,0,.4)}
+.corner-mx{position:absolute;left:20%;right:20%;top:24%;bottom:24%;border-radius:2px;background:radial-gradient(circle,#FF4D4D 0 30%,#3A1416 34% 46%,transparent 50%) 0 0/calc(100% / 32) 25%,#121314}
+.eswitch{position:absolute;right:14%;top:50%;transform:translateY(-50%);border-radius:2px;background:#C8372D;box-shadow:inset 0 -3px 0 rgba(0,0,0,.35),0 0 0 2px #141518}
+.sgrip{position:absolute;top:30%;height:24%;background:var(--frame);border-radius:4px;box-shadow:inset 0 0 0 3px rgba(0,0,0,.25)}
+.caster{position:absolute;border-radius:50%;background:radial-gradient(circle,#9AA1A8 0 16%,#2A2C30 18% 30%,#1A1B1E 32%)}
+.drawer{position:absolute;top:100%;left:2%;right:2%;background:var(--frame);border-radius:0 0 4px 4px;box-shadow:inset 0 2px 0 rgba(0,0,0,.45);display:grid;place-items:center}
+.drawer i{width:22%;height:24%;border-radius:999px;background:var(--acc)}
 .floor{height:18px;margin:4px 8% 0;border-radius:50%;background:radial-gradient(ellipse at center,var(--floor),transparent 70%)}
 
 .selbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;border-radius:14px;background:var(--panel);border:1px solid var(--line);min-height:56px}
@@ -304,8 +307,14 @@ details.abd .hint{margin-top:6px}
 .lrow:hover{background:var(--sunk);border-color:var(--line)}
 .lrow.on{border-color:color-mix(in srgb,var(--accent) 55%,transparent)}
 .lthumb{flex:none;width:58px;display:grid;place-items:center}
-.item.mini{position:relative;width:58px;padding:0 3px;gap:2px;cursor:inherit;border-radius:2px}
-.disc-mini{width:46px;height:12px;border-radius:50%;background:#F2F3F4;box-shadow:inset 0 -3px 0 #CBD0D4,0 0 0 1px rgba(0,0,0,.12)}
+.lthumb svg{display:block;width:58px;height:32px}
+/* a larger drawing beside a library row while the pointer rests on it */
+.lprev{position:fixed;z-index:41;width:300px;padding:10px;border-radius:14px;background:var(--card);border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.28);display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.lp-3d{height:136px;border-radius:10px;background:var(--sunk);padding:6px}
+.lp-3d svg{display:block;width:100%;height:100%}
+.lp-front{position:relative;width:100%;border-radius:4px;overflow:hidden;background:#0C0D0F}
+.lp-front svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.lprev .mono{font-family:var(--f-mono);font-size:11.5px;color:var(--muted)}
 .ltx{flex:1;min-width:0;display:flex;flex-direction:column}
 .ltx b{font-weight:600;font-size:13.5px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ltx small{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -314,7 +323,7 @@ details.abd .hint{margin-top:6px}
 .lmore:hover,.lext:hover{border-color:var(--accent);color:var(--accent)}
 .lsub{margin:0 0 6px 34px;padding-left:8px;border-left:2px solid var(--line);display:flex;flex-direction:column;gap:2px}
 .lsub .lthumb{width:40px}
-.lsub .item.mini{width:40px}
+.lsub .lthumb svg{width:40px;height:24px}
 .pill.lr{margin-left:auto}
 .lfoot{margin-top:10px}
 /* build column: sections fold to one line */
@@ -476,8 +485,10 @@ dialog.wizard::backdrop{background:rgba(10,12,14,.55)}
 </dialog>
 
 <div class="tip" id="tip" role="tooltip" hidden></div>
+<div class="lprev" id="lprev" aria-hidden="true" hidden></div>
 
 <script src="parts.js"></script>
+<script src="shapes.js"></script>
 <script src="view3d.js"></script>
 <script src="pdf.js"></script>
 <script src="airflow.js"></script>
