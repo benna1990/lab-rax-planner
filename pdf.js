@@ -33,11 +33,14 @@ const hex = c => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), pars
 const HEAT = ['#EEF6EF', '#D8EEDC', '#EDE6A8', '#F2C987', '#EC9F63', '#D8743F', '#B04E28'].map(hex), SPAN = 20;
 function heatRGB(dT, span) { const p = Math.sqrt(Math.max(0, Math.min(1, dT / span))) * 6, i = Math.min(5, Math.floor(p)), f = p - i; return HEAT[i].map((v, k) => Math.round(v + (HEAT[i + 1][k] - v) * f)); }
 const tC = (t, short) => (t > 60 ? '60+' : Math.round(t)) + (short ? '°' : ' °C'); // past 60 °C the exact figure means little
-// a part's face as drawn by shapes.js (an SVG string, w × h mm) turned into an image for jsPDF, ppm pixels per mm
-function raster(svg, w, h, ppm, type) {
+// a part's face as drawn by shapes.js (an SVG string, w × h mm) turned into an image for jsPDF, ppm pixels per mm;
+// grey: desaturated and lighter, for the heatmap, where the part's own colour would read as heat
+function raster(svg, w, h, ppm, type, grey) {
   return new Promise((res, rej) => {
     const pw = Math.max(1, Math.round(w * ppm)), ph = Math.max(1, Math.round(h * ppm)), img = new Image();
-    img.onload = () => { const c = document.createElement('canvas'); c.width = pw; c.height = ph; c.getContext('2d').drawImage(img, 0, 0, pw, ph); res(c.toDataURL(type, .9)); };
+    img.onload = () => { const c = document.createElement('canvas'); c.width = pw; c.height = ph; const g = c.getContext('2d'); g.drawImage(img, 0, 0, pw, ph);
+      if (grey) { const px = g.getImageData(0, 0, pw, ph), a = px.data; for (let i = 0; i < a.length; i += 4) { const l = (.3 * a[i] + .59 * a[i + 1] + .11 * a[i + 2]) * .7 + 70; a[i] = a[i + 1] = a[i + 2] = l; } g.putImageData(px, 0, 0); }
+      res(c.toDataURL(type, .9)); };
     img.onerror = () => rej(new Error('could not draw a part'));
     img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg.replace('<svg ', '<svg width="' + pw + '" height="' + ph + '" '));
   });
@@ -62,6 +65,7 @@ async function make(d) {
 
   const faces = new Map(), img = async (key, make) => { if (!faces.has(key)) faces.set(key, await make().catch(() => null)); return faces.get(key); };
   for (const it of d.items) if (it.face) it.img = await img(it.face, () => raster(it.face, 250, it.h2 * 44.45 / 2 - .79, 4, 'image/jpeg'));
+  if (d.cooling && d.cooling.map) for (const it of d.items) if (it.face && !it.back) it.grey = await img('grey:' + it.face, () => raster(it.face, 250, it.h2 * 44.45 / 2 - .79, 4, 'image/jpeg', true));
   const qr = await qrFor(d.shareUrl);
   // A useful first page: budget, material and navigation rather than a decorative cover.
   const navigation=[];
@@ -176,7 +180,7 @@ async function make(d) {
     doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(...ink);text('Air temperature and airflow',M,y);
     doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(...muted);text('Front view. Blue arrows: air in; orange: air out (m³/h).',M,y+4.5);
     doc.setFillColor(64,70,66);doc.roundedRect(rx,ry-3,rw,bh+6,1,1,'F');doc.setFillColor(250,250,250);doc.rect(rx+post,ry,bay,bh,'F');
-    d.items.filter(it=>!it.back&&it.img).forEach(it=>doc.addImage(it.img,'JPEG',rx+rw/2-125*kk,ry+it.pos2*layerH,250*kk,it.h2*layerH-.1,'heat'+[...faces.keys()].indexOf(it.face),'FAST'));
+    d.items.filter(it=>!it.back&&(it.grey||it.img)).forEach(it=>doc.addImage(it.grey||it.img,'JPEG',rx+rw/2-125*kk,ry+it.pos2*layerH,250*kk,it.h2*layerH-.1,'heat'+[...faces.keys()].indexOf(it.grey?'grey:'+it.face:it.face),'FAST'));
     const fade=doc.GState?new doc.GState({opacity:.5}):null;if(fade)doc.setGState(fade);
     m.temp.forEach((t,i)=>{doc.setFillColor(...heatRGB(t-m.room,SPAN));doc.rect(rx+post,ry+i*layerH,bay,layerH+.05,'F');});
     if(fade)doc.setGState(new doc.GState({opacity:1}));
@@ -185,18 +189,20 @@ async function make(d) {
     if(m.neutral!=null&&m.H){const ny=ry+bh-m.neutral/m.H*bh;doc.setLineDashPattern([1,.8],0);doc.setDrawColor(90,96,92);doc.setLineWidth(.25);doc.line(rx+post,ny,rx+rw-post,ny);doc.setLineDashPattern([],0);doc.setFont('helvetica','normal');doc.setFontSize(5.5);doc.setTextColor(...muted);text('neutral',rx+rw-post-1,ny-.8,{align:'right'});}
     // arrows: front openings and front fans on the left, back and sides on the right, the top above
     const mean=(layers,flows,sign)=>{let w=0,sum=0;(flows||[]).forEach((f,i)=>{const v=sign*f;if(v>0){w+=v;sum+=v*layers[i];}});return w?{layer:sum/w,flow:w}:null;};
-    const arrows=[], add=(side,layer,flow)=>{if(Math.abs(flow)>=.5)arrows.push({side,layer,flow});};
+    const arrows=[], add=(side,layer,flow)=>{if(Math.abs(flow)<.5)return;const near=arrows.find(a=>a.side===side&&a.flow>0===flow>0&&(side==='top'||Math.abs(a.layer-layer)<=2));
+      if(near){near.layer=(near.layer*Math.abs(near.flow)+layer*Math.abs(flow))/(Math.abs(near.flow)+Math.abs(flow));near.flow+=flow;}else arrows.push({side,layer,flow});};
     const sideOf=k=>k==='top'?'top':(k==='back'||k==='side')?'right':'left';
     (m.openings||[]).forEach(o=>{const side=sideOf(o.kind);if(side==='top'){add('top',0,(o.in||0)-(o.out||0));return;}const i=mean(o.layers,o.flows,1),out=mean(o.layers,o.flows,-1);if(i)add(side,i.layer,i.flow);if(out)add(side,out.layer,-out.flow);});
     (m.fans||[]).forEach(f=>{const side=sideOf(f.place);add(side,f.pos2!=null?f.pos2+(f.h2||1)/2-.5:0,(f.in||0)-(f.out||0));});
     const arrow=(x1,y1,x2,y2,c)=>{doc.setDrawColor(...c);doc.setFillColor(...c);doc.setLineWidth(.55);const a2=Math.atan2(y2-y1,x2-x1),h=1.9;doc.line(x1,y1,x2-Math.cos(a2)*h*.8,y2-Math.sin(a2)*h*.8);doc.triangle(x2,y2,x2-h*Math.cos(a2-.42),y2-h*Math.sin(a2-.42),x2-h*Math.cos(a2+.42),y2-h*Math.sin(a2+.42),'F');};
+    const drawn=[];
     arrows.sort((p,q)=>Math.abs(q.flow)-Math.abs(p.flow)).slice(0,8).forEach(ar=>{
       const inn=ar.flow>0,c=inn?blue:warm,lab=(inn?'in ':'out ')+Math.round(Math.abs(ar.flow));
       doc.setFont('helvetica','bold');doc.setFontSize(5.8);doc.setTextColor(...c);
       if(ar.side==='top'){const cx=rx+rw/2,y0=ry-4;if(inn)arrow(cx,y0-8,cx,y0-.5,c);else arrow(cx,y0-.5,cx,y0-8,c);text(lab,cx+1.5,y0-5);}
-      else{const yy=ry+(ar.layer+.5)*layerH;
-        if(ar.side==='left'){if(inn)arrow(M,yy,rx-.6,yy,c);else arrow(rx-.6,yy,M,yy,c);text(lab,M,yy-1.4);}
-        else{const x0=rx+rw+.6,x1=rx+rw+12;if(inn)arrow(x1,yy,x0,yy,c);else arrow(x0,yy,x1,yy,c);text(lab,x0+.6,yy-1.4);}}
+      else{const yy=ry+(ar.layer+.5)*layerH,below=drawn.some(o=>o.side===ar.side&&Math.abs(o.yy-yy)<4);drawn.push({side:ar.side,yy});const ly=below?yy+2.9:yy-1.4; // a label near another goes under its arrow
+        if(ar.side==='left'){if(inn)arrow(M,yy,rx-.6,yy,c);else arrow(rx-.6,yy,M,yy,c);text(lab,M,ly);}
+        else{const x0=rx+rw+.6,x1=rx+rw+12;if(inn)arrow(x1,yy,x0,yy,c);else arrow(x0,yy,x1,yy,c);text(lab,x0+.6,ly);}}
     });
     // the scale: room temperature to +20 °C, fixed so racks compare
     const sy=ry+bh+10;for(let i=0;i<24;i++){doc.setFillColor(...heatRGB(i/23*SPAN,SPAN));doc.rect(rx+i*rw/24,sy,rw/24+.05,3,'F');}
@@ -206,10 +212,13 @@ async function make(d) {
     const tx0=rx+rw+16, tw=W-M-tx0, rowH=Math.max(6.4,Math.min(10,(bh+6)/m.h));
     let ty=ry-3;doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(...muted);text('PER U, TOP TO BOTTOM',tx0,ty-2.5);
     for(let u=0;u<m.h;u++){
-      const temp=(m.temp[u*2]+m.temp[u*2+1])/2,names=m.parts.filter(p=>p.pos2<(u+1)*2&&p.pos2+p.h2>u*2).map(p=>p.name);
+      const temp=(m.temp[u*2]+m.temp[u*2+1])/2,names=m.parts.filter(p=>p.pos2<(u+1)*2&&p.pos2+p.h2>u*2).map(p=>p.name+(p.back?' (rear)':''));
       doc.setFillColor(...heatRGB(temp-m.room,SPAN));doc.roundedRect(tx0,ty,tw,rowH-1,1,1,'F');
       doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...ink);text('U'+(m.h-u),tx0+2.5,ty+rowH/2+1);
-      doc.setFont('helvetica','normal');doc.setFontSize(7);let nm=clean(names.join(' / ')||'Open slot');while(doc.getTextWidth(nm)>tw-30&&nm.length>4)nm=nm.slice(0,-2);text(nm,tx0+12,ty+rowH/2+1);
+      doc.setFont('helvetica','normal');doc.setFontSize(7);const nw=tw-30,cut=s=>{if(doc.getTextWidth(s)<=nw)return s;while(doc.getTextWidth(s+'...')>nw&&s.length>4)s=s.slice(0,-1);return s.trimEnd()+'...';};
+      let nm=clean(names.join(' / ')||'Open slot');
+      if(doc.getTextWidth(nm)>nw&&rowH>=8){doc.setFontSize(6.5);const ls=doc.splitTextToSize(nm,nw);text([ls[0],cut(ls.slice(1).join(' '))],tx0+12,ty+rowH/2-.6,{lineHeightFactor:1.15});}
+      else text(cut(nm),tx0+12,ty+rowH/2+1);
       doc.setFont('helvetica','bold');doc.setFontSize(8.5);text(tC(temp),tx0+tw-2.5,ty+rowH/2+1,{align:'right'});ty+=rowH;
     }
     y=Math.max(sy+12,ty+4);
