@@ -1880,6 +1880,8 @@ host.addEventListener('pointerup', () => {
   sel = d.id; render();
 });
 host.addEventListener('pointercancel', () => { if (drag) { drag = null; render(); } });
+// a click on the stage beside the parts lets go of the selected part
+$('#stage').addEventListener('click', e => { if (sel != null && !e.target.closest('.item, button, a, input, select, label, textarea, canvas')) { sel = null; hideTip(); render(); } }); // the 3D view picks parts on its canvas itself
 host.addEventListener('pointermove', e => { const el = e.pointerType === 'mouse' && e.target.closest('.item'); if (el) showTip(+el.dataset.id, e.clientX, e.clientY); else hideTip(); });
 host.addEventListener('pointerleave', hideTip);
 host.addEventListener('focusin', e => { const el = e.target.closest('.item'); if (el && el.matches(':focus-visible')) { const r = el.getBoundingClientRect(); showTip(+el.dataset.id, r.left + r.width / 2, r.bottom - 14); } });
