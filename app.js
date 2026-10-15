@@ -243,15 +243,14 @@ const genHardware = p => p.type === 'fan' && CAT.hardware['fan' + p.size] ? [{ p
 
 /* ---------- placement ---------- */
 /* The 10" hole pattern (6.35 / 22.225 / 38.1 mm) repeats per whole U, so panels of 1U and taller must start on a U boundary; ½U panels fit either half. */
-const aligned = (p, h2) => h2 === 1 || p % 2 === 0;
+const LY = window.LRLayout, aligned = LY.aligned; // placement rules: layout.js
+// the placed parts as layout.js sees them
+const rackCtx = () => ({ slots: slots(), items: placed().map(o => ({ id: o.id, pos2: o.pos2, h2: H(o), side: sideOf(o) })) });
+const sideFor = (except, side) => side || (except != null && find(except) ? sideOf(find(except)) : rackSide);
 // side: front or back; without it, the side of the part being moved (except), else the side being edited
-function isFree(p, h2, except, side) {
-  if (p < 0 || p + h2 > slots() || !aligned(p, h2)) return false;
-  const sd = side || (except != null && find(except) ? sideOf(find(except)) : rackSide);
-  return !placed().some(o => o.id !== except && sideOf(o) === sd && p < o.pos2 + H(o) && o.pos2 < p + h2);
-}
-function nearest(t, h2, except, side) { const n = slots(); for (let d = 0; d <= n; d++) for (const c of d ? [t - d, t + d] : [t]) if (isFree(c, h2, except, side)) return c; return null; }
-function firstFree(h2, side) { for (let p = 0; p + h2 <= slots(); p++) if (isFree(p, h2, undefined, side)) return p; return null; }
+function isFree(p, h2, except, side) { return LY.isFree(rackCtx(), p, h2, sideFor(except, side), except); }
+function nearest(t, h2, except, side) { return LY.nearest(rackCtx(), t, h2, sideFor(except, side), except); }
+function firstFree(h2, side) { return LY.firstFree(rackCtx(), h2, side || rackSide); }
 function touch() { state.example = false; }
 // btn: true for an Undo button, or [act, label] for another action
 function say(msg, btn) { const b = btn === true ? ['undo', 'Undo'] : btn; $('#status').innerHTML = esc(msg) + (b ? ' <button type="button" class="lnk" data-act="' + b[0] + '">' + esc(b[1]) + '</button>' : ''); }
@@ -265,11 +264,8 @@ function addItem(obj, pos) {
   return true;
 }
 // the lowest rack height, up to 10U, with a free slot of h2 half-units on a side; null when even 10U has none
-function heightFor(h2, side) {
-  const h0 = state.h;
-  try { for (let h = h0 + 1; h <= 10; h++) { state.h = h; if (firstFree(h2, side) != null) return h; } return null; } finally { state.h = h0; }
-}
-const freeSlots = side => slots() - placed().filter(o => sideOf(o) === side).reduce((n, o) => n + H(o), 0);
+const heightFor = (h2, side) => LY.heightFor(rackCtx(), h2, side || rackSide, 10);
+const freeSlots = side => LY.freeSlots(rackCtx(), side);
 // the first free slot where the part doesn't run into a part on the other side (depth) or overlap its neighbour, else the first free slot
 function firstClear(obj, h2, sd) {
   let first = null;
@@ -278,8 +274,8 @@ function firstClear(obj, h2, sd) {
 }
 // slide the parts on a side up against each other, so their free space is one gap at the bottom; whole-U parts stay on a U
 function packSide(side) {
-  let p = 0, n = 0;
-  placed().filter(o => sideOf(o) === side).sort((x, y) => x.pos2 - y.pos2).forEach(o => { const h = H(o); while (!aligned(p, h)) p++; if (o.pos2 !== p) { o.pos2 = p; n++; } p += h; });
+  const pos = LY.pack(rackCtx(), side); let n = 0;
+  placed().forEach(o => { if (pos[o.id] != null && pos[o.id] !== o.pos2) { o.pos2 = pos[o.id]; n++; } });
   return n;
 }
 // would packing the side make a slot for h2? (tried, then put back)
@@ -402,15 +398,9 @@ function removeItem(id) {
 /* Move a part to slot t on its side and slide the parts it passes the other way, so a full rack can be reordered. Returns the new
    slot, or null (nothing changed) when sliding would put a whole-U panel off its U or a part outside the rack. */
 function reorder(id, t) {
-  const it = find(id), h = H(it), sd = sideOf(it), a = it.pos2, others = placed().filter(o => o.id !== id && sideOf(o) === sd);
-  const was = others.map(o => [o, o.pos2]); let np;
-  if (t < a) { const hit = others.filter(o => o.pos2 < a && o.pos2 + H(o) > t); np = Math.min(t, ...hit.map(o => o.pos2)); hit.forEach(o => { o.pos2 += h; }); }
-  else { const end = t + h, hit = others.filter(o => o.pos2 >= a + h && o.pos2 < end); np = Math.max(end, ...hit.map(o => o.pos2 + H(o))) - h; hit.forEach(o => { o.pos2 -= h; }); }
-  it.pos2 = np;
-  const all = [it, ...others], ok = all.every(o => o.pos2 >= 0 && o.pos2 + H(o) <= slots() && aligned(o.pos2, H(o))) &&
-    all.every(o => all.every(q => q === o || q.pos2 >= o.pos2 + H(o) || o.pos2 >= q.pos2 + H(q)));
-  if (!ok) { it.pos2 = a; was.forEach(([o, p]) => { o.pos2 = p; }); return null; }
-  return np;
+  const pos = LY.reorder(rackCtx(), id, t); if (!pos) return null;
+  placed().forEach(o => { if (pos[o.id] != null) o.pos2 = pos[o.id]; });
+  return pos[id];
 }
 // one step up (dir < 0) or down: into free space when there is some, else past the neighbouring part, which takes this one's place
 function move(id, dir) {
@@ -1600,7 +1590,7 @@ function snapshot() {
 }
 
 /* ---------- files out ---------- */
-const TOP_WIN = (() => { try { return window.self === window.top; } catch (e) { return false; } })();
+const TOP_WIN = (() => { try { return window.self === window.top || /[?&]selftest\b/.test(location.search); } catch (e) { return false; } })(); // the self-test runs the planner in a frame and catches its downloads
 async function saveFile(filename, blob) {
   let dl = null;
   try { dl = window.claude && window.claude.use ? await window.claude.use('downloads') : null; } catch (e) { dl = null; }
@@ -2235,21 +2225,10 @@ function cycleTheme() { theme = THEMES[(THEMES.indexOf(theme) + 1) % 3]; try { l
 // share links: "#c=" + base64url of the compact layout, [settings that differ from the defaults, parts as [key, pos2, other fields]],
 // short enough for a QR code; old "#l=" links (the whole state) still open. A rack file holds the same compact layout.
 const SHARE_KEYS = ['h', 'version', 'frame', 'panel', 'accent', 'label', 'top', 'topDir', 'extras', 'xdir', 'market', 'costs', 'back', 'sides', 'room', 'power', 'bottom', 'bottomDir'];
-function compactLayout() {
-  const d = Object.assign(defaultState(), { market: 'NL', costs: window.LREstimate.settings() }), same = (x, y) => JSON.stringify(x) === JSON.stringify(y), st = {}; // sanitize() fills in the defaults
-  SHARE_KEYS.forEach(k => { if (state[k] !== undefined && !same(state[k], d[k])) st[k] = state[k]; });
-  const items = state.items.map(i => { const { id, key, pos2, ...rest } = i; return Object.keys(rest).length ? [key, pos2, rest] : [key, pos2]; });
-  return [st, items];
-}
-function expandLayout(st, items) { // a compact layout as a state, before sanitize(); null when it can't be one
-  const list = Array.isArray(items) ? items : [], o = {};
-  if (st && typeof st === 'object') SHARE_KEYS.forEach(k => { if (own(st, k)) o[k] = st[k]; }); // settings this planner knows
-  Object.assign(o, { items: list.map((x, n) => Object.assign({}, Array.isArray(x) && x[2] && typeof x[2] === 'object' ? x[2] : {}, { id: n + 1, key: Array.isArray(x) ? x[0] : null, pos2: Array.isArray(x) ? x[1] : null })), nextId: list.length + 1 });
-  const s2 = Object.assign(defaultState(), o, { example: false, done: {} });
-  return s2.h >= 1 && s2.h <= 10 ? s2 : null;
-}
+function compactLayout() { return LRCodec.compact(state, Object.assign(defaultState(), { market: 'NL', costs: window.LREstimate.settings() }), SHARE_KEYS); } // sanitize() fills in the defaults
+function expandLayout(st, items) { return LRCodec.expand(st, items, defaultState(), SHARE_KEYS); } // a compact layout as a state, before sanitize(); null when it can't be one
 function shareLink() {
-  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(compactLayout())))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const b64 = LRCodec.toB64(compactLayout());
   return location.origin + location.pathname + location.search + '#c=' + b64;
 }
 // replace the layout with one from a link or a file; Undo brings the current one back
@@ -2267,19 +2246,9 @@ function loadShared() {
 }
 /* Rack file (<name>-<h>u.rack.json): the compact layout with a format name and version, written one part per line.
    A newer version still opens; what this planner doesn't know is left out. */
-const RACK_FORMAT = 'mini-rack-planner', RACK_VERSION = 1;
 const rackName = () => slug(state.label || 'lab-rax') + '-' + state.h + 'u';
-function rackFile() {
-  const [settings, parts] = compactLayout();
-  return '{\n  "format": "' + RACK_FORMAT + '",\n  "version": ' + RACK_VERSION + ',\n  "settings": ' + JSON.stringify(settings) + ',\n  "parts": [' +
-    parts.map(x => '\n    ' + JSON.stringify(x)).join(',') + (parts.length ? '\n  ' : '') + ']\n}\n';
-}
-function readRackFile(text) { // { state, newer }, or null when the text isn't a rack file
-  let o = null; try { o = JSON.parse(String(text).replace(/^\uFEFF/, '')); } catch (e) {}
-  if (!o || o.format !== RACK_FORMAT || !Number.isInteger(o.version) || o.version < 1) return null;
-  const s2 = expandLayout(o.settings, o.parts);
-  return s2 ? { state: s2, newer: o.version > RACK_VERSION } : null;
-}
+function rackFile() { return LRCodec.fileText(compactLayout()); }
+function readRackFile(text) { return LRCodec.readFile(text, defaultState(), SHARE_KEYS); } // { state, newer }, or null when the text isn't a rack file
 async function openRackFile(file) {
   if (!file || !CAT) return;
   let text = null;
@@ -2293,7 +2262,7 @@ function decodeShared() {
   if (!m) return null;
   try {
     if (/&s=shop\b/.test(m[3])) { ui.sec.shop = true; setTimeout(() => { const b = $('#build'); if (b) b.scrollIntoView({ block: 'start' }); }, 300); }
-    const raw = JSON.parse(decodeURIComponent(escape(atob(m[2].replace(/-/g, '+').replace(/_/g, '/')))));
+    const raw = LRCodec.fromB64(m[2]); if (raw === undefined) return null;
     history.replaceState(null, '', location.pathname + location.search);
     if (m[1] === 'c') { const [st, items] = Array.isArray(raw) ? raw : [{}, []]; return expandLayout(st, items); }
     const o = raw;
@@ -2323,4 +2292,6 @@ fetch('catalog.json', { cache: 'no-cache' })
   .catch(e => { console.error(e); $('#cards').innerHTML = '<p class="hint">The parts catalog could not be loaded. Reload the page to try again.</p>'; });
 
 window.LRApp = { snapshot, select: id => { sel = id; render(); }, say, toggleSides: () => { state.sides = state.sides === 'acrylic' ? 'printed' : 'acrylic'; touch(); render(); }, tip: (id, x, y) => id == null ? hideTip() : showTip(id, x, y) };
+// tools/selftest.html drives the planner through these; only on a page opened with ?selftest
+if (/[?&]selftest\b/.test(location.search)) window.LRApp.test = { get state() { return state; }, addItem, move, setHeight, histGo, shareLink, rackFile, readRackFile, byPos, ready: () => window.LRReady.summary(READY) };
 })();

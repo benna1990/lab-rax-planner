@@ -10,6 +10,8 @@ Static web app for planning 3D-printed 10" homelab racks: Lab Rax and more. Form
 - `view3d.js` — 3D view (three.js r128 from cdnjs, OrbitControls/STLLoader/3MFLoader from jsDelivr). `FRAME` holds frame dimensions.
 - `pdf.js` — build plan PDF with jsPDF 2.5.1.
 - `ready.js` — build readiness: the checks behind the step bar and the Build readiness panel (pure; `tools/test-ready.mjs`). Audit and plan: `docs/audit/`.
+- `layout.js` — placement rules (free slots, nearest, reorder, pack, the height a part needs); pure, app.js wraps it (`tools/test-layout.mjs`).
+- `codec.js` — share links, the compact layout and the `.rack.json` file; pure (`tools/test-codec.mjs`).
 - `connect.js` — the Connect cards (power and mains, Raspberry Pi 5, fans, PoE, lighting, UPS) for what a build holds; every fact sourced from `docs/audit/RESEARCH_SOURCES.md`, nothing guessed (pure; `tools/test-connect.mjs`).
 - `printers.js` — printer presets and the print bed check: does a piece fit lying flat, straight or turned (`tools/test-printers.mjs`). app.js says what each print-list row prints (`framePieces`, `itemPieces`); the chosen printer lives in the UI settings (`labrax-planner-ui`), not in the layout.
 - `airflow.js` — cooling model: air temperature per ½U layer, stack effect, fan curves, openings and walls. app.js describes the rack for it (airflow section).
@@ -22,7 +24,8 @@ Static web app for planning 3D-printed 10" homelab racks: Lab Rax and more. Form
 
 ## Commands
 - Run: `python3 -m http.server 8000` then open http://localhost:8000 (needs a server; `fetch('catalog.json')`).
-- Check: `node tools/validate.mjs && for f in app.js parts.js shapes.js view3d.js pdf.js airflow.js power.js guide.js estimate.js market.js printers.js ready.js connect.js; do node --check $f; done && node tools/test-power.mjs && node tools/test-printers.mjs && node tools/test-ready.mjs && node tools/test-connect.mjs`
+- Check: `node tools/validate.mjs && for f in app.js parts.js shapes.js view3d.js pdf.js airflow.js power.js guide.js estimate.js market.js printers.js ready.js connect.js layout.js codec.js; do node --check $f; done && for t in tools/test-*.mjs; do node $t; done`
+- Browser self-test (placement, undo, share link, rack file, PDF and ZIP export in the real page): serve the folder and open `/tools/selftest.html`; it puts your saved rack back afterwards.
 - Measure: `node tools/measure.mjs [id …]` (all of `reference/` without ids; `--front=±axis`, `--up=±axis` when it picks the wrong face, `--svg` for an overlay in `reference/`, `--json` for numbers).
 
 ## Rules

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Planner self-test</title>
+<style>
+  :root { color-scheme: light dark; --ok: #1f8a4c; --bad: #c0392b; }
+  body { margin: 0; padding: 16px; font: 14px/1.45 system-ui, sans-serif; background: Canvas; color: CanvasText; }
+  h1 { font-size: 18px; margin: 0 0 4px; }
+  #sum { margin: 0 0 12px; font-weight: 700; }
+  ol { padding-left: 20px; }
+  li.ok::marker { color: var(--ok); } li.bad { color: var(--bad); }
+  iframe { width: 100%; height: 640px; border: 1px solid #8884; border-radius: 8px; }
+</style>
+</head>
+<body>
+<h1>Mini Rack Planner self-test</h1>
+<p>Runs the real planner in the frame below through a full build, then puts your own saved rack back. Serve the folder (<code>python3 -m http.server 8000</code>) and open <code>/tools/selftest.html</code>.</p>
+<p id="sum">Running…</p>
+<ol id="out"></ol>
+<iframe id="app" title="The planner under test"></iframe>
+<script>
+(async () => {
+  const KEYS = ['labrax-planner-v2', 'labrax-planner-ui'], saved = KEYS.map(k => localStorage.getItem(k));
+  const out = document.getElementById('out'), results = [];
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const log = (ok, name, detail) => { results.push(ok); const li = document.createElement('li'); li.className = ok ? 'ok' : 'bad'; li.textContent = (ok ? '✓ ' : '✗ ') + name + (detail ? ' — ' + detail : ''); out.appendChild(li); };
+  const frame = document.getElementById('app');
+  const load = hash => new Promise(res => { frame.onload = () => setTimeout(res, 1800); frame.src = '../index.html?selftest=' + Date.now() + (hash || ''); });
+  let W, errors = [];
+  const hook = () => {
+    W = frame.contentWindow; errors = []; W.addEventListener('error', e => errors.push(e.message));
+    W.__dl = []; const orig = W.HTMLAnchorElement.prototype.click; // catch downloads instead of saving them
+    W.HTMLAnchorElement.prototype.click = function () { if (this.download) { W.__dl.push({ name: this.download, href: this.href }); return; } return orig.call(this); };
+    W.URL.revokeObjectURL = () => {};
+  };
+  const T = () => W.LRApp.test, $ = s => W.document.querySelector(s), items = () => JSON.stringify(T().state.items.map(i => [i.key, i.pos2]));
+  async function check(name, fn) { try { const d = await fn(); log(d !== false, name, typeof d === 'string' ? d : ''); } catch (e) { log(false, name, e.message); } }
+  async function download(act, re) {
+    W.__dl = []; $('[data-act="' + act + '"]').click(); await wait(400);
+    const b = [...W.document.querySelectorAll('#finalize-build button')].find(x => re.test(x.textContent)); if (!b) throw new Error('no download button');
+    b.click(); for (let i = 0; i < 100 && !W.__dl.length; i++) await wait(200);
+    if (!W.__dl.length) throw new Error('nothing downloaded');
+    const f = W.__dl[0]; return { name: f.name, buf: new Uint8Array(await (await W.fetch(f.href)).arrayBuffer()) };
+  }
+  try {
+    KEYS.forEach(k => localStorage.removeItem(k));
+    await load(); hook();
+    await check('First visit shows the start screen', () => !$('#startcard').hidden);
+    await check('The example passes its checks, apart from picking a printer', () => { const s = T().ready(); return s.warn === 0 && s.todo === 1 ? 'ready apart from 1 to do' : false; });
+    await check('Start empty gives an empty rack', async () => { $('.sc-opt[data-v="empty"]').click(); await wait(500); return T().state.items.length === 0 && $('#startcard').hidden; });
+    await check('Parts go to the first free slot', async () => { ['ucgmax1', 'mw2117690', 'sbc7'].forEach(key => T().addItem({ key })); await wait(200);
+      const p = T().state.items.map(i => i.key + '@' + i.pos2).join(' '); return p === 'ucgmax1@0 mw2117690@2 sbc7@4' ? p : false; });
+    await check('Reorder in a full rack', async () => { T().setHeight(4); T().move(T().state.items.find(i => i.key === 'sbc7').id, -1); await wait(200);
+      const p = T().byPos().map(i => i.key).join(' '); return p === 'ucgmax1 sbc7 mw2117690' ? p : false; });
+    await check('Undo and redo', async () => { await wait(900); T().setHeight(6); await wait(900); // a change of its own, more than 0.8 s after the last
+      T().histGo(-1); await wait(200); const undone = T().state.h === 4; T().histGo(1); await wait(200); return undone && T().state.h === 6 ? '6U → 4U → 6U' : false; });
+    await check('Rack file round trip', () => { const r = T().readRackFile(T().rackFile()); return !!r && JSON.stringify(r.state.items.map(i => [i.key, i.pos2])) === items(); });
+    const link = T().shareLink(), want = items();
+    await check('PDF export', async () => { const f = await download('pdf', /download pdf/i), head = new TextDecoder().decode(f.buf.subarray(0, 5)), pages = (new TextDecoder('latin1').decode(f.buf).match(/\/Type \/Page\b/g) || []).length;
+      return head === '%PDF-' && pages >= 4 ? f.name + ', ' + pages + ' pages' : false; });
+    await check('Build pack ZIP export', async () => { W.document.querySelector('#finalize-build').close && W.document.querySelector('#finalize-build').close(); await wait(200);
+      const f = await download('pack', /download/i), v = new DataView(f.buf.buffer), eo = f.buf.length - 22, n = v.getUint16(eo + 10, true); let cd = v.getUint32(eo + 16, true); const names = [];
+      for (let i = 0; i < n; i++) { const nl = v.getUint16(cd + 28, true); names.push(new TextDecoder().decode(f.buf.subarray(cd + 46, cd + 46 + nl))); cd += 46 + nl + v.getUint16(cd + 30, true) + v.getUint16(cd + 32, true); }
+      const need = ['.pdf', '.rack.json', 'shopping-list.csv'].filter(x => !names.some(nm => nm.endsWith(x))); return need.length ? 'missing ' + need.join(', ') : f.name + ': ' + names.length + ' files'; });
+    await check('No errors while building', () => errors.length ? errors.join('; ') : true);
+    await load(link.slice(link.indexOf('#'))); hook();
+    await check('Share link opens the same layout', () => { const got = items(); return got === want || 'got ' + got; });
+  } catch (e) { log(false, 'Self-test stopped', e.message); }
+  finally { KEYS.forEach((k, i) => saved[i] == null ? localStorage.removeItem(k) : localStorage.setItem(k, saved[i])); }
+  const bad = results.filter(x => !x).length;
+  document.getElementById('sum').textContent = bad ? bad + ' of ' + results.length + ' checks failed.' : 'All ' + results.length + ' checks passed.';
+  document.title = (bad ? '✗ ' : '✓ ') + 'Planner self-test';
+})();
+</script>
+</body>
+</html>

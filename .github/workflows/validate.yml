@@ -14,10 +14,13 @@ jobs:
         with:
           node-version: 20
       - run: node tools/validate.mjs
-      - run: for f in app.js parts.js shapes.js view3d.js pdf.js airflow.js power.js guide.js estimate.js market.js printers.js ready.js connect.js; do node --check "$f"; done
+      - run: for f in app.js parts.js shapes.js view3d.js pdf.js airflow.js power.js guide.js estimate.js market.js printers.js ready.js connect.js layout.js codec.js; do node --check "$f"; done
       - run: node tools/test-estimate.mjs
       - run: node tools/test-market.mjs
       - run: node tools/test-power.mjs
       - run: node tools/test-printers.mjs
       - run: node tools/test-ready.mjs
       - run: node tools/test-connect.mjs
+      - run: node tools/test-layout.mjs
+      - run: node tools/test-codec.mjs
+      - run: node tools/test-zip.mjs
