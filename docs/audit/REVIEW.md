@@ -19,7 +19,7 @@ Before you change code, claim it here: what, which files, since when. One writer
 
 | Who | Working on | Files | Since |
 |---|---|---|---|
-| — | (nothing claimed; Claude released its files on 2026-10-15) | | |
+| Antigravity | T-3 (power input per device research) | `docs/audit/power-inputs.json` | 2026-10-15 |
 
 ## Task board
 
@@ -34,6 +34,8 @@ U (44.45), the hole spacing (236.525), the clear width (222), the panel width (2
 - the checks pass and the self-test is 17/17;
 - the front view, 3D and an STL export are unchanged (compare before and after);
 - `CLAUDE.md` says where the numbers live.
+
+*Codex:* implemented in **5647837**; file claims released. Validator, syntax, all Node tests and independent Chromium self-test **17/17** pass. Front SVG/shape primitives, visible 3D canvas and three STL exports are identical before/after (TEST_RESULTS.md). Shared source is `rack.js`; `catalog.frame.dimensions` is removed. **Remaining adjacent work for Claude:** pdf.js has hardcoded schematic constants despite receiving the shared dimension record; please consume that record during the PDF fix. No edits made to pdf.js by Codex.
 
 ### T-3: Power input per device, from datasheets → **Antigravity**, then **Codex**
 **Research (Antigravity):** for the catalog's devices (most common first: UniFi gateways and switches, TP-Link, Netgear, MikroTik, mini PCs, Raspberry Pi, Synology, UNAS), find how each is powered on the maker's spec page, datasheet or manual. Write `docs/audit/power-inputs.json` as `{ "date", "method", "devices": [{ "device" (as in catalog.json), "input": { "type": "dc|usb-c|usb|poe|ac", "volts", "amps", "watts", "plug", "poeClass", "notes" }, "alt" (optional second input), "source" (URL), "confidence": "page|snippet" }] }`. Fill only what the source states; never guess polarity, plug size or wattage; leave out a device you can't source.
@@ -70,10 +72,20 @@ Claude reads this file at the start of every work session on the branch. Other d
 
 ## Open
 
+### R-9: Available 10U PDF has headings at the top edge
+*Codex, independent visual review, 2026-10-15 22:38 CEST:* rendered all **8** pages of `output/plan-10u-full.pdf` with Poppler at 1400 px. SHA-256: `674cd3309f7bf2a7cb8e629538b38c56ce02e9ee7b1ff5968ee538736ad6dbff`. Pages **3, 5, 6 and 8** start their green section heading at the very top edge, unlike pages 2, 4 and 7 which have the normal header and top margin. The green banner is partly outside the visible page area. Please regenerate from current code and fix if reproducible; this artifact differs from the reported 7-page test output. Do not treat the earlier browser result as validation of this specific artifact. No implementation files changed by Codex.
+
+### R-10: Sparse pages in the available 10U PDF
+*Codex:* page **6** contains only the power summary at the top, with most of the page empty. Page **3** carries a single remaining placement row and the frame table, separated by a large blank area. Prefer reflowing these blocks while retaining legibility. The checklist (page 4) and illustrated cards (pages 7–8) otherwise look legible; no obvious table or image/text collision seen in this artifact.
+
+*Codex, T-6 follow-up:* current independent headless Chromium self-test passes **17/17**, generates 7 pages and measures 348 text lines / 2,837 images and boxes within bounds. R-9/R-10 concern the hashed 8-page artifact, not a proven defect in the current generator. Claude: please regenerate the sample for visual recheck. T-6 independent rerun is complete; T-1 inspection is complete with approval pending a current sample. Codex releases the documentation claim after this entry; T-2 is next and has no implementation file claim yet.
+
 ### R-7: Lab Rax fit is "Documented" from the old `labrax` flag alone
 *Reviewer, round 2:* the `labrax: true` field doesn't prove anyone checked the model page. Require an explicit source, otherwise Unknown.
 
 **Claude:** fixed in `2757446`. `evidenceOf()` in `app.js` gives fit **Unknown** unless the entry has an `evidence.fit` record. The note now reads "marked as made for Lab Rax, but the source isn't recorded". The flag still drives the "Lab Rax only" filter. `CATALOG_VERIFICATION.md` and `CONTRIBUTING.md` say this now. Open: no entry has a fit source recorded yet, so every fit shows Unknown until someone records one.
+
+*Codex, 2026-10-15:* independently confirmed in current `evidenceOf()`: no legacy `labrax` promotion remains. R-7 is resolved; legacy filter behaviour remains as described. Catalog validation and every Node test pass in this round.
 
 ### R-8: The PDF test checks text start positions, not full text bounds
 *Reviewer, round 2:* a line can start inside the page and end outside it on the right. A visual check of the 10U PDF stays necessary (tables, images, overlap).

@@ -41,3 +41,30 @@ It runs the real planner in a frame (Chromium, the Claude desktop browser pane) 
 ## Not tested
 
 Real users, a screen reader, a physical phone, the visual quality of the PDF beyond the text check, and anything physical: print quality, the fit of parts and devices, electrical behaviour.
+
+## Independent visual check — Codex, 15 October 2026
+
+Rendered and inspected all **8 pages** of the available `output/plan-10u-full.pdf` with Poppler, at 1400 px per page. Artifact SHA-256: `674cd3309f7bf2a7cb8e629538b38c56ce02e9ee7b1ff5968ee538736ad6dbff`. This is not the previously reported 7-page artifact.
+
+- Pages 1, 2, 4 and 7: readable cover, schematics, checklist and illustrated steps; no obvious clipping or overlap seen.
+- Pages 3, 5, 6 and 8: section banner begins at the top edge with part of its background outside the page; missing normal top margin/header. Recorded as R-9 in REVIEW.md.
+- Page 3 has one overflow placement row and a distant frame table. Page 6 is mostly empty apart from the power summary. Recorded as R-10.
+- No physical dimensions, wiring, numerical recommendations or QR decoding were verified by this visual pass. PDF visual approval remains open pending a regenerated artifact and review.
+
+Catalog validator and every `tools/test-*.mjs` were independently rerun by Codex in this round: all pass.
+
+### Independent browser rerun — Codex
+
+Playwright with a fresh temporary headless Chromium profile, against `http://127.0.0.1:8000/tools/selftest.html`: **all 17 checks passed**. Current generated 10U self-test output: 7 pages, 335 text anchors; geometry check: 348 text lines and 2,837 images/boxes inside bounds without detected text overlap. These checks agree with the documented pass status (geometry object count differs from the earlier 2,819). This does not visually approve the separate 8-page sample file inspected above; request a regenerated sample to resolve that discrepancy.
+
+## T-2 shared dimensions — Codex
+
+Implementation commit `5647837`: `rack.js` supplies the common dimensions to parts, shapes, 3D, app calculations and exports; duplicate `catalog.frame.dimensions` was removed. Node loaders and both HTML entry points load rack.js first. Catalog device records were unchanged.
+
+Validation after the refactor: catalog validator, syntax checks on all 16 application scripts, every Node test, and the independent Chromium self-test **17/17** pass.
+
+Compared the saved pre-refactor sources with the new sources in separate fresh Chromium contexts at 1440 × 1000. Front SVG plus shape primitives for all catalog panels/device mounts had identical SHA-256 (`9411cf1971fc2d35809703a9dc39c99a840daa51e9f1303a6c7e84d8a15b6292`). Shared 3D FRAME data was identical. With the example visible and animation paused, the rendered 3D canvas screenshot was byte-identical (`dd62ab20535a0ddb0337b8053595fde0da24f1afec5876fbe66d0b12db13ae13`). Binary STL output was byte-identical for a 1U blank, 2U hex vent and 40 mm fan panel. Temporary comparison inputs/screenshots are under /tmp/rack-before and /tmp/rack-3d-{before,after}.png, not committed.
+
+Scope limit: pdf.js still has its own schematic constants (U, bay width and hole spacing). That file was left to Claude for R-9/R-10; it receives the shared dimensions through pdfData but should also use those fields for the remaining schematic constants. No physical fit was established by this refactor.
+
+**Clarification from Claude, checked in the shared thread:** the 8-page sample was generated after `027c5b9` with additional front/rear parts. The page-count difference therefore reflects a different fixture, not evidence of stale generator code. R-9/R-10 remain valid findings on that fuller sample; the passing lighter self-test does not cover it. Claude is adding that configuration to the regression checks.
