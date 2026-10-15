@@ -5049,8 +5049,7 @@
          "qty": 1
         }
        ],
-       "fanDir": "exhaust",
-       "vent": 0.2
+       "fanDir": "exhaust"
       },
       {
        "id": "mw1470892",

@@ -19,21 +19,22 @@ const TABS = [['devices', 'Devices'], ['panels', 'Panels'], ['top', 'Top mounts'
 let CAT = null, LIB = {};
 function buildCatalog(c) {
   CAT = c; LIB = {};
-  const add = (id, o) => { LIB[id] = Object.assign({ key: id, h2: o.u ? Math.round(o.u * 2) : 0 }, o); };
-  (c.panels || []).forEach(g => g.items.forEach(i => add(i.id, { name: i.name, label: null, u: i.u, est: !!i.estimated, face: i.face || 'blank', url: i.url || null, author: i.author || '', hardware: i.hardware || [], watts: i.watts, group: g.group, tab: 'panels' })));
+  // src: the catalog entry, for its heat and airflow fields
+  const add = (id, o, src) => { LIB[id] = Object.assign({ key: id, h2: o.u ? Math.round(o.u * 2) : 0 }, o, { watts: src.watts, wattsEst: !!src.wattsEstimated, fanDir: src.fanDir, vent: src.vent, at: src.at, fanAt: src.fanAt }); };
+  (c.panels || []).forEach(g => g.items.forEach(i => add(i.id, { name: i.name, label: null, u: i.u, est: !!i.estimated, face: i.face || 'blank', url: i.url || null, author: i.author || '', hardware: i.hardware || [], group: g.group, tab: 'panels' }, i)));
   (c.devices || []).forEach(g => g.items.forEach(d => d.mounts.forEach(m => {
     if (m.ref) { m.key = m.ref; return; }
     m.key = m.id;
     const top = m.position === 'top';
-    add(m.id, { name: d.device, label: m.label, u: top ? 0 : m.u, top, est: !!m.estimated, face: m.face || 'shelf', url: m.url || null, author: m.author || '', hardware: m.hardware || [], watts: m.watts, note: m.note, depth: m.depth, group: g.group, tab: top ? 'top' : 'devices' });
+    add(m.id, { name: d.device, label: m.label, u: top ? 0 : m.u, top, est: !!m.estimated, face: m.face || 'shelf', url: m.url || null, author: m.author || '', hardware: m.hardware || [], note: m.note, depth: m.depth, group: g.group, tab: top ? 'top' : 'devices' }, m);
   })));
-  (c.extras || []).forEach(g => g.items.forEach(i => add(i.id, { name: i.name, label: i.label || null, u: 0, extra: true, url: i.url, author: i.author || '', hardware: i.hardware || [], note: i.note, group: g.group, tab: 'extras' })));
+  (c.extras || []).forEach(g => g.items.forEach(i => add(i.id, { name: i.name, label: i.label || null, u: 0, extra: true, url: i.url, author: i.author || '', hardware: i.hardware || [], note: i.note, group: g.group, tab: 'extras' }, i)));
 }
 
 /* ---------- state ---------- */
 function defaultState() {
   let n = 1; const m = (k, p) => ({ id: n++, key: k, pos2: p });
-  return { h: 5, version: 'brass', frame: '#26282B', panel: '#26282B', accent: '#B5CF2A', label: 'Lab Rax', top: null, extras: [], back: 'open', sides: 'printed', done: {}, example: true,
+  return { h: 5, version: 'brass', frame: '#26282B', panel: '#26282B', accent: '#B5CF2A', label: 'Lab Rax', top: null, topDir: null, extras: [], xdir: {}, back: 'open', room: 25, sides: 'printed', done: {}, example: true,
     items: [m('keystone', 0), m('flexmini05', 1), m('ucgmax1', 2), m('tiny1', 4), m('sbc7', 6)], nextId: n };
 }
 function load() {
@@ -42,6 +43,7 @@ function load() {
 }
 function save() { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {} }
 const HEX = /^#[0-9a-f]{6}$/i;
+const FAN_DIRS = ['intake', 'exhaust', 'cross'];
 const own = (o, k) => typeof k === 'string' && Object.prototype.hasOwnProperty.call(o, k);
 const okU = u => typeof u === 'number' && u >= 0.5 && u <= 10 && Number.isInteger(u * 2);
 function cleanParams(p) {
@@ -58,6 +60,8 @@ function sanitize() {
   if (!Number.isInteger(state.h) || state.h < 1 || state.h > 10) state.h = d.h;
   if (state.version !== 'bolted') state.version = 'brass';
   if (state.back !== 'closed') state.back = 'open';
+  if (!(typeof state.room === 'number' && state.room >= 10 && state.room <= 40)) state.room = 25; // °C in the room, for the cooling estimate
+  state.room = Math.round(state.room);
   if (state.sides !== 'acrylic') state.sides = 'printed';
   for (const k of ['frame', 'panel', 'accent']) if (!HEX.test(state[k])) state[k] = d[k];
   state.label = typeof state.label === 'string' ? state.label.slice(0, 16) : d.label;
@@ -72,6 +76,7 @@ function sanitize() {
     if (i.key === 'custom') { i.name = String(i.name || 'Own device').slice(0, 40); if (typeof i.url !== 'string' || !/^https:\/\//.test(i.url)) delete i.url; }
     if (i.label != null && typeof i.label !== 'string') delete i.label;
     if (i.watts != null && !(typeof i.watts === 'number' && i.watts >= 0 && i.watts <= 500)) delete i.watts;
+    if (i.dir != null && !FAN_DIRS.includes(i.dir)) delete i.dir;
     if (i.pos2 != null && !Number.isInteger(i.pos2)) i.pos2 = 0;
     if (!Number.isInteger(i.id) || i.id < 1 || ids.has(i.id)) i.id = null; else ids.add(i.id);
   });
@@ -79,6 +84,9 @@ function sanitize() {
   state.items.forEach(i => { if (i.id == null) i.id = state.nextId++; });
   if (state.top && !(own(LIB, state.top) && LIB[state.top].top)) state.top = null;
   state.extras = (Array.isArray(state.extras) ? state.extras : []).filter(k => own(LIB, k) && LIB[k].extra);
+  if (!FAN_DIRS.includes(state.topDir)) state.topDir = null;
+  const xd = state.xdir && typeof state.xdir === 'object' ? state.xdir : {}; state.xdir = {};
+  state.extras.forEach(k => { if (FAN_DIRS.includes(xd[k])) state.xdir[k] = xd[k]; });
   if (!state.done || typeof state.done !== 'object') state.done = {};
   // older layouts could place whole-U panels on a half U, and a shared link could overlap parts; move them onto free slots
   byPos().forEach(i => { const p = i.pos2; i.pos2 = null; i.pos2 = isFree(p, H(i), i.id) ? p : nearest(p, H(i), i.id); });
@@ -215,9 +223,11 @@ const inRack = key => placed().filter(i => i.key === key).length;
 function rowHTML(key, name, sub, extra) {
   const d = LIB[key], on = (d.top && state.top === key) || (d.extra && state.extras.includes(key)), n = d.top || d.extra ? 0 : inRack(key);
   const badge = d.top ? (on ? '✓ on top' : 'Top') : d.extra ? (on ? '✓ added' : 'Add') : uTxt(d);
+  const hw = heatOf({ key }), kind = d.top ? 'top' : d.extra ? 'extra' : 'item', fan = cfmOf(d) ? fanChip(d, dirFor(d, null, fanPlace(d, kind), kind)) : '';
+  if (cfmOf(d)) sub = (sub ? sub + ' · ' : '') + fanLine(d);
   return '<div class="lrow-wrap"><button type="button" class="lrow' + (on || n ? ' on' : '') + '" draggable="' + !(d.top || d.extra) + '" data-act="lib" data-key="' + key + '" title="' + esc(fullName(d)) + (d.author ? ' · by ' + esc(d.author) : '') + '">' +
     '<span class="lthumb">' + miniThumb(d) + '</span><span class="ltx"><b>' + esc(name) + '</b>' + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span>' +
-    (n ? '<span class="inrack" title="In your rack">' + n + '×</span>' : '') + '<span class="badge' + (d.est ? ' est' : '') + '"' + (d.est ? ' title="Height estimated; check the model"' : '') + '>' + badge + '</span></button>' +
+    (n ? '<span class="inrack" title="In your rack">' + n + '×</span>' : '') + fan + wChip(hw.w, hw.est) + '<span class="badge' + (d.est ? ' est' : '') + '"' + (d.est ? ' title="Height estimated; check the model"' : '') + '>' + badge + '</span></button>' +
     (extra || '') + (d.url ? '<a class="lext" href="' + esc(d.url) + '" target="_blank" rel="noopener" aria-label="Open model page for ' + esc(fullName(d)) + '" title="Open model page">↗</a>' : '') + '</div>';
 }
 const mountSub = m => m.label + (m.labrax && !/lab ?rax/i.test(m.label) ? ' · Lab Rax' : '') + (m.author ? ' · ' + m.author : '');
@@ -271,7 +281,8 @@ function renderLib() {
 function renderRack() {
   if (!CAT) return;
   const host = $('#stage'); if (!host) return;
-  const avail = host.clientWidth - 24 - 34 - 60;
+  const air = view === 'air' ? airflow() : null;
+  const avail = host.clientWidth - 24 - 34 - 60 - (air ? 56 : 0); // the Airflow view needs room on the right for the temperature scale
   const s = Math.max(.66, Math.min(1.3, avail / 274));
   const UPX = P.U * s, HU = UPX / 2, postW = 26 * s, bayW = 222 * s, frameW = bayW + 2 * postW, bodyH = state.h * UPX;
   const edge = Math.max(10, 14 * s), topH = Math.max(24, 36 * s), holeIn = (236.525 - 222) / 2 * s; // hole centre 7.26 mm from the inner edge
@@ -286,32 +297,31 @@ function renderRack() {
   for (let i = 0; i < state.h; i++) labels += '<span style="top:' + (i * UPX).toFixed(1) + 'px;height:' + UPX.toFixed(1) + 'px">' + (state.h - i) + '</span>';
   const inset = (137 - P.PANEL_W / 2) * s; // printed panels are 250 mm wide, the frame 274 mm across the posts
   let items = '';
-  const air = view === 'air' ? airflow() : null, hm = air ? heatMap(air) : null;
   byPos().forEach(it => {
     // no text on the panels, so the faces show what is placed; the name is in the tooltip and the aria-label
     const d = info(it), c = colorOf(it);
-    items += '<div class="item' + (it.id === sel ? ' sel' : '') + (hm ? ' heat' : '') + '" data-id="' + it.id + '" role="button" tabindex="0" aria-label="' + esc((it.label ? it.label + ': ' : '') + fullName(d) + ', ' + uTxt(d) + ', ' + uRange(it.pos2, d.h2)) + '"' +
-      ' style="top:' + (it.pos2 * HU).toFixed(1) + 'px;height:' + (d.h2 * HU - 1).toFixed(1) + 'px;left:' + inset.toFixed(1) + 'px;right:' + inset.toFixed(1) + 'px;padding:0 ' + (5 * s).toFixed(1) + 'px;--c:' + c + ';--hole:' + holeFor(c) + (hm ? ';--heat:' + heatColor(hm.get(it.id)) : '') + '">' +
+    items += '<div class="item' + (it.id === sel ? ' sel' : '') + '" data-id="' + it.id + '" role="button" tabindex="0" aria-label="' + esc((it.label ? it.label + ': ' : '') + fullName(d) + ', ' + uTxt(d) + ', ' + uRange(it.pos2, d.h2)) + '"' +
+      ' style="top:' + (it.pos2 * HU).toFixed(1) + 'px;height:' + (d.h2 * HU - 1).toFixed(1) + 'px;left:' + inset.toFixed(1) + 'px;right:' + inset.toFixed(1) + 'px;padding:0 ' + (5 * s).toFixed(1) + 'px;--c:' + c + ';--hole:' + holeFor(c) + '">' +
       '<i class="screw"></i><span class="face">' + faceHTML(d.face) + '</span><i class="screw"></i></div>';
   });
   const ap = state.top ? '<span class="ap" title="' + esc(fullName(LIB[state.top])) + '"><i class="disc"></i><i class="leg" style="left:30%"></i><i class="leg" style="right:30%"></i></span>' : '';
   const marginTop = Math.round(state.top ? Math.max(66 * s, frameW * .12 + 6) : frameW * .12 + 6);
   $('#rackHost').innerHTML =
-    '<div class="rack' + (state.version === 'brass' ? ' brass' : '') + '" id="rack" style="--frame:' + state.frame + ';--acc:' + state.accent + ';--bev:' + (20 * s).toFixed(1) + 'px;--hs:' + Math.max(3.5, 5 * s).toFixed(1) + 'px;grid-template-columns:34px ' + frameW.toFixed(1) + 'px 34px;grid-template-rows:' + topH.toFixed(1) + 'px ' + bodyH.toFixed(1) + 'px ' + edge + 'px auto;margin-top:' + marginTop + 'px">' +
+    '<div class="rack' + (state.version === 'brass' ? ' brass' : '') + (air ? ' airv' : '') + '" id="rack" style="--frame:' + state.frame + ';--acc:' + state.accent + ';--bev:' + (20 * s).toFixed(1) + 'px;--hs:' + Math.max(3.5, 5 * s).toFixed(1) + 'px;grid-template-columns:34px ' + frameW.toFixed(1) + 'px ' + (air ? 90 : 34) + 'px;grid-template-rows:' + topH.toFixed(1) + 'px ' + bodyH.toFixed(1) + 'px ' + edge + 'px auto;margin-top:' + marginTop + 'px">' +
       '<div></div><div class="edge top">' + (state.top ? '' : '<span class="tp-band" style="height:' + Math.round(7 * s) + 'px"></span>') + handleSVG(s, 'left') + handleSVG(s, 'right') + hexSVG(s) +
-        '<span class="logo" style="font-size:' + logoSize(frameW, topH).toFixed(1) + 'px">' + esc(state.label || 'Lab Rax') + '</span>' + ap + '</div><div></div>' +
+        '<span class="logo" style="font-size:' + logoSize(frameW, topH).toFixed(1) + 'px">' + esc(state.label || 'Lab Rax') + '</span>' + ap + (air ? airEnd(air, 'top') : '') + '</div><div></div>' +
       '<div class="ulab">' + labels + '</div>' +
       '<div class="rframe" style="width:' + frameW.toFixed(1) + 'px">' +
         '<div class="post" style="left:0;width:' + postW.toFixed(1) + 'px">' + holesL + '</div>' +
         '<div class="bay" style="left:' + postW.toFixed(1) + 'px;width:' + bayW.toFixed(1) + 'px"></div>' +
         '<div class="post" style="right:0;width:' + postW.toFixed(1) + 'px">' + holesR + '</div>' +
-        '<div class="mount" id="mount">' + items + '<div class="dropghost" id="ghost" hidden></div></div>' +
-      '</div><div></div>' +
-      '<div></div><div class="edge bot"><i class="foot" style="left:3%"></i><i class="foot" style="right:3%"></i></div><div></div>' +
+        '<div class="mount" id="mount">' + items + (air ? airLayer(air, inset) : '') + '<div class="dropghost" id="ghost" hidden></div></div>' +
+      '</div>' + (air ? airSide(air) : '<div></div>') +
+      '<div></div><div class="edge bot"><i class="foot" style="left:3%"></i><i class="foot" style="right:3%"></i>' + (air ? airEnd(air, 'bottom') : '') + '</div><div></div>' +
       '<div></div><div class="floor"></div><div></div>' +
     '</div>';
-  $('#meas').textContent = air ? (air.Q ? 'Air ≈ room + ' + Math.round(air.rise) + ' °C · ' + (air.est ? '≈ ' : '') + Math.round(air.Q) + ' W · blue is cool, red is hot (air at that height)' : 'Nothing in the rack makes heat yet')
-    : '222 mm usable width · ' + (state.h * P.U).toFixed(1) + ' mm inner height · ' + state.h + 'U';
+  if (air) $('#meas').innerHTML = airLegend(air);
+  else $('#meas').textContent = '222 mm usable width · ' + (state.h * P.U).toFixed(1) + ' mm inner height · ' + state.h + 'U';
 }
 function showGhost(p, h2) {
   const g = $('#ghost'); if (!g) return;
@@ -320,12 +330,59 @@ function showGhost(p, h2) {
   g.hidden = false; g.style.top = (p * G.HU) + 'px'; g.style.height = (h2 * G.HU - 1) + 'px'; g.style.left = ins + 'px'; g.style.right = ins + 'px';
 }
 
+/* ---------- Airflow view: air temperature by height, where air comes in and goes out ---------- */
+function airLayer(a, inset) { // over the bay: a temperature wash, the in/out markers of the front openings and the neutral plane
+  const n = slots(), HU = G.HU, mid = (s0, s1) => ((s0 + s1 + 1) / 2 * HU).toFixed(1);
+  let h = '<div class="airfield" style="left:' + inset.toFixed(1) + 'px;right:' + inset.toFixed(1) + 'px;background:linear-gradient(to bottom,' + a.temp.map((t, s) => heatCSS(t - a.room) + ' ' + ((s + .5) / n * 100).toFixed(1) + '%').join(',') + ')"></div>';
+  const left = 'left:' + (inset + 16 * G.s).toFixed(1) + 'px';
+  a.parts.forEach(p => { if (p.w > 0) h += '<span class="wtag hl' + wLevel(p.w) + '" style="top:' + mid(p.it.pos2, p.it.pos2 + p.d.h2 - 1) + 'px;right:' + (inset + 16 * G.s).toFixed(1) + 'px">' + (p.est ? '≈' : '') + fmtW(p.w) + '</span>'; });
+  const mark = (s0, s1, i, o) => { if (i + o >= .5) h += '<span class="amark" style="top:' + mid(s0, s1) + 'px;' + left + '">' + (i >= .5 ? flowPill(i, 1) : '') + (o >= .5 ? flowPill(o, -1) : '') + '</span>'; };
+  a.groups.filter(g => g.kind === 'front' || g.kind === 'slot').forEach(g => mark(Math.min(...g.layers), Math.max(...g.layers), g.in, g.out));
+  a.fans.filter(f => f.place === 'front').forEach(f => mark(f.it.pos2, f.it.pos2 + f.d.h2 - 1, f.in, f.out));
+  if (a.r.neutral != null && a.Q) h += '<i class="nplane" style="left:' + inset.toFixed(1) + 'px;right:' + inset.toFixed(1) + 'px;top:' + ((1 - a.r.neutral / a.r.H) * n * HU).toFixed(1) + 'px" title="Neutral plane: below it air comes in, above it air goes out"></i>';
+  return h;
+}
+function airEnd(a, end) { // what goes in or out through the top or the bottom panel
+  let i = 0, o = 0;
+  a.groups.filter(g => g.kind === end).forEach(g => { i += g.in; o += g.out; });
+  a.fans.filter(f => f.place === 'top').forEach(f => { if (f.dir === 'cross') { if (end === 'top') o += f.out; else i += f.in; } else if (end === 'top') { i += f.in; o += f.out; } });
+  return i + o >= .5 ? '<span class="amark ' + end + '">' + (i >= .5 ? flowPill(i, 1) : '') + (o >= .5 ? flowPill(o, -1) : '') + '</span>' : '';
+}
+function airSide(a) { // right of the rack: back and side openings (in or out per height), then the air temperature with °C per U
+  const n = slots(), HU = G.HU, flows = new Array(n).fill(0);
+  a.groups.filter(g => g.kind === 'back' || g.kind === 'side').forEach(g => g.layers.forEach((s, k) => { flows[s] += g.flows[k]; }));
+  let segs = '', cells = '', labels = '';
+  for (let s = 0; s < n;) { // runs of layers where the back and sides take air in, or let it out
+    const sg = Math.abs(flows[s]) < .1 ? 0 : Math.sign(flows[s]); let e = s; while (e < n && (Math.abs(flows[e]) < .1 ? 0 : Math.sign(flows[e])) === sg) e++;
+    if (sg) { const v = flows.slice(s, e).reduce((x, y) => x + Math.abs(y), 0); segs += '<i class="bseg ' + (sg > 0 ? 'in' : 'out') + '" style="top:' + (s * HU + 1).toFixed(1) + 'px;height:' + ((e - s) * HU - 2).toFixed(1) + 'px" title="Back' + (a.groups.some(g => g.kind === 'side') ? ' and sides' : '') + ': ' + (sg > 0 ? 'in ' : 'out ') + Math.round(v) + ' m³/h">' + (e - s >= 2 ? (sg > 0 ? '↘' : '↗') : '') + '</i>'; }
+    s = e;
+  }
+  let fansAt = ''; // side and back fans: one compact marker each, right of the °C labels
+  a.fans.filter(f => f.place === 'side' || f.place === 'back').forEach(f => {
+    const c = Math.round(n / (f.place === 'back' ? 4 : 2)), cross = f.in >= .5 && f.out >= .5, v = Math.max(f.in, f.out);
+    fansAt += '<span class="fpill sidefan ' + (cross ? 'both' : f.in >= f.out ? 'in' : 'out') + '" style="top:' + (c * HU).toFixed(1) + 'px">' + (cross ? '⇄ ' : f.in >= f.out ? '↘ ' : '↗ ') + Math.round(v) + '</span>';
+  });
+  a.temp.forEach((t, s) => { cells += '<i style="top:' + (s * HU).toFixed(1) + 'px;height:' + (HU + .6).toFixed(1) + 'px;background:' + heatCSS(t - a.room) + '"></i>'; });
+  for (let u = 0; u < state.h; u++) { const t = (a.temp[2 * u] + a.temp[2 * u + 1]) / 2; labels += '<span' + (t > RATED[1] ? ' class="over" title="Above 40 °C"' : '') + ' style="top:' + ((u + .5) * G.UPX).toFixed(1) + 'px">' + (t > 60 ? '60+' : Math.round(t)) + '°' + (t > RATED[1] ? '!' : '') + '</span>'; }
+  return '<div class="airside"><div class="bk" aria-hidden="true">' + segs + '</div><div class="therm" aria-hidden="true">' + cells + '</div><div class="tlab">' + labels + '</div>' + fansAt + '</div>';
+}
+function airLegend(a) {
+  return '<span class="lg-line">' + (a.Q ? 'Hottest air ≈ ' + fmtT(a.maxT) + ' · ' + (a.est ? '≈ ' : '') + fmtW(a.Q) + ' · ' : 'Nothing makes heat yet · ') + fmtF(a.flow) + ' through the rack · room ' + a.room + ' °C</span>' +
+    '<span class="lg-line"><span class="lg-scale">' + a.room + '°<i style="background:linear-gradient(to right,' + [0, 1, 2, 3, 4, 5, 6].map(i => 'var(--h' + i + ')').join(',') + ')"></i>' + (a.room + HEAT_SPAN) + '°+</span>' +
+    '<span><span class="fpill in">↘ in</span> <span class="fpill out">↗ out</span> m³/h</span><span class="lg-np">neutral plane</span><span>estimate</span></span>';
+}
+
 /* ---------- hover tooltip: what a part is, without text on the panels ---------- */
 function tipHTML(it) {
-  const d = info(it), hw = heatOf(it);
+  const d = info(it), hw = heatOf(it), a = view === 'air' ? airflow() : null;
+  const p = a && a.parts.find(x => x.it.id === it.id), f = a && a.fans.find(x => x.it && x.it.id === it.id), g = a && a.groups.find(x => x.it && x.it.id === it.id);
+  const flow = x => [x.in >= .5 ? 'in ' + fmtF(x.in) : '', x.out >= .5 ? 'out ' + fmtF(x.out) : ''].filter(Boolean).join(', ') || 'still';
   return '<b>' + esc(it.label || d.name) + '</b>' +
     (it.label ? '<span>' + esc(fullName(d)) + '</span>' : d.label ? '<span>' + esc(d.label) + '</span>' : '') +
-    '<span class="mono">' + uTxt(d) + ' · ' + uRange(it.pos2, d.h2) + (hw.w ? ' · ' + (hw.est ? '≈ ' : '') + hw.w + ' W' : '') + '</span>' + (d.author ? '<span>by ' + esc(d.author) + '</span>' : '');
+    '<span class="mono">' + uTxt(d) + ' · ' + uRange(it.pos2, d.h2) + (hw.w ? ' · ' + (hw.est ? '≈ ' : '') + fmtW(hw.w) : '') + '</span>' +
+    (p ? '<span class="mono">Air here ≈ ' + fmtT(p.T) + (hw.w ? '' : ' · no heat') + '</span>' : '') +
+    (cfmOf(d) ? '<span class="mono">' + esc(fanLine(d)) + '</span>' : '') + (f ? '<span class="mono">' + (f.dir === 'intake' ? 'Blows in' : 'Blows out') + ': ' + flow(f) + '</span>' : '') +
+    (g ? '<span class="mono">Vents: ' + flow(g) + '</span>' : '') + (d.author ? '<span>by ' + esc(d.author) + '</span>' : '');
 }
 function showTip(id, x, y) {
   const it = find(id), t = $('#tip');
@@ -345,7 +402,8 @@ function renderSel() {
   const d = info(it), auto = heatOf(Object.assign({}, it, { watts: undefined }));
   bar.innerHTML = '<div class="who"><b>' + esc(fullName(d)) + '</b><span class="hint">' + uTxt(d) + ' · ' + uRange(it.pos2, d.h2) + (d.author ? ' · by ' + esc(d.author) : '') + '</span></div>' +
     '<input class="field" id="sel-label" type="text" maxlength="24" aria-label="Label on the panel" placeholder="Label, e.g. Pi 5" value="' + esc(it.label || '') + '">' +
-    '<label class="watts" title="Heat this part gives off, for the airflow estimate">Heat <input class="field" id="sel-watts" type="number" min="0" max="500" step="1" inputmode="numeric" placeholder="' + (auto.w ? (auto.est ? '≈' : '') + auto.w : '0') + '" value="' + (typeof it.watts === 'number' ? it.watts : '') + '"> W</label>' +
+    '<label class="watts" title="Heat this part gives off, for the cooling estimate. Empty: ' + (auto.w ? (auto.est ? 'about ' : '') + fmtW(auto.w) + ', its typical draw' : 'no heat') + '">Heat <input class="field" id="sel-watts" type="number" min="0" max="500" step="1" inputmode="numeric" placeholder="' + (auto.w ? (auto.est ? '≈' : '') + auto.w : '0') + '" value="' + (typeof it.watts === 'number' ? it.watts : '') + '"> W</label>' +
+    (cfmOf(d) ? '<span class="watts" title="' + esc(fanLine(d)) + '">Fans ' + dirSeg({ ref: 'i' + it.id, d, place: 'front', kind: 'item', dir: dirFor(d, it.dir, 'front', 'item'), name: fullName(d) }) + '</span>' : '') +
     '<button type="button" class="btn small" data-act="up" aria-label="Move up">↑</button><button type="button" class="btn small" data-act="down" aria-label="Move down">↓</button>' +
     (it.key === 'gen' ? '<button type="button" class="btn small" data-act="edit-gen" data-id="' + it.id + '">Edit part</button>' : d.url ? '<a class="btn small" href="' + esc(d.url) + '" target="_blank" rel="noopener" style="text-decoration:none;color:inherit">Model ↗</a>' : '') +
     '<button type="button" class="btn small" data-act="dup">Duplicate</button><button type="button" class="btn small danger" data-act="del">Remove</button>' +
@@ -447,124 +505,210 @@ function orderList() {
 const JOINER_NOTE = 'Above 5U the posts are joined. How the post joiners are fastened isn’t confirmed yet, so their screws aren’t counted; check the extension model page.';
 
 /* ---------- airflow ---------- */
-/* An estimate, not a simulation. Heat per part comes from what you entered, the catalog ("watts") or a rule of thumb per kind of device.
-   Air needed:    V = Q / (ρ·cp·ΔT), with ρ·cp of air ≈ 1.2 kg/m³ × 1005 J/(kg·K).
-   Natural flow:  the open back acts as one tall opening, V = Cd/3 · W · √(g·H³·ΔT/T). Openings high up (front, top, sides) add
-                  chimney flow, V = Cd · A · √(2·g·h·ΔT/T), with the low openings (front, sides, lower half of an open back) in series.
-   Fans:          60 % of the rated flow, for grilles and back pressure. Walls: about 4 W/(m²·K) through the panels.
-   Solving Q = ΔT · (ρ·cp · (V_fans + k·√ΔT) + U·A) gives how much warmer the air in the rack gets than the room. */
-const AIR = { rhoCp: 1.2 * 1005, g: 9.81, T: 298, cd: .6, wall: 4, target: 10, cfm: 0.000471947, fan: { fan40: 5, fan80: 25, fan92: 35, fan120: 40, fan140: 55 } };
-const FAN_MM = { 40: 5, 80: 25, 92: 35, 120: 40, 140: 55, 180: 80, 200: 90 };
-const HEAT_RULES = [ // tested on the device name and mount label; the first match wins
-  [/power supply|\bpsu\b|brick|charger/i, 5],
-  [/mini-itx|\bitx\b/i, 60], [/mac (mini|studio)/i, 15],
-  [/cluster|blade|for \d+ (boards|pis?)|\d+ ?pis\b/i, t => 5 * (+(t.match(/(\d+)\s*(?:×\s*)?(?:boards|pis?\b|raspberry)/i) || [])[1] || 6)],
-  [/tiny|elitedesk|prodesk|elite mini|optiplex|micro\b|nuc|minisforum|ms-0|beelink|gmktec|mini pc|zimacube/i, 25],
-  [/raspberry|\bpi\b|zero|zimab|orange pi|rock ?pi|\bsbc\b|arduino|jetson/i, 6],
-  [/hdd|3\.5|2\.5|drive|disk|easystore/i, t => 6 * (+(t.match(/(\d+)\s*(?:×|x\b|-bay|-tray| bays?| trays?)/i) || [])[1] || 2)],
-  [/unvr|unas|\bnas\b|synology|terramaster|qnap|asustor/i, 30],
-  [/ucg-max|uxg|ucg-fiber|udr|dream/i, 20], [/poe/i, 20],
-  [/ucg-ultra|express|ux7|cloud key|router|er605|er7|edgerouter|rb5009|firewalla|protectli|slate|beryl|flint|\bhex\b|\bhap\b|gateway/i, 10],
-  [/modem|fritz|arris|motorola|\bont\b|surfboard|starlink/i, 10],
-  [/home assistant|zigbee|hue|dirigera|hdhomerun|kvm|comet|tuner/i, 5],
-  [/usw|switch|gs\d|sg\d|tl-s|css\d|crs\d|zyxel|cisco|netgear|omada|flex|ugreen/i, 8]
-];
-function heatOf(it) {
-  if (typeof it.watts === 'number') return { w: it.watts, est: false };
+/* An estimate from typical power use and simple physics; airflow.js holds the model and its assumptions. Here the rack is
+   described for it: heat per ½U layer, the openings (open slots, vent panels, an open back, a mesh top, vented sides and the
+   seams between panels), the fans with their rated flow and direction, and the walls. */
+const RATED = [35, 40];                             // hottest air up to 35 °C is cool, up to 40 °C warm; most gear is rated for 0–40 °C
+const HEAT_SPAN = 25;                               // the colour scale runs from room temperature to 25 °C above it
+const BAY_W = .222, RACK_D = .24, SIDE_D = .17;     // m: width between the posts, rack depth, side panel depth
+const TOP_A = .216 * .176;                          // m², the opening of the top panel
+const DIR_BTN = { intake: 'In', exhaust: 'Out', cross: 'In + out' };
+const fmtT = t => t > 60 ? '60+ °C' : Math.round(t) + ' °C'; // past 60 °C the exact figure means little: gear shuts down long before
+const fmtF = v => Math.round(v) + ' m³/h';
+const fmtW = w => (w < 10 && w % 1 ? w.toFixed(1) : Math.round(w)) + ' W';
+function heatOf(it) { // { w, est }: what the builder entered, else the catalog, else a guess for own parts
+  if (typeof it.watts === 'number') return { w: it.watts, est: false, own: true };
   const d = info(it);
-  if (typeof d.watts === 'number') return { w: d.watts, est: false };
+  if (typeof d.watts === 'number') return { w: d.watts, est: !!d.wattsEst };
   if (it.key === 'gen') return it.params.type === 'shelf' ? { w: 10, est: true } : { w: 0, est: false };
-  if (d.custom) return { w: 10, est: true };
-  const t = d.name + ' ' + (d.label || '');
-  if (d.tab === 'panels') { const w = /\bpsu\b|power supply|charger|usb-c pd/i.test(t) ? 10 : /display|lcd|screen|oled|cyd|nextion/i.test(t) ? 3 : 0; return { w, est: w > 0 }; }
-  for (const [re, w] of HEAT_RULES) if (re.test(t)) return { w: typeof w === 'function' ? w(t) : w, est: true };
-  return { w: { drv2: 12, drv4: 24, sbc: 25, switch: 8 }[d.face] || 10, est: true };
+  return d.custom ? { w: 10, est: true } : { w: 0, est: false };
 }
-function fansOf(d) { // rated flow in CFM, from the part's hardware or else from its name
-  let c = 0; (d.hardware || []).forEach(x => { if (AIR.fan[x.part]) c += AIR.fan[x.part] * x.qty; });
-  const t = d.name + ' ' + (d.label || '');
-  if (!c && /fan/i.test(t) && !/controller/i.test(t)) { const m = t.match(/(40|80|92|120|140|180|200) ?mm/); c = m ? FAN_MM[m[1]] : 20; }
-  return c;
+// fans a part holds, from its hardware: [{ mm, cfm, pa, qty }], rated at full speed in free air
+const fanSpecs = d => (d && d.hardware || []).filter(x => CAT.hardware[x.part] && CAT.hardware[x.part].cfm).map(x => Object.assign({ qty: x.qty }, CAT.hardware[x.part]));
+const cfmOf = d => fanSpecs(d).reduce((n, f) => n + f.cfm * f.qty, 0);
+const toM3h = cfm => cfm * 1.699;
+function fanLine(d) { const c = cfmOf(d); return fanSpecs(d).map(f => (f.qty > 1 ? f.qty + '× ' : '') + f.mm + ' mm').join(' + ') + ' · ' + Math.round(c) + ' CFM · ' + fmtF(toM3h(c)); }
+// where a part's fans sit and which way they blow: the builder's choice, else the catalog's, else in at the front and sides, out at the top and back.
+// A pair in an extra can also go one in, one out: across the side panels, or in at the bottom and out at the top.
+const fanPlace = (d, kind) => kind === 'item' ? 'front' : kind === 'top' ? 'top' : d.fanAt || d.at || 'side';
+const canCross = (d, place, kind) => kind === 'extra' && (place === 'side' || place === 'top') && fanSpecs(d).reduce((n, f) => n + f.qty, 0) >= 2;
+function dirFor(d, chosen, place, kind) {
+  const ok = v => v === 'intake' || v === 'exhaust' || (v === 'cross' && canCross(d, place, kind));
+  return ok(chosen) ? chosen : ok(d.fanDir) ? d.fanDir : place === 'top' || place === 'back' ? 'exhaust' : 'intake';
 }
-function airflow() {
-  const W = .222, Hm = state.h * P.U / 1000, mid = slots() / 2, parts = [], open = [];
-  let Q = 0, est = false, cfm = 0, low = 0, high = 0;
-  const area = (p2, h2, a) => { for (let s = p2; s < p2 + h2; s++) { if (s >= mid) low += a / h2; else high += a / h2; } }; // pos2 counts from the top
-  byPos().forEach(it => {
-    const d = info(it), h = heatOf(it), face = it.key === 'gen' ? genFace(it.params) : d.face, ph = d.h2 * P.U / 2 - P.CLEAR;
-    Q += h.w; if (h.est && h.w) est = true;
-    parts.push({ it, w: h.w, est: h.est });
-    if (face === 'vent') area(it.pos2, d.h2, .2 * Math.max(0, ph - 13) / 1000 * (it.key === 'gen' ? .5 : .4));
-    if (face === 'fan' || (d.hardware || []).some(x => AIR.fan[x.part])) cfm += fansOf(d);
-  });
-  for (let s = 0; s < slots(); s++) if (!placed().some(o => s >= o.pos2 && s < o.pos2 + H(o))) { open.push(s); area(s, 1, W * P.U / 2000); }
-  const top = state.top ? LIB[state.top] : null, tt = top ? fullName(top) : '';
-  let topA = 0;
-  let fanHole = 0; // a fan top's own opening, which can't also be the inlet for that fan
-  if (top) { cfm += fansOf(top); topA = .216 * .176 * (/mesh|hex|vent/i.test(tt) ? .45 : /fan/i.test(tt) ? .1 : 0); if (fansOf(top) && !/mesh|hex|vent/i.test(tt)) fanHole = topA; }
-  high += topA;
-  state.extras.map(k => LIB[k]).filter(x => /side/i.test(x.name + ' ' + (x.label || ''))).forEach(x => {
-    const t = x.name + ' ' + (x.label || '');
-    if (/fan/i.test(t)) cfm += fansOf(x) * (/left \+ right|both/i.test(t) ? 2 : 1);
-    else if (/vent|hex|mesh|kumiko|pattern|generator|honeycomb/i.test(t)) { low += .3 * .2 * Hm; high += .3 * .2 * Hm; }
-  });
-  const back = state.back !== 'closed';
-  let k = back ? AIR.cd / 3 * W * Math.sqrt(AIR.g * Hm ** 3 / AIR.T) : 0;
-  const inlet = low + (back ? W * Hm / 2 : 0); // with high openings, the lower half of an open back feeds the chimney too
-  if (inlet > 0 && high > 0) k += AIR.cd / Math.sqrt(1 / inlet ** 2 + 1 / high ** 2) * Math.sqrt(2 * AIR.g * (topA ? .8 : .5) * Hm / AIR.T);
-  // fans need somewhere for air to come from: without other openings only the gaps between panels leak a little
-  const vf = cfm * .6 * AIR.cfm * (back || low + high - fanHole > .002 ? 1 : .15), ua = AIR.wall * (2 * (Hm + .05) * .24 + 2 * .28 * .24 + .28 * (Hm + .05));
-  let lo = 0, hi = 120;
-  for (let i = 0; i < 50; i++) { const m = (lo + hi) / 2; if (m * (AIR.rhoCp * (vf + k * Math.sqrt(m)) + ua) < Q) lo = m; else hi = m; }
-  return { Q, est, rise: Q ? (lo + hi) / 2 : 0, need: Q / (AIR.rhoCp * AIR.target), passive: k * Math.sqrt(AIR.target), vf, cfm, open, parts, back };
-}
-function heatMap(a) { // air temperature rise at each part's height: the air warms as it rises past the heat below it
-  const m = new Map(); let cum = 0;
-  [...a.parts].sort((x, y) => y.it.pos2 - x.it.pos2).forEach(p => { cum += p.w / 2; m.set(p.it.id, a.Q ? a.rise * (.4 + 1.2 * cum / a.Q) : 0); cum += p.w / 2; });
-  return m;
-}
-const heatColor = t => 'hsl(' + Math.round(Math.max(0, 200 - 10 * t)) + ' 85% 52%)';
-// what the rise would be after a change; only top, back and the items list are touched, and they are put back
-function predict(change) { const keep = { top: state.top, back: state.back, items: state.items.slice() }; change(); const r = airflow().rise; Object.assign(state, keep); return r; }
-const blankKeys = () => LIB.mw13855411 && LIB.mw1385541 ? ['mw13855411', 'mw1385541'] : ['vent1', 'vent05'];
-function airTips(a) {
-  if (!a.Q) return [{ text: 'Nothing in the rack makes heat yet.' }];
-  const tips = [], warm = a.rise > 8, fans = a.cfm > 0;
-  const lowest = h2 => { for (let p = slots() - h2; p >= 0; p--) if (isFree(p, h2)) return p; return null; };
-  if (warm && !state.top && LIB.mw1875867) tips.push({ text: 'Put a 120 mm fan in the top panel, blowing out: warm air rises, so it leaves fastest there.', act: 'air-top', key: 'mw1875867', label: 'Use fan top', r: predict(() => { state.top = 'mw1875867'; }) });
-  if (warm && !fans && LIB.fan40) { const p = lowest(2); if (p != null) tips.push({ text: 'Add a 5× 40 mm fan panel low in the rack, blowing in, at ' + uRange(p, 2) + '.', act: 'air-add', key: 'fan40', pos: p, label: 'Add fan panel', r: predict(() => { state.items.push({ id: -1, key: 'fan40', pos2: p }); }) }); }
-  if (warm && !state.top && LIB.mw1896816) tips.push({ text: 'Or swap the solid top panel for a hex mesh top, so warm air can rise out without a fan.', act: 'air-top', key: 'mw1896816', label: 'Use mesh top', r: predict(() => { state.top = 'mw1896816'; }) });
-  if (warm && !a.back) tips.push({ text: 'Leave the back open: with a closed back only the panels let air through.', act: 'air-back', v: 'open', label: 'Open back', r: predict(() => { state.back = 'open'; }) });
-  const ps = a.parts.slice().sort((x, y) => x.it.pos2 - y.it.pos2), nm = p => p.it.label || shortName(info(p.it));
-  for (let i = 0; i + 1 < ps.length; i++) { const x = ps[i], y = ps[i + 1]; if (x.w >= 15 && y.w >= 15 && x.it.pos2 + H(x.it) === y.it.pos2) tips.push({ text: 'There is no gap between ' + nm(x) + ' and ' + nm(y) + ', and both run warm. Leave ½U between them, ideally with a vent panel.' }); }
-  ps.filter(p => /drv/.test(info(p.it).face || '') || /hdd|3\.5″|drive|disk/i.test(fullName(info(p.it)))).forEach(dp => {
-    const below = ps.find(p => p !== dp && p.w >= 15 && p.it.pos2 > dp.it.pos2);
-    if (below) tips.push({ text: 'Drives last longer when they stay cool: move ' + nm(dp) + ' below ' + nm(below) + ', where the air is cooler.' });
-  });
-  if (a.open.length) {
-    const where = 'open ' + fmtU(a.open.length);
-    if (fans) tips.push({ text: 'Close the ' + where + ' with blank panels: with fans running, open gaps let the air go around the gear instead of through it.', act: 'air-blank', label: 'Fill with blanks' });
-    else if (warm) tips.push({ text: 'Keep the ' + where + ' breathing: fill it with vent panels rather than blanks.', act: 'fill', label: 'Fill with vents' });
-    else if (a.rise < 5) tips.push({ text: 'Cooling has room to spare, so you can close the ' + where + ' with blank panels for a tidy front.', act: 'air-blank', label: 'Fill with blanks' });
-  }
-  if (a.parts.some(p => p.est && /poe/i.test(fullName(info(p.it))))) tips.push({ text: 'A PoE switch also warms up from the power it sends to your devices. Set its real heat once you know the load.' });
-  const out = tips.filter(t => t.r == null || t.r < a.rise - .5); // only suggest changes that help
-  if (!out.length) out.push({ text: a.rise > 15 ? 'This rack runs hot: add fans or more openings.' : 'Cooling looks fine for this layout.' });
+const dirText = (dir, place) => dir === 'intake' ? 'blows in' : dir === 'exhaust' ? 'blows out' : place === 'top' ? 'blows in at the bottom and out at the top' : 'blows in on one side and out on the other';
+function fanParts() { // every part in the rack with fans
+  const out = [], add = (ref, d, kind, chosen, name, it) => { const place = fanPlace(d, kind); out.push({ ref, d, it, kind, place, dir: dirFor(d, chosen, place, kind), name, where: it ? uRange(it.pos2, d.h2) : place === 'side' ? 'sides' : place }); };
+  byPos().forEach(it => { const d = info(it); if (cfmOf(d)) add('i' + it.id, d, 'item', it.dir, it.label || fullName(d), it); });
+  if (state.top && cfmOf(LIB[state.top])) add('top', LIB[state.top], 'top', state.topDir, fullName(LIB[state.top]));
+  state.extras.forEach(k => { if (cfmOf(LIB[k])) add('x' + k, LIB[k], 'extra', state.xdir[k], fullName(LIB[k])); });
   return out;
 }
-function airParts() { // the Airflow section: a one-line summary and the details
-  const a = airflow(), tips = airTips(a), m3h = v => Math.round(v * 3600) + ' m³/h';
-  const lvl = !a.Q ? ['No heat', ''] : a.rise <= 8 ? ['Cool', ''] : a.rise <= 15 ? ['Warm', ' est'] : ['Hot', ' hot'];
-  const acts = tips.filter(t => t.act).length;
-  const sum = '<span class="badge' + lvl[1] + '">' + lvl[0] + '</span>' + (a.Q ? '<span>room + ' + (a.rise >= 60 ? '60+' : Math.round(a.rise)) + ' °C</span>' : '') + (acts ? '<span class="muted">' + acts + (acts > 1 ? ' tips' : ' tip') + '</span>' : '');
-  const body = '<dl class="kv"><dt>Heat</dt><dd>' + (a.est ? '≈ ' : '') + Math.round(a.Q) + ' W</dd>' +
-    '<dt>Air needed for +' + AIR.target + ' °C</dt><dd>' + m3h(a.need) + '</dd>' +
-    '<dt>Natural airflow at +' + AIR.target + ' °C</dt><dd>' + m3h(a.passive) + '</dd>' +
-    '<dt>Fans</dt><dd>' + (a.cfm ? m3h(a.vf) : 'none') + '</dd>' +
-    '<dt>Back of the rack</dt><dd><span class="seg small" role="group" aria-label="Back of the rack">' + [['open', 'Open'], ['closed', 'Closed']].map(([v, l]) => '<button type="button" data-act="air-back" data-v="' + v + '" aria-pressed="' + (state.back === v) + '">' + l + '</button>').join('') + '</span></dd></dl>' +
-    '<ul class="tips">' + tips.map(t => '<li><span>' + esc(t.text) + (t.r != null ? ' <em>→ about +' + Math.round(t.r) + ' °C</em>' : '') + '</span>' +
-      (t.act ? '<button type="button" class="btn small" data-act="' + t.act + '"' + (t.key ? ' data-key="' + t.key + '"' : '') + (t.pos != null ? ' data-pos="' + t.pos + '"' : '') + (t.v ? ' data-v="' + t.v + '"' : '') + '>' + t.label + '</button>' : '') + '</li>').join('') + '</ul>' +
-    '<p class="hint">An estimate from typical power use and rough physics. Click a part to enter its real heat; the Airflow view colours the rack by air temperature.</p>';
+// reassigns rather than edits, so predict() can put the old values back
+function setFanDir(ref, v) {
+  if (ref === 'top') state.topDir = v;
+  else if (ref[0] === 'x') state.xdir = Object.assign({}, state.xdir, { [ref.slice(1)]: v });
+  else state.items = state.items.map(i => 'i' + i.id === ref ? Object.assign({}, i, { dir: v }) : i);
+}
+function frontVent(it, d) { // m² of free area in a part's front plate
+  const ph = d.h2 * P.U / 2 - P.CLEAR; // plate height in mm
+  if (it.key === 'gen') {
+    const p = it.params, m = d.h2 === 1 ? 4.5 : 6.5;
+    if (p.type === 'vent') return (p.pattern === 'hex' ? .64 : .55) * 196 * Math.max(0, ph - 2 * m) / 1e6; // matches parts.js
+    if (p.type === 'shelf' && p.open !== false) return .2 * Math.min(p.dw, 212) * Math.min(p.dh, ph) / 1e6;  // the device fills most of the cut-out
+    return 0;
+  }
+  if (d.vent) return d.vent * 200 * ph / 1e6;
+  return d.face === 'vent' ? .4 * 200 * Math.max(0, ph - 13) / 1e6 : 0; // slots over 200 mm, a 6.5 mm rim, 40 % open
+}
+function rackModel() {
+  const K = window.LRAir.K, n = slots(), dz = P.U / 2000, heat = new Array(n).fill(0), ua = new Array(n).fill(0);
+  const openings = [], fans = [], groups = [], parts = [], occ = new Array(n).fill(null);
+  const group = (kind, name, where, extra) => { const g = Object.assign({ kind, name, where, ids: [], area: 0, layers: [] }, extra); groups.push(g); return g; };
+  const hole = (g, area, layer, at) => { const id = 'o' + openings.length; openings.push(at ? { id, at, area } : { id, layer, area }); g.ids.push(id); g.area += area; if (!at) g.layers.push(layer); };
+  byPos().forEach(it => {
+    const d = info(it), h = heatOf(it), lay = [];
+    for (let s = it.pos2; s < Math.min(n, it.pos2 + d.h2); s++) { lay.push(s); occ[s] = it; }
+    lay.forEach(s => { heat[s] += h.w / lay.length; });
+    parts.push({ it, d, w: h.w, est: h.est, own: !!h.own, layers: lay });
+    const area = frontVent(it, d);
+    if (area > 0) { const g = group('front', it.label || fullName(d), uRange(it.pos2, d.h2), { it }); lay.forEach(s => hole(g, area / lay.length, s)); }
+  });
+  for (let s = 0; s < n;) { // open slots, one group per run
+    if (occ[s]) { s++; continue; }
+    let e = s; while (e < n && !occ[e]) e++;
+    const g = group('slot', 'Open ' + fmtU(e - s), uRange(s, e - s)); for (let k = s; k < e; k++) hole(g, BAY_W * dz, k);
+    s = e;
+  }
+  const back = state.back !== 'closed', top = state.top ? LIB[state.top] : null, topVent = top && top.vent || 0;
+  if (back) { const g = group('back', 'Open back', 'back'); for (let s = 0; s < n; s++) hole(g, BAY_W * dz, s); }
+  if (topVent) hole(group('top', fullName(top), 'top'), TOP_A * topVent, 0, 'top');
+  state.extras.forEach(k => { const d = LIB[k]; if (d.at === 'side' && d.vent) { const g = group('side', fullName(d), 'both sides'); for (let s = 0; s < n; s++) hole(g, 2 * SIDE_D * dz * d.vent, s); } });
+  const seams = group('seams', 'Seams between panels', 'everywhere');
+  for (let s = 0; s < n; s++) hole(seams, K.leak, s);
+  hole(seams, K.leakTB, 0, 'top'); hole(seams, K.leakTB, 0, 'bottom');
+  const fp = fanParts();
+  fp.forEach(f => {
+    let layers;
+    if (f.place === 'front') { const lay = [], end = Math.min(n, f.it.pos2 + f.d.h2); for (let s = f.it.pos2; s < end; s++) lay.push(s); layers = lay.map(s => ({ layer: s, share: 1 / lay.length })); }
+    else if (f.place === 'top') layers = [{ at: 'top', share: 1 }];
+    else { // side fans sit halfway up, back fans in the upper part; a fan covers as many ½U layers as it is wide
+      const mm = Math.max(...fanSpecs(f.d).map(x => x.mm)), c = Math.max(1, Math.min(n, Math.round(mm / 1000 / dz)));
+      const s0 = Math.max(0, Math.min(n - c, Math.round((f.place === 'back' ? n / 4 : n / 2) - c / 2)));
+      layers = []; for (let s = s0; s < s0 + c; s++) layers.push({ layer: s, share: 1 / c });
+    }
+    f.ids = [];
+    fanSpecs(f.d).forEach((x, k) => {
+      const ins = f.dir === 'cross' ? Math.ceil(x.qty / 2) : f.dir === 'intake' ? x.qty : 0;
+      [[ins, 1], [x.qty - ins, -1]].forEach(([q, dir], j) => {
+        if (!q) return;
+        const id = f.ref + ':' + k + ':' + j, at = f.dir === 'cross' && f.place === 'top' && dir > 0 ? [{ at: 'bottom', share: 1 }] : layers; // a top + bottom pair takes air in at the bottom
+        f.ids.push(id); fans.push({ id, cfm: x.cfm * q, pa: x.pa, mm: x.mm, dir, layers: at });
+      });
+    });
+  });
+  for (let s = 0; s < n; s++) ua[s] = K.uWall * dz * (2 * RACK_D + (occ[s] ? BAY_W : 0) + (back ? 0 : BAY_W)); // sides, panels, a closed back
+  ua[0] += K.uWall * BAY_W * RACK_D * (1 - topVent); ua[n - 1] += K.uWall * BAY_W * RACK_D;            // top and bottom panel
+  return { model: { n, dz, room: state.room, heat, ua, openings, fans }, groups, parts, fp };
+}
+const airMemo = new Map();
+function airflow() {
+  const sig = JSON.stringify([state.h, state.items.map(i => [i.key, i.pos2, i.watts, i.dir, i.params]), state.top, state.topDir, state.extras, state.xdir, state.back, state.room]);
+  if (airMemo.has(sig)) return airMemo.get(sig);
+  const m = rackModel(), r = window.LRAir.solve(m.model), flow = {};
+  r.openings.forEach(o => { flow[o.id] = o.flow; }); r.fans.forEach(f => { flow[f.id] = f.flow; });
+  const sum = ids => ids.reduce((s, id) => { const v = flow[id] || 0; if (v > 0) s.in += v; else s.out -= v; return s; }, { in: 0, out: 0 });
+  m.groups.forEach(g => { Object.assign(g, sum(g.ids)); g.flows = g.ids.map(id => flow[id] || 0); });
+  m.fp.forEach(f => Object.assign(f, sum(f.ids), { rated: toM3h(cfmOf(f.d)) }));
+  m.parts.forEach(p => { const t = p.layers.map(s => r.temp[s]); p.T = t.length ? t.reduce((x, y) => x + y, 0) / t.length : r.room; });
+  const a = { Q: r.Q, est: m.parts.some(p => p.est && p.w > 0), r, room: r.room, temp: r.temp, maxT: r.maxT, rise: r.maxT - r.room, flow: r.flow, exhaustT: r.exhaustT,
+    cfm: m.fp.reduce((n, f) => n + cfmOf(f.d), 0), parts: m.parts, groups: m.groups, fans: m.fp, back: state.back !== 'closed',
+    openU: m.groups.filter(g => g.kind === 'slot').reduce((n, g) => n + g.layers.length, 0) };
+  if (airMemo.size > 100) airMemo.clear();
+  airMemo.set(sig, a);
+  return a;
+}
+const airLevel = a => !a.Q ? ['No heat', ''] : a.maxT <= RATED[0] ? ['Cool', ''] : a.maxT <= RATED[1] ? ['Warm', ' est'] : ['Hot', ' hot'];
+// the airflow after a change; change() only reassigns fields of state (never edits an item in place), so they can be put back
+function predict(change) {
+  const keep = {}; ['h', 'top', 'topDir', 'back', 'items', 'extras', 'xdir'].forEach(k => { keep[k] = state[k]; });
+  try { change(); return airflow(); } finally { Object.assign(state, keep); }
+}
+function fillInto(k1, k05) { // every open slot filled, on a copy of the items list
+  state.items = state.items.slice(); let id = -1;
+  for (let p = 0; p < slots();) { if (isFree(p, 2)) { state.items.push({ id: id--, key: k1, pos2: p }); p += 2; } else if (isFree(p, 1)) { state.items.push({ id: id--, key: k05, pos2: p }); p += 1; } else p++; }
+}
+const blankKeys = () => LIB.mw13855411 && LIB.mw1385541 ? ['mw13855411', 'mw1385541'] : ['vent1', 'vent05'];
+function airTips(a) {
+  if (!a.Q) return [];
+  const tips = [], warm = a.maxT > RATED[0], fans = a.cfm > 0, nm = p => p.it.label || shortName(p.d);
+  const test = (text, change, btn) => tips.push(Object.assign({ text, after: predict(change) }, btn));
+  if (warm && !state.top && LIB.mw1875867) test('Put a 120 mm fan in the top panel, blowing out. Warm air collects at the top, so it leaves fastest there.', () => { state.top = 'mw1875867'; state.topDir = null; }, { act: 'air-top', key: 'mw1875867', label: 'Use fan top' });
+  if (warm && !state.top && LIB.mw1896816) test('Swap the solid top panel for a hex mesh top, so warm air can rise out without a fan.', () => { state.top = 'mw1896816'; }, { act: 'air-top', key: 'mw1896816', label: 'Use mesh top' });
+  if (warm && !fans && LIB.fan40) { const p = lowestFree(2); if (p != null) test('Add a 5× 40 mm fan panel low in the rack, at ' + uRange(p, 2) + ', blowing in.', () => { state.items = state.items.concat({ id: -1, key: 'fan40', pos2: p }); }, { act: 'air-add', key: 'fan40', pos: p, label: 'Add fan panel' }); }
+  if (warm && !a.back) test('Open the back. With a closed back the air only gets in and out through the panels and their seams.', () => { state.back = 'open'; }, { act: 'air-back', v: 'open', label: 'Open back' });
+  a.fans.forEach(f => { if (f.dir === 'cross') return; const v = f.dir === 'intake' ? 'exhaust' : 'intake'; test('Turn ' + f.name + ' around, so it ' + dirText(v, f.place) + '.', () => setFanDir(f.ref, v), { act: 'fan-dir', ref: f.ref, v, label: 'Turn around' }); });
+  if (fans && a.openU) test('Close the open ' + fmtU(a.openU) + ' with blank panels, so the fans pull air through the gear instead of around it.', () => fillInto(...blankKeys()), { act: 'air-blank', label: 'Fill with blanks' });
+  const out = tips.filter(t => t.after.maxT < a.maxT - 1).sort((x, y) => x.after.maxT - y.after.maxT); // only changes that help, best first
+  if (!fans && a.openU) {
+    const v = predict(() => fillInto('vent1', 'vent05')), b = predict(() => fillInto(...blankKeys()));
+    if (b.maxT - v.maxT >= 1) out.push({ text: 'Closing the open ' + fmtU(a.openU) + ' for a tidy front? With vent panels the hottest air would be about ' + fmtT(v.maxT) + ', with blank panels ' + fmtT(b.maxT) + '.', act: 'fill', label: 'Fill with vents' });
+  }
+  const ps = a.parts.slice().sort((x, y) => x.it.pos2 - y.it.pos2);
+  for (let i = 0; i + 1 < ps.length; i++) { const x = ps[i], y = ps[i + 1]; if (x.w >= 15 && y.w >= 15 && x.it.pos2 + x.d.h2 === y.it.pos2) out.push({ text: nm(x) + ' and ' + nm(y) + ' both run warm and sit right against each other. A ½U vent panel between them lets each get its own air; the estimate can’t see that difference.' }); }
+  ps.filter(p => /drv/.test(p.d.face || '') || /storage/i.test(p.d.group || '')).forEach(p => {
+    const below = a.temp.slice(Math.max(...p.layers) + 1), cool = below.length ? Math.min(...below) : Infinity, where = nm(p) + ' (' + uRange(p.it.pos2, p.d.h2) + ')';
+    if (p.T - cool >= 3) out.push({ text: 'Drives last longer when they stay well under 40 °C. ' + where + ' sit in air of about ' + fmtT(p.T) + '; lower in the rack it is about ' + fmtT(cool) + '.' });
+    else if (p.T > RATED[1]) out.push({ text: 'Drives last longer when they stay well under 40 °C, and ' + where + ' sit in air of about ' + fmtT(p.T) + '. Cool the rack first; the changes above help most.' });
+  });
+  if (a.parts.some(p => /poe/i.test(fullName(p.d)) && !p.own)) out.push({ text: 'A PoE switch’s heat here is its own draw. Its power supply also turns roughly 10 % of the power it sends out over PoE into heat; add that once you know the load.' });
+  if (!out.length) out.push({ text: a.maxT > RATED[1] ? 'This rack runs hot: add fans or more openings.' : 'Cooling looks fine for this layout.' });
+  return out;
+}
+
+/* colours: air temperature and heat on one warm scale, --h0 (room temperature) to --h6 (25 °C above it) */
+function heatCSS(dT) {
+  const p = Math.max(0, Math.min(1, dT / HEAT_SPAN)) * 6, i = Math.min(5, Math.floor(p)), f = p - i;
+  return 'color-mix(in oklab, var(--h' + i + ') ' + Math.round((1 - f) * 100) + '%, var(--h' + (i + 1) + '))';
+}
+const wLevel = w => [4, 8, 15, 30, 60].filter(x => w >= x).length + 1;
+const wChip = (w, est) => w > 0 ? '<span class="wchip hl' + wLevel(w) + '" title="' + (est ? 'Typical heat, estimated' : 'Typical heat') + '">' + (est ? '≈' : '') + fmtW(w) + '</span>' : '';
+const flowPill = (v, dir) => '<span class="fpill ' + (dir > 0 ? 'in' : 'out') + '">' + (dir > 0 ? '↘ in ' : '↗ out ') + Math.round(v) + '</span>';
+const fanChip = (d, dir) => '<span class="fchip" title="' + esc(fanLine(d)) + '">' + (dir === 'exhaust' ? '↗ out ' : dir === 'intake' ? '↘ in ' : '⇅ in + out ') + Math.round(toM3h(cfmOf(d))) + ' m³/h</span>';
+function dirSeg(f) {
+  const opts = ['intake', 'exhaust'].concat(canCross(f.d, f.place, f.kind) ? ['cross'] : []);
+  return '<span class="seg small" role="group" aria-label="Which way ' + esc(f.name) + ' blows">' + opts.map(v => '<button type="button" data-act="fan-dir" data-ref="' + f.ref + '" data-v="' + v + '" aria-pressed="' + (f.dir === v) + '">' + DIR_BTN[v] + '</button>').join('') + '</span>';
+}
+function airParts() { // the Cooling section: a one-line summary and the breakdown
+  const a = airflow(), lvl = airLevel(a), tips = airTips(a), acts = tips.filter(t => t.after).length;
+  const sub = (id, title, n, list, dflt) => '<details class="abd" data-sec="' + id + '"' + ((ui.sec[id] == null ? dflt : ui.sec[id]) ? ' open' : '') + '><summary>' + title + ' <span class="muted">' + n + '</span></summary>' + list + '</details>';
+  const row = (name, sub, right) => '<li class="arow"><span class="an"><b>' + esc(name) + '</b>' + (sub ? '<small>' + sub + '</small>' : '') + '</span>' + right + '</li>';
+  const sum = '<span class="badge' + lvl[1] + '">' + lvl[0] + '</span>' + (a.Q ? '<span>hottest air ≈ ' + fmtT(a.maxT) + '</span>' : '') + '<span class="muted">' + fmtF(a.flow) + '</span>' + (acts ? '<span class="muted">' + acts + (acts > 1 ? ' tips' : ' tip') + '</span>' : '');
+  let body = '<dl class="kv">' +
+    '<dt><label for="air-room">Room temperature</label></dt><dd><input class="field mini" id="air-room" type="number" min="10" max="40" step="1" inputmode="numeric" value="' + a.room + '"> °C</dd>' +
+    '<dt>Heat in the rack</dt><dd>' + (a.est ? '≈ ' : '') + fmtW(a.Q) + '</dd>' +
+    '<dt>Hottest air</dt><dd>' + (a.Q ? '≈ ' + fmtT(a.maxT) : '–') + '</dd>' +
+    '<dt>Air through the rack</dt><dd>' + fmtF(a.flow) + ' · ' + Math.round(a.flow / 1.699) + ' CFM</dd>' +
+    (a.Q ? '<dt>Air leaving the rack</dt><dd>≈ ' + fmtT(a.exhaustT) + '</dd>' +
+      '<dt>Heat out with the air · through the walls</dt><dd>' + Math.round(a.r.toAir) + ' · ' + Math.round(a.r.toWalls) + ' W</dd>' : '') +
+    '<dt>Back of the rack</dt><dd><span class="seg small" role="group" aria-label="Back of the rack">' + [['open', 'Open'], ['closed', 'Closed']].map(([v, l]) => '<button type="button" data-act="air-back" data-v="' + v + '" aria-pressed="' + (state.back === v) + '">' + l + '</button>').join('') + '</span></dd></dl>';
+  const src = a.parts.filter(p => p.w > 0).sort((x, y) => y.w - x.w);
+  if (src.length) body += sub('air-src', 'Heat sources', src.length + ' · ' + (a.est ? '≈ ' : '') + fmtW(a.Q), '<ul>' +
+    src.map(p => row(p.it.label || fullName(p.d), uRange(p.it.pos2, p.d.h2) + (p.own ? ' · your value' : ''), wChip(p.w, p.est) + '<span class="at" title="Air at this height">' + fmtT(p.T) + '</span>')).join('') + '</ul>', false);
+  if (a.fans.length) body += sub('air-fans', 'Fans', a.fans.length + ' · ' + fmtF(a.fans.reduce((n, f) => n + f.in + f.out, 0)) + ' moved', '<ul>' +
+    a.fans.map(f => row(f.name, esc(f.where) + ' · ' + esc(fanLine(f.d)), dirSeg(f) + '<span class="at" title="Air it moves here, in m³/h; rated ' + Math.round(f.rated) + ' m³/h in free air">' + Math.round(f.in + f.out) + '</span>')).join('') + '</ul>', true);
+  const og = a.groups.filter(g => g.kind !== 'seams' || Math.max(g.in, g.out) >= .5);
+  body += sub('air-open', 'Openings', og.length, '<ul>' +
+    og.map(g => row(g.name, esc(g.where) + ' · ' + Math.round(g.area * 1e4) + ' cm² open', '<span class="fl">' + (g.in >= .5 ? flowPill(g.in, 1) : '') + (g.out >= .5 ? flowPill(g.out, -1) : '') + (g.in < .5 && g.out < .5 ? '<span class="muted">still</span>' : '') + '</span>')).join('') + '</ul>' +
+    '<p class="hint">Flows in m³/h. Without fans, warm air rises: low openings take air in and high ones let it out.</p>', false);
+  if (a.Q) body += '<ul class="tips">' + tips.map(t => '<li><span>' + esc(t.text) + (t.after ? '<em>Hottest air ' + fmtT(a.maxT) + ' → ' + fmtT(t.after.maxT) + ' · air through ' + fmtF(a.flow) + ' → ' + fmtF(t.after.flow) + '</em>' : '') + '</span>' +
+    (t.act ? '<button type="button" class="btn small" data-act="' + t.act + '"' + (t.key ? ' data-key="' + t.key + '"' : '') + (t.ref ? ' data-ref="' + t.ref + '"' : '') + (t.pos != null ? ' data-pos="' + t.pos + '"' : '') + (t.v ? ' data-v="' + t.v + '"' : '') + '>' + t.label + '</button>' : '') + '</li>').join('') + '</ul>';
+  body += sub('air-how', 'How the estimate works', '', '<ul class="notes">' +
+    '<li>Heat is each part’s typical draw, from spec sheets and measurements; ≈ marks an estimate. Click a part to enter its real value.</li>' +
+    '<li>Warm air is lighter and rises (the stack effect): low openings take air in, high ones let it out, and an open back does both. The dashed line in the Airflow view is where in turns into out.</li>' +
+    '<li>Fans follow their rated flow and pressure, minus 15 % for the grille, and work against whatever the openings allow.</li>' +
+    '<li>The rack is split into ½U layers. The air carries heat upward, warm air under cool air turns over, and about 4 W per m² per °C leaks through the walls.</li>' +
+    '<li>Not included: the devices’ own fans, draughts in the room and sun on the rack. The temperatures are of the air around the parts, not of the parts themselves.</li></ul>', false);
   return { sum, body };
 }
 
@@ -577,13 +721,17 @@ function renderBuild() {
   const pk = printPack(), done = pk.filter(x => state.done[x.k]).length, count = placed().length + (state.top ? 1 : 0);
   let html = '<div><h2 class="title">Your build</h2><span class="muted">' + h + 'U · ' + count + (count === 1 ? ' part · ' : ' parts · ') + (free ? fmtU(free) + ' open' : 'no open slots') + '</span></div>';
 
+  const rowAir = {}, ra = url => rowAir[url] || (rowAir[url] = { w: 0, est: false, fans: [] }); // heat and fans per model page
+  byPos().forEach(i => { const d = info(i), hw = heatOf(i); if (d.url && hw.w) { const r = ra(d.url); r.w += hw.w; r.est = r.est || hw.est; } });
+  airflow().fans.forEach(f => { if (f.d.url) ra(f.d.url).fans.push(f); });
+  const airChips = url => { const r = url && rowAir[url]; return r ? '<span class="pchips">' + wChip(r.w, r.est) + r.fans.map(f => fanChip(f.d, f.dir)).join('') + '</span>' : ''; };
   html += sec('print', 'Print list', '<span>' + done + ' of ' + pk.length + ' printed</span><span class="minibar" aria-hidden="true"><i style="width:' + (pk.length ? done / pk.length * 100 : 0) + '%"></i></span>',
     '<ul class="plist">' + pk.map(x => {
       const ok = !!state.done[x.k];
       return '<li class="prow"><button type="button" class="tick" data-act="done" data-k="' + esc(x.k) + '" aria-pressed="' + ok + '" aria-label="Mark ' + esc(x.name) + ' as printed">' +
         (ok ? '<svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="var(--accent)" stroke-width="2.2" aria-hidden="true"><path d="M4 9.5l3.2 3L14 5.5"/></svg>'
             : '<svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="var(--muted)" stroke-width="1.7" aria-hidden="true"><path d="M9 3v9M5 8.5l4 4 4-4M4 15h10"/></svg>') + '</button>' +
-        '<span class="tx"><b>' + esc(x.name) + '</b>' + (x.variants ? '<small>Variants: ' + esc(x.variants) + '</small>' : '') + '<small>' + esc(x.subs.join(', ')) + '</small></span>' + (x.qty > 1 ? '<span class="q">' + x.qty + '×</span>' : '') +
+        '<span class="tx"><b>' + esc(x.name) + '</b>' + (x.variants ? '<small>Variants: ' + esc(x.variants) + '</small>' : '') + '<small>' + esc(x.subs.join(', ')) + '</small>' + airChips(x.url) + '</span>' + (x.qty > 1 ? '<span class="q">' + x.qty + '×</span>' : '') +
         (x.url ? '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">Open</a>' : '<span class="badge">STL</span>') + '</li>';
     }).join('') + '</ul>' +
     (pk.missing ? '<p class="hint">' + pk.missing + ' own device' + (pk.missing > 1 ? 's' : '') + ' without a link.</p>' : '') +
@@ -591,7 +739,7 @@ function renderBuild() {
     '<p class="hint">Download community models from MakerWorld as 3MF to keep their print profiles. Your build pack has the custom parts and a download list to click through the rest.</p>');
 
   const air = airParts();
-  html += sec('air', 'Airflow', air.sum, air.body);
+  html += sec('air', 'Cooling', air.sum, air.body);
 
   const ol = orderList(), tagged = CAT.shops && CAT.shops.amazon && CAT.shops.amazon.en && CAT.shops.amazon.en.tag;
   html += sec('shop', 'Shopping list', '<span>' + ol.length + (ol.length === 1 ? ' item' : ' items') + '</span>', '<dl class="kv">' +
@@ -624,7 +772,11 @@ function listText() {
   L.push('', 'Print pack'); printPack().forEach(x => L.push('- ' + x.qty + '× ' + x.name + (x.variants ? ' (' + x.variants + ')' : '') + (x.url ? '  ' + x.url : '  (custom STL in build pack)')));
   L.push('', 'Shopping list'); orderList().forEach(x => L.push('- ' + (x.qty == null ? 'unknown number of ' + x.name.toLowerCase() + ' (not confirmed; ' + x.check + ')' : x.qty + '× ' + x.name)));
   const a = airflow();
-  if (a.Q) { L.push('', 'Airflow (estimate)', '- Heat: ' + (a.est ? '≈ ' : '') + Math.round(a.Q) + ' W; air in the rack ≈ room + ' + Math.round(a.rise) + ' °C'); airTips(a).forEach(t => L.push('- ' + t.text)); }
+  if (a.Q) {
+    L.push('', 'Cooling (estimate, room ' + a.room + ' °C)', '- Heat: ' + (a.est ? '≈ ' : '') + fmtW(a.Q) + ' · air through the rack ' + fmtF(a.flow) + ' · hottest air ≈ ' + fmtT(a.maxT));
+    a.fans.forEach(f => L.push('- Fan: ' + f.name + ', ' + fanLine(f.d) + ', ' + dirText(f.dir, f.place)));
+    airTips(a).forEach(t => L.push('- ' + t.text + (t.after ? ' (hottest air ' + fmtT(a.maxT) + ' → ' + fmtT(t.after.maxT) + ')' : '')));
+  }
   return L.join('\n');
 }
 function csv(rows) { return '﻿' + rows.map(r => r.map(v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(',')).join('\n'); }
@@ -810,8 +962,8 @@ function planLayout(w) {
   try {
     placed().forEach(i => { if (i.pos2 + H(i) > slots()) i.pos2 = null; }); // more than 10U: these wait below the rack
     let a = airflow();
-    if (w.fans === 'auto' && a.rise > 8 && LIB.mw1875867) { state.top = 'mw1875867'; a = airflow(); }
-    if (w.fans !== 'none' && a.rise > 15 && LIB.fan40) {
+    if (w.fans === 'auto' && a.maxT > RATED[0] && LIB.mw1875867) { state.top = 'mw1875867'; a = airflow(); }
+    if (w.fans !== 'none' && a.maxT > RATED[1] && LIB.fan40) {
       if (lowestFree(2) == null && state.h < 10) state.h++;
       const q = lowestFree(2); if (q != null) { state.items.push({ id: state.nextId++, key: 'fan40', pos2: q }); a = airflow(); }
     }
@@ -876,10 +1028,10 @@ function renderWizard() {
     '<label><input type="checkbox" id="wz-power"' + (wz.power ? ' checked' : '') + '> Power strip at the bottom (1U PDU)</label>' +
     '<label>Room to grow <select id="wz-spare">' + [0, 1, 2].map(n => '<option value="' + n + '"' + (wz.spare === n ? ' selected' : '') + '>' + (n ? n + 'U' : 'none') + '</option>').join('') + '</select></label></div>';
   else {
-    const r = planLayout(wz), a = r.a, lvl = !a.Q ? 'no heat' : a.rise <= 8 ? 'cool' : a.rise <= 15 ? 'warm' : 'hot', s = r.state;
+    const r = planLayout(wz), a = r.a, lvl = airLevel(a)[0].toLowerCase(), s = r.state;
     body = '<h3 class="wz-h">Your rack</h3><div class="wz-result">' + miniRack(s) + '<div class="wz-sum">' +
       '<p><b>' + s.h + 'U</b> · ' + s.items.filter(i => i.pos2 != null).length + ' parts · ' + (s.version === 'brass' ? 'heat-set inserts' : 'bolted') + ' · ' + s.sides + ' sides</p>' +
-      (a.Q ? '<p>Air in the rack ≈ room + ' + Math.round(a.rise) + ' °C (' + lvl + ')' + (s.top ? ', with a 120 mm fan in the top' : '') + (s.items.some(i => i.key === 'fan40') ? ' and a fan panel' : '') + '.</p>' : '') +
+      (a.Q ? '<p>Hottest air ≈ ' + fmtT(a.maxT) + ' in a ' + a.room + ' °C room (' + lvl + ')' + (s.top ? ', with a 120 mm fan in the top' : '') + (s.items.some(i => i.key === 'fan40') ? ' and a fan panel' : '') + '.</p>' : '') +
       (r.unplaced ? '<p class="wz-warn">' + r.unplaced + (r.unplaced > 1 ? ' parts don’t' : ' part doesn’t') + ' fit in 10U. Take some hardware out, or place them later.</p>' : '') +
       (wz.picks.length ? '' : '<p class="wz-warn">No hardware picked, so this is an empty frame with panels.</p>') +
       '<ul class="wz-list">' + wz.picks.map(p => { const d = LIB[p.mount]; return '<li>' + (p.qty > 1 ? p.qty + '× ' : '') + esc(fullName(d)) + ' <span class="muted">' + uTxt(d) + '</span>' + (d.url ? ' <a href="' + esc(d.url) + '" target="_blank" rel="noopener">↗</a>' : '') + '</li>'; }).join('') + '</ul>' +
@@ -950,7 +1102,8 @@ document.addEventListener('click', async e => {
     case 'wz-create': wzCreate(); break;
     case 'air-blank': fillGaps(blankKeys(), 'blank panel'); break;
     case 'air-add': addItem({ key: a.dataset.key }, +a.dataset.pos); break;
-    case 'air-top': if (LIB[a.dataset.key]) { state.top = a.dataset.key; touch(); render(); renderLib(); say(fullName(LIB[a.dataset.key]) + ' now sits on top of the rack.'); } break;
+    case 'fan-dir': if (FAN_DIRS.includes(a.dataset.v)) { setFanDir(a.dataset.ref, a.dataset.v); touch(); render(); hideTip(); } break;
+    case 'air-top': if (LIB[a.dataset.key]) { state.top = a.dataset.key; state.topDir = null; touch(); render(); renderLib(); say(fullName(LIB[a.dataset.key]) + ' now sits on top of the rack.'); } break;
     case 'air-back': state.back = a.dataset.v === 'closed' ? 'closed' : 'open'; touch(); render(); break;
     case 'clear': undo = JSON.stringify(state); state.items = []; state.top = null; state.extras = []; sel = null; touch(); render(); renderLib(); say('Rack cleared.', true); break;
     case 'undo': if (undo) { state = JSON.parse(undo); undo = null; render(); renderLib(); say('Restored.'); } break;
@@ -1004,8 +1157,9 @@ document.addEventListener('change', e => {
   if (t.id === 'wz-patch' || t.id === 'wz-power') { wz[t.id.slice(3)] = t.checked; return; }
   if (t.id === 'wz-spare') { wz.spare = +t.value; return; }
   if (t.classList.contains('wz-mount')) { wz.picks[+t.dataset.i].mount = t.value; return; }
+  if (t.id === 'air-room') { const v = Math.round(+t.value); if (v >= 10 && v <= 40) { state.room = v; render(); } else t.value = state.room; return; }
   if (e.target.id === 'sel-color') { render(); return; } if (e.target.id === 'mk-type' || e.target.id === 'mk-u' || e.target.id === 'mk-pattern') { if (e.target.id === 'mk-type') mkOptions(null); mkPreview(); } });
-document.addEventListener('toggle', e => { const d = e.target; if (d.matches && d.matches('details.sec')) { ui.sec[d.dataset.sec] = d.open; saveUI(); } }, true);
+document.addEventListener('toggle', e => { const d = e.target; if (d.matches && d.matches('details.sec, details.abd')) { ui.sec[d.dataset.sec] = d.open; saveUI(); } }, true);
 document.addEventListener('focusout', e => { if (e.target.id === 'rack-name') renderSettings(); });
 
 const host = $('#rackHost');

@@ -7,12 +7,12 @@ Plan your 3D-printed [Lab Rax](https://the-diy-life.com/introducing-lab-rax-a-3d
 - **Pick from ~500 community parts**: device mounts (UniFi, TP-Link, MikroTik, Netgear, Zyxel, mini PCs, thin clients, firewall boxes, Mac mini, Raspberry Pi, Mini-ITX, NAS and drive bays…), panels (power, keystone and D-type patch panels, fans, shelves), top mounts and frame mods, each linked to its model page.
 - **Lay it out** at real scale. Whole-U panels snap to the hole pattern; ½U panels fit either half of a U.
 - **Look around in 3D**, and load your own downloaded STL or 3MF files onto a part to see them in place. Those files never leave your browser.
-- **Check the airflow**: an estimate of the heat in the rack and how warm the air inside gets, with suggestions for fans, vent panels, a mesh top or blank panels, each with its expected effect. The Airflow view colours the rack from cool to hot; enter a part's real watts for a better estimate.
+- **Check the cooling**: every part has its typical heat in watts and every fan its rated flow. The planner estimates the air temperature at each height and the airflow through the rack, shows where air comes in and goes out, and suggests fans, a mesh top, an open back or other changes with their effect (hottest air before → after). You can turn each fan around and enter a part's real watts. See [Cooling estimate](#cooling-estimate).
 - **Make custom parts**: blank, vent (slots or hexagons), keystone and label panels, and a shelf sized to your device. They export as STL, ready to print without supports: panels and shelves face-down, label plates face-up.
 - **Download a build pack**: one ZIP with your custom STL files, a PDF build plan, a download list to click through the community models, a print list with links and a shopping list.
 - Light and dark theme. Your layout is saved in your browser; share it with a link (Share link in Your build).
 
-It is a static site with no build step: `index.html`, `app.js`, `parts.js`, `view3d.js`, `pdf.js` and `catalog.json`. three.js r128 and jsPDF 2.5.1 load from cdnjs/jsDelivr when the 3D view or PDF export is first used.
+It is a static site with no build step: `index.html`, `app.js`, `parts.js`, `view3d.js`, `pdf.js`, `airflow.js` and `catalog.json`. three.js r128 and jsPDF 2.5.1 load from cdnjs/jsDelivr when the 3D view or PDF export is first used.
 
 ## Run it locally
 
@@ -45,6 +45,17 @@ Settings → Pages → Deploy from a branch → `main` / root.
 | Keystone cut-out | 14.9 × 16.4 mm in a 2 mm plate | module face 14.5 × 16.0 mm |
 
 The 3D frame follows the photos in the Lab Rax article: bevelled top and bottom rings with mitred corners, the hex grille and logo on the front bevel, arched handles, posts with inserts and tinted side panels. Ring sizes, post section, handles and feet are estimates. They live in `FRAME` at the top of `view3d.js`; correct them there when you measure the original files (keep downloaded model files in `reference/`, which git ignores).
+
+## Cooling estimate
+
+`airflow.js` estimates how warm the air in the rack gets. It is a quick physical model, not CFD, so treat the numbers as a guide.
+
+- **Heat.** Each part's `watts` in `catalog.json` is its typical draw in a home lab under light load, from spec sheets and wall-meter measurements. A switch counts its own draw, not its PoE budget, and a power supply only its losses. ≈ marks an estimate. A part's own value always wins.
+- **Layers.** The rack is split into ½U layers, each with one air temperature. Air that comes in through an opening is at room temperature (25 °C unless you change it).
+- **Stack effect.** Warm air is lighter, so the pressure inside rises faster with height than outside. Low openings take air in, high ones let it out. An open back does both, split at the neutral plane (the dashed line in the Airflow view). Openings follow orifice flow with a discharge coefficient of 0.6, and the seams between panels leak a little.
+- **Fans.** Each fan follows a straight fan curve from its rated flow and maximum static pressure, at full speed, minus 15 % for the grille. It pushes against whatever pressure the openings leave. Typical figures: 40 mm 6 CFM, 80 mm 30, 92 mm 40, 120 mm 52, 140 mm 75, 200 mm 86 CFM (1 CFM = 1.7 m³/h).
+- **Heat balance.** In every layer the parts' heat is carried off by the air flowing through it. Warm air under cooler air turns over and mixes upward, warm air above cooler air stays put, and about 4 W per m² per °C leaks through the printed walls. Pressure and temperature depend on each other, so the model solves them in turn until they settle.
+- **Not included.** The devices' own fans (which usually help), draughts and air conditioning in the room, sunlight, and how hot a device runs inside. The temperatures are of the air around the parts. Most network gear and mini PCs are rated for air up to 40 °C, so the planner calls a rack cool up to 35 °C, warm up to 40 °C and hot above that.
 
 ## Add a device, mount or part
 
