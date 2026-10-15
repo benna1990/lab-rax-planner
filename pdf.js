@@ -16,10 +16,14 @@ const lum = c => { const [r, g, b] = hex(c); return .2126 * r + .7152 * g + .072
 
 async function make(d) {
   const JsPDF = await load();
-  const doc = new JsPDF({ unit: 'mm', format: 'a4' }), W = 210, M = 16;
+  const doc = new JsPDF({ unit: 'mm', format: 'a4' }), W = 210, M = 16, BOT = 297 - M; // BOT: lowest baseline for content
   const ink = [22, 24, 27], muted = [106, 111, 118], line = [218, 221, 216], green = [23, 130, 74];
-  const text = (s, x, y, o) => doc.text(clean(s), x, y, o);
+  const text = (s, x, y, o) => doc.text(Array.isArray(s) ? s.map(clean) : clean(s), x, y, o); // arrays are wrapped lines
+  const wrap = (s, w) => doc.splitTextToSize(clean(s), w);
   const head = (s, y) => { doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...ink); text(s, M, y); doc.setDrawColor(...line); doc.line(M, y + 2, W - M, y + 2); return y + 8; };
+  const page = () => { doc.addPage(); return M + 4; };
+  // measure a block before drawing it, and start a new page when it doesn't fit
+  const fit = (y, h) => y + h > BOT ? page() : y;
 
   // ---- page 1: title, rack drawing, layout ----
   doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.setTextColor(...ink); text('Lab Rax build plan', M, M + 6);
@@ -50,53 +54,75 @@ async function make(d) {
   const dimX = x0 + fw + 4; doc.line(dimX, by, dimX, by + bodyH); doc.line(dimX - 1.2, by, dimX + 1.2, by); doc.line(dimX - 1.2, by + bodyH, dimX + 1.2, by + bodyH);
   text((d.h * U).toFixed(1) + ' mm', dimX + 2, by + bodyH / 2, { angle: 90 });
 
-  // layout table to the right
-  const tx = x0 + fw + 16; let y = top + 2;
+  // layout table to the right; when it runs past the page it continues full width on the next one
+  let tx = x0 + fw + 16, tw = W - M - tx - 14, y = top + 2;
   doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...ink); text('Layout, top to bottom', tx, y); y += 6;
   doc.setFontSize(8.5);
-  if (d.top) { doc.setFont('helvetica', 'bold'); text('Top', tx, y); doc.setFont('helvetica', 'normal'); text(doc.splitTextToSize(clean(d.top), W - M - tx - 14), tx + 14, y); y += 6; }
-  for (const it of d.items) {
-    doc.setFont('helvetica', 'bold'); doc.setTextColor(...ink); text(it.pos, tx, y);
-    doc.setFont('helvetica', 'normal');
-    const lines = doc.splitTextToSize(clean((it.label ? '[' + it.label + '] ' : '') + it.name + ' (' + it.u + ')'), W - M - tx - 14);
-    text(lines, tx + 14, y); y += lines.length * 3.8 + 2.2;
-  }
+  const row = (pos, s) => {
+    let lines = wrap(s, tw);
+    if (y + (lines.length - 1) * 3.8 > BOT) {
+      y = page(); tx = M; tw = W - 2 * M - 14;
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...ink); text('Layout, continued', tx, y); y += 6;
+      doc.setFontSize(8.5); lines = wrap(s, tw);
+    }
+    doc.setFont('helvetica', 'bold'); doc.setTextColor(...ink); text(pos, tx, y);
+    doc.setFont('helvetica', 'normal'); text(lines, tx + 14, y); y += lines.length * 3.8 + 2.2;
+  };
+  if (d.top) row('Top', d.top);
+  for (const it of d.items) row(it.pos, (it.label ? '[' + it.label + '] ' : '') + it.name + ' (' + it.u + ')');
   const used = d.items.reduce((n, i) => n + i.h2, 0), free = d.h * 2 - used;
-  if (free > 0) { doc.setTextColor(...muted); text('Open: ' + (free / 2) + 'U', tx, y); y += 6; }
+  if (free > 0) { if (y > BOT) { y = page(); tx = M; } doc.setFont('helvetica', 'normal'); doc.setTextColor(...muted); text('Open: ' + (free / 2) + 'U', tx, y); y += 6; }
 
-  let y2 = Math.max(y + 6, by + bodyH + 24);
+  // frame table below the drawing, or below the layout once that has moved to a later page
+  const fp = d.frameParts;
+  const rows = [['Vertical posts', fp.posts], fp.joiners ? ['Post joiners', '4'] : null, ['Side panels', fp.sides], ['Horizontal pieces', '4'], ['Edge pieces', '4'], ['Handles · feet', '2 · 4'],
+    ...(d.top ? [['Top', d.top], ['Bottom panel', '1']] : [['Top + bottom panel', '1 + 1']])].filter(Boolean);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+  const cells = rows.map(([a, b]) => [a, wrap(b, W - 2 * M - 40)]);
+  let y2 = doc.getNumberOfPages() > 1 ? y + 6 : Math.max(y + 6, by + bodyH + 24);
+  y2 = fit(y2, 8 + cells.reduce((n, c) => n + c[1].length * 3.8 + 1.2, 0));
   y2 = head('Frame parts', y2);
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...ink);
-  const fp = d.frameParts;
-  const rows = [['Vertical posts', fp.posts], fp.joiners ? ['Post joiners', '4'] : null, ['Side panels', fp.sides], ['Horizontal pieces', '4'], ['Edge pieces', '4'], ['Handles · feet', '2 · 4'], d.top ? ['Top', d.top] : ['Top + bottom panel', '1 + 1']].filter(Boolean);
-  for (const [a, b] of rows) { text(a, M, y2); text(b, W - M, y2, { align: 'right' }); y2 += 5; }
+  for (const [a, b] of cells) { text(a, M, y2); text(b, W - M, y2, { align: 'right' }); y2 += b.length * 3.8 + 1.2; }
 
-  // ---- page 2: print pack and shopping list ----
-  doc.addPage(); y = M + 4;
+  // ---- print pack and shopping list: on page 2, or straight on when page 1 already ran over ----
+  y = doc.getNumberOfPages() > 1 ? y2 + 6 : page();
+  const prints = d.print.map(p => {
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
+    const name = wrap((p.qty > 1 ? p.qty + '× ' : '') + p.name, W - 2 * M - 6);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+    const sub = wrap((p.vars ? 'Variants: ' + p.vars + '  ·  ' : '') + p.sub + (p.url ? '  ·  ' + p.url : '  ·  custom STL in the build pack'), W - 2 * M - 6);
+    return { p, name, sub, nameH: name.length * 3.8 + .2, h: name.length * 3.8 + .2 + (sub.length - 1) * 3.6 };
+  });
+  y = fit(y, 8 + (prints.length ? prints[0].h : 0));
   y = head('Print pack', y);
-  doc.setFontSize(9);
-  for (const p of d.print) {
-    if (y > 270) { doc.addPage(); y = M + 4; }
+  for (const { p, name, sub, nameH, h } of prints) {
+    y = fit(y, h);
     doc.setDrawColor(...muted); doc.rect(M, y - 3, 3.4, 3.4);
-    doc.setFont('helvetica', 'bold'); doc.setTextColor(...ink);
-    const name = (p.qty > 1 ? p.qty + '× ' : '') + p.name;
-    if (p.url) doc.textWithLink(clean(name), M + 6, y, { url: p.url }); else text(name, M + 6, y);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...ink); text(name, M + 6, y);
+    if (p.url) doc.link(M + 6, y - 3.2, Math.max(...name.map(l => doc.getTextWidth(l))), name.length * 3.8, { url: p.url });
     doc.setFont('helvetica', 'normal'); doc.setTextColor(...muted); doc.setFontSize(8);
-    const sub = doc.splitTextToSize(clean(p.sub + (p.url ? '  ·  ' + p.url : '  ·  custom STL in the build pack')), W - 2 * M - 6);
-    text(sub, M + 6, y + 4); y += 4 + sub.length * 3.6 + 3.2; doc.setFontSize(9);
+    text(sub, M + 6, y + nameH); y += h + 6.8;
   }
-  y += 4; y = head('Shopping list', y);
-  doc.setFontSize(9);
-  for (const s of d.shop) {
-    if (y > 278) { doc.addPage(); y = M + 4; }
-    doc.setTextColor(...ink); doc.setFont('helvetica', 'normal'); text(s.name, M, y);
-    doc.setFont('helvetica', 'bold'); text(s.qty + '×', W - M, y, { align: 'right' });
-    if (s.buy) { doc.setTextColor(...green); doc.setFont('helvetica', 'normal'); doc.textWithLink('Buy', W - M - 22, y, { url: s.buy }); }
-    y += 5.5;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+  const shops = d.shop.map(s => ({ s, name: wrap(s.name, W - 2 * M - 42) }));
+  y += 4; y = fit(y, 8 + (shops.length ? (shops[0].name.length - 1) * 3.8 : 0));
+  y = head('Shopping list', y);
+  for (const { s, name } of shops) {
+    y = fit(y, (name.length - 1) * 3.8);
+    doc.setFontSize(9); doc.setTextColor(...ink); doc.setFont('helvetica', 'normal'); text(name, M, y);
+    doc.setFont('helvetica', 'bold'); text(s.qty == null ? 'unknown' : s.qty + '×', W - M, y, { align: 'right' });
+    const link = s.buy ? ['Buy', s.buy] : s.check ? ['Check', s.check] : null;
+    if (link) { doc.setTextColor(...green); doc.setFont('helvetica', 'normal'); doc.textWithLink(link[0], W - M - 26, y, { url: link[1] }); }
+    y += (name.length - 1) * 3.8 + 5.5;
   }
-  y += 4; doc.setFontSize(8); doc.setTextColor(...muted);
-  const foot = doc.splitTextToSize('Community models belong to their makers and stay on MakerWorld under their own licenses; download them there as 3MF. Custom parts were generated by the Lab Rax Planner (MIT). Lab Rax is designed by Michael Klements.', W - 2 * M);
-  text(foot, M, Math.min(y, 282 - foot.length * 3.5));
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...muted);
+  const foot = wrap('Community models belong to their makers and stay on MakerWorld under their own licenses; download them there as 3MF. Custom parts were generated by the Lab Rax Planner (MIT). Lab Rax is designed by Michael Klements.', W - 2 * M);
+  if (d.notes && d.notes.length) foot.unshift(...d.notes.flatMap(n => wrap(n, W - 2 * M)), '');
+  y = fit(y + 4, (foot.length - 1) * 3.5);
+  text(foot, M, y);
+  const pages = doc.getNumberOfPages();
+  if (pages > 1) for (let i = 1; i <= pages; i++) { doc.setPage(i); doc.setFontSize(8); doc.setTextColor(...muted); text(i + ' / ' + pages, W - M, 297 - 8, { align: 'right' }); }
   return new Uint8Array(doc.output('arraybuffer'));
 }
 window.LRPdf = { make };
