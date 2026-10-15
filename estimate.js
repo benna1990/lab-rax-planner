@@ -2,7 +2,7 @@
 (function () {
 'use strict';
 const defaults = { currency:'EUR', kgPrice:25, kwhPrice:.30, watts:120, gramsHour:25, slicedGrams:null, slicedHours:null, prices:{}, owned:{}, filamentOwned:{} };
-const allowance = { m6x10:8,m6x12:8,insert:12,nut:5,m3x8lp:6,m25kit:8,fan40:8,fan80:10,fan92:12,fan120:12,fan140:15,fan200:20,fanusb:4,fansplit:4,usbpower:10,powerstrip:15,pi5psu:15,pi4psu:10,usbc:5,keystone:20,patch:12,ties:5 };
+const allowance = { m6x10:8,m6x12:8,insert:12,nut:5,m3x8lp:6,m25kit:8,fan40:8,fan80:10,fan92:12,fan120:12,fan140:15,fan200:20,fanusb:4,fansplit:4,usbpower:10,powerstrip:15,pi5psu:15,pi4psu:10,poehat5:30,poehat4:25,poeinj:25,poeinjbt:45,usbc:5,keystone:20,patch:12,ties:5 };
 function settings(raw) {
  const r=raw&&typeof raw==='object'?raw:{}, o={...defaults,prices:{}, owned:{}, filamentOwned:{}};
  o.currency=['EUR','USD','GBP','CAD','AUD'].includes(r.currency)?r.currency:'EUR';

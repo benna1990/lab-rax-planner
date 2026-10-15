@@ -55,6 +55,7 @@ Community STL/3MF files are downloaded from their original pages and retain thei
 | Shopping list and assembly guide | Available; verify against selected model variants |
 | Filament per colour | Rough estimate, including a spare allowance |
 | Cooling and airflow | Simplified estimate; see [assumptions below](#cooling-estimate) |
+| Power draw, PoE budget, network ports and UPS runtime | Planning estimate; see [Power budget](#power-budget) |
 | Print time and full build cost | Planned |
 | Acrylic sides | Material choice and supplier links; measured cutting files still needed |
 | Cheapest delivered acrylic quote by country | Planned |
@@ -88,7 +89,8 @@ To run the repository checks with Node.js:
 
 ```sh
 node tools/validate.mjs
-for f in app.js parts.js shapes.js view3d.js pdf.js airflow.js; do node --check "$f"; done
+for f in app.js parts.js shapes.js view3d.js pdf.js airflow.js power.js; do node --check "$f"; done
+node tools/test-power.mjs
 ```
 
 ## Help improve the planner
@@ -124,6 +126,15 @@ The 3D frame follows the photos in the Lab Rax article: bevelled top and bottom 
 - **Fans.** Each fan follows a straight fan curve from its rated flow and maximum static pressure, at full speed, minus 15 % for the grille. It pushes against whatever pressure the openings leave. Typical figures: 40 mm 6 CFM, 80 mm 30, 92 mm 40, 120 mm 52, 140 mm 75, 200 mm 86 CFM (1 CFM = 1.7 m³/h).
 - **Heat balance.** In every layer the parts' heat is carried off by the air flowing through it. Warm air under cooler air turns over and mixes upward, warm air above cooler air stays put, and about 4 W per m² per °C leaks through the printed walls. Pressure and temperature depend on each other, so the model solves them in turn until they settle.
 - **Not included.** The devices' own fans (which usually help), draughts and air conditioning in the room, sunlight, and how hot a device runs inside. The temperatures are of the air around the parts. Most network gear and mini PCs are rated for air up to 40 °C, so the planner calls a rack cool up to 35 °C, warm up to 40 °C and hot above that.
+
+## Power budget
+
+`power.js` adds up what the rack needs, in the **Power & network** section of Your build and in the build plan PDF.
+
+- **Draw.** The same typical `watts` per part as the cooling estimate, plus 5 V fans and PoE devices outside the rack that you add. A PoE switch's own draw leaves out what it sends over PoE, so the devices on PoE count with their own draw, plus about 10 % lost in the switch's power supply. Start-up and full load can be two to three times the typical figure.
+- **PoE.** Switches, gateways and injectors with `poe` give a budget, a number of PoE ports and a standard (PoE, PoE+, PoE++). Devices with `poeIn` take one port and their maximum draw from the spec sheet. The planner hands them out biggest first and warns when the budget, the ports or the standard run short, with an injector or a bigger switch to fix it; the shopping list then gets the injectors. A Raspberry Pi switched to PoE gets a PoE+ HAT instead of its USB-C supply.
+- **Network ports.** Every device with a network cable takes a switch port; switches and routers offer theirs (`ports`, or the RJ45 and SFP in their `io`), and each extra one links to another with a port at both ends. Keystone jacks are listed next to the free ports.
+- **UPS.** Enter a size in VA or Wh. A lead-acid battery of about 0.125 Wh per VA, an 85 % inverter, 5 W for the UPS itself and Peukert's law (k = 1.2) give the runtime at the rack's draw; about 0.6 W per VA is its watt rating.
 
 ## Add a device, mount or part
 
