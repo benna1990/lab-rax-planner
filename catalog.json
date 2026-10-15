@@ -2,15 +2,41 @@
  "schema": 2,
  "updated": "2026-10-15",
  "shops": {
+  "_comment": "Search links per shop; {q} is the search text. Affiliate: Amazon takes your Associates tag in \"tag\" (added as tagParam=tag). Other shops take a deep-link template from their partner programme in \"wrap\", with {url} where the product link goes. Empty means plain links.",
   "amazon": {
-   "_comment": "Put your Amazon Associates tag in \"tag\" (e.g. yourname-21 for amazon.nl). Empty means plain links.",
-   "en": {
-    "domain": "www.amazon.nl",
-    "tag": ""
-   }
+   "name": "Amazon",
+   "url": "https://www.amazon.nl/s?k={q}",
+   "tagParam": "tag",
+   "tag": ""
+  },
+  "bol": {
+   "name": "bol",
+   "url": "https://www.bol.com/nl/nl/s/?searchtext={q}",
+   "wrap": ""
+  },
+  "aliexpress": {
+   "name": "AliExpress",
+   "url": "https://www.aliexpress.com/wholesale?SearchText={q}",
+   "wrap": ""
   }
  },
- "frame": {
+ "acrylic": [
+  {
+   "name": "Snijlab",
+   "url": "https://snijlab.nl/products/acrylaat-helder-lasersnijden",
+   "note": "NL · laser cut from your SVG or DXF"
+  },
+  {
+   "name": "Kunststofplatenshop",
+   "url": "https://www.kunststofplatenshop.nl/",
+   "note": "NL · sheets cut to size"
+  },
+  {
+   "name": "Ponoko",
+   "url": "https://www.ponoko.com/",
+   "note": "worldwide · laser cut, quote online"
+  }
+ ], "frame": {
   "brass": {
    "name": "Lab Rax frame, heat-set inserts",
    "url": "https://makerworld.com/en/models/1294480-lab-rax-10-server-rack-5u",
@@ -68,68 +94,284 @@
  "hardware": {
   "m6x10": {
    "name": "M6×10 button head screw",
-   "search": "M6x10 button head screws"
+   "spec": "ISO 7380, 4 mm hex key; stainless or black",
+   "search": "M6x10 button head screws ISO 7380",
+   "pack": 50,
+   "group": "fasteners"
   },
   "m6x12": {
    "name": "M6×12 button head screw (or #10-32 × ½″)",
-   "search": "M6x12 button head screws"
+   "spec": "ISO 7380, 4 mm hex key; stainless or black",
+   "search": "M6x12 button head screws ISO 7380",
+   "pack": 50,
+   "group": "fasteners"
   },
   "insert": {
    "name": "M6 heat-set insert, 8 mm OD, 4–5 mm long",
-   "search": "M6 heat set insert 8mm OD"
+   "spec": "No longer than 5 mm: the holes are 5.5 mm deep",
+   "search": "M6 heat set insert 8mm OD 5mm",
+   "pack": 50,
+   "group": "fasteners"
   },
   "nut": {
    "name": "M6 nut (or #10-32)",
-   "search": "M6 hex nuts"
+   "spec": "DIN 934 hex nut",
+   "search": "M6 hex nuts DIN 934",
+   "pack": 50,
+   "group": "fasteners"
   },
   "fan40": {
    "name": "40 mm fan, 5 V",
-   "search": "40mm fan 5V",
+   "spec": "40 × 40 × 10 mm, 5 V; check the fan panel's hole spacing",
+   "search": "40mm fan 5V 4010",
+   "pack": 1,
+   "group": "cooling",
    "mm": 40,
    "cfm": 6,
-   "pa": 25
+   "pa": 25,
+   "volt": 5,
+   "amp": 0.1,
+   "models": [
+    [
+     "Quiet",
+     "Noctua NF-A4x10 5V"
+    ],
+    [
+     "Budget",
+     "4010 fan 5V"
+    ]
+   ]
   },
   "fan80": {
-   "name": "80 mm fan",
-   "search": "80mm PC fan",
+   "name": "80 mm fan, 5 V",
+   "spec": "80 × 80 × 25 mm; take a 5 V (USB) version so it runs from a USB port",
+   "search": "80mm fan 5V USB",
+   "pack": 1,
+   "group": "cooling",
    "mm": 80,
    "cfm": 30,
-   "pa": 23
+   "pa": 23,
+   "volt": 5,
+   "amp": 0.15,
+   "models": [
+    [
+     "Quiet",
+     "Noctua NF-A8 5V"
+    ],
+    [
+     "Budget",
+     "80mm USB fan 5V"
+    ]
+   ]
   },
   "fan92": {
-   "name": "92 mm fan",
-   "search": "92mm PC fan",
+   "name": "92 mm fan, 5 V",
+   "spec": "92 × 92 × 25 mm; take a 5 V (USB) version",
+   "search": "92mm fan 5V USB",
+   "pack": 1,
+   "group": "cooling",
    "mm": 92,
    "cfm": 40,
-   "pa": 22
+   "pa": 22,
+   "volt": 5,
+   "amp": 0.15,
+   "models": [
+    [
+     "Quiet",
+     "Noctua NF-A9 5V"
+    ],
+    [
+     "Budget",
+     "92mm USB fan 5V"
+    ]
+   ]
   },
   "fan120": {
    "name": "120 mm fan, 5 V USB",
+   "spec": "120 × 120 × 25 mm, 5 V (USB)",
    "search": "120mm fan 5V USB",
+   "pack": 1,
+   "group": "cooling",
    "mm": 120,
    "cfm": 52,
-   "pa": 20
+   "pa": 20,
+   "volt": 5,
+   "amp": 0.2,
+   "models": [
+    [
+     "Quiet",
+     "Noctua NF-A12x25 5V"
+    ],
+    [
+     "Budget",
+     "120mm USB fan 5V"
+    ]
+   ]
   },
   "fan140": {
-   "name": "140 mm fan",
-   "search": "140mm PC fan",
+   "name": "140 mm fan, 5 V",
+   "spec": "140 × 140 × 25 mm; take a 5 V (USB) version",
+   "search": "140mm fan 5V USB",
+   "pack": 1,
+   "group": "cooling",
    "mm": 140,
    "cfm": 75,
-   "pa": 22
+   "pa": 22,
+   "volt": 5,
+   "amp": 0.25,
+   "models": [
+    [
+     "Quiet",
+     "Noctua NF-A14 5V"
+    ],
+    [
+     "Budget",
+     "140mm USB fan 5V"
+    ]
+   ]
   },
   "fan200": {
-   "name": "200 mm fan",
-   "search": "200mm PC fan",
+   "name": "200 mm fan, 5 V",
+   "spec": "200 mm; take a 5 V (USB) version",
+   "search": "200mm fan 5V USB",
+   "pack": 1,
+   "group": "cooling",
    "mm": 200,
    "cfm": 86,
-   "pa": 11
+   "pa": 11,
+   "volt": 5,
+   "amp": 0.3,
+   "models": [
+    [
+     "Quiet",
+     "Noctua NF-A20 5V"
+    ],
+    [
+     "Budget",
+     "200mm USB fan"
+    ]
+   ]
   },
   "m3x8lp": {
    "name": "M3×8 low-profile screw",
-   "search": "M3x8 low profile screws"
+   "spec": "Low head, so it clears the device",
+   "search": "M3x8 low profile screws",
+   "pack": 50,
+   "group": "fasteners"
+  },
+  "m25kit": {
+   "name": "M2.5 screws, nuts and standoffs",
+   "spec": "Kit, for Raspberry Pi and other boards on their trays",
+   "search": "M2.5 standoff screw nut kit",
+   "pack": 1,
+   "group": "fasteners"
+  },
+  "inserttip": {
+   "name": "Heat-set insert tip for your soldering iron",
+   "spec": "M6 size; set the iron to about 220–240 °C for PETG",
+   "search": "heat set insert tip M6 soldering iron",
+   "pack": 1,
+   "group": "tools"
+  },
+  "hexkey": {
+   "name": "4 mm hex key or bit",
+   "spec": "For the M6 button head screws",
+   "search": "4mm hex key",
+   "pack": 1,
+   "group": "tools"
+  },
+  "fanusb": {
+   "name": "USB to fan cable (5 V)",
+   "spec": "USB-A to 3- or 4-pin fan plug; only for 5 V fans",
+   "search": "USB to 4 pin fan adapter cable 5V",
+   "pack": 1,
+   "group": "cooling"
+  },
+  "fansplit": {
+   "name": "Fan splitter cable",
+   "spec": "1 to 4 fan plugs; the fans share one USB port",
+   "search": "fan splitter cable 1 to 4",
+   "pack": 1,
+   "group": "cooling"
+  },
+  "fanspeed": {
+   "name": "USB fan speed controller (optional)",
+   "spec": "Inline knob or switch to make the fans quieter",
+   "search": "USB fan speed controller inline",
+   "pack": 1,
+   "group": "cooling"
+  },
+  "usbpower": {
+   "name": "USB charger, 2 ports, 2.4 A or more",
+   "spec": "Powers the fans; certified (CE), not the cheapest no-name",
+   "search": "USB charger 2 port 2.4A CE",
+   "pack": 1,
+   "group": "power"
+  },
+  "powerstrip": {
+   "name": "Power strip with switch, 6 outlets",
+   "spec": "Certified, with overload protection; fits the rack's power strip holders",
+   "search": "power strip 6 outlets switch",
+   "pack": 1,
+   "group": "power"
+  },
+  "pi5psu": {
+   "name": "Raspberry Pi 27 W USB-C power supply",
+   "spec": "Official 5.1 V / 5 A supply for the Raspberry Pi 5",
+   "search": "Raspberry Pi 27W USB-C power supply",
+   "pack": 1,
+   "group": "power"
+  },
+  "pi4psu": {
+   "name": "Raspberry Pi 15 W USB-C power supply",
+   "spec": "Official 5.1 V / 3 A supply for the Raspberry Pi 4",
+   "search": "Raspberry Pi 15W USB-C power supply",
+   "pack": 1,
+   "group": "power"
+  },
+  "usbc": {
+   "name": "Short USB-C cable, 30 cm",
+   "spec": "Rated for 3 A or more",
+   "search": "USB-C cable 30cm 3A",
+   "pack": 1,
+   "group": "power"
+  },
+  "keystone": {
+   "name": "Cat6 keystone jack",
+   "spec": "Snap-in RJ45, tool-less or punch-down",
+   "search": "Cat6 keystone jack",
+   "pack": 10,
+   "group": "network"
+  },
+  "patch": {
+   "name": "Cat6 patch cable, 25 cm",
+   "spec": "Short cables keep the rack tidy",
+   "search": "Cat6 patch cable 0.25m",
+   "pack": 5,
+   "group": "network"
+  },
+  "ties": {
+   "name": "Velcro cable ties",
+   "spec": "Reusable, for the back of the rack",
+   "search": "velcro cable ties",
+   "pack": 1,
+   "group": "other"
+  },
+  "filament": {
+   "name": "PETG filament, 1.75 mm",
+   "spec": "1 kg spool",
+   "search": "PETG filament 1.75mm {colour} 1kg",
+   "pack": 1000,
+   "group": "print"
+  },
+  "acrylic": {
+   "name": "Acrylic sheet, 3 mm, cut to size",
+   "spec": "Smoked or clear; one per side panel",
+   "search": "acrylic sheet 3mm",
+   "pack": 1,
+   "group": "acrylic"
   }
- },
- "panels": [
+ }, "panels": [
   {
    "group": "Lab Rax panels by mklements",
    "items": [

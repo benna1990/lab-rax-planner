@@ -482,24 +482,160 @@ function printPack() {
   out.missing = missing;
   return out;
 }
-function shopUrl(search) {
-  const a = CAT.shops && CAT.shops.amazon, c = a && (a.en || null);
-  if (!c || !search) return null;
-  const q = typeof search === 'string' ? search : search.en;
-  return 'https://' + c.domain + '/s?k=' + encodeURIComponent(q) + (c.tag ? '&tag=' + encodeURIComponent(c.tag) : '');
+/* ---------- shopping list and build guide ---------- */
+/* Everything to buy and every step to build, derived from the layout: filament per colour, screws and inserts in packs,
+   fans with safe 5 V power, network, power supplies, acrylic and handy extras (tips.json). Shop links come from
+   catalog.json "shops", with the maintainer's affiliate tag or deep-link template when one is set. */
+let TIPS = null; // tips.json: { items, tips }, loaded after the catalog when it exists
+const SHOP_GROUPS = [['print', 'Filament'], ['fasteners', 'Screws and inserts'], ['tools', 'Tools'], ['cooling', 'Fans and fan power'], ['power', 'Power'], ['network', 'Network'], ['acrylic', 'Acrylic'], ['other', 'Handy extras']];
+function shopLinks(q) {
+  const S = (CAT && CAT.shops) || {}, out = [];
+  if (!q) return out;
+  Object.keys(S).forEach(k => {
+    const s = S[k]; if (k[0] === '_' || !s || typeof s.url !== 'string') return;
+    let u = s.url.replace('{q}', encodeURIComponent(q));
+    if (s.tag && s.tagParam) u += (u.indexOf('?') < 0 ? '?' : '&') + encodeURIComponent(s.tagParam) + '=' + encodeURIComponent(s.tag);
+    if (s.wrap) u = s.wrap.replace('{url}', encodeURIComponent(u));
+    out.push({ shop: s.name || k, url: u, aff: !!(s.tag || s.wrap) });
+  });
+  return out;
+}
+const shopUrl = q => (shopLinks(q)[0] || {}).url || null;
+const affiliate = () => { const S = (CAT && CAT.shops) || {}; return Object.keys(S).some(k => S[k] && (S[k].tag || S[k].wrap)); };
+// grams of filament per U, by face: a rough estimate before slicing
+const GRAMS_PER_U = { blank: 22, vent: 20, ks: 25, fan: 30, sbc: 60, drv2: 70, drv4: 70, switch: 45, shelf: 45, cut: 45 };
+function filament() {
+  const g = new Map(), add = (c, n) => g.set(c, (g.get(c) || 0) + n), h = state.h;
+  add(state.frame, 380 + 40 * h);                                   // frame: about 580 g for 5U (Lab Rax article)
+  if (state.sides !== 'acrylic') add(state.frame, 72 * h);          // side panels: about 360 g for 5U
+  add(state.frame, 60);                                             // bottom panel
+  if (state.top) add(state.panel, 120); else add(state.accent, 60); // top mount, or the top panel in the accent colour
+  placed().forEach(i => { const d = info(i), face = i.key === 'gen' ? genFace(i.params) : d.face; add(colorOf(i), Math.max(12, (GRAMS_PER_U[face] || 40) * d.h2 / 2)); });
+  state.extras.forEach(() => add(state.frame, 60));
+  return [...g].map(([c, grams]) => ({ c, grams: Math.round(grams * 1.1 / 10) * 10 })); // +10 % for brims, purge and a failed print
+}
+const modsOf = d => { const s = d && d.shape; return s ? [].concat(...(s.rows || [s.row || []])).filter(m => m && typeof m === 'object') : []; };
+function facts() { // what the layout holds, for the shopping list and the guide
+  const f = { ks: 0, pi5: 0, pi4: 0, boards: 0, eth: 0, mains: 0, drives: 0, strip: false, gateway: false, fanParts: [], fans: new Map(), amps: 0 };
+  const fanPart = d => { let n = 0; (d.hardware || []).forEach(x => { const hw = CAT.hardware[x.part]; if (hw && hw.mm) { n += x.qty; f.fans.set(x.part, (f.fans.get(x.part) || 0) + x.qty); f.amps += x.qty * (hw.amp || .15); } }); if (n) f.fanParts.push({ name: fullName(d), n }); };
+  placed().forEach(i => {
+    const d = info(i), mods = modsOf(d), name = fullName(d);
+    mods.forEach(m => { if (typeof m.ks === 'number') f.ks += m.ks; });
+    if (i.key === 'gen' && i.params.type === 'keystone') f.ks += (i.params.ports || 12) * (i.params.rows || 1);
+    let boards = 0; mods.forEach(m => { if (m.sbc) { const n = typeof m.sbc === 'number' ? m.sbc : 1; boards += n; if (/pi4/.test(m.board || '')) f.pi4 += n; else if (/pi/.test(m.board || 'pi5')) f.pi5 += n; } });
+    if (!boards && d.tab === 'devices' && /raspberry|\bpi ?[345]\b/i.test(name)) { boards = 1; if (/pi ?4/i.test(name)) f.pi4++; else f.pi5++; }
+    f.boards += boards;
+    if (/drv/.test(d.face || '') || mods.some(m => m.bay)) f.drives++;
+    if (d.group && /gateway/i.test(d.group)) f.gateway = true;
+    if (d.tab === 'panels' && /strip|pdu|outlet/i.test(name)) f.strip = true;
+    if ((d.tab === 'devices' && !/power/i.test(d.group || '')) || d.custom || (i.key === 'gen' && i.params.type === 'shelf')) { f.eth += boards || 1; if (!boards) f.mains++; }
+    fanPart(d);
+  });
+  if (state.top) fanPart(LIB[state.top]);
+  state.extras.forEach(k => fanPart(LIB[k]));
+  return f;
 }
 function orderList() {
-  const m = new Map(), add = (p, q) => m.set(p, (m.get(p) || 0) + q), br = state.version === 'brass';
+  const m = new Map(), add = (p, q) => { if (CAT.hardware[p] && q > 0) m.set(p, (m.get(p) || 0) + q); }, br = state.version === 'brass', f = facts();
   (br ? CAT.frame.brass : CAT.frame.bolted).hardware.forEach(x => add(x.part, x.qty));
   const sc = placed().reduce((n, i) => n + (H(i) === 1 ? 2 : 4), 0);
   if (sc) { add(br ? 'm6x10' : 'm6x12', sc); add(br ? 'insert' : 'nut', sc); }
   placed().forEach(i => (info(i).hardware || []).forEach(x => add(x.part, x.qty)));
   if (state.top) (LIB[state.top].hardware || []).forEach(x => add(x.part, x.qty));
   state.extras.forEach(k => (LIB[k].hardware || []).forEach(x => add(x.part, x.qty)));
-  const out = [...m].map(([p, q]) => { const hw = CAT.hardware[p] || {}; return { name: hw.name || p, qty: q, buy: hw.buy || shopUrl(hw.search) }; });
-  // qty null: needed, but the number isn't confirmed
-  if (state.h > 5) out.push({ name: 'Fasteners for the 4 post joiners', qty: null, buy: null, check: CAT.frame.extension.url });
-  return out;
+  if (br) add('inserttip', 1);
+  add('hexkey', 1);
+  if (f.boards) add('m25kit', 1);
+  // fans: each fan part gets a USB-to-fan cable, a splitter when it holds more than one fan, and a USB port
+  if (f.fanParts.length) { add('fanusb', f.fanParts.length); add('fansplit', f.fanParts.filter(p => p.n > 1).length); add('usbpower', Math.ceil(f.fanParts.length / 2)); add('fanspeed', 1); }
+  if (f.pi5) { add('pi5psu', f.pi5); add('usbc', f.pi5); }
+  if (f.pi4) { add('pi4psu', f.pi4); add('usbc', f.pi4); }
+  if (f.mains && !f.strip) add('powerstrip', Math.ceil((f.mains + (f.fanParts.length ? 1 : 0)) / 6));
+  if (f.ks) add('keystone', f.ks);
+  if (f.eth) add('patch', f.eth + Math.min(f.ks, f.eth));
+  add('ties', 1);
+  const out = [...m].map(([p, q]) => { const hw = CAT.hardware[p], q2 = hw.search || hw.name, packs = hw.pack > 1 ? Math.ceil(q / hw.pack) : null;
+    return { key: p, group: hw.group || 'other', name: hw.name, spec: hw.spec || '', qty: q, pack: hw.pack || null, packs, links: shopLinks(q2), buy: hw.buy || shopUrl(q2),
+      models: (hw.models || []).map(([label, s]) => ({ label, name: s, links: shopLinks(s) })) }; });
+  const fil = CAT.hardware.filament || { name: 'PETG filament, 1.75 mm', search: 'PETG filament 1.75mm {colour} 1kg' };
+  filament().forEach(x => { const cn = colorName(x.c), named = cn[0] !== '#', q2 = fil.search.replace('{colour}', named ? cn.toLowerCase() : '').replace(/\s+/g, ' ');
+    out.push({ key: 'filament-' + x.c, group: 'print', name: fil.name.replace('1.75 mm', named ? cn : 'custom ' + cn) + ', 1.75 mm', spec: '≈ ' + x.grams + ' g with 10 % spare; an estimate before slicing', qty: Math.ceil(x.grams / 1000), unit: 'spool', swatch: x.c, links: shopLinks(q2), buy: shopUrl(q2) }); });
+  if (state.sides === 'acrylic') { const a = CAT.hardware.acrylic || {};
+    out.push({ key: 'acrylic', group: 'acrylic', name: a.name || 'Acrylic sheet, 3 mm, cut to size', spec: (a.spec || '') + '. Take the size from the printed side panel model; the planner has no measured size yet.', qty: 2, links: [], buy: null, cutters: CAT.acrylic || [] }); }
+  if (state.h > 5) out.push({ key: 'joiners', group: 'fasteners', name: 'Fasteners for the 4 post joiners', spec: 'Not confirmed yet; check the extension model page', qty: null, links: [], buy: null, check: CAT.frame.extension.url });
+  // handy extras from tips.json, when they fit this rack
+  const when = { always: true, fans: f.fanParts.length > 0, acrylic: state.sides === 'acrylic', brass: br, bolted: !br, network: f.eth > 0 || f.ks > 0, sbc: f.boards > 0, drives: f.drives > 0, tall: state.h > 5, power: f.mains > 0 };
+  ((TIPS && TIPS.items) || []).forEach(t => { if (!t || !t.name || !when[t.when || 'always'] || out.some(o => o.key === t.id)) return;
+    out.push({ key: t.id, group: t.group || 'other', name: t.name, spec: t.spec || '', why: t.why || '', qty: t.qty || 1, pack: t.pack || null, packs: null, optional: true, links: shopLinks(t.search || t.name), buy: shopUrl(t.search || t.name) }); });
+  const order = SHOP_GROUPS.map(g => g[0]);
+  return out.sort((a, b) => order.indexOf(a.group) - order.indexOf(b.group));
+}
+const qtyText = r => r.qty == null ? 'check' : r.unit === 'spool' ? r.qty + (r.qty > 1 ? ' spools' : ' spool') : r.packs ? r.qty + ' · ' + r.packs + (r.packs > 1 ? ' packs' : ' pack') + ' of ' + r.pack : r.qty + '×';
+const linksHTML = ls => ls && ls.length ? '<span class="slinks">' + ls.map(l => '<a href="' + esc(l.url) + '" target="_blank" rel="noopener' + (l.aff ? ' sponsored' : '') + '">' + esc(l.shop) + '</a>').join('') + '</span>' : '';
+function shopHTML(rows) {
+  return SHOP_GROUPS.map(([g, title]) => { const rs = rows.filter(r => r.group === g); if (!rs.length) return '';
+    return '<p class="sgroup">' + title + '</p><ul class="slist">' + rs.map(r => '<li class="srow">' +
+      '<div class="stx"><b>' + (r.swatch ? '<i class="swatchdot" style="--c:' + r.swatch + '"></i>' : '') + esc(r.name) + (r.optional ? ' <span class="muted">· optional</span>' : '') + '</b>' +
+      (r.spec ? '<small>' + esc(r.spec) + '</small>' : '') + (r.why ? '<small>' + esc(r.why) + '</small>' : '') +
+      (r.models || []).map(mo => '<small class="smodel">' + esc(mo.label) + ': ' + esc(mo.name) + linksHTML(mo.links) + '</small>').join('') +
+      (r.cutters || []).map(c => '<small class="smodel"><a href="' + esc(c.url) + '" target="_blank" rel="noopener">' + esc(c.name) + '</a> · ' + esc(c.note || '') + '</small>').join('') +
+      (r.check ? '<small><a href="' + esc(r.check) + '" target="_blank" rel="noopener">Check the model page</a></small>' : '') +
+      '</div><span class="sqty">' + qtyText(r) + '</span>' + (r.models && r.models.length ? '' : linksHTML(r.links)) + '</li>').join('') + '</ul>'; }).join('');
+}
+function guide() {
+  const f = facts(), br = state.version === 'brass', acr = state.sides === 'acrylic', fp = frameParts(), screw = br ? 'M6×10 screw' : 'M6×12 screw and nut', S = [];
+  const add = (id, title, steps) => S.push({ id, title, steps: steps.filter(Boolean) });
+  const fil = filament(), gens = byPos().some(i => i.key === 'gen'), mountScrews = placed().reduce((n, i) => n + (H(i) === 1 ? 2 : 4), 0);
+  add('print', 'Print the parts', [
+    'Print in PETG; PLA is fine for a rack that stays cool. Download each community model as 3MF from MakerWorld to keep its print profile: the build pack has a download list.',
+    'Frame: ' + fp.posts + ' posts, 4 horizontal pieces, 4 edge pieces, 2 handles and 4 feet' + (acr ? '' : ', side panels ' + fp.sides) + '. The horizontal pieces need a print bed of about 250 mm.',
+    'Filament: ' + fil.map(x => colorName(x.c) + ' ≈ ' + x.grams + ' g').join(', ') + '.',
+    gens ? 'Your custom parts are in custom-parts/ in the build pack. Panels and shelves print face-down, label plates face-up, without supports.' : null]);
+  if (br) add('inserts', 'Melt in the inserts', [
+    'You need ' + ((CAT.frame.brass.hardware.find(x => x.part === 'insert') || { qty: 24 }).qty + mountScrews) + ' M6 inserts: the frame joints, the handles and feet, and ' + mountScrews + ' in the posts for your parts.',
+    'Use an M6 insert tip at about 220–240 °C for PETG. Press straight down until the insert is flush, keep it square, and let it cool before you screw into it.',
+    'In the posts, only melt inserts into the holes your parts use: see "Mount the parts" below.']);
+  add('frame', 'Build the frame', [
+    'Base: put the bottom panel between two edge pieces and two horizontal pieces, one ' + screw + ' per joint.',
+    'Stand the four posts on the base, one screw per joint' + (fp.joiners ? ', and join them to ' + state.h + 'U with the post joiners' : '') + '.',
+    'Slide the ' + (acr ? '3 mm acrylic ' : '') + 'side panels into the slots between the posts' + (fp.joiners ? '; turn them the opposite way to the posts so the seams don’t line up' : '') + '.',
+    'Add the top horizontal pieces, then ' + (state.top ? 'the ' + fullName(LIB[state.top]) : 'the top panel') + ', and close the top with the last two edge pieces.',
+    'Screw the handles on top and the feet underneath; they use the same hole pattern.']);
+  add('mount', 'Mount the parts, top to bottom', ['Fit each device into its mount first, then screw the panel to the front of the posts: ½U panels take one ' + screw + ' per side, 1U and taller two per side.']
+    .concat(byPos().map(i => { const d = info(i); return uRange(i.pos2, d.h2) + ': ' + (i.label ? i.label + ' – ' : '') + fullName(d) + ' (' + (H(i) === 1 ? 2 : 4) + ' screws)'; })));
+  if (f.eth || f.ks) add('network', 'Connect the network', [
+    f.ks ? 'Snap the ' + f.ks + ' keystone jacks into the patch panel and number them.' : null,
+    'Run short patch cables from each device to the switch' + (f.gateway ? ', and from the switch to the gateway' : '') + (f.ks ? '; patch the keystone ports you use the same way' : '') + '.',
+    'Keep network cables on one side of the rack and power cables on the other, and bundle them with velcro ties.']);
+  add('power', 'Connect the power', [
+    f.mains ? 'Plug the power supplies of your ' + f.mains + ' device' + (f.mains > 1 ? 's' : '') + ' into ' + (f.strip ? 'the power strip in the rack' : 'one certified power strip with overload protection') + '. Don’t plug one power strip into another.' : null,
+    f.pi5 ? 'Each Raspberry Pi 5 gets its own 27 W USB-C supply (5.1 V, 5 A); a weaker supply limits the USB ports and can make the Pi unstable.' : null,
+    f.pi4 ? 'Each Raspberry Pi 4 gets a 15 W USB-C supply (5.1 V, 3 A).' : null,
+    f.pi5 + f.pi4 > 2 ? 'With several Pis, a PoE switch with PoE HATs, or one multi-port USB-C charger with enough watts per port, is tidier than one supply per Pi.' : null,
+    'Wiring mains inside the rack (DIY outlets, inlets or switches) is only for someone qualified to do it. A certified power strip in a holder is the safe choice.']);
+  if (f.fanParts.length) add('fans', 'Connect the fans safely', [
+    'Check the arrow on each fan before you screw it in: fans low in the rack blow in, fans at the top blow out, so the air rises through the rack.',
+    'Use 5 V fans. Plug the fans of each panel into a splitter, the splitter into a USB-to-fan cable, and that into a USB charger.',
+    'Add up the current printed on the fans: keep it under 1 A per USB port and under the charger’s rating. Your fans draw about ' + f.amps.toFixed(1) + ' A in total.',
+    'Never connect 12 V fans to USB, and don’t power several fans from a Raspberry Pi’s GPIO pins.',
+    'Too loud? Put a USB speed controller between the charger and the fans.']);
+  add('finish', 'Final check', [
+    'Close the open slots with blank or vent panels, as the Cooling section suggests.',
+    'Bundle the cables at the back with velcro and label both ends.',
+    'Switch on one device at a time, and check the temperatures after an hour of normal use.']);
+  ((TIPS && TIPS.tips) || []).forEach(t => { const s = t && S.find(x => x.id === t.step); if (s && t.text) s.steps.push('Tip: ' + t.text); });
+  return S;
+}
+function guideHTML(G) { return G.map((s, i) => '<div class="gstep"><b>' + (i + 1) + '. ' + esc(s.title) + '</b><ul>' + s.steps.map(t => '<li' + (/^Tip: /.test(t) ? ' class="gtip"' : '') + '>' + esc(t) + '</li>').join('') + '</ul></div>').join(''); }
+/* build-guide.html in the build pack: the guide and the shopping list with links, on one page that prints well */
+function buildGuidePage() {
+  const title = (state.label || 'Lab Rax') + ' · ' + state.h + 'U', rows = orderList();
+  const css = DL_CSS + 'h2{font-size:18px}.gstep{margin:0 0 14px}.gstep ul{margin:6px 0 0;padding-left:20px}.gstep li{margin:3px 0}.gtip{color:var(--muted)}' +
+    '.sgroup{margin:18px 0 6px;font-weight:700}.srow{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line);list-style:none}.stx{flex:1;display:flex;flex-direction:column}.stx small{color:var(--muted)}' +
+    '.sqty{white-space:nowrap;font-size:13px}.slinks{display:flex;flex-direction:row;flex:none;gap:10px}.slinks a{font-size:13px}.smodel{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:center}.smodel .slinks{justify-content:flex-start}.srow{flex-wrap:wrap}.slist{margin:0;padding:0}.swatchdot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);margin-right:6px;box-shadow:0 0 0 1px rgba(127,127,127,.5)}';
+  return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Build guide · ' + esc(title) + '</title><style>' + css + '</style></head><body><main>' +
+    '<h1>Build guide</h1><p>' + esc(title) + '. Community models: open download-list.html. ' + (affiliate() ? 'Some shop links are affiliate links; the maintainer of the planner may earn a small commission at no cost to you.' : '') + '</p>' +
+    '<h2>What to buy</h2>' + shopHTML(rows) + '<h2>Build and wire it</h2>' + guideHTML(guide()) + '</main></body></html>';
 }
 const JOINER_NOTE = 'Above 5U the posts are joined. How the post joiners are fastened isn’t confirmed yet, so their screws aren’t counted; check the extension model page.';
 
@@ -740,11 +876,12 @@ function renderBuild() {
   const air = airParts();
   html += sec('air', 'Cooling', air.sum, air.body);
 
-  const ol = orderList(), tagged = CAT.shops && CAT.shops.amazon && CAT.shops.amazon.en && CAT.shops.amazon.en.tag;
-  html += sec('shop', 'Shopping list', '<span>' + ol.length + (ol.length === 1 ? ' item' : ' items') + '</span>', '<dl class="kv">' +
-    ol.map(x => '<dt>' + esc(x.name) + '</dt><dd>' + (x.qty == null ? 'unknown' : x.qty + '×') + (x.buy ? '<a class="buy" href="' + esc(x.buy) + '" target="_blank" rel="noopener sponsored">Buy</a>' : x.check ? '<a class="buy" href="' + esc(x.check) + '" target="_blank" rel="noopener">Check</a>' : '') + '</dd>').join('') +
-    '<div class="note">Mounting screws: 2 per side per panel, 1 per side for ½U panels.' + (br ? ' Inserts max 5 mm long; the hole is 5.5 mm deep.' : '') + '</div>' + (h > 5 ? '<div class="note">' + esc(JOINER_NOTE) + '</div>' : '') +
-    (tagged ? '<div class="note">As an Amazon Associate the maintainer of this planner earns from qualifying purchases.</div>' : '') + '</dl>');
+  const ol = orderList(), kg = filament().reduce((n, x) => n + x.grams, 0) / 1000, amazonTag = CAT.shops && CAT.shops.amazon && CAT.shops.amazon.tag;
+  html += sec('shop', 'Shopping list', '<span>' + ol.length + ' items · ≈ ' + kg.toFixed(1) + ' kg PETG</span>', shopHTML(ol) +
+    '<p class="hint">Mounting screws: 2 per side per panel, 1 per side for ½U panels.' + (br ? ' Inserts max 5 mm long; the hole is 5.5 mm deep.' : '') + (h > 5 ? ' ' + esc(JOINER_NOTE) : '') + '</p>' +
+    (affiliate() ? '<p class="hint">Some shop links are affiliate links: the maintainer of this planner may earn a small commission, at no cost to you.' + (amazonTag ? ' As an Amazon Associate the maintainer earns from qualifying purchases.' : '') + '</p>' : ''));
+  const G = guide();
+  html += sec('guide', 'Build guide', '<span>' + G.length + ' steps · from printing to wiring</span>', guideHTML(G));
 
   const top = state.top ? LIB[state.top] : null;
   html += sec('frame', 'Frame parts', '<span>' + (br ? 'Heat-set inserts' : 'Bolted') + ' · ' + (state.sides === 'acrylic' ? 'acrylic' : 'printed') + ' sides</span>', '<dl class="kv">' +
@@ -769,7 +906,8 @@ function listText() {
   L.push('', 'Frame', '- Vertical posts: ' + fp.posts); if (fp.joiners) L.push('- Post joiners: 4');
   L.push('- Side panels: ' + fp.sides + (state.sides === 'acrylic' ? ' (3 mm acrylic)' : ''), '- Horizontal pieces: 4', '- Edge pieces: 4', '- Handles · feet: 2 · 4', state.top ? '- Top: ' + fullName(LIB[state.top]) + '\n- Bottom panel: 1' : '- Top + bottom panel: 1 + 1');
   L.push('', 'Print pack'); printPack().forEach(x => L.push('- ' + x.qty + '× ' + x.name + (x.variants ? ' (' + x.variants + ')' : '') + (x.url ? '  ' + x.url : '  (custom STL in build pack)')));
-  L.push('', 'Shopping list'); orderList().forEach(x => L.push('- ' + (x.qty == null ? 'unknown number of ' + x.name.toLowerCase() + ' (not confirmed; ' + x.check + ')' : x.qty + '× ' + x.name)));
+  L.push('', 'Shopping list'); orderList().forEach(x => L.push('- ' + qtyText(x) + ' ' + x.name + (x.spec ? ' (' + x.spec + ')' : '') + (x.check ? ' – ' + x.check : '')));
+  guide().forEach((g, n) => { L.push('', (n + 1) + '. ' + g.title); g.steps.forEach(t => L.push('- ' + t)); });
   const a = airflow();
   if (a.Q) {
     L.push('', 'Cooling (estimate, room ' + a.room + ' °C)', '- Heat: ' + (a.est ? '≈ ' : '') + fmtW(a.Q) + ' · air through the rack ' + fmtF(a.flow) + ' · hottest air ≈ ' + fmtT(a.maxT));
@@ -857,7 +995,8 @@ async function buildPack() {
   const pk = printPack();
   files.push({ name: 'download-list.html', data: downloadListHTML(pk) });
   files.push({ name: 'print-list.csv', data: csv([['Qty', 'Part', 'Variants', 'Where', 'Link'], ...pk.map(x => [x.qty, x.name, x.variants, x.subs.join('; '), x.url || 'custom-parts/'])]) });
-  files.push({ name: 'shopping-list.csv', data: csv([['Qty', 'Item', 'Buy'], ...orderList().map(x => [x.qty == null ? 'unknown' : x.qty, x.name, x.buy || x.check || ''])]) });
+  files.push({ name: 'shopping-list.csv', data: csv([['Group', 'Qty', 'Item', 'Spec', ...((shopLinks('x')).map(l => l.shop))], ...orderList().map(x => [(SHOP_GROUPS.find(g => g[0] === x.group) || ['', ''])[1], qtyText(x), x.name, x.spec || '', ...(x.links || []).map(l => l.url)])]) });
+  files.push({ name: 'build-guide.html', data: buildGuidePage() });
   files.push({ name: 'README.txt', data: 'Lab Rax build pack — ' + (state.label || 'Lab Rax') + ', ' + state.h + 'U\n\n' + listText() +
     '\n\nCommunity models stay on MakerWorld under their own licenses: open download-list.html, download each model there as 3MF and tick it off.\nCustom parts in custom-parts/ were generated by the Lab Rax Planner (MIT) and print without supports: panels and shelves face-down, label plates face-up.\n' });
   let pdfErr = window.LRPdf ? null : 'the PDF module is not available';
@@ -869,7 +1008,7 @@ function pdfData() {
   return { title: (state.label || 'Lab Rax') + ' · ' + state.h + 'U', h: state.h, version: state.version === 'brass' ? 'Heat-set inserts' : 'Bolted', frame: state.frame, panel: state.panel, accent: state.accent, label: state.label || 'Lab Rax',
     top: state.top ? fullName(LIB[state.top]) : null, topLook: state.top ? LS.topFor(LIB[state.top], colorsFor()) : null, // the top mount as drawn above the frame
     items: byPos().map(i => { const d = info(i); return { pos: uRange(i.pos2, d.h2), pos2: i.pos2, h2: d.h2, name: fullName(d), label: i.label || '', u: uTxt(d), url: d.url || '', author: d.author || '', color: colorOf(i), face: faceSVG(d, colorOf(i)) }; }),
-    print: printPack().map(x => ({ qty: x.qty, name: x.name, sub: x.subs.join(', '), vars: x.variants, url: x.url })), shop: orderList(), frameParts: frameParts(), notes: state.h > 5 ? [JOINER_NOTE] : [],
+    print: printPack().map(x => ({ qty: x.qty, name: x.name, sub: x.subs.join(', '), vars: x.variants, url: x.url })), shop: orderList(), guide: guide(), shareUrl: TOP_WIN ? shareLink() + '&s=shop' : null, frameParts: frameParts(), notes: state.h > 5 ? [JOINER_NOTE] : [],
     cooling: pdfCooling() };
 }
 function pdfCooling() { // the Cooling section for the PDF; null when nothing in the rack makes heat
@@ -1289,7 +1428,9 @@ function loadShared() {
 function decodeShared() {
   if (location.hash.indexOf('#l=') !== 0) return null;
   try {
-    const o = JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(3).replace(/-/g, '+').replace(/_/g, '/')))));
+    const [b64, ...opts] = location.hash.slice(3).split('&'); // extra options after the layout, e.g. s=shop
+    if (opts.includes('s=shop')) { ui.sec.shop = true; setTimeout(() => { const b = $('#build'); if (b) b.scrollIntoView({ block: 'start' }); }, 300); }
+    const o = JSON.parse(decodeURIComponent(escape(atob(b64.replace(/-/g, '+').replace(/_/g, '/')))));
     history.replaceState(null, '', location.pathname + location.search);
     if (o && Array.isArray(o.items) && o.h >= 1 && o.h <= 10) return Object.assign(defaultState(), o, { example: false, done: {} });
   } catch (e) {}
@@ -1305,6 +1446,7 @@ fetch('catalog.json', { cache: 'no-cache' })
   .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
   .then(c => {
     buildCatalog(c);
+    fetch('tips.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).then(t => { if (t && (Array.isArray(t.items) || Array.isArray(t.tips))) { TIPS = t; renderBuild(); } }).catch(() => {});
     sanitize();
     if (!loadShared()) { renderLib(); render(); }
     window.addEventListener('hashchange', loadShared);

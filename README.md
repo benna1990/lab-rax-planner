@@ -9,7 +9,8 @@ Plan your 3D-printed [Lab Rax](https://the-diy-life.com/introducing-lab-rax-a-3d
 - **Look around in 3D**, and load your own downloaded STL or 3MF files onto a part to see them in place. Those files never leave your browser.
 - **Check the cooling**: every part has its typical heat in watts and every fan its rated flow. The planner estimates the air temperature at each height and the airflow through the rack, shows where air comes in and goes out, and suggests fans, a mesh top, an open back or other changes with their effect (hottest air before → after). You can turn each fan around and enter a part's real watts. See [Cooling estimate](#cooling-estimate).
 - **Make custom parts**: blank, vent (slots or hexagons), keystone and label panels, and a shelf sized to your device. They export as STL, ready to print without supports: panels and shelves face-down, label plates face-up.
-- **Download a build pack**: one ZIP with your custom STL files, a PDF build plan, a download list to click through the community models, a print list with links and a shopping list.
+- **Know what to buy and how to build it**: a shopping list made from your layout (filament per colour, screws and inserts in packs, fans with safe 5 V power, network, power supplies, acrylic, handy extras) with shop links, and a step-by-step build and wiring guide.
+- **Download a build pack**: one ZIP with your custom STL files, a PDF build plan, a build guide page with the shopping list, a download list to click through the community models, a print list and a shopping list (CSV).
 - Light and dark theme. Your layout is saved in your browser; share it with a link (Share link in Your build).
 
 It is a static site with no build step: `index.html`, `app.js`, `parts.js`, `view3d.js`, `pdf.js`, `airflow.js` and `catalog.json`. three.js r128 and jsPDF 2.5.1 load from cdnjs/jsDelivr when the 3D view or PDF export is first used.
@@ -61,9 +62,14 @@ The 3D frame follows the photos in the Lab Rax article: bevelled top and bottom 
 
 Edit **`catalog.json`** and see [CONTRIBUTING.md](CONTRIBUTING.md) for the format. Run `node tools/validate.mjs` before opening a pull request; GitHub runs it on every pull request.
 
-## Amazon links
+## Shop and affiliate links
 
-The shopping list links each hardware item to an Amazon search. Put your Amazon Associates tag in `catalog.json` under `shops.amazon.en.tag`; the planner then shows the disclosure Amazon requires.
+Every item on the shopping list links to a search at each shop in `catalog.json` → `shops` (Amazon, bol and AliExpress to start with; `{q}` is the search text). To earn from the links:
+
+- **Amazon**: put your Associates tag in `shops.amazon.tag` (e.g. `yourname-21` for amazon.nl).
+- **Other shops**: put the deep-link template from their partner programme in `wrap`, with `{url}` where the product link goes.
+
+When any tag or template is set, the planner and the build guide show an affiliate disclosure (and Amazon's own sentence when the Amazon tag is set). Hardware lives in `catalog.json` → `hardware`, with a spec, pack size, shop search text and, for fans, a quiet and a budget model. Handy extras and build tips come from `tips.json`.
 
 ## Credits and licenses
 
