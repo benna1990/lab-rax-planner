@@ -1095,7 +1095,7 @@ function pdfData() {
     top: state.top ? fullName(LIB[state.top]) : null, topLook: state.top ? LS.topFor(LIB[state.top], colorsFor()) : null, // the top mount as drawn above the frame
     items: byPos().map(i => { const d = info(i); return { pos: uRange(i.pos2, d.h2) + atBack(i), pos2: i.pos2, h2: d.h2, name: fullName(d), label: i.label || '', u: uTxt(d), url: d.url || '', author: d.author || '', color: colorOf(i), face: faceSVG(d, colorOf(i)), depth: partDepth(i), back: sideOf(i) === 'back' }; }),
     print: printPack().map(x => ({ qty: x.qty, name: x.name, sub: x.subs.join(', '), vars: x.variants, url: x.url })), shop: orderList(), guide: guide(), estimate: buildEstimate(), market: state.market, wallMounts: state.extras.filter(k => LIB[k].shape && LIB[k].shape.wall).map(k => ({ name: fullName(LIB[k]), url: LIB[k].url })), sides: state.sides, dimensions: CAT.frame.dimensions, shareUrl: TOP_WIN ? shareLink() + '&s=shop' : null, frameParts: frameParts(), notes: state.h > 5 ? [JOINER_NOTE] : [],
-    cooling: pdfCooling() };
+    cooling: pdfCooling(), shareUrl: TOP_WIN ? shareLink() + '&s=shop' : null }; // the QR code opens this layout with its shopping list
 }
 function pdfCooling() { // the Cooling section for the PDF; null when nothing in the rack makes heat
   const a = airflow();
@@ -1522,10 +1522,15 @@ function applyTheme() {
 function cycleTheme() { theme = THEMES[(THEMES.indexOf(theme) + 1) % 3]; try { localStorage.setItem(THEMEKEY, theme); } catch (e) {} applyTheme(); }
 
 /* ---------- share link (own page only) ---------- */
+// share links: "#c=" + base64url of [settings that differ from the defaults, parts as [key, pos2, other fields]],
+// short enough for a QR code; old "#l=" links (the whole state) still open
+const SHARE_KEYS = ['h', 'version', 'frame', 'panel', 'accent', 'label', 'top', 'extras', 'market', 'costs', 'back', 'sides'];
 function shareLink() {
-  const o = { h: state.h, version: state.version, frame: state.frame, panel: state.panel, accent: state.accent, label: state.label, top: state.top, extras: state.extras, market: state.market, costs: state.costs, back: state.back, sides: state.sides, items: state.items, nextId: state.nextId };
-  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  return location.origin + location.pathname + location.search + '#l=' + b64;
+  const d = defaultState(), same = (x, y) => JSON.stringify(x) === JSON.stringify(y), st = {};
+  SHARE_KEYS.forEach(k => { if (state[k] !== undefined && !same(state[k], d[k])) st[k] = state[k]; });
+  const items = state.items.map(i => { const { id, key, pos2, ...rest } = i; return Object.keys(rest).length ? [key, pos2, rest] : [key, pos2]; });
+  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify([st, items])))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return location.origin + location.pathname + location.search + '#c=' + b64;
 }
 function loadShared() {
   const shared = decodeShared(); if (!shared) return false;
@@ -1534,13 +1539,16 @@ function loadShared() {
   return true;
 }
 function decodeShared() {
-  if (location.hash.indexOf('#l=') !== 0) return null;
+  const m = location.hash.match(/^#([lc])=([^&]*)(.*)$/); // l: the whole state (older links), c: compact
+  if (!m) return null;
   try {
-    const [b64, ...opts] = location.hash.slice(3).split('&'); // extra options after the layout, e.g. s=shop
-    if (opts.includes('s=shop')) { ui.sec.shop = true; setTimeout(() => { const b = $('#build'); if (b) b.scrollIntoView({ block: 'start' }); }, 300); }
-    const o = JSON.parse(decodeURIComponent(escape(atob(b64.replace(/-/g, '+').replace(/_/g, '/')))));
+    if (/&s=shop\b/.test(m[3])) { ui.sec.shop = true; setTimeout(() => { const b = $('#build'); if (b) b.scrollIntoView({ block: 'start' }); }, 300); }
+    const raw = JSON.parse(decodeURIComponent(escape(atob(m[2].replace(/-/g, '+').replace(/_/g, '/')))));
     history.replaceState(null, '', location.pathname + location.search);
-    if (o && Array.isArray(o.items) && o.h >= 1 && o.h <= 10) return Object.assign(defaultState(), o, { example: false, done: {} });
+    let o = raw;
+    if (m[1] === 'c') { const [st, items] = Array.isArray(raw) ? raw : [{}, []], list = Array.isArray(items) ? items : [];
+      o = Object.assign({}, st, { items: list.map((x, n) => Object.assign({}, Array.isArray(x) && x[2] && typeof x[2] === 'object' ? x[2] : {}, { id: n + 1, key: Array.isArray(x) ? x[0] : null, pos2: Array.isArray(x) ? x[1] : null })), nextId: list.length + 1 }); }
+    if (o && Array.isArray(o.items)) { const s2 = Object.assign(defaultState(), o, { example: false, done: {} }); if (s2.h >= 1 && s2.h <= 10) return s2; }
   } catch (e) {}
   return null;
 }

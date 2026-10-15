@@ -9,12 +9,29 @@ function load() {
   }
   return jsp;
 }
+// QR code (qrcode-generator 1.4.4 from cdnjs, loaded on demand like jsPDF): this layout's own link while the code stays
+// scannable at 30 mm (85 modules or fewer, so modules of 0.35 mm or more), else the planner's home page
+let qrp = null;
+function loadQR() {
+  if (!qrp) { qrp = (window.qrcode ? Promise.resolve() : window.LRParts.loadScript('https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js')).then(() => window.qrcode); qrp.catch(() => { qrp = null; }); }
+  return qrp;
+}
+const HOME = 'https://benna1990.github.io/lab-rax-planner/';
+async function qrFor(url) {
+  const qrcode = await loadQR().catch(() => null);
+  if (!qrcode) return null;
+  const make = s => { try { const q = qrcode(0, 'L'); q.addData(s); q.make(); return q; } catch (e) { return null; } };
+  const own = url ? make(url) : null;
+  if (own && own.getModuleCount() <= 85) return { q: own, url, full: true };
+  const home = make(HOME);
+  return home ? { q: home, url: HOME, full: false } : null;
+}
 // built-in PDF fonts only cover WinAnsi; map the few characters the planner uses that fall outside it
 const clean = s => String(s == null ? '' : s).replace(/€/g, 'EUR ').replace(/≈/g, '~').replace(/→/g, '->').replace(/″/g, '"').replace(/✓/g, '').replace(/[^\x00-\xFF–—‘’“”•…×½]/g, '');
 const hex = c => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
 // the planner's heat scale (light theme): room temperature to `span` °C above it. It only gets darker, so it survives greyscale printing.
-const HEAT = ['#EFF5F0', '#E3EFDF', '#F0EDCC', '#F5DFB7', '#F2C999', '#E7AB83', '#D99075'].map(hex);
-function heatRGB(dT, span) { const p = Math.max(0, Math.min(1, dT / span)) * 6, i = Math.min(5, Math.floor(p)), f = p - i; return HEAT[i].map((v, k) => Math.round(v + (HEAT[i + 1][k] - v) * f)); }
+const HEAT = ['#EEF6EF', '#D8EEDC', '#EDE6A8', '#F2C987', '#EC9F63', '#D8743F', '#B04E28'].map(hex), SPAN = 20;
+function heatRGB(dT, span) { const p = Math.sqrt(Math.max(0, Math.min(1, dT / span))) * 6, i = Math.min(5, Math.floor(p)), f = p - i; return HEAT[i].map((v, k) => Math.round(v + (HEAT[i + 1][k] - v) * f)); }
 const tC = (t, short) => (t > 60 ? '60+' : Math.round(t)) + (short ? '°' : ' °C'); // past 60 °C the exact figure means little
 // a part's face as drawn by shapes.js (an SVG string, w × h mm) turned into an image for jsPDF, ppm pixels per mm
 function raster(svg, w, h, ppm, type) {
@@ -45,6 +62,7 @@ async function make(d) {
 
   const faces = new Map(), img = async (key, make) => { if (!faces.has(key)) faces.set(key, await make().catch(() => null)); return faces.get(key); };
   for (const it of d.items) if (it.face) it.img = await img(it.face, () => raster(it.face, 250, it.h2 * 44.45 / 2 - .79, 4, 'image/jpeg'));
+  const qr = await qrFor(d.shareUrl);
   // A useful first page: budget, material and navigation rather than a decorative cover.
   const navigation=[];
   const section=(title,detail)=>navigation.push({title,detail,page:doc.getNumberOfPages()});
@@ -124,15 +142,24 @@ async function make(d) {
   doc.setFillColor(240,243,240); doc.setDrawColor(75,86,79); doc.rect(tx,ty,outerW*tk,depth*tk,'FD');
   doc.setDrawColor(160,170,163);doc.rect(tx+5,ty+5,outerW*tk-10,depth*tk-10,'S');
   dimension(tx,ty+depth*tk+5,tx+outerW*tk,'~ '+outerW+' outer');
+  if(d.top){
+    const t=d.top, cx=tx+outerW*tk/2, cy=ty+depth*tk/2, mm=+((t.match(/(\d{2,3}) ?mm/)||[])[1]||0);
+    doc.setDrawColor(75,86,79);doc.setLineWidth(.25);
+    if(/mesh|hex|vent/i.test(t)){doc.setFillColor(196,203,198);for(let gx=tx+7.5;gx<tx+outerW*tk-7;gx+=2.2)for(let gy=ty+7.5;gy<ty+depth*tk-7;gy+=2.2)doc.circle(gx,gy,.42,'F');}
+    if(/\bu7\b|\bu6\b|access point/i.test(t)){const sz=(/u7 pro/i.test(t)?206:160)*tk, dz=/45/.test(t)?.71:1;doc.setFillColor(248,249,250);doc.roundedRect(cx-sz/2,cy-sz*dz/2,sz,sz*dz,sz*.16,sz*.16*dz,'FD');doc.setFillColor(110,160,230);doc.circle(cx,cy,.9,'F');}
+    else if(mm){const r=mm/2*tk;doc.setFillColor(255,255,255);doc.circle(cx,cy,r,'FD');doc.setDrawColor(140,150,143);doc.line(cx-r*.7,cy-r*.7,cx+r*.7,cy+r*.7);doc.line(cx-r*.7,cy+r*.7,cx+r*.7,cy-r*.7);doc.circle(cx,cy,r*.22,'S');}
+    doc.setFont('helvetica','normal');doc.setFontSize(6.5);doc.setTextColor(...muted);text(wrap('Top: '+t,outerW*tk+26),tx,ty+depth*tk+13.5);
+  }
   let py=viewBottom+5;
   doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...green);text('PLACEMENT / U / SIDE',91,viewBottom);
   for(const it of d.items){
-    doc.setFont('helvetica','normal');doc.setFontSize(8);const name=wrap(it.name,77),hh=Math.max(8,name.length*3.3+3);
+    doc.setFont('helvetica','normal');doc.setFontSize(8);const name=wrap(it.name,77),hh=Math.max(8,name.length*3.3+4);
     if(py+hh>239){py=head('Placement / continued',page());}
-    doc.setFont('helvetica','bold');doc.setTextColor(...green);text(it.pos.replace(/ *\(back\)/i,''),91,py);doc.setFont('helvetica','normal');doc.setTextColor(...ink);text(name,112,py);py+=hh;
-    doc.setFontSize(6);doc.setTextColor(...muted);text(it.back?'REAR':'FRONT',91,py-3);
+    doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...green);text(it.pos.replace(/ *\(back\)/i,''),91,py);
+    doc.setFont('helvetica','normal');doc.setFontSize(6);doc.setTextColor(...muted);text(it.back?'REAR':'FRONT',91,py+3.2);
+    doc.setFontSize(8);doc.setTextColor(...ink);text(name,112,py);py+=hh;
   }
-  y2=Math.max(ty+depth*tk+18,py+8);
+  y2=Math.max(ty+depth*tk+(d.top?24:18),py+8);
   y2=fit(y2,54);y2=head('Frame / key dimensions',y2);
   const frameRows=[['Posts / side panels',fp.posts+' / '+fp.sides+(d.sides==='acrylic'?' acrylic':' printed')],['Other frame pieces','4 horizontals / 4 edges / 2 handles / 4 feet'],['Bay / mounting holes','222 mm clear / 236.525 mm hole centres'],['Bay height',(d.h*U).toFixed(1)+' mm nominal / '+d.h+'U']];
   doc.setFont('helvetica','normal');doc.setFontSize(8);
@@ -143,44 +170,76 @@ async function make(d) {
     y=head('Cooling overview',y);
     const stats=[['ROOM',Math.round(m.room)+' °C'],['WARMEST AIR',tC(m.maxT)],['HEAT',Math.round(m.Q)+' W'],['AIRFLOW',Math.round(m.flow)+' m³/h']];
     stats.forEach(([name,value],i)=>{const x=M+i*45.5;doc.setFillColor(243,246,243);doc.roundedRect(x,y,41.5,24,2,2,'F');doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(...muted);text(name,x+4,y+7);doc.setFontSize(16);doc.setTextColor(...(i===1&&m.maxT>40?[164,78,34]:ink));text(value,x+4,y+17);});
-    y+=36;
-    doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(...ink);text('Estimated air temperature / top to bottom',M,y);y+=9;
+    y+=34;
+    const blue=[37,99,235], warm=[196,73,40];
+    const kk=Math.min(60/280,118/(m.h*U)), rw=280*kk, bay=222*kk, rx=M+13, ry=y+20, layerH=U/2*kk, bh=m.h*U*kk, post=(rw-bay)/2;
+    doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(...ink);text('Air temperature and airflow',M,y);
+    doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(...muted);text('Front view. Blue arrows: air in; orange: air out (m³/h).',M,y+4.5);
+    doc.setFillColor(64,70,66);doc.roundedRect(rx,ry-3,rw,bh+6,1,1,'F');doc.setFillColor(250,250,250);doc.rect(rx+post,ry,bay,bh,'F');
+    d.items.filter(it=>!it.back&&it.img).forEach(it=>doc.addImage(it.img,'JPEG',rx+rw/2-125*kk,ry+it.pos2*layerH,250*kk,it.h2*layerH-.1,'heat'+[...faces.keys()].indexOf(it.face),'FAST'));
+    const fade=doc.GState?new doc.GState({opacity:.5}):null;if(fade)doc.setGState(fade);
+    m.temp.forEach((t,i)=>{doc.setFillColor(...heatRGB(t-m.room,SPAN));doc.rect(rx+post,ry+i*layerH,bay,layerH+.05,'F');});
+    if(fade)doc.setGState(new doc.GState({opacity:1}));
+    doc.setFont('helvetica','bold');doc.setFontSize(5.5);doc.setTextColor(255,255,255);
+    for(let u=0;u<m.h;u++)text(String(m.h-u),rx+post/2,ry+(u+.5)*U*kk+1,{align:'center'});
+    if(m.neutral!=null&&m.H){const ny=ry+bh-m.neutral/m.H*bh;doc.setLineDashPattern([1,.8],0);doc.setDrawColor(90,96,92);doc.setLineWidth(.25);doc.line(rx+post,ny,rx+rw-post,ny);doc.setLineDashPattern([],0);doc.setFont('helvetica','normal');doc.setFontSize(5.5);doc.setTextColor(...muted);text('neutral',rx+rw-post-1,ny-.8,{align:'right'});}
+    // arrows: front openings and front fans on the left, back and sides on the right, the top above
+    const mean=(layers,flows,sign)=>{let w=0,sum=0;(flows||[]).forEach((f,i)=>{const v=sign*f;if(v>0){w+=v;sum+=v*layers[i];}});return w?{layer:sum/w,flow:w}:null;};
+    const arrows=[], add=(side,layer,flow)=>{if(Math.abs(flow)>=.5)arrows.push({side,layer,flow});};
+    const sideOf=k=>k==='top'?'top':(k==='back'||k==='side')?'right':'left';
+    (m.openings||[]).forEach(o=>{const side=sideOf(o.kind);if(side==='top'){add('top',0,(o.in||0)-(o.out||0));return;}const i=mean(o.layers,o.flows,1),out=mean(o.layers,o.flows,-1);if(i)add(side,i.layer,i.flow);if(out)add(side,out.layer,-out.flow);});
+    (m.fans||[]).forEach(f=>{const side=sideOf(f.place);add(side,f.pos2!=null?f.pos2+(f.h2||1)/2-.5:0,(f.in||0)-(f.out||0));});
+    const arrow=(x1,y1,x2,y2,c)=>{doc.setDrawColor(...c);doc.setFillColor(...c);doc.setLineWidth(.55);const a2=Math.atan2(y2-y1,x2-x1),h=1.9;doc.line(x1,y1,x2-Math.cos(a2)*h*.8,y2-Math.sin(a2)*h*.8);doc.triangle(x2,y2,x2-h*Math.cos(a2-.42),y2-h*Math.sin(a2-.42),x2-h*Math.cos(a2+.42),y2-h*Math.sin(a2+.42),'F');};
+    arrows.sort((p,q)=>Math.abs(q.flow)-Math.abs(p.flow)).slice(0,8).forEach(ar=>{
+      const inn=ar.flow>0,c=inn?blue:warm,lab=(inn?'in ':'out ')+Math.round(Math.abs(ar.flow));
+      doc.setFont('helvetica','bold');doc.setFontSize(5.8);doc.setTextColor(...c);
+      if(ar.side==='top'){const cx=rx+rw/2,y0=ry-4;if(inn)arrow(cx,y0-8,cx,y0-.5,c);else arrow(cx,y0-.5,cx,y0-8,c);text(lab,cx+1.5,y0-5);}
+      else{const yy=ry+(ar.layer+.5)*layerH;
+        if(ar.side==='left'){if(inn)arrow(M,yy,rx-.6,yy,c);else arrow(rx-.6,yy,M,yy,c);text(lab,M,yy-1.4);}
+        else{const x0=rx+rw+.6,x1=rx+rw+12;if(inn)arrow(x1,yy,x0,yy,c);else arrow(x0,yy,x1,yy,c);text(lab,x0+.6,yy-1.4);}}
+    });
+    // the scale: room temperature to +20 °C, fixed so racks compare
+    const sy=ry+bh+10;for(let i=0;i<24;i++){doc.setFillColor(...heatRGB(i/23*SPAN,SPAN));doc.rect(rx+i*rw/24,sy,rw/24+.05,3,'F');}
+    doc.setFont('helvetica','normal');doc.setFontSize(6);doc.setTextColor(...muted);
+    [[0,tC(m.room,true)],[.5,'+'+SPAN/2+'°'],[1,'+'+SPAN+'°']].forEach(([f,l])=>text(l,rx+f*rw,sy+6,{align:f===0?'left':f===1?'right':'center'}));
+    // per U, top to bottom
+    const tx0=rx+rw+16, tw=W-M-tx0, rowH=Math.max(6.4,Math.min(10,(bh+6)/m.h));
+    let ty=ry-3;doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(...muted);text('PER U, TOP TO BOTTOM',tx0,ty-2.5);
     for(let u=0;u<m.h;u++){
-      const temp=(m.temp[u*2]+m.temp[u*2+1])/2, pos=m.h-u;
-      doc.setFillColor(...heatRGB(temp-m.room,25));doc.roundedRect(M,y-4,W-2*M,13,1.5,1.5,'F');
-      doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(...ink);text('U'+pos,M+4,y+3);
-      const names=m.parts.filter(p=>p.pos2<(u+1)*2&&p.pos2+p.h2>u*2).map(p=>p.name);
-      doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(...muted);
-      let name=clean(names.join(' / ')||'Open slot');while(doc.getTextWidth(name)>68&&name.length>4)name=name.slice(0,-2);text(name,M+19,y+3);
-      const barX=M+95,barW=52;doc.setFillColor(255,255,255);doc.roundedRect(barX,y,barW,3,1,1,'F');
-      const warm=[88,66,45];doc.setFillColor(...warm);doc.roundedRect(barX,y,Math.max(2,Math.min(1,(temp-m.room)/25)*barW),3,1,1,'F');
-      doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(...ink);text(tC(temp),W-M-3,y+3,{align:'right'});y+=15;
+      const temp=(m.temp[u*2]+m.temp[u*2+1])/2,names=m.parts.filter(p=>p.pos2<(u+1)*2&&p.pos2+p.h2>u*2).map(p=>p.name);
+      doc.setFillColor(...heatRGB(temp-m.room,SPAN));doc.roundedRect(tx0,ty,tw,rowH-1,1,1,'F');
+      doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...ink);text('U'+(m.h-u),tx0+2.5,ty+rowH/2+1);
+      doc.setFont('helvetica','normal');doc.setFontSize(7);let nm=clean(names.join(' / ')||'Open slot');while(doc.getTextWidth(nm)>tw-30&&nm.length>4)nm=nm.slice(0,-2);text(nm,tx0+12,ty+rowH/2+1);
+      doc.setFont('helvetica','bold');doc.setFontSize(8.5);text(tC(temp),tx0+tw-2.5,ty+rowH/2+1,{align:'right'});ty+=rowH;
     }
-    y+=6;doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(...muted);text('Colour = estimated air temperature. Scale: room temperature to +25 °C.',M,y);y+=6;
-    const note=wrap('Planning estimate of the air around your equipment, not internal component temperature. Verify with real measurements after assembly.',W-2*M);text(note,M,y);y+=note.length*3.5+5;
+    y=Math.max(sy+12,ty+4);
+    doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(...muted);
+    const note=wrap('Colour = estimated air temperature, room to +'+SPAN+' °C. A planning estimate of the air around your equipment, not the temperature inside it; check with a thermometer after an hour of use.',W-2*M);text(note,M,y);y+=note.length*3.5+5;
     return y;
   }
 
   let y=page();section('Print & parts checklist','Only selected prints and essential purchases');
   y=head('Print & parts checklist',y);
   const tableRow=(name,qty,url,detail,cost)=>{
-    doc.setFont('helvetica','bold');doc.setFontSize(8.5);const lines=wrap(name,112);
-    doc.setFont('helvetica','normal');doc.setFontSize(7.5);const sub=detail?wrap(detail,112):[];
-    const hh=Math.max(9,lines.length*3.5+sub.length*3.1+4);
+    doc.setFont('helvetica','bold');doc.setFontSize(8.5);const lines=wrap(name,112),nameW=doc.getTextWidth(clean(lines[lines.length-1]));
+    doc.setFont('helvetica','normal');doc.setFontSize(7);
+    const inline=!!detail&&nameW+3+doc.getTextWidth(clean(detail))<=112, sub=detail&&!inline?wrap(detail,112):[];
+    const hh=Math.max(6.6,lines.length*3.6+sub.length*3+3);
     y=continued(y,hh,'Print & parts checklist');
-    doc.setDrawColor(...line);doc.setLineWidth(.15);doc.line(M,y+hh-4,W-M,y+hh-4);
+    doc.setDrawColor(...line);doc.setLineWidth(.15);doc.line(M,y+hh-3.4,W-M,y+hh-3.4);
     doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(...(url?green:ink));text(lines,M+2,y);
-    if(url)doc.link(M+2,y-3,112,Math.max(4,lines.length*3.5),{url});
-    doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(...muted);if(sub.length)text(sub,M+2,y+lines.length*3.5);
-    doc.setTextColor(...ink);text(qty,W-M-29,y,{align:'right'});if(cost)text(cost,W-M,y,{align:'right'});y+=hh;
+    if(url)doc.link(M+2,y-3,112,Math.max(4,lines.length*3.6),{url});
+    doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(...muted);
+    if(inline)text(detail,M+2+nameW+3,y+(lines.length-1)*3.6);else if(sub.length)text(sub,M+2,y+lines.length*3.6);
+    doc.setFontSize(8);doc.setTextColor(...ink);text(qty,W-M-29,y,{align:'right'});if(cost)text(cost,W-M,y,{align:'right'});y+=hh;
   };
   doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...muted);text('TO PRINT / CLICK A MODEL NAME TO DOWNLOAD',M,y);y+=8;
   d.print.forEach(p=>tableRow(p.name,p.qty+'×',p.url,p.vars?'Variant: '+p.vars:'',null));
   y=fit(y+8,25);y=head('To buy / essential supplies',y);
+  doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(...muted);
+  const buyNote=wrap('Total need per item; what you already own is deducted from what to buy and the costs. Filament is on page 1; tools, optional extras and devices are left out.',W-2*M);text(buyNote,M,y-2);y+=buyNote.length*3.2+3;
   const supplies=e?e.supplies:window.LREstimate.essential(d.shop);
-  supplies.forEach(r=>tableRow(r.name,r.qty==null?'check':String(r.qty)+'×',r.buy,r.qty==null?'Quantity needs checking':'Own '+r.owned+' / buy '+r.toBuy+(r.pack>1?' ('+r.packs+' packs of '+r.pack+')':''),r.cost==null?'unpriced':money(r.cost)));
-  y=fit(y+5,17);doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(...muted);
-  text(wrap('Filament is listed on the build overview. Quantities show total need; owned stock is deducted from purchases and costs. Tools, optional extras and device purchases are omitted.',W-2*M),M,y);
+  supplies.forEach(r=>tableRow(r.name,r.qty==null?'check':String(r.qty)+'×',r.buy,r.qty==null?'Quantity needs checking':'Own '+r.owned+' / buy '+r.toBuy+(r.pack>1?' ('+r.packs+(r.packs===1?' pack':' packs')+' of '+r.pack+')':''),r.cost==null?'unpriced':money(r.cost)));
   if(d.wallMounts&&d.wallMounts.length){y=fit(y+18,32);y=head('Wall mounting / before drilling',y);doc.setFontSize(8);text(wrap('No verified hole coordinates are available for the selected bracket. Download the bracket model and measure or use the printed bracket as a template. No inferred drilling pattern is provided.',W-2*M),M,y);y+=15;for(const wall of d.wallMounts){doc.setTextColor(...green);doc.textWithLink(clean(wall.name),M,y,{url:wall.url});y+=6;}}
 
   const c=d.cooling;
@@ -221,13 +280,21 @@ async function make(d) {
   }
   // Fill the cover directory once the final page positions are known.
   doc.setPage(1);
+  const navW=W-2*M-(qr?40:0);
+  if(qr){ // the QR code beside the navigation: this rack with its shopping list on a phone
+    const n=qr.q.getModuleCount(), size=32, cell=size/n, qx=W-M-size-2, qy=216;
+    doc.setFillColor(255,255,255);doc.roundedRect(qx-3,qy-3,size+6,size+15,2,2,'F');doc.setFillColor(...ink);
+    for(let r=0;r<n;r++)for(let col=0;col<n;col++)if(qr.q.isDark(r,col))doc.rect(qx+col*cell,qy+r*cell,cell+.02,cell+.02,'F');
+    doc.link(qx,qy,size,size,{url:qr.url});
+    doc.setFont('helvetica','bold');doc.setFontSize(6.5);doc.setTextColor(...ink);text(wrap(qr.full?'Scan: this rack and its shopping list':'Scan: open the planner',size+2),qx+size/2,qy+size+4,{align:'center'});
+  }
   navigation.forEach((entry,i)=>{
     const yy=223+i*12;
-    doc.setFillColor(255,255,255);doc.roundedRect(M,yy-5,W-2*M,11,2,2,'F');
+    doc.setFillColor(255,255,255);doc.roundedRect(M,yy-5,navW,11,2,2,'F');
     doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(...ink);text(entry.title,M+5,yy);
     doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(...muted);text(entry.detail,M+5,yy+4);
-    doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(...green);text(String(entry.page).padStart(2,'0'),W-M-5,yy+3,{align:'right'});
-    doc.link(M,yy-5,W-2*M,11,{pageNumber:entry.page});
+    doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(...green);text(String(entry.page).padStart(2,'0'),M+navW-5,yy+3,{align:'right'});
+    doc.link(M,yy-5,navW,11,{pageNumber:entry.page});
     if(doc.outline&&doc.outline.add)doc.outline.add(null,entry.title,{pageNumber:entry.page});
   });
   const pages = doc.getNumberOfPages();
