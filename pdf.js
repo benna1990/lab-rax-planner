@@ -10,7 +10,7 @@ function load() {
   return jsp;
 }
 // built-in PDF fonts only cover WinAnsi; map the few characters the planner uses that fall outside it
-const clean = s => String(s == null ? '' : s).replace(/≈/g, '~').replace(/″/g, '"').replace(/✓/g, '').replace(/[^\x00-\xFF–—‘’“”•…×½]/g, '');
+const clean = s => String(s == null ? '' : s).replace(/≈/g, '~').replace(/→/g, '->').replace(/″/g, '"').replace(/✓/g, '').replace(/[^\x00-\xFF–—‘’“”•…×½]/g, '');
 const hex = c => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
 const lum = c => { const [r, g, b] = hex(c); return .2126 * r + .7152 * g + .0722 * b; };
 // a part's face as drawn by shapes.js (an SVG string, w × h mm) turned into an image for jsPDF, ppm pixels per mm
@@ -101,6 +101,51 @@ async function make(d) {
   y2 = head('Frame parts', y2);
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...ink);
   for (const [a, b] of cells) { text(a, M, y2); text(b, W - M, y2, { align: 'right' }); y2 += b.length * 3.8 + 1.2; }
+
+  // cooling estimate: moves to a new page as one block when it doesn't fit, and row by row only when it is longer than a page
+  const c = d.cooling;
+  if (c) {
+    const fw2 = W - 2 * M, cw = Math.min(17.8, fw2 / c.perU.length), cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+    const note = wrap('An estimate from typical power use and simple physics: the air around the parts, not the parts themselves.', fw2);
+    const fans = c.fans.map(f => { // h runs from the first baseline to the next row's
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9); const name = wrap(f.name, fw2);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8); const sub = wrap(cap(f.where) + ' · ' + f.spec + ' · ' + f.dir, fw2);
+      return { name, sub, h: name.length * 3.8 + (sub.length - 1) * 3.6 + 6 };
+    });
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+    const tips = c.tips.map(t => { const tx = wrap(t.text, fw2); return { t, tx, h: tx.length * 3.8 + 6 }; });
+    const list = rows => rows.length ? 5 + rows.reduce((n, r) => n + r.h, 0) : 0;
+    const lead = 8 + note.length * 3.5 + 1.5 + 4 * 5 + 3 + 5 + 10, all = lead + list(fans) + list(tips) - 6;
+    const sub = s => { doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...ink); text(s, M, y2); y2 += 5; };
+    y2 = fit(y2 + 6, all <= BOT - M - 4 ? all : lead - 6);
+    y2 = head('Cooling (estimate)', y2);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...muted); text(note, M, y2); y2 += note.length * 3.5 + 1.5;
+    doc.setFontSize(9); doc.setTextColor(...ink);
+    for (const [a, b] of [['Room temperature', c.room], ['Heat in the rack', c.heat], ['Hottest air', c.hottest], ['Air through the rack', c.flow]]) { text(a, M, y2); text(b, W - M, y2, { align: 'right' }); y2 += 5; }
+    y2 += 3; sub('Air temperature per U, top to bottom');
+    c.perU.forEach((u, i) => {
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...muted); text(u.u, M + i * cw, y2);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...ink); text(u.t, M + i * cw, y2 + 4);
+    });
+    y2 += 10;
+    if (fans.length) {
+      y2 = fit(y2, 5 + fans[0].h - 6); sub('Fans');
+      for (const f of fans) {
+        y2 = fit(y2, f.h - 6);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...ink); text(f.name, M, y2);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...muted); text(f.sub, M, y2 + f.name.length * 3.8); y2 += f.h;
+      }
+    }
+    if (tips.length) {
+      y2 = fit(y2, 5 + tips[0].h - 6); sub('What would help');
+      for (const { t, tx, h } of tips) {
+        y2 = fit(y2, h - 6);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...ink); text(tx, M, y2);
+        doc.setFontSize(8); doc.setTextColor(...muted); text('Hottest air ' + t.before + ' → ' + t.after, M, y2 + tx.length * 3.8); y2 += h;
+      }
+    }
+  }
 
   // ---- print pack and shopping list: on page 2, or straight on when page 1 already ran over ----
   y = doc.getNumberOfPages() > 1 ? y2 + 6 : page();
