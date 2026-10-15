@@ -44,8 +44,9 @@ A new device needs `size`, `color` and `io` (see [How parts look](#how-parts-loo
 | `wattsEstimated` | no | `true` when `watts` is a guess rather than a spec or a measurement. Shown as ≈. |
 | `fanDir` | no | For parts with fans in `hardware`: which way they blow by default, `intake` or `exhaust`, or `cross` for a pair: one in and one out, in the two side panels or in the bottom and top panel. Builders can turn each part around. |
 | `vent` | no | For openings: the open share of the panel, 0 to 1. A hex mesh top is about `0.5`, a vent panel `0.4`. |
+| `poe`, `poeIn`, `poeOptional`, `ports`, `eth` | no | Power and network, for the power budget: see [Power and network](#power-and-network). Usually set on the device; a mount only sets them when it differs. |
 
-Panels use `id`, `name`, `u`, `face`, `shape`, `url`, `author`, `labrax`, `estimated`, `hardware`, `watts`, `wattsEstimated`, `fanDir` and `vent`; `watts` only when the panel makes heat (power supplies, chargers, displays). Extras use `id`, `name`, `label`, `shape`, `author`, `url`, `hardware`, `fanDir` and `vent`, plus `at`: where the extra lets air through, `side`, `back` or `top` (`top` also covers a matching bottom panel; `fanAt` when its fans sit elsewhere). For example a pair of side panels with an 80 mm fan each:
+Panels use `id`, `name`, `u`, `face`, `shape`, `url`, `author`, `labrax`, `estimated`, `hardware`, `watts`, `wattsEstimated`, `fanDir`, `vent` and the power fields; `watts` only when the panel makes heat (power supplies, chargers, displays). Extras use `id`, `name`, `label`, `shape`, `author`, `url`, `hardware`, `fanDir` and `vent`, plus `at`: where the extra lets air through, `side`, `back` or `top` (`top` also covers a matching bottom panel; `fanAt` when its fans sit elsewhere). For example a pair of side panels with an 80 mm fan each:
 
 ```json
 { "id": "mw1460771", "name": "Side panels with an 80 mm fan", "url": "https://makerworld.com/models/1460771",
@@ -61,6 +62,26 @@ Panels use `id`, `name`, `u`, `face`, `shape`, `url`, `author`, `labrax`, `estim
 - Drives: about 6 W per 3.5″ hard drive and 2 W per 2.5″ drive. Add up everything a mount holds.
 - Power supplies and chargers: only what they lose as heat, a few watts.
 - Add `"wattsEstimated": true` when you had to guess, for example when a mount fits several devices or a different number of boards.
+
+### Power and network
+
+The Power & network section adds up what the rack draws (the same `watts`), checks the PoE budget and PoE ports, counts network ports and estimates UPS runtime. Five optional fields feed it, all from the maker's spec sheet:
+
+```json
+{ "device": "USW-Lite-8-PoE", "size": [163.7, 31.7, 99.6], "color": "#E9EBEC", "io": ["rj45x8"],
+  "poe": {"budget": 52, "ports": 4, "std": "at"}, "mounts": [ … ] }
+{ "device": "U7 Pro", "size": [206, 46, 206], "color": "#F4F5F6", "io": ["led"], "poeIn": 21, "mounts": [ … ] }
+```
+
+| Field | Meaning |
+|---|---|
+| `poe` | PoE it gives: `budget`, the total PoE budget in W; `ports`, how many ports give PoE; `std`, the standard of those ports: `af` (PoE, 15.4 W per port), `at` (PoE+, 30 W, the default) or `bt` (PoE++, 60 W). When the budget depends on the power supply, use the one with the adapter it comes with, or with the best PoE input when it has no adapter. Builders can enter their own budget. An injector is `"poe": {"budget": 30, "ports": 1}`. |
+| `poeIn` | The most the device draws over PoE in W, from the spec sheet (not the typical `watts`), so the budget also holds at full load. At most 51 W. The planner works out the standard it needs: up to 12.95 W PoE, up to 25.5 W PoE+, more PoE++. |
+| `poeOptional` | `true` when PoE is not the usual way to power it: it needs a PoE HAT or splitter, or it comes with its own power supply. It then counts on PoE only when the builder switches it on. Set `false` on a mount made for the PoE version (a Pi tray for a PoE HAT). |
+| `ports` | Network ports it offers to other devices: on a switch all RJ45 and SFP ports, on a router or gateway its LAN ports without the WAN port, `0` for an injector. Devices in the switch and gateway groups without `ports` count the `rj45` and `sfp` in their `io`, so set it when the ports are at the back or one of them is the WAN port. |
+| `eth` | Switch ports it takes. Devices take 1 each by default, panels 0. Use `0` for things that don't plug into a switch: drives, USB enclosures, power supplies, a modem that feeds the router's WAN port. |
+
+On a device these count per device; a mount that holds several (`"n": 2`, or 7 Pi boards) multiplies them. A mount's own `ports` and `eth` count for the whole mount, for mixed mounts like a Pi beside a small switch. `poe` and `poeIn` on a mount replace the device's, per device it holds.
 
 ### Fans
 
@@ -103,7 +124,7 @@ Around the row: `"shelf": true` adds a shelf behind it (`"floor": "hex"` or `"sl
 
 **Extras** say what they change on the frame: `{ "side": "hex" }` (or `kumiko`, `skadis`, `multiboard`, `honeycomb`, `brick`, `vent`, `grid`) and `{ "fan": 80 }` for side panels, `{ "handles": "stackable" }` (`side`, `long`), `{ "feet": "big" }` or `"casters"`, `{ "drawer": true }`, `{ "logo": "neopixel" }` or `"hexbar"`, `{ "corner": 11 }` for keystones in the top corner (`"matrix"` for an LED matrix), `{ "depth": 50 }` for deeper sides, `{ "edge": "switch" }`, `{ "wall": true }` for a wall cleat behind, and for the card only `"u"`, `"frame"` (`lowprofile`, `matx`), `"inside"` (`comb`, `guide`, `atx`, `matx`, `fans`, `bracket`, `device`, `keystone`) and `"hl"` to highlight the `posts`, `handles`, `base` or `top`.
 
-`node tools/validate.mjs` checks shapes, sizes and `io` tokens.
+`node tools/validate.mjs` checks shapes, sizes, `io` tokens and the power fields (a PoE switch can't have more PoE ports than ports).
 
 If you have the model file, put it in `reference/` named by the entry's id (`reference/keystone.3mf`) and run `node tools/measure.mjs keystone`. It reports the height in U, the screw holes, the openings through the front plate, the depth and, for top mounts, the tilt, and compares them with the catalog entry and its drawing (a text map shows openings that are only in the model or only in the drawing). `reference/` is ignored by git: never commit model files or outlines traced from them.
 

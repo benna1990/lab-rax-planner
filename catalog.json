@@ -336,6 +336,34 @@
    "pack": 1,
    "group": "power"
   },
+  "poehat5": {
+   "name": "PoE+ HAT for Raspberry Pi 5",
+   "spec": "802.3at, for the Pi 5’s PoE header; replaces the USB-C supply. Some add an M.2 slot for an NVMe drive",
+   "search": "Raspberry Pi 5 PoE+ HAT",
+   "pack": 1,
+   "group": "power"
+  },
+  "poehat4": {
+   "name": "Raspberry Pi PoE+ HAT",
+   "spec": "Official 802.3at HAT for the Raspberry Pi 4; replaces the USB-C supply",
+   "search": "Raspberry Pi PoE+ HAT",
+   "pack": 1,
+   "group": "power"
+  },
+  "poeinj": {
+   "name": "PoE+ injector, 30 W",
+   "spec": "802.3at, gigabit; one per device",
+   "search": "PoE+ injector 802.3at 30W gigabit",
+   "pack": 1,
+   "group": "power"
+  },
+  "poeinjbt": {
+   "name": "PoE++ injector, 60 W",
+   "spec": "802.3bt, 2.5 G or faster; one per device",
+   "search": "PoE++ injector 802.3bt 60W",
+   "pack": 1,
+   "group": "power"
+  },
   "keystone": {
    "name": "Cat6 keystone jack",
    "spec": "Snap-in RJ45, tool-less or punch-down",
@@ -1728,6 +1756,7 @@
      "size": [141.8, 30, 127.6],
      "color": "#E9EBEC",
      "io": ["lcd@24x12"],
+     "ports": 4,
      "mounts": [
       {
        "id": "ucgmax1",
@@ -1765,6 +1794,7 @@
      "size": [141.8, 30, 127.6],
      "color": "#E9EBEC",
      "io": ["lcd@24x12"],
+     "ports": 4,
      "mounts": [
       {
        "id": "mw2113543ucgult",
@@ -1813,6 +1843,7 @@
      "size": [141.8, 30, 127.6],
      "color": "#E9EBEC",
      "io": ["led"],
+     "ports": 4,
      "mounts": [
       {
        "id": "mw783611uxgmax",
@@ -1843,6 +1874,7 @@
      "size": [98, 30, 98],
      "color": "#E9EBEC",
      "io": ["led"],
+     "ports": 1,
      "mounts": [
       {
        "id": "mw2732600",
@@ -1861,6 +1893,8 @@
      "size": [212.8, 30, 127.6],
      "color": "#E9EBEC",
      "io": ["lcd@24x12"],
+     "poe": {"budget": 30, "ports": 1, "std": "at"},
+     "ports": 5,
      "mounts": [
       {
        "id": "mw1228299",
@@ -1930,6 +1964,7 @@
      "size": [63, 34.7, 118.5],
      "color": "#1E1E1E",
      "io": ["power"],
+     "eth": 0,
      "mounts": [
       {
        "id": "mw1667041",
@@ -1949,6 +1984,7 @@
      "size": [117, 42.5, 117],
      "color": "#E9EBEC",
      "io": ["lcd"],
+     "ports": 1,
      "mounts": [
       {
        "id": "mw2263413",
@@ -1990,6 +2026,7 @@
      "size": [135, 28.3, 135],
      "color": "#E9EBEC",
      "io": ["led", "rj45x4"],
+     "ports": 1,
      "mounts": [
       {
        "id": "mw2097503",
@@ -2018,6 +2055,7 @@
      "size": [131.2, 27.1, 134.2],
      "color": "#E9EBEC",
      "io": ["lcd"],
+     "poeIn": 12.95,
      "mounts": [
       {
        "id": "mw2438481",
@@ -2070,6 +2108,7 @@
      "size": [98, 30, 98],
      "color": "#E9EBEC",
      "io": ["lcd"],
+     "ports": 1,
      "mounts": [
       {
        "id": "mw1262197",
@@ -2115,6 +2154,7 @@
      "size": [203, 33, 76],
      "color": "#E9EBEC",
      "io": ["rj45x8"],
+     "poe": {"budget": 42, "ports": 7, "std": "at"},
      "mounts": [
       {
        "id": "mw773130",
@@ -2132,6 +2172,7 @@
        "label": "1U mount (60W model)",
        "u": 1,
        "watts": 6,
+       "poe": {"budget": 52, "ports": 7, "std": "at"},
        "face": "switch",
        "shape": {"row": [{"dev": true}], "shelf": true},
        "author": "DToX",
@@ -2155,6 +2196,7 @@
      "size": [86, 26, 190],
      "color": "#1E1E1E",
      "io": ["power"],
+     "eth": 0,
      "mounts": [
       {
        "id": "mw1295688",
@@ -2173,6 +2215,7 @@
      "size": [163.7, 31.7, 99.6],
      "color": "#E9EBEC",
      "io": ["rj45x8"],
+     "poe": {"budget": 52, "ports": 4, "std": "at"},
      "mounts": [
       {
        "id": "mw2117690",
@@ -2214,6 +2257,7 @@
      "size": [192, 44, 185],
      "color": "#E9EBEC",
      "io": ["rj45x16"],
+     "poe": {"budget": 45, "ports": 8, "std": "at"},
      "mounts": [
       {
        "id": "mw815550",
@@ -2254,6 +2298,7 @@
      "size": [122.5, 28, 107.1],
      "color": "#E9EBEC",
      "io": ["rj45x5"],
+     "poe": {"budget": 46, "ports": 4, "std": "af"},
      "mounts": [
       {
        "id": "mw2521345",
@@ -2434,6 +2479,7 @@
      "size": [212.9, 33.5, 99.4],
      "color": "#E9EBEC",
      "io": ["rj45x8", "rj45", "sfp"],
+     "poe": {"budget": 196, "ports": 8, "std": "bt"},
      "mounts": [
       {
        "id": "mw1024496",
@@ -2464,6 +2510,7 @@
      "size": [210.4, 43.7, 173.8],
      "color": "#E9EBEC",
      "io": ["rj45x8", "sfpx2"],
+     "poe": {"budget": 155, "ports": 8, "std": "bt"},
      "mounts": [
       {
        "id": "mw1490785",
@@ -2482,6 +2529,9 @@
      "size": [63, 34, 106],
      "color": "#1E1E1E",
      "io": ["rj45", "rj45", "led"],
+     "poe": {"budget": 60, "ports": 1, "std": "bt"},
+     "eth": 0,
+     "ports": 0,
      "mounts": [
       {
        "id": "mw3418637",
@@ -2501,6 +2551,7 @@
      "size": [148, 31, 100],
      "color": "#E9EBEC",
      "io": ["rj45x8"],
+     "poe": {"budget": 48, "ports": 4, "std": "af"},
      "mounts": [
       {
        "id": "mw1393047",
@@ -2521,6 +2572,8 @@
      "size": [46, 33, 86],
      "color": "#E9EBEC",
      "io": ["rj45", "rj45", "led"],
+     "eth": 0,
+     "ports": 0,
      "mounts": [
       {
        "id": "mw1214393",
@@ -2545,6 +2598,7 @@
      "size": [206, 46, 206],
      "color": "#F4F5F6",
      "io": ["led"],
+     "poeIn": 21,
      "mounts": [
       {
        "id": "u7pro45",
@@ -2733,6 +2787,7 @@
      "size": [158, 25, 101],
      "color": "#2E3033",
      "io": ["rj45x8", "power"],
+     "poe": {"budget": 64, "ports": 4, "std": "at"},
      "mounts": [
       {
        "id": "pr1166364",
@@ -2769,6 +2824,7 @@
      "size": [158, 25, 101],
      "color": "#2E3033",
      "io": ["rj45x6", "led"],
+     "poe": {"budget": 58, "ports": 4, "std": "at"},
      "mounts": [
       {
        "id": "mw2622617",
@@ -2788,6 +2844,7 @@
      "size": [158, 25, 101],
      "color": "#2E3033",
      "io": ["usba", "rj45x5", "led"],
+     "ports": 4,
      "mounts": [
       {
        "id": "pr1210271",
@@ -2877,6 +2934,7 @@
      "size": [209, 26, 126],
      "color": "#2E3033",
      "io": ["rj45x8", "sfpx2", "led"],
+     "poe": {"budget": 61, "ports": 8, "std": "at"},
      "mounts": [
       {
        "id": "mw1845495",
@@ -2952,6 +3010,7 @@
      "size": [158, 27, 101],
      "color": "#1C1C1E",
      "io": ["rj45x5", "led"],
+     "poe": {"budget": 63, "ports": 4, "std": "at"},
      "mounts": [
       {
        "id": "mw2338175",
@@ -3043,6 +3102,7 @@
      "size": [113, 28, 89],
      "color": "#F2F2F2",
      "io": ["power", "rj45x5", "sfp", "usba"],
+     "ports": 5,
      "mounts": [
       {
        "id": "mw2396355",
@@ -3189,6 +3249,7 @@
      "size": [118, 30, 85],
      "color": "#E3E4E6",
      "io": ["usbc", "usba", "rj45x3"],
+     "ports": 2,
      "mounts": [
       {
        "id": "mw2238156",
@@ -3207,6 +3268,7 @@
      "size": [208, 34, 83],
      "color": "#3B4652",
      "io": ["usbc", "rj45", "rj45", "usba"],
+     "ports": 1,
      "mounts": [
       {
        "id": "pr1238568",
@@ -3225,6 +3287,7 @@
      "size": [158, 27, 101],
      "color": "#1C1C1E",
      "io": ["rj45x8", "led"],
+     "poe": {"budget": 62, "ports": 8, "std": "at"},
      "mounts": [
       {
        "id": "mw1155380",
@@ -3263,6 +3326,7 @@
      "size": [158, 29, 101],
      "color": "#2F4A66",
      "io": ["rj45x8", "led"],
+     "poe": {"budget": 53, "ports": 4, "std": "af"},
      "mounts": [
       {
        "id": "mw1646055",
@@ -3299,6 +3363,7 @@
      "size": [220, 22, 125],
      "color": "#34373B",
      "io": ["power", "usba", "rj45", "rj45x7", "sfp"],
+     "ports": 8,
      "mounts": [
       {
        "id": "mw442934",
@@ -3350,6 +3415,7 @@
      "size": [228, 30, 120],
      "color": "#1F1F1F",
      "io": ["rj45x10", "sfp"],
+     "ports": 10,
      "mounts": [
       {
        "id": "mw792413",
@@ -3416,6 +3482,7 @@
      "size": [156.3, 35.7, 127.7],
      "color": "#F2F2F2",
      "io": ["power", "rj45x5", "sfp", "usba"],
+     "ports": 5,
      "mounts": [
       {
        "id": "mw2218899",
@@ -3435,6 +3502,7 @@
      "size": [113, 28, 89],
      "color": "#F2F2F2",
      "io": ["power", "rj45x5", "usba"],
+     "ports": 4,
      "mounts": [
       {
        "id": "mw1493804",
@@ -3550,6 +3618,7 @@
      "size": [142, 23, 75],
      "color": "#1E1E1E",
      "io": ["rj45x5", "sfp", "led"],
+     "ports": 5,
      "mounts": [
       {
        "id": "mw236922",
@@ -3570,6 +3639,7 @@
      "size": [110, 22, 75],
      "color": "#1E1E1E",
      "io": ["rj45x5", "led"],
+     "ports": 4,
      "mounts": [
       {
        "id": "mw2529136",
@@ -3588,6 +3658,7 @@
      "size": [229, 31.1, 136.5],
      "color": "#1E1E1E",
      "io": ["rj45", "usba", "rj45x3", "sfp"],
+     "ports": 3,
      "mounts": [
       {
        "id": "pr37814",
@@ -3608,6 +3679,7 @@
      "size": [130, 34, 91],
      "color": "#222222",
      "io": ["usbc", "rj45", "rj45", "usba"],
+     "ports": 1,
      "mounts": [
       {
        "id": "mw3247005",
@@ -3638,6 +3710,7 @@
      "size": [120, 34, 83],
      "color": "#3B4652",
      "io": ["usbc", "rj45", "rj45", "usba"],
+     "ports": 1,
      "mounts": [
       {
        "id": "mw1416079",
@@ -3657,6 +3730,7 @@
      "size": [200, 32, 100],
      "color": "#3A3D40",
      "io": ["rj45x10", "led"],
+     "poe": {"budget": 60, "ports": 8, "std": "at"},
      "mounts": [
       {
        "id": "mw2533145",
@@ -3678,6 +3752,7 @@
      "size": [193, 26, 84],
      "color": "#3A3A3A",
      "io": ["rj45x5", "led"],
+     "poe": {"budget": 60, "ports": 4, "std": "at"},
      "mounts": [
       {
        "id": "pr1379840",
@@ -3701,6 +3776,7 @@
      "size": [250, 48, 185],
      "color": "#F4F4F4",
      "io": ["dsl", "phonex2", "rj45", "rj45x4", "usbax2", "power"],
+     "ports": 4,
      "mounts": [
       {
        "id": "mw1443771",
@@ -3719,6 +3795,7 @@
      "size": [226, 47, 160],
      "color": "#2B2B2B",
      "io": ["dsl", "phonex2", "rj45x4", "usba", "power"],
+     "ports": 4,
      "mounts": [
       {
        "id": "mw1443786",
@@ -3738,6 +3815,7 @@
      "size": [133, 46, 120],
      "color": "#F2F2F2",
      "io": ["coax", "rj45", "rj45", "power"],
+     "eth": 0,
      "mounts": [
       {
        "id": "mw2376717",
@@ -3767,6 +3845,7 @@
      "size": [180, 50, 160],
      "color": "#F0F0F0",
      "io": ["coax", "rj45x4", "power"],
+     "eth": 0,
      "mounts": [
       {
        "id": "mw664461",
@@ -3785,6 +3864,7 @@
      "size": [110, 28, 85],
      "color": "#F2F2F2",
      "io": ["power", "rj45", "btn"],
+     "eth": 0,
      "mounts": [
       {
        "id": "mw2855425",
@@ -3803,6 +3883,7 @@
      "size": [86, 86, 25],
      "color": "#F4F4F4",
      "io": [],
+     "eth": 0,
      "mounts": [
       {
        "id": "mw2739136",
@@ -3821,6 +3902,7 @@
      "size": [200, 57, 184],
      "color": "#1E1E1E",
      "io": ["coax", "rj45", "power", "btn"],
+     "eth": 0,
      "mounts": [
       {
        "id": "mw1945622",
@@ -3841,6 +3923,7 @@
      "size": [250, 48, 185],
      "color": "#F4F4F4",
      "io": ["dsl", "phonex2", "rj45", "rj45x4", "usbax2", "power"],
+     "ports": 4,
      "mounts": [
       {
        "id": "mw954943",
@@ -3860,6 +3943,7 @@
      "size": [200, 45, 152],
      "color": "#F4F4F4",
      "io": ["dsl", "phone", "rj45x4", "usba", "power"],
+     "ports": 4,
      "mounts": [
       {
        "id": "mw937232",
@@ -3890,6 +3974,7 @@
      "size": [226, 47, 160],
      "color": "#F4F4F4",
      "io": ["dsl", "phonex2", "rj45x4", "usba", "power"],
+     "ports": 4,
      "mounts": [
       {
        "id": "mw1659365",
@@ -3911,6 +3996,7 @@
      "size": [173, 40, 117],
      "color": "#F2F2F2",
      "io": ["power", "power"],
+     "eth": 0,
      "mounts": [
       {
        "id": "pr1520550",
@@ -4895,6 +4981,8 @@
      "size": [56, 20, 85],
      "color": "#1E7B3B",
      "io": ["usbax2", "usbax2", "rj45"],
+     "poeOptional": true,
+     "poeIn": 15,
      "mounts": [
       {
        "id": "mw2319976",
@@ -4903,6 +4991,7 @@
        "shape": {"row": [{"sbc": 1, "board": "pi5", "hat": true}], "shelf": true},
        "watts": 6,
        "wattsEstimated": true,
+       "poeOptional": false,
        "author": "TryCatch",
        "url": "https://makerworld.com/en/models/2319976"
       },
@@ -4950,6 +5039,9 @@
        "label": "1U mount with Linksys LGS105 switch",
        "u": 1,
        "watts": 9,
+       "eth": 1,
+       "ports": 5,
+       "poeOptional": false,
        "face": "sbc",
        "shape": {"row": [{"sbc": 1, "board": "pi5"}, {"dev": "switch5"}], "shelf": true},
        "author": "Le0n._.",
@@ -4963,6 +5055,8 @@
      "size": [56.5, 17, 85.6],
      "color": "#1E7B3B",
      "io": ["rj45", "usbax2", "usbax2"],
+     "poeOptional": true,
+     "poeIn": 15,
      "mounts": [
       {
        "id": "mw2501403",
@@ -5061,6 +5155,8 @@
      "size": [56, 20, 85],
      "color": "#1E7B3B",
      "io": ["usbax2", "usbax2", "rj45"],
+     "poeOptional": true,
+     "poeIn": 15,
      "mounts": [
       {
        "id": "sbc7",
@@ -5276,6 +5372,7 @@
      "size": [65, 8, 30],
      "color": "#1E7B3B",
      "io": ["hdmi", "usbc", "usbc"],
+     "eth": 0,
      "mounts": [
       {
        "id": "mw982725",
@@ -5313,6 +5410,7 @@
      "size": [53.4, 15, 68.6],
      "color": "#00979D",
      "io": ["usba", "power"],
+     "eth": 0,
      "mounts": [
       {
        "id": "mw1011789",
@@ -5474,6 +5572,7 @@
      "size": [101.6, 26.1, 147],
      "color": "#B8BBBF",
      "io": [],
+     "eth": 0,
      "mounts": [
       {
        "id": "nas35",
@@ -5614,6 +5713,7 @@
      "size": [69.8, 7, 100.5],
      "color": "#B8BBBF",
      "io": [],
+     "eth": 0,
      "mounts": [
       {
        "id": "nas25",
@@ -5726,6 +5826,7 @@
      "size": [117, 65, 200],
      "color": "#1E1E1E",
      "io": ["vbayx2", "led"],
+     "eth": 0,
      "mounts": [
       {
        "id": "mw2643748",
@@ -5744,6 +5845,8 @@
      "size": [220, 47, 220],
      "color": "#E9EBEC",
      "io": ["rj45", "rj45x6", "hdmi", "iec"],
+     "poe": {"budget": 40, "ports": 6, "std": "af"},
+     "ports": 6,
      "mounts": [
       {
        "id": "mw2424584",
@@ -5804,6 +5907,7 @@
      "size": [166, 48, 135],
      "color": "#1E1E1E",
      "io": ["led"],
+     "eth": 0,
      "mounts": [
       {
        "id": "mw2974418",
@@ -6014,6 +6118,7 @@
        "u": 1,
        "estimated": true,
        "watts": 3,
+       "poeIn": 5,
        "face": "shelf",
        "shape": {"row": [{"dev": true}, {"dev": "brick"}], "shelf": true},
        "author": "Andsten",
