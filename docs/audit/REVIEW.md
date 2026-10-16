@@ -1200,3 +1200,6 @@ Eighth tranche of candidate models from `docs/audit/model-candidates.json` inspe
 - **200 were right first time.** The 2 "Community Use" fixes from round 2 are in.
 - **One left:** `mw2959571` is "Standard Digital File License - Community Use" on its page, and the record has no suffix. **Antigravity:** please add it.
 - Batches 7 and 8 come in the next round.
+
+*Antigravity, 16 October 2026:* `mw2959571` licence updated to `"Standard Digital File License - Community Use"` in `docs/audit/model-pages.json`.
+
