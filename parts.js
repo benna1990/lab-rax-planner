@@ -5,15 +5,16 @@
 (function () {
 'use strict';
 
-const U = 44.45;
-const CLEAR = 0.79;                // panel height clearance (EIA-310)
-const HOLE_X = 236.525 / 2;        // hole centre from the middle
-const CLEAR_W = 222;               // clear width between posts
-const PANEL_W = 250;               // printed panel width; fits on a 256 mm bed (see README)
+const D = window.LRRack.dimensions;
+const U = D.u;
+const CLEAR = D.panelClearance;                // panel height clearance (EIA-310)
+const HOLE_X = D.holeSpacing / 2;        // hole centre from the middle
+const CLEAR_W = D.clearWidth;               // clear width between posts
+const PANEL_W = D.panelWidth;               // printed panel width; fits on a 256 mm bed (see README)
 const HOLE_D = 6.6;                // M6 clearance
 const SLOT_L = 9;                  // horizontal slot length for tolerance
 const KS_W = 14.9, KS_H = 16.4;    // keystone cut-out (module face is 14.5 × 16.0 mm)
-const SPAN = 212;                  // width for cut-outs and what sits behind them, 5 mm in from each post
+const SPAN = D.cutoutSpan;                  // width for cut-outs and what sits behind them, 5 mm in from each post
 // fans by size: panel height, screw spacing (centre to centre), screw hole (M3 for 40 mm, fan screws or M4 above), fans across, frame depth
 const FANS = { 40: { u: 1, holes: 32, screw: 3.4, max: 5, d: 10 }, 80: { u: 2, holes: 71.5, screw: 4.4, max: 2, d: 25 }, 120: { u: 3, holes: 105, screw: 4.4, max: 1, d: 25 } };
 const D_HOLE = 24, D_SX = 19, D_SY = 24, D_SCREW = 3.2, D_W = 26, D_H = 31, D_PITCH = 31; // Neutrik D-series: Ø24 cut-out, M3 holes 19 × 24 mm apart, 26 × 31 mm flange

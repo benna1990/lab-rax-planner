@@ -4,9 +4,24 @@ import { readFileSync } from 'node:fs';
 const cat = JSON.parse(readFileSync(new URL('../catalog.json', import.meta.url), 'utf8'));
 // shapes.js knows the shape spec (how a part looks); it is a browser script, so give it a window to attach to
 const win = {};
+new Function('window', readFileSync(new URL('../rack.js', import.meta.url), 'utf8'))(win);
 new Function('window', readFileSync(new URL('../shapes.js', import.meta.url), 'utf8'))(win);
 const LS = win.LRShapes, deviceNames = new Set((cat.devices || []).flatMap(g => (g.items || []).map(d => d.device)));
-const look = (kind, o, where) => { if (o.shape != null) LS.check(kind, o.shape, n => deviceNames.has(n)).forEach(e => errors.push(`${where}: ${e}`)); };
+const look = (kind, o, where) => {
+  if (o.shape != null) LS.check(kind, o.shape, n => deviceNames.has(n)).forEach(e => errors.push(`${where}: ${e}`));
+  if (o.profileChoices != null && (!Array.isArray(o.profileChoices) || o.profileChoices.some(x => typeof x !== 'string' || !x.trim()))) errors.push(`${where}: profileChoices must be an array of text`);
+  if (o.options != null) {
+    if (!Array.isArray(o.options) || !o.options.length) { errors.push(`${where}: options must be a nonempty array`); return; }
+    const ids = new Set();
+    for (const opt of o.options) {
+      if (!opt || typeof opt.id !== 'string' || !/^[a-z0-9-]+$/.test(opt.id) || ids.has(opt.id) || typeof opt.name !== 'string' || !opt.name.trim()) { errors.push(`${where}: each option needs a unique id and name`); continue; }
+      ids.add(opt.id);
+      if (opt.frame != null && !['brass', 'bolted'].includes(opt.frame)) errors.push(`${where}: option frame must be brass or bolted`);
+      if (opt.note != null && typeof opt.note !== 'string') errors.push(`${where}: option note must be text`);
+      if (opt.shape != null) LS.check(kind, Object.assign({}, o.shape, opt.shape), n => deviceNames.has(n)).forEach(e => errors.push(`${where} option ${opt.id}: ${e}`));
+    }
+  }
+};
 const errors = [], ids = new Set(), urls = new Map();
 const FACES = new Set(['shelf', 'switch', 'vent', 'fan', 'ks', 'd', 'sbc', 'drv2', 'drv4', 'blank', 'cut']);
 const text = v => typeof v === 'string' && v.trim() !== '';
@@ -15,6 +30,29 @@ const okU = u => typeof u === 'number' && u >= 0.5 && u <= 10 && Number.isIntege
 const DIRS = new Set(['intake', 'exhaust', 'cross']), PLACES = new Set(['side', 'back', 'top']);
 const isFan = part => typeof cat.hardware?.[part]?.cfm === 'number';
 // heat and airflow: typical heat in W (wattsEstimated marks a guess), fan direction, free area of an opening, where an extra sits
+// how a claim is known (docs/audit/CATALOG_VERIFICATION.md): verified needs a method and a date, documented and community a source
+const EV = new Set(['verified', 'documented', 'community', 'estimated', 'unknown']);
+// entries from before licences were recorded; every other entry must state its model's licence
+const LEGACY = new Set(JSON.parse(readFileSync(new URL('./catalog-baseline.json', import.meta.url), 'utf8')).ids);
+function evidence(o, where) {
+  if (o.license != null && !text(o.license)) errors.push(`${where}: license must be text, e.g. "CC BY 4.0"`);
+  if (o.license == null && o.id && !LEGACY.has(o.id)) errors.push(`${where}: a new entry needs a license, as its model page states it (e.g. "CC BY-NC-SA 4.0")`);
+  if (o.evidence == null) return;
+  if (typeof o.evidence !== 'object' || Array.isArray(o.evidence)) return errors.push(`${where}: evidence must be an object`);
+  for (const [k, e] of Object.entries(o.evidence)) {
+    if (!['height', 'fit', 'power', 'depth', 'look'].includes(k)) errors.push(`${where}: evidence.${k} is not a known claim (height, fit, power, depth, look)`);
+    if (!e || !EV.has(e.state)) { errors.push(`${where}: evidence.${k}.state must be one of ${[...EV].join(', ')}`); continue; }
+    if (e.state === 'verified' && !(text(e.method) && /^\d{4}-\d{2}-\d{2}$/.test(e.date || ''))) errors.push(`${where}: evidence.${k} is verified, so it needs a method and a date (YYYY-MM-DD)`);
+    if ((e.state === 'documented' || e.state === 'community') && !(okUrl(e.source) || okUrl(o.url))) errors.push(`${where}: evidence.${k} is ${e.state}, so it needs a source link`);
+  }
+}
+function powerInput(i, where) {
+  if (!i || typeof i !== 'object' || Array.isArray(i)) { errors.push(`${where}: input must be an object`); return; }
+  if (!['dc', 'usb-c', 'usb', 'poe', 'ac'].includes(i.type)) errors.push(`${where}: unknown input type`);
+  for (const key of ['volts', 'amps', 'watts']) if (i[key] != null && !(typeof i[key] === 'number' && Number.isFinite(i[key]) && i[key] >= 0)) errors.push(`${where}: input.${key} must be a nonnegative number or null`);
+  for (const key of ['plug', 'poeClass', 'notes']) if (i[key] != null && typeof i[key] !== 'string') errors.push(`${where}: input.${key} must be text or null`);
+  if (i.alt != null) { if (i.alt.alt != null) errors.push(`${where}: nested alternative inputs are not supported`); else powerInput(i.alt, where + ' alternative'); }
+}
 function air(o, where, needWatts) {
   if (o.watts == null) { if (needWatts) errors.push(`${where}: needs watts, the typical heat in W (add "wattsEstimated": true when it's a guess)`); }
   else if (!(typeof o.watts === 'number' && o.watts >= 0 && o.watts <= 500)) errors.push(`${where}: watts must be a number from 0 to 500`);
@@ -82,12 +120,13 @@ for (const g of cat.panels || []) {
     if (!okU(p.u)) errors.push(`${w}: u must be 0.5–10 in steps of 0.5`);
     if (p.face && !FACES.has(p.face)) errors.push(`${w}: unknown face "${p.face}"`);
     if (p.fit != null && p.fit !== 'labrax') errors.push(`${w}: fit can only be "labrax"`);
-    url(p.url, w, false); hardware(p.hardware, w); air(p, w, false); power(p, w); look('part', p, w);
+    url(p.url, w, false); hardware(p.hardware, w); air(p, w, false); power(p, w); evidence(p, w); look('part', p, w);
   }
 }
 for (const g of cat.devices || []) {
   if (!text(g.group)) errors.push('devices: every group needs a name');
   for (const d of g.items || []) {
+    if (d.input != null) { powerInput(d.input, d.device); if (d.evidence?.power?.state !== 'documented' || !okUrl(d.evidence.power.source)) errors.push(`${d.device}: input needs documented power source evidence`); }
     if (!text(d.device)) errors.push('devices: every item needs a device name');
     if (!Array.isArray(d.mounts) || !d.mounts.length) errors.push(`${d.device}: needs at least one mount`);
     LS.checkDevice(d, d.device).forEach(e => errors.push(e));
@@ -100,14 +139,36 @@ for (const g of cat.devices || []) {
       if (m.position !== 'top' && !okU(m.u)) errors.push(`${w}: u must be 0.5–10 in steps of 0.5`);
       if (m.face && !FACES.has(m.face)) errors.push(`${w}: unknown face "${m.face}"`);
       if (m.fit != null && (m.fit !== 'labrax' || m.position === 'top')) errors.push(`${w}: fit can only be "labrax", on a panel`);
-      hardware(m.hardware, w); air(m, w, true); power(m, w, d); look(m.position === 'top' ? 'top' : 'part', m, w);
+      hardware(m.hardware, w); air(m, w, true); power(m, w, d); evidence(m, w); look(m.position === 'top' ? 'top' : 'part', m, w);
       if (m.url) { const k = m.url.replace(/^https:\/\/(www\.)?/, '').replace(/\/en\//, '/'); if (urls.has(k + d.device)) errors.push(`${w}: same model listed twice for this device`); urls.set(k + d.device, 1); }
     }
   }
 }
 for (const g of cat.extras || []) {
   if (!text(g.group)) errors.push('extras: every group needs a name');
-  for (const x of g.items || []) { const w = `extra ${x.id}`; claim(x.id, w); if (!text(x.name)) errors.push(`${w}: needs a name`); url(x.url, w, true); hardware(x.hardware, w); air(x, w, false); look('extra', x, w); }
+  if (g.kind != null && g.kind !== 'rack' && g.kind !== 'addon') errors.push(`extras group ${g.group}: kind must be rack (rack systems and variants) or addon`);
+  for (const x of g.items || []) { const w = `extra ${x.id}`; claim(x.id, w); if (!text(x.name)) errors.push(`${w}: needs a name`); url(x.url, w, true); hardware(x.hardware, w); air(x, w, false); evidence(x, w); look('extra', x, w); }
+}
+
+// resources.json: the Guides → Resources list
+const res = JSON.parse(readFileSync(new URL('../resources.json', import.meta.url), 'utf8'));
+for (const g of res.groups || []) { if (!text(g.title)) errors.push('resources: every group needs a title'); for (const r of g.items || []) { const w = `resource ${r.title || '(untitled)'}`; if (!text(r.title) || !text(r.kind) || !text(r.about)) errors.push(`${w}: needs a title, a kind and an about`); if (!okUrl(r.url)) errors.push(`${w}: needs an https url`); } }
+
+// Affiliate links are the maintainer's only. The shop tags and partner templates in catalog.json must match
+// OWNER_SHOPS here, so a change to either shows up twice in a pull request. Links in the data never carry
+// affiliate or tracking parameters, and never go through link shorteners.
+const OWNER_SHOPS = { amazon: { tag: '' }, bol: { wrap: '' }, aliexpress: { wrap: '' } };
+for (const [k, s] of Object.entries(cat.shops || {})) {
+  if (k.startsWith('_')) continue;
+  for (const f of ['tag', 'wrap']) {
+    const want = (OWNER_SHOPS[k] || {})[f] || '', got = (s && s[f]) || '';
+    if (got !== want) errors.push(`shops.${k}.${f}: affiliate tags and partner links are the maintainer's only; only the maintainer changes them, here and in OWNER_SHOPS in tools/validate.mjs`);
+  }
+}
+const TRACKING = /[?&](tag|ref_?|aff(_?id)?|affiliate|affid|clickref|utm_[a-z]+|ascsubtag|linkCode|camp|creative|aff_fcid|aff_platform|sk|spm)=|\/\/(s\.click\.aliexpress\.com|partner\.bol\.com|amzn\.(to|eu)|a\.co|bit\.ly|tinyurl\.com)\//i;
+for (const f of ['catalog.json', 'resources.json', 'tips.json']) {
+  let src = ''; try { src = readFileSync(new URL('../' + f, import.meta.url), 'utf8'); } catch (e) { continue; }
+  for (const u of src.match(/https?:\/\/[^"\s]+/g) || []) if (TRACKING.test(u) && !Object.values(cat.shops || {}).some(s => s && s.url && u === s.url)) errors.push(`${f}: ${u} has an affiliate or tracking part; link to the plain page (shop affiliate tags are set only in "shops")`);
 }
 
 if (errors.length) { console.error(`catalog.json has ${errors.length} problem(s):\n- ` + errors.join('\n- ')); process.exit(1); }

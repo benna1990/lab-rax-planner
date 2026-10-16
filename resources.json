@@ -1,0 +1,60 @@
+{
+ "_comment": "Resources shown under Guides → Resources. Each item: title, url (https), kind, about. Only sources that were read are listed; see docs/audit/RESEARCH_SOURCES.md. Checked 2026-10-15.",
+ "checked": "2026-10-15",
+ "groups": [
+  {
+   "title": "Rack systems",
+   "items": [
+    {"title": "Introducing Lab Rax (The DIY Life)", "url": "https://www.the-diy-life.com/introducing-lab-rax-a-3d-printable-modular-10-rack-system/", "kind": "Rack system", "about": "The designer's own article: sizes, heat-set inserts, the assembly order and the first panels."},
+    {"title": "Lab Rax upgrades and accessories (The DIY Life)", "url": "https://the-diy-life.com/lab-rax-upgrades-design-improvements-new-accessories-for-my-3d-printed-homelab/", "kind": "Rack system", "about": "Design changes, the NeoPixel light-up logo and new accessories."},
+    {"title": "Lab Rax frame, heat-set inserts (MakerWorld)", "url": "https://makerworld.com/en/models/1294480-lab-rax-10-server-rack-5u", "kind": "Model source", "about": "The 5U frame files. The page didn't load for our research; open it for the licence and print profiles."},
+    {"title": "Lab Rax frame, bolted (MakerWorld)", "url": "https://makerworld.com/en/models/1464819-lab-rax-10-server-rack-bolted-version-5u", "kind": "Model source", "about": "The bolted version, without inserts."},
+    {"title": "rackstack (GitHub)", "url": "https://github.com/jazwa/rackstack", "kind": "Rack system", "about": "Another printable 10-inch rack system, with its own frame and parts."},
+    {"title": "HomeRacker (GitHub)", "url": "https://github.com/kellervater/homeracker", "kind": "Rack system", "about": "A modular printable rack system."},
+    {"title": "LabStack (GitHub)", "url": "https://github.com/JaredC01/LabStack", "kind": "Rack system", "about": "A printable 10-inch rack project."},
+    {"title": "DeskPi 3D print models (GitHub)", "url": "https://github.com/DeskPi-Team/3DPrint-Models", "kind": "Manufacturer", "about": "Printable parts for the DeskPi RackMate metal racks."}
+   ]
+  },
+  {
+   "title": "Indexes and builds",
+   "items": [
+    {"title": "Project MINI RACK", "url": "https://mini-rack.jeffgeerling.com", "kind": "Index", "about": "Jeff Geerling's index of commercial and printable 10-inch racks, with builds by the community."},
+    {"title": "Project MINI RACK on GitHub", "url": "https://github.com/geerlingguy/mini-rack", "kind": "Index", "about": "The same index as a repository; notes that there is no formal 10-inch standard."}
+   ]
+  },
+  {
+   "title": "Find more models",
+   "items": [
+    {"title": "MakerWorld: 10 inch rack", "url": "https://makerworld.com/en/search/models?keyword=10%20inch%20rack", "kind": "Model search", "about": "A search, not a checked list: check the licence and the height on each model page."},
+    {"title": "Printables: 10 inch rack", "url": "https://www.printables.com/search/models?q=10%20inch%20rack", "kind": "Model search", "about": "A search, not a checked list."}
+   ]
+  },
+  {
+   "title": "Other planners",
+   "items": [
+    {"title": "Rackula (GitHub)", "url": "https://github.com/RackulaLives/Rackula", "kind": "Planner", "about": "An open-source web rack planner for 10-inch and wider racks, with front and rear faces."},
+    {"title": "Lanberg rack configurator", "url": "https://lanberg.eu/configurator", "kind": "Planner", "about": "A vendor configurator for metal racks that checks depth and load."}
+   ]
+  },
+  {
+   "title": "Power, cooling and lighting",
+   "items": [
+    {"title": "Raspberry Pi: power supply", "url": "https://www.raspberrypi.com/documentation/computers/raspberry-pi.html", "kind": "Reference", "about": "Supply needs of the Pi 5 and 4, the USB current limit and the fan header."},
+    {"title": "Raspberry Pi 27 W USB-C power supply", "url": "https://www.raspberrypi.com/products/27w-power-supply/", "kind": "Manufacturer", "about": "The 5.1 V, 5 A supply for the Pi 5."},
+    {"title": "Noctua PWM specifications white paper", "url": "https://cdn.noctua.at/media/Noctua_PWM_specifications_white_paper.pdf", "kind": "Reference", "about": "PWM signal, tach pulses and what a fan's control pin can take."},
+    {"title": "Power over Ethernet (Wikipedia)", "url": "https://en.wikipedia.org/wiki/Power_over_Ethernet", "kind": "Reference", "about": "PoE types and the power at the switch and at the device."},
+    {"title": "Westermo: PoE budget", "url": "https://docs.westermo.com/weos/5/General/PoE", "kind": "Reference", "about": "How a switch reserves PoE power by class, not by what a device draws."},
+    {"title": "Adafruit NeoPixel Überguide: powering", "url": "https://learn.adafruit.com/adafruit-neopixel-uberguide/powering-neopixels", "kind": "Reference", "about": "Current per LED, capacitors, grounding and data levels."},
+    {"title": "WLED: wiring", "url": "https://kno.wled.ge/advanced/wiring/", "kind": "Reference", "about": "Power injection, fusing and wire sizes for LED strips on an ESP32."},
+    {"title": "Lab Rax logo example code (GitHub)", "url": "https://github.com/mklements/LabRaxLogoIllumination", "kind": "Reference", "about": "The designer's example code for the NeoPixel logo."},
+    {"title": "UPS battery backup calculator (Anker SOLIX)", "url": "https://www.ankersolix.com/blogs/battery/battery-backup-calculator-for-ups", "kind": "Reference", "about": "How runtime follows from battery energy, efficiency and load."}
+   ]
+  },
+  {
+   "title": "How good instructions work",
+   "items": [
+    {"title": "Assembly instructions study (Stanford)", "url": "https://graphics.stanford.edu/papers/assembly_instructions_study/", "kind": "Research", "about": "Why step-by-step diagrams speed up assembly and cut mistakes; the basis for the planner's build guide."}
+   ]
+  }
+ ]
+}

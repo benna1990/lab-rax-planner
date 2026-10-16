@@ -17,19 +17,21 @@ h1{font-size:18px;margin:0 0 4px}p{margin:0 0 12px;color:var(--muted)}
 .f svg{display:block}
 .n{font-weight:700;font-size:13px}.m{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
 .v3{height:260px;border-radius:8px;background:var(--sunk)}
+.big{grid-template-columns:repeat(auto-fill,minmax(520px,1fr))}.big .t{height:250px}.big .t svg{width:100%;height:100%}.big .v3{height:290px}
 input{font:inherit;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);width:280px}
 </style>
 </head>
 <body>
 <h1>Part looks</h1>
-<p>Every catalog part drawn from its <code>shape</code> by shapes.js, the way the planner draws it: library drawing, front view at 1.2 px/mm, and with <code>&amp;3d=1</code> the 3D model. The custom part maker's types come last (in 3D their printed geometry). Add <code>?ids=sbc7,ucgmax1</code> to show only those parts, <code>?ids=gen</code> for the custom parts. Run a local server and open tools/looks.html.</p>
+<p>Every catalog part drawn from its <code>shape</code> by shapes.js, the way the planner draws it: library drawing, front view at 1.2 px/mm, and with <code>&amp;3d=1</code> the 3D model. The custom part maker's types come last (in 3D their printed geometry). Add <code>?ids=sbc7,ucgmax1</code> to show only those parts, <code>?ids=gen</code> for the custom parts. Add <code>&amp;big=1</code> for larger drawings, <code>&amp;novar=1</code> to leave out the print profile variants, and with <code>&amp;3d=1</code> <code>&amp;az=65&amp;el=15</code> to turn the 3D camera (degrees from the front, and up). Run a local server and open tools/looks.html.</p>
 <p><input id="q" placeholder="Filter by name, id or author"></p>
 <div class="grid" id="g"></div>
+<script src="../rack.js"></script>
 <script src="../parts.js"></script>
 <script src="../shapes.js"></script>
 <script>
 (async function () {
-  const qs = new URLSearchParams(location.search), ids = qs.get('ids') ? qs.get('ids').split(',') : null, want3d = qs.get('3d');
+  const qs = new URLSearchParams(location.search), ids = qs.get('ids') ? qs.get('ids').split(',') : null, want3d = qs.get('3d'), big = qs.get('big');
   const cat = await (await fetch('../catalog.json', { cache: 'no-store' })).json();
   const L = window.LRShapes, sizes = {}, parts = [], colors = { color: '#26282B', accent: '#B5CF2A', frame: '#26282B' };
   // the same entries the planner builds (app.js buildCatalog)
@@ -45,8 +47,10 @@ input{font:inherit;padding:6px 10px;border-radius:999px;border:1px solid var(--l
     { type: 'dtype', u: 1, ports: 6 }, { type: 'dtype', u: 2, ports: 7 }, { type: 'pass', u: 0.5, width: 160, style: 'brush' }, { type: 'pass', u: 1, width: 120, style: 'slot' },
     { type: 'vent', u: 1, pattern: 'hex' }, { type: 'keystone', u: 0.5, ports: 12, rows: 1 }, { type: 'shelf', u: 1, dw: 120, dh: 30, dd: 120, open: true }, { type: 'label', u: 0.5, text: 'LAB RAX' }]
     .forEach((params, i) => parts.push({ key: 'gen-' + params.type + '-' + i, name: 'Custom ' + params.type, label: 'Custom part · ' + JSON.stringify(params), gen: true, params, u: params.u, h2: params.u * 2 }));
+  const models = [...cat.panels.flatMap(g => g.items), ...cat.devices.flatMap(g => g.items.flatMap(d => d.mounts)), ...cat.extras.flatMap(g => g.items)];
+  if (!qs.get('novar')) for (const part of parts.slice()) for (const opt of models.find(m => m.id === part.key)?.options || []) parts.push(Object.assign({}, part, { name: part.name + ' · ' + opt.name, label: opt.note || part.label, shape: Object.assign({}, part.shape, opt.shape), variant: opt.id }));
   L.devices(n => sizes[n] || null);
-  const host = document.getElementById('g');
+  const host = document.getElementById('g'); if (big) host.classList.add('big');
   function draw(q) {
     host.innerHTML = '';
     parts.filter(p => (!ids || ids.includes(p.key) || (p.gen && ids.includes('gen'))) && (!q || (p.key + p.name + (p.label || '') + (p.author || '')).toLowerCase().includes(q))).forEach(p => {
@@ -60,23 +64,23 @@ input{font:inherit;padding:6px 10px;border-radius:999px;border:1px solid var(--l
           front = at(false) + (p.fit === 'labrax' && p.u < 1 ? at(true) : '');
         }
       } catch (e) { thumb = '<span style="color:#C8372D">' + e.message + '</span>'; console.error(p.key, e); }
-      el.innerHTML = '<div class="t">' + thumb + '</div>' + (front ? '<div class="f">' + front + '</div>' : '') + '<div class="n">' + p.name + '</div><div class="m">' + (p.label || '') + ' · ' + p.key + (p.u ? ' · ' + p.u + 'U' : '') + (p.author ? ' · ' + p.author : '') + (p.device ? ' · ' + p.device.size.join(' × ') + ' mm' : '') + '</div>' + (want3d && !p.extra ? '<div class="v3"></div>' : '');
+      el.innerHTML = '<div class="t">' + thumb + '</div>' + (front ? '<div class="f">' + front + '</div>' : '') + '<div class="n">' + p.name + '</div><div class="m">' + (p.label || '') + ' · ' + p.key + (p.u ? ' · ' + p.u + 'U' : '') + (p.author ? ' · ' + p.author : '') + (p.device ? ' · ' + p.device.size.join(' × ') + ' mm' : '') + '</div>' + (want3d ? '<div class="v3"></div>' : '');
       host.appendChild(el);
-      if (want3d && !p.extra) show3d(el.querySelector('.v3'), p);
+      if (want3d) show3d(el.querySelector('.v3'), p);
     });
   }
   async function show3d(box, p) {
     const T = await window.LRParts.loadThree();
-    const r = new T.WebGLRenderer({ antialias: true, alpha: true }); r.setPixelRatio(2); r.setSize(box.clientWidth, 260); if (T.sRGBEncoding) r.outputEncoding = T.sRGBEncoding; box.appendChild(r.domElement);
-    const scene = new T.Scene(), cam = new T.PerspectiveCamera(30, box.clientWidth / 260, 5, 5000);
+    const r = new T.WebGLRenderer({ antialias: true, alpha: true }); r.setPixelRatio(2); r.setSize(box.clientWidth, box.clientHeight); if (T.sRGBEncoding) r.outputEncoding = T.sRGBEncoding; box.appendChild(r.domElement);
+    const scene = new T.Scene(), cam = new T.PerspectiveCamera(30, box.clientWidth / box.clientHeight, 5, 5000);
     scene.add(new T.HemisphereLight(0xffffff, 0x444444, .75)); const d1 = new T.DirectionalLight(0xffffff, .7); d1.position.set(300, 500, 400); scene.add(d1); const d2 = new T.DirectionalLight(0xffffff, .35); d2.position.set(-400, 200, -200); scene.add(d2);
     const mat = c => new T.MeshStandardMaterial({ color: new T.Color(c).convertSRGBToLinear(), roughness: .8, metalness: .02 });
     let g;
     if (p.gen) { const part = await window.LRParts.build(p.params); g = new T.Group(); part.geoms.forEach(x => g.add(new T.Mesh(x, mat(colors.color)))); (part.show || []).forEach(s => g.add(new T.Mesh(s.g, mat(s.c)))); }
-    else g = p.top ? L.topMeshes(T, p, colors, mat) : L.partMeshes(T, p, colors, mat);
+    else g = p.extra ? L.rackMeshes(T, p, colors, mat) : p.top ? L.topMeshes(T, p, colors, mat) : L.partMeshes(T, p, colors, mat);
     scene.add(g);
     const b = new T.Box3().setFromObject(g), c = new T.Vector3(), s = new T.Vector3(); b.getCenter(c); b.getSize(s);
-    const dist = Math.max(s.x, s.y, s.z) * 1.5 + 40; cam.position.set(c.x + dist * .5, c.y + dist * .35, c.z + dist * .85); cam.lookAt(c);
+    const dist = Math.max(s.x, s.y, s.z) * 1.5 + 40; const az = (+qs.get('az') || 30) * Math.PI / 180, el = (+qs.get('el') || 20) * Math.PI / 180; cam.position.set(c.x + dist * 1.05 * Math.sin(az) * Math.cos(el), c.y + dist * 1.05 * Math.sin(el), c.z + dist * 1.05 * Math.cos(az) * Math.cos(el)); cam.lookAt(c);
     const ctl = new T.OrbitControls(cam, r.domElement); ctl.target.copy(c); ctl.update();
     (function loop() { if (!box.isConnected) return; ctl.update(); r.render(scene, cam); requestAnimationFrame(loop); })();
   }

@@ -34,9 +34,11 @@ A new device needs `size`, `color` and `io` (see [How parts look](#how-parts-loo
 | `face` | no | The kind of part: `shelf` (default), `switch`, `vent`, `fan`, `ks` (keystone), `sbc`, `drv2`, `drv4`, `d`, `blank`. The cooling estimate uses it, and a part without a `shape` is drawn from it. |
 | `shape` | no | What the part looks like: see [How parts look](#how-parts-look). |
 | `author` | no | The maker's name. |
+| `evidence` | no | How each claim is known: `{"height": {"state": "verified", "method": "measured from the model file", "date": "2026-10-15"}}`. Claims: `height`, `fit`, `power`, `depth`. States: `verified` (needs a method and a date), `documented` (the creator or maker says so; needs a `source` link, or the entry's own `url`), `community` (a builder reports it; needs a `source`), `estimated`, `unknown`. Without it, `estimated` and `wattsEstimated` mark estimates and everything else shows as Unknown, also fit for parts flagged `labrax`. To show a fit as documented, record its source: `"fit": {"state": "documented", "source": "https://…"}`. Never mark something verified because a listing is popular. See `docs/audit/CATALOG_VERIFICATION.md`. |
+| `license` | new entries | The model's licence as its page states it, e.g. `CC BY-NC-SA 4.0`. Required for every entry that isn't in `tools/catalog-baseline.json` (the catalog as it was on 15 October 2026); the validator checks it. Copy it from the page; don't guess. |
 | `labrax` | no | `true` when the page says it was made for or tested in Lab Rax. |
 | `fit` | no | `"labrax"` when the panel has the Lab Rax size instead of the EIA one: n × 44.45 − 2.45 mm high (42 for 1U), three 10 × 7 mm slots per U, and ½U panels 22.6 mm that turn over to fit the upper half of a U. Set on mklements' own Lab Rax parts; on another maker's part only when `tools/measure.mjs` says its panel is "like the Lab Rax panels". Without it the part is drawn at the EIA size, n × 44.45 − 0.79. |
-| `url` | yes | The original model page on MakerWorld or Printables. Never a mirror or re-upload. |
+| `url` | yes | The original model page on MakerWorld or Printables. Never a mirror or re-upload, and never with affiliate or tracking parameters (the validator rejects them). Shop affiliate links are the maintainer's only. |
 | `position` | no | `top` for parts that replace the top panel. |
 | `hardware` | no | Extra parts to buy: `[{ "part": "fan80", "qty": 2 }]`. |
 | `note` | no | One sentence the builder should know. |
@@ -123,7 +125,27 @@ Around the row: `"shelf": true` adds a shelf behind it (`"floor": "hex"` or `"sl
 
 **Top mounts** (`"position": "top"`): `{ "ap": "U7 Pro", "tilt": 45 }` for an access point (`U7 Pro`, `U7 Pro Max`, `U7 Pro XG`, `U6+`, `U6 Pro`, `U6 Lite`, `U7 Lite`), `{ "plate": "hex", "fan": 120 }` for a mesh or fan top (`"n"` fans), `{ "plate": "gridfinity" }`.
 
-**Extras** say what they change on the frame: `{ "side": "hex" }` (or `kumiko`, `skadis`, `multiboard`, `honeycomb`, `brick`, `vent`, `grid`) and `{ "fan": 80 }` for side panels, `{ "handles": "stackable" }` (`side`, `long`), `{ "feet": "big" }` or `"casters"`, `{ "drawer": true }`, `{ "logo": "neopixel" }` or `"hexbar"`, `{ "corner": 11 }` for keystones in the top corner (`"matrix"` for an LED matrix), `{ "depth": 50 }` for deeper sides, `{ "edge": "switch" }`, `{ "wall": true }` for a wall cleat behind, and for the card only `"u"`, `"frame"` (`lowprofile`, `matx`), `"inside"` (`comb`, `guide`, `atx`, `matx`, `fans`, `bracket`, `device`, `keystone`) and `"hl"` to highlight the `posts`, `handles`, `base` or `top`.
+**Extras** say what they change on the frame, and where it sits and how it looks. `at` names the attachment point (`posts`, `top`, `bottom`, `side-panel`, `top-corners`, `bottom-corners`, `feet`, `wall`, `inside`, …); a size goes in only when the model page states it, otherwise `evidence.look` stays `estimated`.
+
+| Key | Draws |
+|---|---|
+| `{ "side": "hex" }` | A pattern on the side panels: `hex`, `honeycomb`, `raisedhex` (a dual-tone fine hex with a raised border), `asanoha` (the hemp-leaf Kumiko lattice), `kumiko`, `skadis`, `multiboard`, `brick`, `vent`, `grid`. `{ "fan": 80 }` is a round fan opening instead. |
+| `{ "side": "hex", "mount": [180, 200] }` | The four mounting holes of each listed fan size, drilled through the pattern (hole spacing is estimated at .77 × the fan size). |
+| `{ "sides": "open" }` | No printed side panel: the frame shows. |
+| `{ "handles": "stackable" }` | Top handles: `plain`, `stackable`, `long` (with `depth`: the usual 127 mm plus the extra depth), `side` (with `"at": "top-corners"` or `"bottom-corners"`). |
+| `{ "feet": "big" }`, `{ "feet": "big", "foot": "round" }` | Taller feet; `foot` makes them round (`round`) or conical, narrower at the floor (`cone`). |
+| `{ "feet": "casters", "chassis": "blocks" }` | Casters under four corner base blocks (a swivel plate, fork and wheel each); without `chassis` a plain caster. |
+| `{ "drawer": true }`, `{ "logo": "neopixel" }` (or `hexbar`), `{ "corner": 11 }` (`"matrix"`), `{ "edge": "switch" }` | A drawer under the base, a lit logo, keystones or an LED matrix in the top corner, a switch in the edge. |
+| `{ "depth": 50 }` | Deeper sides: the frame is that many mm deeper. |
+| `{ "rails": "counterbore" }` | The posts with a column of counterbored holes in each front face. |
+| `{ "wall": "cleat" }` | A wall mount: `cleat` (cleats on the rear posts and the wall, spacers at the foot), `plate` (a plate on the wall, slotted slide mounts on the rear posts, spacer bolts), `dock` (adapter feet that slide into brackets; the card turns the rack on its side as the page shows it). `true` is a plain plate behind. |
+| `{ "width": 482.6 }`, `{ "tandem": 2 }`, `{ "bar": "center" }` | A wider frame (outside width in mm, 280 to 600); two or three racks side by side sharing the middle posts; a flat bar along the middle of the top. |
+| `{ "joiner": "post" }` | How a build taller than 5U is joined at the 5U seam: plates over the post joints (`post`), a bar between the front and rear posts (`depth`), or a bar across the outside of the side panels (`outer`). |
+| `{ "hl": ["edges", "sides"] }` | What the extra changes, drawn in the accent colour: `base`, `top`, `posts`, `handles`, `edges` (the side beams of both rings), `braces` (the front and back braces) and `sides` (the side panels); one name or a list. |
+
+For the card only: `"u"` (the height of the little rack in U), `"frame"` (`lowprofile`, `matx`) and `"inside"` (`comb`, `guide`, `atx`, `matx`, `fans`, `bracket`, `device`, `keystone`). In the planner the height is the rack's own.
+
+Where each is drawn: the library card and `tools/looks.html` draw all of them from the same functions in `shapes.js`. The planner's 3D view (`view3d.js`, `buildRack`) draws them in the build's frame with its equipment, except `edge`, `frame` and `inside`, which it leaves out, using the accent colour for what an extra adds or changes and no wall behind the wall brackets. The flat front view in `app.js` still knows only `feet` (`big`, `casters`), `handles`, `drawer`, `logo`, `corner` and `edge`. `frameMods()` merges the extras of a build into one object for the views.
 
 `node tools/validate.mjs` checks shapes, sizes, `io` tokens and the power fields (a PoE switch can't have more PoE ports than ports).
 

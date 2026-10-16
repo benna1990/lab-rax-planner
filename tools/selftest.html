@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Planner self-test</title>
+<style>
+  :root { color-scheme: light dark; --ok: #1f8a4c; --bad: #c0392b; }
+  body { margin: 0; padding: 16px; font: 14px/1.45 system-ui, sans-serif; background: Canvas; color: CanvasText; }
+  h1 { font-size: 18px; margin: 0 0 4px; }
+  #sum { margin: 0 0 12px; font-weight: 700; }
+  ol { padding-left: 20px; }
+  li.ok::marker { color: var(--ok); } li.bad { color: var(--bad); }
+  iframe { width: 100%; height: 640px; border: 1px solid #8884; border-radius: 8px; }
+</style>
+</head>
+<body>
+<h1>Mini Rack Planner self-test</h1>
+<p>Runs the real planner in the frame below through a full build, then puts your own saved rack back. Serve the folder (<code>python3 -m http.server 8000</code>) and open <code>/tools/selftest.html</code>.</p>
+<p id="sum">Running…</p>
+<ol id="out"></ol>
+<iframe id="app" title="The planner under test"></iframe>
+<script>
+(async () => {
+  const KEYS = ['labrax-planner-v2', 'labrax-planner-ui', 'labrax-planner-previous'], saved = KEYS.map(k => localStorage.getItem(k));
+  const out = document.getElementById('out'), results = [];
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const log = (ok, name, detail) => { results.push(ok); const li = document.createElement('li'); li.className = ok ? 'ok' : 'bad'; li.textContent = (ok ? '✓ ' : '✗ ') + name + (detail ? ' — ' + detail : ''); out.appendChild(li); };
+  const frame = document.getElementById('app');
+  const load = (hash, keepQuestion = false) => new Promise(res => { frame.onload = () => setTimeout(() => { const d = frame.contentDocument.querySelector('#askdlg[open]'); if (d && !keepQuestion) { d.close('open'); setTimeout(res, 100); } else res(); }, 1800); frame.src = '../index.html?selftest=' + Date.now() + (hash || ''); });
+  let W, errors = [];
+  const hook = () => {
+    W = frame.contentWindow; errors = []; W.addEventListener('error', e => errors.push(e.message));
+    W.__dl = []; const orig = W.HTMLAnchorElement.prototype.click; // catch downloads instead of saving them
+    W.HTMLAnchorElement.prototype.click = function () { if (this.download) { W.__dl.push({ name: this.download, href: this.href }); return; } return orig.call(this); };
+    W.URL.revokeObjectURL = () => {};
+  };
+  const T = () => W.LRApp.test, $ = s => W.document.querySelector(s), items = () => JSON.stringify(T().state.items.map(i => [i.key, i.pos2]));
+  const fail = m => { throw new Error(m); }; // a check passes with true or a note, and fails by throwing
+  async function check(name, fn) { try { const d = await fn(); log(d !== false, name, typeof d === 'string' ? d : ''); } catch (e) { log(false, name, e.message); } }
+  async function download(act, re) {
+    W.__dl = []; $('[data-act="' + act + '"]').click(); await wait(400);
+    const b = [...W.document.querySelectorAll('#finalize-build button')].find(x => re.test(x.textContent)); if (!b) throw new Error('no download button');
+    b.click(); for (let i = 0; i < 100 && !W.__dl.length; i++) await wait(200);
+    if (!W.__dl.length) throw new Error('nothing downloaded');
+    const f = W.__dl[0]; return { name: f.name, buf: new Uint8Array(await (await W.fetch(f.href)).arrayBuffer()) };
+  }
+  try {
+    KEYS.forEach(k => localStorage.removeItem(k));
+    await load(); hook();
+    await check('First visit shows the start screen', () => !$('#startcard').hidden);
+    await check('The example passes its checks, apart from picking a printer', () => { const s = T().ready(); return s.warn === 0 && s.todo === 1 ? 'ready apart from 1 to do' : false; });
+    await check('Filled modular slots set needed supplies, Connect and network counts without rebuying owned supplies', () => {
+      const item = T().state.items.find(i => i.key === 'sbc7'), fill = item.fill;
+      if (T().orderList().some(r => r.key === 'pi5psu' || r.key === 'usbc')) fail('owned example rebuys Pi supplies');
+      item.needPower = true;
+      try {
+        const f = T().facts(), shop = T().orderList();
+        if (f.pi5 !== 4 || f.boards !== 4 || shop.find(x => x.key === 'pi5psu')?.qty !== 4 || shop.find(x => x.key === 'usbc')?.qty !== 4) fail('missing supplies not four');
+        if (!W.document.body.textContent.includes('4 Pi 5 boards need')) fail('Connect count not four');
+        for (const n of [0, 1, 7]) { item.fill = n; const f = T().facts(), rows = T().orderList(); if (f.boards !== n || (rows.find(x => x.key === 'pi5psu')?.qty || 0) !== n || T().powerModel().rows.find(r => r.it?.key === 'sbc7').p.eth !== n) fail('filled count ' + n + ' differs'); }
+      } finally { item.fill = fill; delete item.needPower; }
+      return 'owned supplies omitted; missing supplies follow 4/7 and 0/1/7 occupied slots';
+    });
+    await check('Start empty gives an empty rack', async () => { $('.sc-opt[data-v="empty"]').click(); await wait(500); return T().state.items.length === 0 && $('#startcard').hidden; });
+    await check('Parts go to the first free slot', async () => { ['ucgmax1', 'mw2117690', 'sbc7'].forEach(key => T().addItem({ key })); await wait(200);
+      const p = T().state.items.map(i => i.key + '@' + i.pos2).join(' '); return p === 'ucgmax1@0 mw2117690@2 sbc7@4' ? p : false; });
+    await check('Reorder in a full rack', async () => { T().setHeight(4); T().move(T().state.items.find(i => i.key === 'sbc7').id, -1); await wait(200);
+      const p = T().byPos().map(i => i.key).join(' '); return p === 'ucgmax1 sbc7 mw2117690' ? p : false; });
+    await check('Undo and redo', async () => { await wait(900); T().setHeight(6); await wait(900); // a change of its own, more than 0.8 s after the last
+      T().histGo(-1); await wait(200); const undone = T().state.h === 4; T().histGo(1); await wait(200); return undone && T().state.h === 6 ? '6U → 4U → 6U' : false; });
+    await check('Rack file round trip', () => { const r = T().readRackFile(T().rackFile()); return !!r && JSON.stringify(r.state.items.map(i => [i.key, i.pos2])) === items(); });
+    const link = T().shareLink(), want = items();
+    await check('PDF export', async () => { const f = await download('pdf', /download pdf/i), head = new TextDecoder().decode(f.buf.subarray(0, 5)), pages = (new TextDecoder('latin1').decode(f.buf).match(/\/Type \/Page\b/g) || []).length;
+      return head === '%PDF-' && pages >= 4 ? f.name + ', ' + pages + ' pages' : false; });
+    await check('Build pack ZIP export', async () => { W.document.querySelector('#finalize-build').close && W.document.querySelector('#finalize-build').close(); await wait(200);
+      const f = await download('pack', /download/i), v = new DataView(f.buf.buffer), eo = f.buf.length - 22, n = v.getUint16(eo + 10, true); let cd = v.getUint32(eo + 16, true); const names = [], contents = {};
+      for (let i = 0; i < n; i++) { const nl = v.getUint16(cd + 28, true); const name = new TextDecoder().decode(f.buf.subarray(cd + 46, cd + 46 + nl)); names.push(name); const lh = v.getUint32(cd + 42, true), start = lh + 30 + v.getUint16(lh + 26, true) + v.getUint16(lh + 28, true); contents[name] = new TextDecoder().decode(f.buf.subarray(start, start + v.getUint32(cd + 24, true))); cd += 46 + nl + v.getUint16(cd + 30, true) + v.getUint16(cd + 32, true); }
+      if (!/Optional/.test(contents['shopping-list.csv'] || '') || !/,"Yes",/.test(contents['shopping-list.csv'] || '') || !/\[Optional\]/.test(contents['README.txt'] || '')) fail('optional items lost in CSV or README');
+      const need = ['.pdf', '.rack.json', 'shopping-list.csv'].filter(x => !names.some(nm => nm.endsWith(x))); return need.length ? fail('missing ' + need.join(', ')) : f.name + ': ' + names.length + ' files'; });
+    // regressions from the first review (AUDIT-NL.md, findings 1–4)
+    await check('Print list: two variants from one model page share a row and both show', async () => { T().setHeight(8); T().addItem({ key: 'mw1385541' }); T().addItem({ key: 'mw13855411' }); await wait(200);
+      const rows = T().printPack().filter(x => /1385541/.test(x.url || '')); return rows.length === 1 && rows[0].qty === 2 && /½U/.test(rows[0].variants) && /1U/.test(rows[0].variants) ? rows[0].variants : fail('rows: ' + JSON.stringify(rows.map(r => [r.qty, r.variants]))); });
+    await check('Print list: two custom parts with the same name but other settings stay apart', async () => { T().addItem({ key: 'gen', name: 'Panel', params: { type: 'vent', u: 1, pattern: 'hex' } }); T().addItem({ key: 'gen', name: 'Panel', params: { type: 'vent', u: 1, pattern: 'slots' } }); await wait(200);
+      const n = T().printPack().filter(x => x.name === 'Panel').length; return n === 2 || fail(n + ' rows'); });
+    await check('Shopping list: a mount without its own hardware list shows unknown hardware', () => { const r = T().orderList().find(x => x.key === 'parthardware'); return !!r && r.qty == null ? r.spec.slice(0, 60) + '…' : false; });
+    await check('No errors while building', () => errors.length ? fail(errors.join('; ')) : true);
+    await check('PDF at 10U, full: every text line inside the page', async () => { T().setHeight(10); for (const key of ['tiny1', 'fan40', 'keystone']) if (!T().addItem({ key }, 0)) fail('PDF stress fixture could not place ' + key); await wait(300); // explicit placement also exercises PDF output for builds with warnings
+      W.document.querySelector('#finalize-build').close && W.document.querySelector('#finalize-build').close();
+      const f = await download('pdf', /download pdf/i); window.__lighterFixturePDF = Array.from(f.buf);
+      const s = new TextDecoder('latin1').decode(f.buf), pages = (s.match(/\/Type \/Page\b/g) || []).length; const bad = []; let n = 0;
+      for (const blk of s.matchAll(/\bBT\b([\s\S]*?)\bET\b/g)) { let x = 0, y = 0; // the first Td in a text block is absolute, the next ones move from the line before
+        for (const m of blk[1].matchAll(/(-?[\d.]+) (-?[\d.]+) Td/g)) { n++; x += +m[1]; y += +m[2]; if (x < 0 || x > 595.3 || y < 14 || y > 841.9) bad.push(x.toFixed(1) + ',' + y.toFixed(1) + ' ' + blk[1].slice(m.index, m.index + 80).replace(/\s+/g, ' ')); } }
+      return n > 50 && !bad.length ? pages + ' pages, ' + n + ' text lines inside A4' : fail(bad.length + ' of ' + n + ' text lines outside the page: ' + bad.slice(0, 2).join(' | ')); });
+    await check('PDF at 10U: every text line, image and box inside the page, and no text over text', async () => {
+      W.document.querySelector('#finalize-build').close && W.document.querySelector('#finalize-build').close(); W.__pdfGeom = [];
+      await download('pdf', /download pdf/i); const g = W.__pdfGeom; W.__pdfGeom = null;
+      const txt = g.filter(e => e.k === 'text'), out = g.filter(e => e.k === 'text' ? e.l < 4 || e.r > 206 || e.t < 4 || e.b > 293 : e.l < -.5 || e.r > 210.5 || e.t < -.5 || e.b > 297.5);
+      const over = []; for (let i = 0; i < txt.length; i++) for (let j = i + 1; j < txt.length; j++) { const a = txt[i], b = txt[j];
+        if (a.page === b.page && Math.min(a.r, b.r) - Math.max(a.l, b.l) > .6 && Math.min(a.b, b.b) - Math.max(a.t, b.t) > .6) over.push('p' + a.page + ' “' + a.s + '” × “' + b.s + '”'); }
+      const say = e => 'p' + e.page + ' ' + e.k + (e.s ? ' “' + e.s + '”' : '') + ' ' + [e.l, e.t, e.r, e.b].map(v => v.toFixed(1)).join(',');
+      const margin = txt.filter(e => e.page > 1 && e.t < 26 && e.s !== 'MINI RACK PLANNER' && e.s !== 'Lab Rax · 10U');
+      return !out.length && !over.length && !margin.length ? txt.length + ' text lines, ' + (g.length - txt.length) + ' images and boxes, all inside; no overlap'
+        : fail((out.length ? out.length + ' outside: ' + out.slice(0, 3).map(say).join(' | ') + '. ' : '') + (over.length ? over.length + ' overlaps: ' + over.slice(0, 3).join(' | ') : '') + (margin.length ? ' content above header margin: ' + margin.map(say).join(' | ') : '')); });
+    await check('A failed PDF is reported, not silently left out of the build pack', async () => { W.document.querySelector('#finalize-build').close && W.document.querySelector('#finalize-build').close(); const make = W.LRPdf.make; W.LRPdf.make = () => Promise.reject(new Error('test failure'));
+      try { const f = await download('pack', /download/i); await wait(300); const st = W.document.getElementById('status').textContent; return /PDF is missing/.test(st) ? f.name + ': ' + st.slice(0, 70) + '…' : fail('status: ' + st); } finally { W.LRPdf.make = make; } });
+    await load(link.slice(link.indexOf('#'))); hook();
+    await check('Share link opens the same layout', () => { const got = items(); return got === want || fail('got ' + got); });
+    await check('Fuller 10U rack with front and rear parts: PDF content respects the header margin', async () => {
+      T().state.items.splice(0); T().setHeight(10);
+      const front = [['ucgmax1',0],['mw2117690',2],['sbc7',4],['fan40',8],['keystone',10],['tiny1',12],['fan40',14],['vent1',16],['mw2381776',18]];
+      for (const [key, pos] of front) T().addItem(Object.assign({ key }, key === 'sbc7' ? { fill: 4 } : {}), pos);
+      T().addItem({ key: 'fan40', side: 'back' }, 0); T().addItem({ key: 'vent1', side: 'back' }, 2);
+      await wait(300);
+      if (T().state.items.length !== 11 || T().state.items.filter(i => i.side === 'back').length !== 2 || T().state.items[0].pos2 !== 0) fail('full fixture placement differs: ' + JSON.stringify(T().state.items.map(i => [i.key, i.pos2, i.side])));
+      W.document.querySelector('#finalize-build')?.close(); W.__pdfGeom = [];
+      const f = await download('pdf', /download pdf/i), g = W.__pdfGeom; W.__pdfGeom = null;
+      window.__fullFixturePDF = Array.from(f.buf); // lets an independent browser runner render this exact fixture
+      const pages = (new TextDecoder('latin1').decode(f.buf).match(/\/Type \/Page\b/g) || []).length;
+      const bad = g.filter(e => e.page > 1 && e.k === 'text' && e.t < 26 && e.s !== 'MINI RACK PLANNER' && e.s !== 'Lab Rax · 10U');
+      const boxes = g.filter(e => e.page > 1 && e.k !== 'text' && (e.t < 26 || e.b > 280) && !(e.k === 'rect' && e.l === 16 && e.r === 18 && e.t === 14));
+      const outside = g.filter(e => e.k === 'text' ? e.l < 4 || e.r > 206 || e.t < 4 || e.b > 293 : e.l < -.5 || e.r > 210.5 || e.t < -.5 || e.b > 297.5);
+      const texts = g.filter(e => e.k === 'text'), overlap = texts.some((a, i) => texts.slice(i + 1).some(b => a.page === b.page && Math.min(a.r, b.r) - Math.max(a.l, b.l) > .6 && Math.min(a.b, b.b) - Math.max(a.t, b.t) > .6));
+      return pages <= 7 && !bad.length && !boxes.length && !outside.length && !overlap ? pages + ' pages; no content above the header margin; frame and power share the continuation page' : fail(outside.length + ' outside / overlap: ' + overlap + '; ' + pages + ' pages; ' + bad.length + ' text lines / ' + boxes.length + ' boxes cross the content margins');
+    });
+    await check('Beginner wizard: UCG-Max with default options creates no physical overlaps', async () => {
+      $('[data-act="wizard"]').click();
+      const pick = [...W.document.querySelectorAll('.wz-dev')].find(b => /^\+\s*UCG-Max$/.test(b.textContent));
+      if (!pick) fail('UCG-Max not offered'); pick.click();
+      for (let step = 0; step < 4; step++) $('[data-act="wz-next"]').click();
+      $('[data-act="wz-create"]').click(); await wait(250);
+      const s = T().ready();
+      return s.warn === 0 && !/parts overlap/.test($('#ready').textContent) ? T().state.h + 'U, no build warnings' : fail($('#ready').textContent);
+    });
+    await check('Automatic placement asks before growing instead of overlapping a half-U panel', async () => {
+      T().setHeight(2);
+      const before = JSON.stringify(T().state), count = T().state.items.length, height = T().state.h;
+      if (T().addItem({ key: 'flexmini05' })) fail('overlapping placement was accepted');
+      await wait(100);
+      if (T().state.items.length !== count || !$('#askdlg').open) fail('build changed before a growth choice');
+      $('#askdlg button[value=""]').click(); await wait(100);
+      if (JSON.stringify(T().state) !== before) fail('cancel changed the build');
+      T().addItem({ key: 'flexmini05' }); await wait(100);
+      const grow = $('#askdlg button[value="grow"]'); if (!grow) fail('no physical growth proposal');
+      grow.click(); await wait(200);
+      return T().state.items.length === count + 1 && T().state.h > height && T().ready().warn === 0 ? T().state.h + 'U, added without overlaps; cancel preserves the build' : fail($('#ready').textContent);
+    });
+    await check('Step jumps keep Print and Export below the sticky header', async () => {
+      for (const [step, selector] of [[5, '[data-sec="print"]'], [6, '#export']]) {
+        $('[data-act="go-step"][data-step="' + step + '"]').click(); await wait(800);
+        const header = $('header.top').getBoundingClientRect().bottom, target = $(selector).getBoundingClientRect().top;
+        if (target < header) fail('step ' + step + ' starts at ' + target.toFixed(1) + ', header ends at ' + header.toFixed(1));
+      }
+      return 'headings and export controls remain visible';
+    });
+    await check('A sourced extra profile survives files and sharing and names the print variant', async () => {
+      $('[data-act="where"][data-v="sides"]').click();
+      $('#q').value = 'Side handles'; $('#q').dispatchEvent(new W.Event('input', { bubbles: true }));
+      const row = $('[data-act="lib"][data-key="mw1931511"]'); if (!row) fail('side handles not found'); row.click();
+      const picker = $('[data-part-opt][data-key="mw1931511"]'), opt = 'only-xl-bolted-parts-handles-and-corners';
+      if (!picker || picker.options.length !== 5) fail('four source profiles not offered');
+      picker.value = opt; picker.dispatchEvent(new W.Event('change', { bubbles: true }));
+      const print = T().printPack().find(p => /1931511/.test(p.url || ''));
+      if (!print || !/Only XL Bolted Parts/.test(print.name)) fail('print list lost the selected profile');
+      if (!T().orderList().some(r => r.key.startsWith('profile-') && /Only XL Bolted Parts/.test(r.spec))) fail('shopping list lost the selected profile');
+      const file = T().readRackFile(T().rackFile());
+      if (file.state.optionChoices.mw1931511 !== opt) fail('rack file lost the profile');
+      const shared = T().shareLink(); await load(shared.slice(shared.indexOf('#'))); hook();
+      if (T().state.optionChoices.mw1931511 !== opt) fail('share link lost the profile');
+      const mods = W.LRApp.snapshot().mods;
+      if (mods.handlesAt !== 'top-corners') fail('attachment point lost');
+      return 'four source profiles, selected XL persisted, approximate drawing at top corners';
+    });
+    await check('Automatic profiles follow the frame; explicit mismatches warn and source choices remain visible', async () => {
+      const set = value => { const p = $('[data-part-opt][data-key="mw1931511"]'); if (!p) fail('profile picker missing'); p.value = value; p.dispatchEvent(new W.Event('change', { bubbles: true })); };
+      $('[data-act="where"][data-v="sides"]').click();
+      $('#q').value = 'Side handles'; $('#q').dispatchEvent(new W.Event('input', { bubbles: true }));
+      $('[data-act="ver"][data-v="brass"]').click(); set('');
+      const row = () => T().printPack().find(p => /1931511/.test(p.url || ''));
+      if (!/Only Heatset/.test(row().name)) fail('automatic heat-set profile missing');
+      if (!row().subs.some(s => /open or closed/.test(s) && /blank side corners/.test(s))) fail('source choices absent from print list');
+      $('[data-act="ver"][data-v="bolted"]').click();
+      if (!/Only Normal Bolted/.test(row().name)) fail('automatic profile did not follow bolted frame');
+      set('only-heatset-parts-handles-and-corners');
+      if (!W.document.body.textContent.includes('Print profile does not match the frame')) fail('mismatch not warned');
+      if (!/Only Heatset/.test(row().name)) fail('explicit profile was overwritten');
+      set('');
+      if (W.document.body.textContent.includes('Print profile does not match the frame')) fail('warning remained after automatic correction');
+      if (T().state.optionChoices.mw1931511) fail('automatic choice stored as fixed profile');
+      return 'automatic heat-set/bolted, explicit mismatch warning, source choices in print list';
+    });
+    await check('Shared racks and files ask first and Previous rack survives reload', async () => {
+      const shared = T().shareLink().split('#')[1];
+      const mine = JSON.parse(JSON.stringify(T().state)); mine.label = 'MY OWN RACK'; mine.example = false;
+      localStorage.setItem(KEYS[0], JSON.stringify(mine)); await load(); hook();
+      await load('#' + shared, true); hook();
+      if (!$('#askdlg[open]') || T().state.label !== 'MY OWN RACK') fail('share replaced rack without asking');
+      $('#askdlg').close(''); await wait(100);
+      if (T().state.label !== 'MY OWN RACK') fail('cancel changed rack');
+      await load('#' + shared, true); hook(); $('#askdlg').close('open'); await wait(150);
+      if (T().state.label === mine.label) fail('accepted link did not open incoming rack');
+      await load(); hook();
+      const restore = $('[data-act="previous-rack"]'); if (!restore) fail('previous rack missing after reload'); restore.click();
+      if (!$('#askdlg[open]')) fail('restore did not protect current rack'); $('#askdlg').close('open'); await wait(150);
+      if (T().state.label !== mine.label || JSON.stringify(T().state.items) !== JSON.stringify(mine.items)) fail('previous rack differs');
+      const before = JSON.stringify(T().state), opening = T().openRackFile(new W.File([T().rackFile()], 'test.rack.json'));
+      await wait(100); if (!$('#askdlg[open]')) fail('file did not ask'); $('#askdlg').close(''); await opening; await wait(50);
+      if (JSON.stringify(T().state) !== before) fail('cancel file changed rack');
+      return 'cancel preserved own rack; accepted link backed it up; restore after reload; file asks';
+    });
+    await check('Three-device wizard stays compact, reserves usable growth and explains small printer limits', async () => {
+      $('[data-act="wizard"]').click();
+      while ($('[data-act="wz-qty"][data-d="-1"]')) $('[data-act="wz-qty"][data-d="-1"]').click();
+      for (const name of ['UCG-Ultra', 'USW-Flex-Mini', 'Raspberry Pi 5']) {
+        $('#wz-q').value = name; $('#wz-q').dispatchEvent(new W.Event('input', { bubbles: true }));
+        const b = [...W.document.querySelectorAll('.wz-dev')].find(b => b.textContent.trim() === '+ ' + name); if (!b) fail(name + ' not found'); b.click();
+      }
+      $('[data-act="wz-next"]').click();
+      const pr = $('#wz-printer'); pr.value = 'a1mini'; pr.dispatchEvent(new W.Event('change', { bubbles: true })); await wait(150);
+      if (!$('#wz-body').textContent.includes('254 mm') || !$('#wz-body').textContent.includes('diagonally')) fail('small-bed warning missing at selection');
+      const clear = $('#wz-printer'); clear.value = ''; clear.dispatchEvent(new W.Event('change', { bubbles: true })); await wait(150);
+      for (let i = 0; i < 3; i++) $('[data-act="wz-next"]').click();
+      if (!$('#wz-body').textContent.includes('open for growth')) fail('height breakdown missing');
+      const compact = $('[data-act="wz-result-spare"][data-v="0"]'), grow = $('[data-act="wz-result-spare"][data-v="1"]');
+      if (!compact || !grow) fail('5U/6U choice missing'); compact.click();
+      if (!/^5U/.test($('.wz-sum').textContent)) fail('compact choice did not show 5U');
+      $('[data-act="wz-result-spare"][data-v="1"]').click();
+      $('[data-act="wz-create"]').click(); await wait(150);
+      const h = T().state.h;
+      if (h > 6 || T().ready().warn) fail('wizard too tall or has warnings: ' + h + 'U ' + $('#ready').textContent);
+      const pi = T().powerModel().rows.find(r => /Raspberry Pi 5/.test(r.name)); if (pi?.on) fail('default Pi runs on PoE');
+      if (!T().addItem({ key: 'ucgmax1' }) || T().state.h !== h) fail('1U addition cannot use growth space');
+      return h + 'U; 1U addition fits without growth, adapter-powered Pi, immediate A1 mini warning';
+    });
+    await check('A Pi PoE warning offers its own USB-C supply and applies that choice', async () => {
+      T().setHeight(10);
+      if (!T().addItem({ key: 'mw2319976' })) fail('PoE fixture could not be placed'); await wait(100);
+      const it = T().state.items[T().state.items.length - 1], button = $('#ready [data-act="poe-on"]');
+      if (!button || !/Use its own USB-C supply/.test(button.textContent)) fail('adapter action missing');
+      button.click(); await wait(100);
+      if (T().powerModel().rows.find(r => r.it?.id === it.id)?.on !== false) fail('adapter action did not switch power mode');
+      return 'USB-C is the first warning action and clears this device from PoE demand';
+    });
+    await check('Wizard offers 5U without spare instead of requiring extension prints', async () => {
+      $('[data-act="wizard"]').click();
+      for (let i = 0; i < 4; i++) $('[data-act="wz-next"]').click();
+      const compact = $('[data-act="wz-result-spare"][data-v="0"]'); if (!compact) fail('compact choice missing'); compact.click();
+      if (!/^5U/.test($('.wz-sum').textContent)) fail('result did not become 5U');
+      $('[data-act="wz-create"]').click(); await wait(150);
+      if (T().state.h !== 5 || T().ready().warn) fail('compact build has warnings: ' + $('#ready').textContent);
+      return '5U base frame, no spare, no build warnings; 6U remains available before creating';
+    });
+    await check('Have, buy and mixed wizard choices change shopping lists and survive files and sharing', async () => {
+      const counts = [];
+      for (const mode of ['have', 'buy', 'mix']) {
+        $('[data-act="wizard"]').click(); $('[data-act="wz-set"][data-k="intent"][data-v="' + mode + '"]').click();
+        for (let i = 0; i < 4; i++) $('[data-act="wz-next"]').click();
+        $('[data-act="wz-create"]').click(); await wait(100);
+        counts.push(T().orderList().filter(r => r.group === 'devices').length);
+      }
+      if (counts.join() !== '0,3,2') fail('same rack mode lists: ' + counts);
+      if (T().orderList().filter(r => r.group === 'devices').some(r => r.price != null)) fail('device prices guessed');
+      if (T().readRackFile(T().rackFile()).state.items.filter(i => i.own === false).length !== 2) fail('file lost ownership');
+      const link = T().shareLink(); await load(link.slice(link.indexOf('#'))); hook();
+      if (T().state.items.filter(i => i.own === false).length !== 2) fail('share lost ownership');
+      const pi = T().state.items.find(i => /Raspberry Pi 5/.test(T().powerModel().rows.find(r => r.it?.id === i.id)?.name || ''));
+      if (!pi) fail('Pi fixture missing'); W.LRApp.select(pi.id);
+      const picker = $('[data-own-item="' + pi.id + '"]'); if (!picker) fail('ownership panel missing'); picker.value = 'have'; picker.dispatchEvent(new W.Event('change', { bubbles: true }));
+      if (T().orderList().some(r => r.key === 'pi5psu')) fail('owned Pi supply was rebought');
+      const missing = $('[data-missing-item="' + pi.id + '"][data-missing="needPower"]'); missing.checked = true; missing.dispatchEvent(new W.Event('change', { bubbles: true }));
+      if (T().orderList().find(r => r.key === 'pi5psu')?.qty !== 1) fail('missing Pi supply not added');
+      if (!$('#build [data-cost^="owned:"]')) fail('Have quantities missing from shopping list');
+      $('[data-sec="inventory"]').open = true; await wait(50);
+      const stock = $('#build [data-cost="owned:pi5psu"]'); stock.value = '1'; stock.dispatchEvent(new W.Event('change', { bubbles: true })); await wait(50);
+      if (!$('[data-sec="inventory"]').open || T().state.costs.owned.pi5psu !== 1) fail('inventory edit collapsed or was lost');
+      T().setHeight(10); if (!T().addItem({ key: 'mw1646434', own: false })) fail('mixed-board fixture did not fit');
+      const buys = T().orderList().filter(r => r.group === 'devices');
+      if (buys.filter(r => r.name === 'Orange Pi Zero 3').reduce((n, r) => n + r.qty, 0) !== 2 || buys.filter(r => r.name === 'Raspberry Pi 5').reduce((n, r) => n + r.qty, 0) !== 1) fail('mixed boards were bought as the same device');
+      return '0/3/2 devices; unpriced; file/share preserved; missing supplies requested; Pi/Orange Pi counts separate';
+    });
+    await check('Connect shows sourced device inputs without promoting typical consumption estimates', async () => {
+      T().setHeight(10); if (!T().addItem({ key: 'ucgmax1' })) fail('input fixture did not fit');
+      const text = W.document.body.textContent;
+      if (!text.includes('Documented input: USB-C, 5 V, 5 A')) fail('sourced UCG-Max input missing');
+      const source = [...W.document.querySelectorAll('#build a')].find(a => a.href === 'https://techspecs.ui.com/unifi/cloud-gateways/ucg-max');
+      if (!source) fail('input source link missing');
+      const row = T().powerModel().rows.find(r => r.it?.key === 'ucgmax1'); if (['documented', 'verified'].includes(row.d.ev.power.state)) fail('typical consumption became verified');
+      return 'sourced 5 V/5 A USB-C input and source link; typical draw evidence stays unverified';
+    });
+  } catch (e) { log(false, 'Self-test stopped', e.message); }
+  finally { KEYS.forEach((k, i) => saved[i] == null ? localStorage.removeItem(k) : localStorage.setItem(k, saved[i])); }
+  const bad = results.filter(x => !x).length;
+  document.getElementById('sum').textContent = bad ? bad + ' of ' + results.length + ' checks failed.' : 'All ' + results.length + ' checks passed.';
+  document.title = (bad ? '✗ ' : '✓ ') + 'Planner self-test';
+})();
+</script>
+</body>
+</html>

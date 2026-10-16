@@ -4,9 +4,10 @@
 'use strict';
 
 const STORE = 'labrax-planner-v2';
+const PREVIOUS_STORE = 'labrax-planner-previous';
 const THEMEKEY = 'labrax-planner-theme';
 const REPO_URL = 'https://github.com/benna1990/lab-rax-planner';
-const P = window.LRParts;
+const P = window.LRParts, RACK = window.LRRack, DIMS = RACK.dimensions;
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -15,7 +16,7 @@ const mm = n => n.toFixed(1) + ' mm';
 const FIL = [['Black', '#26282B'], ['Grey', '#7D848B'], ['White', '#E9EBEC'], ['Blue', '#2E5E9E'], ['Orange', '#E07A2E'], ['Green', '#3E8E5A'], ['Lime', '#B5CF2A'], ['Red', '#C8372D']];
 const TABS = [['devices', 'Devices'], ['panels', 'Panels'], ['custom', 'Custom']]; // for the front and the back
 // the "Where" bar: which side of the rack the library shows parts for; the front and back hold the panels, the rest have their own lists
-const WHERE = [['front', 'Front'], ['back', 'Back'], ['top', 'Top'], ['bottom', 'Bottom'], ['sides', 'Sides'], ['frame', 'Frame']];
+const WHERE = [['front', 'Front'], ['back', 'Back'], ['top', 'Top'], ['bottom', 'Bottom'], ['sides', 'Sides'], ['inside', 'Inside']]; // rack systems and variants live in step 1, Rack
 
 /* ---------- catalog ---------- */
 let CAT = null, LIB = {}, SIZES = {}, PWDEV = {};
@@ -23,15 +24,37 @@ const LS = window.LRShapes; // how parts look: shapes.js
 // power and network fields (see the power budget below): pw on a part or mount, pwDev on the device it holds (PWDEV: those per device name)
 const PW_KEYS = ['poe', 'poeIn', 'poeOptional', 'ports', 'eth'];
 const pwOf = o => { const r = {}; PW_KEYS.forEach(k => { if (o[k] !== undefined) r[k] = o[k]; }); return r; };
+/* What the catalog knows about a part and how, per claim (docs/audit/CATALOG_VERIFICATION.md): verified (measured or tested,
+   with a method and a date), documented (the creator or maker says so), community (a builder reports it), estimated, unknown.
+   Only an entry's own "evidence" record can make a claim verified, documented or community reported. The older fields can only
+   lower it: "estimated" and "wattsEstimated" are estimates. Everything else is unknown, also the old "labrax" flag, because nobody
+   recorded which page or test it came from. */
+const EV_LABEL = { verified: 'Verified', documented: 'Documented', community: 'Community reported', estimated: 'Estimated', unknown: 'Unknown' };
+function evidenceOf(src) {
+  const e = src.evidence || {};
+  return {
+    look: e.look || { state: 'unknown' },
+    height: e.height || (src.estimated ? { state: 'estimated', note: 'from the model’s title or photos' } : { state: 'unknown', note: 'where the height comes from isn’t recorded' }),
+    fit: e.fit || { state: 'unknown', note: src.labrax ? 'marked as made for Lab Rax, but the source isn’t recorded' : '' },
+    power: e.power || (typeof src.watts !== 'number' ? { state: 'unknown' } : src.wattsEstimated ? { state: 'estimated', note: 'a typical figure for this kind of device' } : { state: 'unknown', note: 'where the figure comes from isn’t recorded' })
+  };
+}
+const evNote = x => x.method ? x.method + (x.date ? ', ' + x.date : '') : x.note || '';
+function evidenceHTML(d) { // the hover preview in the library
+  if (!d || !d.ev) return '';
+  const row = (what, x) => '<li class="ev ev-' + x.state + '"><span>' + what + '</span><b>' + EV_LABEL[x.state] + '</b>' + (evNote(x) ? '<small>' + esc(evNote(x)) + '</small>' : '') + '</li>';
+  return '<ul class="evlist">' + row('Height', d.ev.height) + (d.top || d.extra ? '' : row('Fit in Lab Rax', d.ev.fit)) + (d.watts > 0 || d.device ? row('Power', d.ev.power) : '') + '</ul>';
+}
+const evShort = d => !d || !d.ev ? '' : 'Height ' + EV_LABEL[d.ev.height.state].toLowerCase() + (d.top || d.extra ? '' : ' · fit ' + EV_LABEL[d.ev.fit.state].toLowerCase()) + (d.watts > 0 || d.device ? ' · power ' + EV_LABEL[d.ev.power.state].toLowerCase() : '');
 function buildCatalog(c) {
   CAT = c; LIB = {}; SIZES = {}; PWDEV = {};
   // src: the catalog entry, for its heat, airflow and power fields
-  const add = (id, o, src) => { LIB[id] = Object.assign({ key: id, h2: o.u ? Math.round(o.u * 2) : 0 }, o, { watts: src.watts, wattsEst: !!src.wattsEstimated, fanDir: src.fanDir, vent: src.vent, at: src.at, fanAt: src.fanAt, pw: pwOf(src), fit: src.fit }); };
+  const add = (id, o, src) => { LIB[id] = Object.assign({ key: id, h2: o.u ? Math.round(o.u * 2) : 0 }, o, { watts: src.watts, wattsEst: !!src.wattsEstimated, fanDir: src.fanDir, vent: src.vent, at: src.at, fanAt: src.fanAt, pw: pwOf(src), fit: src.fit, options: src.options || [], profileChoices: src.profileChoices || [], ev: evidenceOf(src) }); };
   (c.panels || []).forEach(g => g.items.forEach(i => add(i.id, { name: i.name, label: null, u: i.u, est: !!i.estimated, face: i.face || 'blank', shape: i.shape, url: i.url || null, author: i.author || '', hardware: i.hardware || [], group: g.group, tab: 'panels' }, i)));
   (c.devices || []).forEach(g => g.items.forEach(d => {
     const dev = d.size ? { device: d.device, size: d.size, color: d.color, io: d.io } : null;
     if (dev) SIZES[d.device] = dev;
-    const pwDev = PWDEV[d.device] = Object.assign({ name: d.device, group: g.group, io: d.io || [] }, pwOf(d));
+    const pwDev = PWDEV[d.device] = Object.assign({ name: d.device, group: g.group, io: d.io || [], input: d.input, inputEvidence: d.evidence?.power }, pwOf(d));
     d.mounts.forEach(m => {
       if (m.ref) { m.key = m.ref; return; }
       m.key = m.id;
@@ -39,16 +62,16 @@ function buildCatalog(c) {
       add(m.id, { name: d.device, label: m.label, u: top ? 0 : m.u, top, est: !!m.estimated, face: m.face || 'shelf', shape: m.shape, device: dev, pwDev, url: m.url || null, author: m.author || '', hardware: m.hardware || [], note: m.note, depth: m.depth, group: g.group, tab: top ? 'top' : 'devices' }, m);
     });
   }));
-  (c.extras || []).forEach(g => g.items.forEach(i => add(i.id, { name: i.name, label: i.label || null, u: 0, extra: true, shape: i.shape, url: i.url, author: i.author || '', hardware: i.hardware || [], note: i.note, group: g.group, tab: 'extras' }, i)));
+  (c.extras || []).forEach(g => g.items.forEach(i => add(i.id, { name: i.name, label: i.label || null, u: 0, extra: true, shape: i.shape, url: i.url, author: i.author || '', hardware: i.hardware || [], note: i.note, group: g.group, tab: 'extras', rack: g.kind === 'rack' }, i)));
   LS.devices(n => SIZES[n] || null);
 }
 
 /* ---------- state ---------- */
 function defaultState() {
   let n = 1; const m = (k, p) => ({ id: n++, key: k, pos2: p });
-  return { h: 5, version: 'brass', frame: '#26282B', panel: '#26282B', accent: '#B5CF2A', label: 'Lab Rax', top: null, topDir: null, bottom: null, bottomDir: null, extras: [], xdir: {}, back: 'open', room: 25, sides: 'printed', done: {}, example: true,
+  return { h: 5, version: 'brass', frame: '#26282B', panel: '#26282B', accent: '#B5CF2A', label: 'Lab Rax', top: null, topDir: null, bottom: null, bottomDir: null, extras: [], optionChoices: {}, xdir: {}, back: 'open', room: 25, sides: 'printed', done: {}, example: true,
     power: defaultPower(),
-    items: [m('keystone', 0), m('flexmini05', 1), m('ucgmax1', 2), m('tiny1', 4), m('sbc7', 6)], nextId: n };
+    items: [m('ucgmax1', 0), m('mw2117690', 2), Object.assign(m('sbc7', 4), { fill: 4, names: ['Pi 1', 'Pi 2', 'Pi 3', 'Pi 4'] }), m('fan40', 8)], nextId: n }; // the example passes the readiness checks
 }
 function load() {
   try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && Array.isArray(s.items) && s.h >= 1 && s.h <= 10 && s.nextId) return Object.assign({ accent: '#B5CF2A', label: 'Lab Rax', top: null, extras: [], done: {} }, s); } catch (e) {}
@@ -121,6 +144,8 @@ function sanitize() {
     if (i.color != null && !HEX.test(i.color)) delete i.color;
     if (i.key === 'custom') { i.name = String(i.name || 'Own device').slice(0, 40); if (typeof i.url !== 'string' || !/^https:\/\//.test(i.url)) delete i.url; }
     if (i.label != null && typeof i.label !== 'string') delete i.label;
+    for (const k of ['own', 'needPower', 'needCable']) if (i[k] != null && typeof i[k] !== 'boolean') delete i[k];
+    if (i.opt != null && !(LIB[i.key]?.options || []).some(o => o.id === i.opt)) delete i.opt;
     if (i.watts != null && !(typeof i.watts === 'number' && i.watts >= 0 && i.watts <= 500)) delete i.watts;
     if (i.fill != null && !(Number.isInteger(i.fill) && i.fill >= 0 && i.fill <= 48)) delete i.fill;
     if (i.names != null) { if (Array.isArray(i.names) && i.names.length <= 48) i.names = i.names.map(t => typeof t === 'string' ? t.slice(0, 16) : ''); else delete i.names; }
@@ -133,12 +158,15 @@ function sanitize() {
   });
   state.nextId = Math.max(Number.isInteger(state.nextId) ? state.nextId : 1, ...[...ids].map(n => n + 1));
   state.items.forEach(i => { if (i.id == null) i.id = state.nextId++; });
-  if (state.top && !(own(LIB, state.top) && LIB[state.top].top)) state.top = null;
-  state.extras = (Array.isArray(state.extras) ? state.extras : []).filter(k => own(LIB, k) && LIB[k].extra);
+  if (state.top && !(own(LIB, state.top) && catalogPart(state.top).top)) state.top = null;
+  state.extras = (Array.isArray(state.extras) ? state.extras : []).filter(k => own(LIB, k) && catalogPart(k).extra);
   if (!FAN_DIRS.includes(state.topDir)) state.topDir = null;
   // the bottom: null is the printed panel, 'acrylic' a 3 mm sheet, or a top/bottom panel from the catalog (mesh, a fan)
-  if (state.bottom != null && state.bottom !== 'acrylic' && !(own(LIB, state.bottom) && canBottom(LIB[state.bottom]))) state.bottom = null;
+  if (state.bottom != null && state.bottom !== 'acrylic' && !(own(LIB, state.bottom) && canBottom(catalogPart(state.bottom)))) state.bottom = null;
   if (!FAN_DIRS.includes(state.bottomDir)) state.bottomDir = null;
+  const choices = state.optionChoices && typeof state.optionChoices === 'object' ? state.optionChoices : {};
+  state.optionChoices = {};
+  for (const key of [...state.extras, state.top, state.bottom].filter(Boolean)) if (own(choices, key) && (LIB[key]?.options || []).some(o => o.id === choices[key])) state.optionChoices[key] = choices[key];
   const xd = state.xdir && typeof state.xdir === 'object' ? state.xdir : {}; state.xdir = {};
   state.extras.forEach(k => { if (FAN_DIRS.includes(xd[k])) state.xdir[k] = xd[k]; });
   if (!state.done || typeof state.done !== 'object') state.done = {};
@@ -151,10 +179,35 @@ let state = load() || defaultState();
 let sel = null, undo = null, G = {}, drag = null, libKey = null, dropP = null, tab = 'devices', query = '', view = 'front';
 let rackSide = 'front'; // the side new parts go to: the back while the Back view is open, else the front (the 3D view keeps the last one)
 
+function withOption(base, id) {
+  if (!base) return base;
+  const opts = base.options || [];
+  const opt = id ? opts.find(o => o.id === id) : opts.find(o => o.frame === state.version);
+  return opt ? Object.assign({}, base, { shape: Object.assign({}, base.shape, opt.shape), opt: opt.id, optionName: opt.name, optionNote: opt.note || '', optionFrame: opt.frame || null, optionExplicit: !!id, variant: (base.variant || '') + ':' + opt.id }) : base;
+}
+const catalogPart = key => withOption(LIB[key], state.optionChoices && state.optionChoices[key]);
+function lookHint(d) {
+  if (!d || d.gen || d.custom) return '';
+  const checked = d.ev?.look && ['verified', 'documented'].includes(d.ev.look.state);
+  return '<span class="hint drawing-status">' + (checked ? 'Drawing compared with the model page' : 'Approximate drawing, see the model page') + '</span>';
+}
+const devicePart = d => d && (d.tab === 'devices' || d.custom || modsOf(d).some(m => m.sbc));
+const haveDevice = it => it.own !== false;
+function ownershipPicker(it) {
+  const d = info(it); if (!devicePart(d)) return '';
+  return '<div class="extra-options" style="flex-basis:100%;order:6"><label class="hint">' + esc(d.name) + ' <select class="field" data-own-item="' + it.id + '" aria-label="Ownership of ' + esc(d.name) + '"><option value="have"' + (haveDevice(it) ? ' selected' : '') + '>Have it</option><option value="buy"' + (!haveDevice(it) ? ' selected' : '') + '>To buy</option></select></label>' + ['needPower', 'needCable'].map(k => '<label class="hint"><input type="checkbox" data-missing-item="' + it.id + '" data-missing="' + k + '"' + (it[k] ? ' checked' : '') + '> ' + (k === 'needPower' ? 'Missing its power supply' : 'Missing its network cable') + '</label>').join('') + '</div>';
+}
+const profileChoiceText = d => (d.profileChoices || []).length ? 'Within the model profile, choose: ' + d.profileChoices.join('; ') + '.' : '';
+const profileChoiceHint = d => profileChoiceText(d) ? '<small class="hint">' + esc(profileChoiceText(d)) + '</small>' : '';
+function optionPicker(d, it) {
+  if (!d?.options?.length) return '';
+  return '<label class="hint profile-picker">Print profile <select class="field" data-part-opt="1" data-key="' + esc(d.key) + '"' + (it ? ' data-item="' + it.id + '"' : '') + ' aria-label="Print profile for ' + esc(d.name) + '"><option value=""' + (!d.optionExplicit ? ' selected' : '') + '>Automatic: match the frame</option>' + d.options.map(o => '<option value="' + esc(o.id) + '"' + (d.optionExplicit && d.opt === o.id ? ' selected' : '') + '>' + esc(o.name) + '</option>').join('') + '</select></label>' + (d.optionNote ? '<small class="hint">' + esc((!d.optionExplicit ? d.optionName + '. ' : '') + d.optionNote) + '</small>' : '') + profileChoiceHint(d);
+}
 const info = it => {
   if (it.key === 'custom') return { custom: true, name: it.name, h2: it.h2, face: 'custom', url: it.url || null, hardware: [] };
   if (it.key === 'gen') return { gen: true, name: it.name, label: genLabel(it.params), h2: Math.round(it.params.u * 2), face: genFace(it.params), params: it.params, url: null, hardware: genHardware(it.params) };
-  return it.fill != null || it.names ? modded(it, LIB[it.key]) : LIB[it.key];
+  const base = withOption(LIB[it.key], it.opt);
+  return it.fill != null || it.names ? modded(it, base) : base;
 };
 /* Modular parts: a row of like slots (boards, drive sleds, keystone jacks). A placed part may fill fewer slots (it.fill; the rest
    get a blank plate, cover or insert) and name each slot (it.names, printed on its plate). info() then hands out the part with
@@ -169,9 +222,9 @@ const modMemo = new Map();
 function modded(it, base) {
   const md = modOf(base); if (!md) return base;
   const k = Math.max(0, Math.min(md.n, it.fill != null ? it.fill : md.n)), names = (it.names || []).slice(0, md.n), variant = '~' + k + '~' + names.join('|');
-  const mk = it.key + variant; if (modMemo.has(mk)) return modMemo.get(mk);
+  const mk = it.key + (base.opt || '') + variant; if (modMemo.has(mk)) return modMemo.get(mk);
   const row = base.shape.row.map((m, i) => i === md.idx ? Object.assign({}, m, { fill: k, names }) : m);
-  const d = Object.assign({}, base, { shape: Object.assign({}, base.shape, { row }), variant, fill: k, slots: md.n }); // keystone jacks carry no heat
+  const d = Object.assign({}, base, { shape: Object.assign({}, base.shape, { row }), variant: (base.variant || '') + variant, fill: k, slots: md.n }); // keystone jacks carry no heat
   if (typeof base.watts === 'number' && md.kind !== 'ks') d.watts = Math.round(base.watts * k / md.n * 10) / 10;
   if (modMemo.size > 300) modMemo.clear(); modMemo.set(mk, d); return d;
 }
@@ -190,7 +243,7 @@ function slotsHTML(it) {
 }
 const H = it => info(it).h2;
 const canBottom = d => !!(d && d.top && /bottom/i.test(d.label || '')); // top panels made for the bottom too
-const bottomPart = () => state.bottom && state.bottom !== 'acrylic' && own(LIB, state.bottom) ? LIB[state.bottom] : null;
+const bottomPart = () => state.bottom && state.bottom !== 'acrylic' && own(LIB, state.bottom) ? catalogPart(state.bottom) : null;
 const bottomName = () => state.bottom === 'acrylic' ? 'Acrylic, 3 mm' : bottomPart() ? fullName(bottomPart()) : 'Printed panel';
 const slots = () => state.h * 2;
 const placed = () => state.items.filter(i => i.pos2 != null);
@@ -205,7 +258,7 @@ const colorName = c => (FIL.find(f => f[1].toLowerCase() === c.toLowerCase()) ||
 function fmtU(h2) { const w = Math.floor(h2 / 2), h = h2 % 2; return (w || !h ? w : '') + (h ? '½' : '') + 'U'; }
 const uTxt = d => (d.est ? '≈' : '') + fmtU(d.h2);
 const shortName = d => d.name;
-const fullName = d => d.label ? d.name + ' – ' + d.label : d.name;
+const fullName = d => (d.label ? d.name + ' – ' + d.label : d.name) + (d.optionName ? ' · ' + d.optionName : '');
 function uRange(p, h2) { const hi = state.h - Math.floor(p / 2), lo = state.h - Math.floor((p + h2 - 1) / 2); return lo === hi ? 'U' + hi : 'U' + lo + '–' + hi; }
 const GEN_NAMES = { blank: 'Blank panel', vent: 'Vent panel', keystone: 'Keystone panel', shelf: 'Shelf', label: 'Label plate', fan: 'Fan panel', dtype: 'D-type panel', pass: 'Cable pass-through' };
 function genLabel(p) {
@@ -224,15 +277,14 @@ const genHardware = p => p.type === 'fan' && CAT.hardware['fan' + p.size] ? [{ p
 
 /* ---------- placement ---------- */
 /* The 10" hole pattern (6.35 / 22.225 / 38.1 mm) repeats per whole U, so panels of 1U and taller must start on a U boundary; ½U panels fit either half. */
-const aligned = (p, h2) => h2 === 1 || p % 2 === 0;
+const LY = window.LRLayout, aligned = LY.aligned; // placement rules: layout.js
+// the placed parts as layout.js sees them
+const rackCtx = () => ({ slots: slots(), items: placed().map(o => ({ id: o.id, pos2: o.pos2, h2: H(o), side: sideOf(o) })) });
+const sideFor = (except, side) => side || (except != null && find(except) ? sideOf(find(except)) : rackSide);
 // side: front or back; without it, the side of the part being moved (except), else the side being edited
-function isFree(p, h2, except, side) {
-  if (p < 0 || p + h2 > slots() || !aligned(p, h2)) return false;
-  const sd = side || (except != null && find(except) ? sideOf(find(except)) : rackSide);
-  return !placed().some(o => o.id !== except && sideOf(o) === sd && p < o.pos2 + H(o) && o.pos2 < p + h2);
-}
-function nearest(t, h2, except, side) { const n = slots(); for (let d = 0; d <= n; d++) for (const c of d ? [t - d, t + d] : [t]) if (isFree(c, h2, except, side)) return c; return null; }
-function firstFree(h2, side) { for (let p = 0; p + h2 <= slots(); p++) if (isFree(p, h2, undefined, side)) return p; return null; }
+function isFree(p, h2, except, side) { return LY.isFree(rackCtx(), p, h2, sideFor(except, side), except); }
+function nearest(t, h2, except, side) { return LY.nearest(rackCtx(), t, h2, sideFor(except, side), except); }
+function firstFree(h2, side) { return LY.firstFree(rackCtx(), h2, side || rackSide); }
 function touch() { state.example = false; }
 // btn: true for an Undo button, or [act, label] for another action
 function say(msg, btn) { const b = btn === true ? ['undo', 'Undo'] : btn; $('#status').innerHTML = esc(msg) + (b ? ' <button type="button" class="lnk" data-act="' + b[0] + '">' + esc(b[1]) + '</button>' : ''); }
@@ -240,27 +292,38 @@ function addItem(obj, pos) {
   const sd = obj.side === 'back' || (obj.side == null && rackSide === 'back') ? 'back' : 'front';
   if (sd === 'back') obj.side = 'back'; else delete obj.side;
   const d = info(obj), p = pos == null ? firstClear(obj, d.h2, sd) : nearest(pos, d.h2, undefined, sd);
-  if (p == null) { noRoom(d, sd, () => addItem(obj), () => addItem(Object.assign(obj, { side: sd === 'back' ? 'front' : 'back' }))); return false; }
+  if (p == null) { noRoom(d, sd, () => addItem(obj), () => addItem(Object.assign(obj, { side: sd === 'back' ? 'front' : 'back' })), obj); return false; }
   obj.id = state.nextId++; obj.pos2 = p; state.items.push(obj); sel = obj.id; touch(); render();
   say(fullName(d) + ' (' + uTxt(d) + ') placed at ' + uRange(p, d.h2) + atBack(obj) + '.' + clashText(obj));
   return true;
 }
 // the lowest rack height, up to 10U, with a free slot of h2 half-units on a side; null when even 10U has none
-function heightFor(h2, side) {
-  const h0 = state.h;
-  try { for (let h = h0 + 1; h <= 10; h++) { state.h = h; if (firstFree(h2, side) != null) return h; } return null; } finally { state.h = h0; }
+const heightFor = (h2, side) => LY.heightFor(rackCtx(), h2, side || rackSide, 10);
+const freeSlots = side => LY.freeSlots(rackCtx(), side);
+function openSpace(side) {
+  const sd = side || rackSide, gaps = LY.gaps(rackCtx(), sd), key = blankKeys()[1];
+  const usable = [], blocked = [];
+  for (const gap of gaps) for (let p = gap.pos2; p < gap.pos2 + gap.h2; p++) (halfFits(key, p, sd) ? usable : blocked).push(p);
+  let largest = 0;
+  for (let h2 = 1; h2 <= slots(); h2++) if (firstClear(h2 === 1 ? { key } : { key: 'custom', h2, name: 'Open space' }, h2, sd) != null) largest = h2;
+  const text = usable.length ? fmtU(usable.length) + ' usable open (largest aligned gap ' + fmtU(largest) + ')' : 'no usable open slots';
+  return { usable: usable.length, blocked, text: text + (blocked.length ? '; ' + fmtU(blocked.length) + ' reserved for panel clearance' : '') };
 }
-const freeSlots = side => slots() - placed().filter(o => sideOf(o) === side).reduce((n, o) => n + H(o), 0);
-// the first free slot where the part doesn't run into a part on the other side (depth) or overlap its neighbour, else the first free slot
+// the first free slot where the part fits physically; otherwise ask before changing the build
 function firstClear(obj, h2, sd) {
-  let first = null;
-  for (let p = 0; p + h2 <= slots(); p++) if (isFree(p, h2, undefined, sd)) { if (first == null) first = p; const o = Object.assign({ id: -1 }, obj, { pos2: p }); if (!clashes(o).length && !overlaps(o).length) return p; }
-  return first;
+  for (let p = 0; p + h2 <= slots(); p++) if (isFree(p, h2, undefined, sd)) { const o = Object.assign({ id: -1 }, obj, { pos2: p, side: sd }); if (!clashes(o).length && !overlaps(o).length) return p; }
+  return null;
+}
+// Find a growth proposal using the same physical checks as automatic placement, without rendering or saving trial heights.
+function heightForPhysical(obj, side) {
+  const h = state.h;
+  try { for (let u = h + 1; u <= 10; u++) { state.h = u; if (firstClear(obj, H(obj), side) != null) return u; } return null; }
+  finally { state.h = h; }
 }
 // slide the parts on a side up against each other, so their free space is one gap at the bottom; whole-U parts stay on a U
 function packSide(side) {
-  let p = 0, n = 0;
-  placed().filter(o => sideOf(o) === side).sort((x, y) => x.pos2 - y.pos2).forEach(o => { const h = H(o); while (!aligned(p, h)) p++; if (o.pos2 !== p) { o.pos2 = p; n++; } p += h; });
+  const pos = LY.pack(rackCtx(), side); let n = 0;
+  placed().forEach(o => { if (pos[o.id] != null && pos[o.id] !== o.pos2) { o.pos2 = pos[o.id]; n++; } });
   return n;
 }
 // would packing the side make a slot for h2? (tried, then put back)
@@ -286,10 +349,10 @@ function askUser(title, text, buttons) {
 }
 /* No slot for a part on side sd: offer the lowest rack height that makes room, or say why it can't go in and offer the other
    side when it fits there. place() puts the part in and returns true when it did; placeOther() tries the other side. */
-async function noRoom(d, sd, place, placeOther) {
+async function noRoom(d, sd, place, placeOther, probe) {
   const name = fullName(d) + ' (' + fmtU(d.h2) + ')', free = freeSlots(sd), other = sd === 'back' ? 'front' : 'back';
-  const grow = heightFor(d.h2, sd), spread = free >= d.h2; // enough room in total, but not in one piece
-  const where = 'The ' + sd + ' of this ' + state.h + 'U rack has ' + (free ? fmtU(free) + ' free' + (spread ? ', but not in one piece' : '') : 'no free slots') + '.';
+  const grow = probe ? heightForPhysical(probe, sd) : heightFor(d.h2, sd), spread = !probe && free >= d.h2; // enough room in total, but not in one piece
+  const where = probe && firstFree(d.h2, sd) != null ? 'The available slots overlap neighbouring panels or run into parts on the other side.' : 'The ' + sd + ' of this ' + state.h + 'U rack has ' + openSpace(sd).text + '.';
   say('No room for ' + name + ' at the ' + sd + '.');
   if (spread && packHelps(d.h2, sd)) {
     const v = await askUser('Move parts together?', name + ' doesn’t fit in one gap. ' + where + ' Sliding the parts at the ' + sd + ' up against each other makes one gap at the bottom.', [['', 'Cancel']].concat(grow ? [['grow', 'Make it ' + grow + 'U']] : [], [['pack', 'Move parts together', 'primary']]));
@@ -308,7 +371,7 @@ async function noRoom(d, sd, place, placeOther) {
     if (place()) { undo = before; say($('#status').textContent + ' The rack is now ' + grow + 'U.', true); } else { state = JSON.parse(before); render(); }
     return;
   }
-  const otherOk = placeOther && d.h2 <= 20 && (firstFree(d.h2, other) != null || heightFor(d.h2, other) != null);
+  const otherOk = placeOther && d.h2 <= 20 && (probe ? firstClear(probe, d.h2, other) != null || heightForPhysical(probe, other) != null : firstFree(d.h2, other) != null || heightFor(d.h2, other) != null);
   const why = d.h2 > 20 ? name + ' is taller than the largest rack (10U).'
     : name + ' doesn’t fit, even at 10U, the largest rack. ' + where + (spread ? ' Move parts together to make one gap, or remove some.' : ' Remove or move parts to make room.');
   const v = await askUser('No room for this part', why, otherOk ? [['', 'OK'], ['other', 'Place it at the ' + other, 'primary']] : [['', 'OK', 'primary']]);
@@ -336,7 +399,7 @@ function partDepth(it) {
 function clashes(it) {
   if (it.pos2 == null) return [];
   // the panels sit on the outside of the posts, so the two parts share the frame depth plus both 3 mm plates
-  const room = ((CAT.frame.dimensions || {}).depth || 240) + (frameMods().depthAdd || 0) + 2 * 3, mine = partDepth(it);
+  const room = DIMS.depth + (frameMods().depthAdd || 0) + 2 * 3, mine = partDepth(it);
   if (!mine) return [];
   return placed().filter(o => o !== it && o.id !== it.id && sideOf(o) !== sideOf(it) && o.pos2 < it.pos2 + H(it) && it.pos2 < o.pos2 + H(o))
     .map(o => ({ o, d: partDepth(o) })).filter(x => x.d && mine + x.d > room).map(x => Object.assign(x, { mine, room }));
@@ -344,10 +407,10 @@ function clashes(it) {
 /* Parts on the same side whose panels overlap: a ½U Lab Rax panel is 22.6 mm high, more than half a U, and sits on the U's outer
    hole, so it reaches past the middle of its U into the other half (shapes.js). Two ½U parts in one U then overlap: 3.6 mm for two
    Lab Rax panels, 1.4 mm next to an EIA one. Returns [{ o, mm }]. */
-function overlaps(it) {
+function overlaps(it, others = placed()) {
   if (it.pos2 == null) return [];
   const span = o => { const [py, ph] = plateBox(o, info(o)), t = o.pos2 * P.U / 2 + py; return [t, t + ph]; }, [a0, a1] = span(it);
-  return placed().filter(o => o.id !== it.id && sideOf(o) === sideOf(it) && Math.abs(o.pos2 - it.pos2) <= 2)
+  return others.filter(o => o.id !== it.id && sideOf(o) === sideOf(it) && Math.abs(o.pos2 - it.pos2) <= 2)
     .map(o => { const [b0, b1] = span(o); return { o, mm: Math.min(a1, b1) - Math.max(a0, b0) }; }).filter(x => x.mm > .05);
 }
 // would a ½U part fit in slot p, without overlapping the part in the other half of its U? (for filling open slots)
@@ -383,15 +446,9 @@ function removeItem(id) {
 /* Move a part to slot t on its side and slide the parts it passes the other way, so a full rack can be reordered. Returns the new
    slot, or null (nothing changed) when sliding would put a whole-U panel off its U or a part outside the rack. */
 function reorder(id, t) {
-  const it = find(id), h = H(it), sd = sideOf(it), a = it.pos2, others = placed().filter(o => o.id !== id && sideOf(o) === sd);
-  const was = others.map(o => [o, o.pos2]); let np;
-  if (t < a) { const hit = others.filter(o => o.pos2 < a && o.pos2 + H(o) > t); np = Math.min(t, ...hit.map(o => o.pos2)); hit.forEach(o => { o.pos2 += h; }); }
-  else { const end = t + h, hit = others.filter(o => o.pos2 >= a + h && o.pos2 < end); np = Math.max(end, ...hit.map(o => o.pos2 + H(o))) - h; hit.forEach(o => { o.pos2 -= h; }); }
-  it.pos2 = np;
-  const all = [it, ...others], ok = all.every(o => o.pos2 >= 0 && o.pos2 + H(o) <= slots() && aligned(o.pos2, H(o))) &&
-    all.every(o => all.every(q => q === o || q.pos2 >= o.pos2 + H(o) || o.pos2 >= q.pos2 + H(q)));
-  if (!ok) { it.pos2 = a; was.forEach(([o, p]) => { o.pos2 = p; }); return null; }
-  return np;
+  const pos = LY.reorder(rackCtx(), id, t); if (!pos) return null;
+  placed().forEach(o => { if (pos[o.id] != null) o.pos2 = pos[o.id]; });
+  return pos[id];
 }
 // one step up (dir < 0) or down: into free space when there is some, else past the neighbouring part, which takes this one's place
 function move(id, dir) {
@@ -439,7 +496,7 @@ const upperHalf = it => H(it) === 1 && it.pos2 % 2 === 0;
 // where a part's panel sits in its slot: [mm from the top of the slot, height in mm]. Lab Rax panels are lower than EIA ones (shapes.js)
 const plateBox = (it, d) => { const f = LS.fit(d, upperHalf(it)); return [d.h2 * P.U / 2 - f.lift - f.h, f.h]; };
 const thumbSVG = d => LS.thumbFor(d, d.extra ? { accent: state.accent } : colorsFor());
-const frameMods = () => LS.frameMods(state.extras.map(k => LIB[k]));
+const frameMods = () => LS.frameMods(state.extras.map(k => catalogPart(k)));
 // seen from the front a handle is the end of an arch along the side edge: 12 mm wide, 34 mm high, centred 23 mm in from the outside;
 // stackable handles are flat-topped and lower, side handles sit on the side panels instead
 function handleSVG(s, side, kind) {
@@ -461,12 +518,13 @@ const UIKEY = 'labrax-planner-ui';
 const ui = (() => { try { return Object.assign({ open: {}, sec: { print: true }, lr: false }, JSON.parse(localStorage.getItem(UIKEY)) || {}); } catch (e) { return { open: {}, sec: { print: true }, lr: false }; } })();
 const saveUI = () => { try { localStorage.setItem(UIKEY, JSON.stringify(ui)); } catch (e) {} };
 const devOpen = new Set(); // devices whose other mounts are folded out
-const where = () => WHERE.some(([k]) => k === ui.where) ? ui.where : 'front';
+const where = () => ui.where === 'frame' ? 'inside' : WHERE.some(([k]) => k === ui.where) ? ui.where : 'front'; // 'frame' was the old name
 // an extra's side of the rack, for the Where bar
 function extraFace(d) {
   const s = d.shape || {};
+  if (d.rack) return 'rack'; // a rack system or variant: step 1
   if (s.side || d.at === 'side' || s.handles === 'side' || s.depth) return 'sides';
-  if (s.u || s.frame || s.hl || s.wall || s.inside && d.at !== 'top') return 'frame';
+  if (s.u || s.frame || s.hl || s.wall || s.inside && d.at !== 'top') return 'inside';
   if (s.feet || s.drawer) return 'bottom';
   return 'top'; // logo, corners, edges, handles, fans at the top
 }
@@ -487,17 +545,17 @@ function renderTabs() {
 function miniThumb(d) { return thumbSVG(d); }
 const inRack = key => placed().filter(i => i.key === key).length;
 function rowHTML(key, name, sub, extra) {
-  const d = LIB[key], on = (d.top && state.top === key) || (d.extra && state.extras.includes(key)), n = d.top || d.extra ? 0 : inRack(key);
+  const d = catalogPart(key), on = (d.top && state.top === key) || (d.extra && state.extras.includes(key)), n = d.top || d.extra ? 0 : inRack(key);
   const badge = d.top ? (on ? '✓ on top' : 'Top') : d.extra ? (on ? '✓ added' : 'Add') : uTxt(d);
   const hw = heatOf({ key }), kind = d.top ? 'top' : d.extra ? 'extra' : 'item', fan = cfmOf(d) ? fanChip(d, dirFor(d, null, fanPlace(d, kind), kind)) : '';
   if (cfmOf(d)) sub = (sub ? sub + ' · ' : '') + fanLine(d);
-  return '<div class="lrow-wrap"><button type="button" class="lrow' + (on || n ? ' on' : '') + '" draggable="' + !(d.top || d.extra) + '" data-act="lib" data-key="' + key + '" title="' + esc(fullName(d)) + (d.author ? ' · by ' + esc(d.author) : '') + '">' +
+  return '<div class="lrow-wrap' + (((d.extra || d.top) && on) || (n && devicePart(d)) ? ' has-options' : '') + '"><button type="button" class="lrow' + (on || n ? ' on' : '') + '" draggable="' + !(d.top || d.extra) + '" data-act="lib" data-key="' + key + '" title="' + esc(fullName(d)) + (d.author ? ' · by ' + esc(d.author) : '') + '">' +
     '<span class="lthumb">' + miniThumb(d) + '</span><span class="ltx"><b>' + esc(name) + '</b><span class="lmeta"><span class="lchips">' + // the name gets the whole first line
-    (n ? '<span class="inrack" title="In your rack">' + n + '×</span>' : '') + '<span class="badge' + (d.est ? ' est' : '') + '"' + (d.est ? ' title="≈: the height is estimated, not yet checked against the model"' : '') + '>' + badge + '</span>' + wChip(hw.w, hw.est) + fan + '</span>' +
+    (n ? '<span class="inrack" title="In your rack">' + n + '×</span>' : '') + '<span class="badge' + (d.est ? ' est' : '') + '"' + (d.est ? ' title="≈: the height is estimated, not yet checked against the model"' : d.ev && d.ev.height.state === 'verified' ? ' title="Height verified: ' + esc(evNote(d.ev.height)) + '"' : '') + '>' + badge + (d.ev && d.ev.height.state === 'verified' && !d.top && !d.extra ? ' ✓' : '') + '</span>' + wChip(hw.w, hw.est) + fan + '</span>' +
     (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span></span></button>' +
-    (extra || '') + (d.url ? '<a class="lext" href="' + esc(d.url) + '" target="_blank" rel="noopener" aria-label="Open model page for ' + esc(fullName(d)) + '" title="Open model page">↗</a>' : '') + '</div>';
+    (extra || '') + state.items.filter(it => it.key === key).map(ownershipPicker).join('') + ((d.extra || d.top) && on ? '<div class="extra-options">' + optionPicker(d) + lookHint(d) + '</div>' : '') + (d.url ? '<a class="lext" href="' + esc(d.url) + '" target="_blank" rel="noopener" aria-label="Open model page for ' + esc(fullName(d)) + '" title="Open model page">↗</a>' : '') + '</div>';
 }
-const mountSub = m => m.label + (m.labrax && !/lab ?rax/i.test(m.label) ? ' · Lab Rax' : '') + (m.author ? ' · ' + m.author : '');
+const mountSub = m => 'Mount: ' + m.label + (m.labrax && !/lab ?rax/i.test(m.label) ? ' · Lab Rax' : '') + (m.author ? ' · ' + m.author : '');
 const groupOpen = id => !!query || !!ui.open[id];
 function groupHTML(id, title, rows, n) { // rows is only built for open groups; n is the count either way
   n = n == null ? rows.length : n;
@@ -530,14 +588,14 @@ function faceLibHTML(w) {
     const bs = []; (CAT.devices || []).forEach(g => g.items.forEach(d => d.mounts.forEach(m => { if (LIB[m.id] && canBottom(LIB[m.id])) bs.push(m.id); })));
     return '<p class="hint lhead">The bottom panel: printed, 3 mm acrylic to see inside, or a mesh or fan panel that lets air in from below.</p>' +
       list('Bottom panel', [opt('bottom', '', 'Printed bottom panel', 'Comes with the frame, in the frame colour', !state.bottom, sheet(state.frame, 1)), opt('bottom', 'acrylic', 'Acrylic bottom panel', '3 mm sheet, about 228 × 171.5 mm', state.bottom === 'acrylic', sheet('#9ED3F0', .45))]
-        .concat(bs.map(k => opt('bottom', k, LIB[k].label, (cfmOf(LIB[k]) ? 'The fan blows in from below' : 'Lets air in from below') + (LIB[k].author ? ' · by ' + LIB[k].author : ''), state.bottom === k, miniThumb(LIB[k]))))) +
+        .concat(bs.map(k => opt('bottom', k, catalogPart(k).label, (cfmOf(catalogPart(k)) ? 'The fan blows in from below' : 'Lets air in from below') + (catalogPart(k).author ? ' · by ' + catalogPart(k).author : ''), state.bottom === k, miniThumb(catalogPart(k)))))) +
       list('Feet, casters and drawer', extras);
   }
   if (w === 'sides') return '<p class="hint lhead">The side panels: printed or acrylic, or a patterned or fan panel from the list.</p>' +
     list('Side panels', [opt('sides', 'printed', 'Printed side panels', 'Printed with the frame, in the frame colour', state.sides !== 'acrylic', sheet(state.frame, 1)), opt('sides', 'acrylic', 'Acrylic side panels', '3 mm sheets, so you can see inside', state.sides === 'acrylic', sheet('#9ED3F0', .45))]) +
     list('Patterned, fan and deeper side panels', extras);
-  const byGroup = (CAT.extras || []).map(g => list(g.group, g.items.filter(i => LIB[i.id] && extraFace(LIB[i.id]) === 'frame' && matches(i.name, i.label || '', g.group, i.author || '')).map(i => rowHTML(i.id, i.name, [i.label, i.author && 'by ' + i.author].filter(Boolean).join(' · '))))).join('');
-  return '<p class="hint lhead">The frame itself: other sizes and versions, joining racks, wall mounting and parts that go inside the rack.</p>' + byGroup; // under the catalog's own headings
+  const byGroup = (CAT.extras || []).map(g => list(g.group, g.items.filter(i => LIB[i.id] && extraFace(LIB[i.id]) === 'inside' && matches(i.name, i.label || '', g.group, i.author || '')).map(i => rowHTML(i.id, i.name, [i.label, i.author && 'by ' + i.author].filter(Boolean).join(' · '))))).join('');
+  return '<p class="hint lhead">Inside the rack and around it: cable management, holders for devices that don’t fit a panel, motherboard mounts, rails and wall mounting. Other frame sizes and versions are under step 1, Rack.</p>' + byGroup; // under the catalog's own headings
 }
 function renderLib() {
   renderTabs();
@@ -581,8 +639,8 @@ function renderRack() {
   const air = view === 'air' ? airflow() : null;
   const avail = host.clientWidth - 24 - 34 - 60 - (air ? 56 : 0); // the Airflow view needs room on the right for the temperature scale
   const s = Math.max(.66, Math.min(1.3, avail / 274));
-  const UPX = P.U * s, HU = UPX / 2, postW = 26 * s, bayW = 222 * s, frameW = bayW + 2 * postW, bodyH = state.h * UPX;
-  const edge = Math.max(10, 14 * s), topH = Math.max(24, 36 * s), holeIn = (236.525 - 222) / 2 * s; // hole centre 7.26 mm from the inner edge
+  const UPX = P.U * s, HU = UPX / 2, postW = RACK.frame.post * s, bayW = DIMS.clearWidth * s, frameW = bayW + 2 * postW, bodyH = state.h * UPX;
+  const edge = Math.max(10, RACK.frame.bottom * s), topH = Math.max(24, RACK.frame.top * s), holeIn = (DIMS.holeSpacing - DIMS.clearWidth) / 2 * s; // hole centre 7.26 mm from the inner edge
   G = { s, UPX, HU, postW, bayW, frameW };
   let holesL = '', holesR = '';
   for (let i = 0; i < state.h; i++) for (const off of [6.35, 22.225, 38.1]) {
@@ -596,6 +654,7 @@ function renderRack() {
   let items = '';
   // the Back view shows the panels on the rear posts, seen from behind; the Front and Airflow views the front ones
   const rear = view === 'back';
+  for (const p of openSpace(rear ? 'back' : 'front').blocked) items += '<div aria-label="Panel clearance: unusable half-U gap" title="Reserved for the neighbouring panel clearance" style="position:absolute;pointer-events:none;left:0;right:0;top:' + (p * HU).toFixed(1) + 'px;height:' + HU.toFixed(1) + 'px;background:repeating-linear-gradient(135deg,transparent,transparent 5px,#b4773b55 5px,#b4773b55 8px)"></div>';
   onSide(rear ? 'back' : 'front').forEach(it => {
     // no text on the panels, so the faces show what is placed; the name is in the tooltip and the aria-label
     const d = info(it), c = colorOf(it), clash = clashes(it).length > 0, over = overlaps(it)[0], [py, ph] = plateBox(it, d);
@@ -604,8 +663,8 @@ function renderRack() {
       faceSVG(d, c, upperHalf(it)) + '</div>';
   });
   // the top mount, drawn above the frame at the same scale (280 mm across the outside of the frame)
-  const tf = state.top ? LS.topFor(LIB[state.top], colorsFor()) : null;
-  const ap = tf && tf.h > 1.5 ? '<span class="ap" title="' + esc(fullName(LIB[state.top])) + '" style="width:' + (tf.w * s).toFixed(1) + 'px;height:' + (tf.h * s).toFixed(1) + 'px;margin-left:' + (-tf.w * s / 2).toFixed(1) + 'px' + (rear ? ';transform:scaleX(-1)' : '') + '">' + tf.svg + '</span>' : '';
+  const tf = state.top ? LS.topFor(catalogPart(state.top), colorsFor()) : null;
+  const ap = tf && tf.h > 1.5 ? '<span class="ap" title="' + esc(fullName(catalogPart(state.top))) + '" style="width:' + (tf.w * s).toFixed(1) + 'px;height:' + (tf.h * s).toFixed(1) + 'px;margin-left:' + (-tf.w * s / 2).toFixed(1) + 'px' + (rear ? ';transform:scaleX(-1)' : '') + '">' + tf.svg + '</span>' : '';
   const mods = frameMods(), below = (mods.drawer ? 30 : 0) + (mods.feet === 'casters' ? 40 : mods.feet === 'big' ? 8 : 0);
   const marginTop = Math.round(Math.max(ap ? tf.h * s + 4 : 0, frameW * .12 + 6));
   // extras seen from the front: keystones or an LED matrix in the top corner, a lit logo, a switch in the edge, grips on the sides,
@@ -617,7 +676,8 @@ function renderRack() {
   const feet = mods.feet === 'casters' ? '<i class="caster" style="left:4%;width:' + (32 * s).toFixed(1) + 'px;height:' + (32 * s).toFixed(1) + 'px;top:calc(100% + ' + ((mods.drawer ? 30 : 0) * s + 8 * s).toFixed(1) + 'px)"></i><i class="caster" style="right:4%;width:' + (32 * s).toFixed(1) + 'px;height:' + (32 * s).toFixed(1) + 'px;top:calc(100% + ' + ((mods.drawer ? 30 : 0) * s + 8 * s).toFixed(1) + 'px)"></i>'
     : ['left', 'right'].map(sd => '<i class="foot" style="' + sd + ':3%;height:' + ((mods.feet === 'big' ? 14 : 6) * s).toFixed(1) + 'px' + (mods.drawer ? ';top:calc(100% + ' + (30 * s).toFixed(1) + 'px)' : '') + '"></i>').join('');
   const drawer = mods.drawer && !rear ? '<i class="drawer" style="height:' + (28 * s).toFixed(1) + 'px"><i></i></i>' : '';
-  const grips = mods.handles === 'side' ? '<i class="sgrip" style="left:' + (-12 * s).toFixed(1) + 'px;width:' + (12 * s).toFixed(1) + 'px"></i><i class="sgrip" style="right:' + (-12 * s).toFixed(1) + 'px;width:' + (12 * s).toFixed(1) + 'px"></i>' : '';
+  const gripAt = mods.handlesAt === 'top-corners' ? ';top:' + (-topH / 2 - 13 * s).toFixed(1) + 'px;height:' + (26 * s).toFixed(1) + 'px' : mods.handlesAt === 'bottom-corners' ? ';top:' + (bodyH + edge / 2 - 13 * s).toFixed(1) + 'px;height:' + (26 * s).toFixed(1) + 'px' : '';
+  const grips = mods.handles === 'side' ? '<i class="sgrip" style="left:' + (-12 * s).toFixed(1) + 'px;width:' + (12 * s).toFixed(1) + 'px' + gripAt + '"></i><i class="sgrip" style="right:' + (-12 * s).toFixed(1) + 'px;width:' + (12 * s).toFixed(1) + 'px' + gripAt + '"></i>' : '';
   $('#rackHost').innerHTML =
     '<div class="rack' + (state.version === 'brass' ? ' brass' : '') + (air ? ' airv' : '') + (rear ? ' backv' : '') + '" id="rack" style="--frame:' + state.frame + ';--acc:' + state.accent + ';--bev:' + (20 * s).toFixed(1) + 'px;--hs:' + Math.max(3.5, 5 * s).toFixed(1) + 'px;grid-template-columns:34px ' + frameW.toFixed(1) + 'px ' + (air ? 90 : 34) + 'px;grid-template-rows:' + topH.toFixed(1) + 'px ' + bodyH.toFixed(1) + 'px ' + edge + 'px auto;margin-top:' + marginTop + 'px">' +
       '<div></div><div class="edge top">' + (state.top ? '' : '<span class="tp-band" style="height:' + Math.round(7 * s) + 'px"></span>') + handleSVG(s, 'left', mods.handles) + handleSVG(s, 'right', mods.handles) + crown +
@@ -633,7 +693,7 @@ function renderRack() {
       '<div></div><div class="floor"' + (below ? ' style="margin-top:' + (4 + below * s).toFixed(1) + 'px"' : '') + '></div><div></div>' +
     '</div>';
   if (air) $('#meas').innerHTML = airLegend(air);
-  else $('#meas').textContent = (rear ? 'Seen from the back · ' : '') + '222 mm usable width · ' + (state.h * P.U).toFixed(1) + ' mm inner height · ' + state.h + 'U';
+  else $('#meas').textContent = (rear ? 'Seen from the back · ' : '') + DIMS.clearWidth + ' mm usable width · ' + (state.h * P.U).toFixed(1) + ' mm inner height · ' + state.h + 'U';
 }
 function showGhost(p, h2) {
   const g = $('#ghost'); if (!g) return;
@@ -714,8 +774,8 @@ function renderSel() {
   const it = sel != null ? find(sel) : null, bar = $('#selbar');
   if (!it || it.pos2 == null) { bar.innerHTML = '<span class="hint">Click a part in the rack to move, label or remove it. Drag it, or use the arrow keys to move by ½U.</span>'; return; }
   const d = info(it), auto = heatOf(Object.assign({}, it, { watts: undefined }));
-  bar.innerHTML = '<div class="who"><b>' + esc(fullName(d)) + '</b><span class="hint">' + uTxt(d) + ' · ' + uRange(it.pos2, d.h2) + ' · ' + sideOf(it) + (d.author ? ' · by ' + esc(d.author) : '') + '</span>' + warnHTML(it) + '</div>' +
-    '<input class="field" id="sel-label" type="text" maxlength="24" aria-label="Label on the panel" placeholder="Label, e.g. Pi 5" value="' + esc(it.label || '') + '">' +
+  bar.innerHTML = '<div class="who"><b>' + esc(fullName(d)) + '</b><span class="hint">' + uTxt(d) + ' · ' + uRange(it.pos2, d.h2) + ' · ' + sideOf(it) + (d.author ? ' · by ' + esc(d.author) : '') + '</span>' + warnHTML(it) + '' + (evShort(d) ? '<span class="hint evs">' + esc(evShort(d)) + qm('verification') + '</span>' : '') + '</div>' +
+    lookHint(d) + optionPicker(d, it) + ownershipPicker(it) + '<input class="field" id="sel-label" type="text" maxlength="24" aria-label="Label on the panel" placeholder="Label, e.g. Pi 5" value="' + esc(it.label || '') + '">' +
     '<label class="watts" title="Heat this part gives off, for the cooling estimate. Empty: ' + (auto.w ? (auto.est ? 'about ' : '') + fmtW(auto.w) + ', its typical draw' : 'no heat') + '">Heat <input class="field" id="sel-watts" type="number" min="0" max="500" step="1" inputmode="numeric" placeholder="' + (auto.w ? (auto.est ? '≈' : '') + auto.w : '0') + '" value="' + (typeof it.watts === 'number' ? it.watts : '') + '"> W</label>' +
     (cfmOf(d) ? '<span class="watts" title="' + esc(fanLine(d)) + '">Fans ' + dirSeg({ ref: 'i' + it.id, d, place: fanPlace(d, 'item', it), kind: 'item', dir: dirFor(d, it.dir, fanPlace(d, 'item', it), 'item'), name: fullName(d) }) + '</span>' : '') +
     '<button type="button" class="btn small" data-act="up" aria-label="Move up">↑</button><button type="button" class="btn small" data-act="down" aria-label="Move down">↓</button>' +
@@ -738,8 +798,14 @@ function renderSettings() {
   const sw = (act, cur) => '<div class="swatches">' + FIL.map(([n, c]) => '<button type="button" class="sw" style="--c:' + c + '" data-act="' + act + '" data-c="' + c + '" aria-label="' + n + '" title="PETG ' + n.toLowerCase() + '" aria-pressed="' + (c === cur) + '"></button>').join('') + '</div>';
   const nameFocused = document.activeElement && document.activeElement.id === 'rack-name';
   if (nameFocused) return;
+  const fm = CAT ? (state.version === 'brass' ? CAT.frame.brass : CAT.frame.bolted) : null, vars = CAT ? (CAT.extras || []).filter(g => g.kind === 'rack') : []; // drawn once before the catalog loads
+  const on = vars.flatMap(g => g.items).filter(i => state.extras.includes(i.id)), nv = vars.reduce((n, g) => n + g.items.length, 0);
   $('#settings').innerHTML =
-    '<div class="set"><span>Frame</span><div class="seg small" role="group" aria-label="Frame version">' + [['brass', 'Heat-set inserts'], ['bolted', 'Bolted']].map(([v, l]) => '<button type="button" data-act="ver" data-v="' + v + '" aria-pressed="' + (state.version === v) + '">' + l + '</button>').join('') + '</div></div>' +
+    (fm ? '<div class="set rackset"><span>Rack</span><div class="rsys"><b>' + esc(fm.name) + '</b><span class="muted">' + (fm.author ? 'by ' + esc(fm.author) + ' · ' : '') + '1–5U, joined above 5U</span>' +
+      (on.length ? '<span class="rvon">' + on.map(i => '<span class="badge">' + esc(i.name) + '</span>').join('') + '</span>' : '') +
+      '<a class="btn small" href="' + esc(fm.url) + '" target="_blank" rel="noopener">Model ↗</a><button type="button" class="btn small" data-act="rack-variants" aria-expanded="' + !!ui.rackOpen + '">Other sizes & versions (' + nv + ')</button></div></div>' : '') +
+    (ui.rackOpen ? '<div class="rvariants">' + vars.map(g => '<p class="sgroup">' + esc(g.group) + '</p><div class="lrows">' + g.items.filter(i => LIB[i.id]).map(i => rowHTML(i.id, i.name, [i.label, i.author && 'by ' + i.author].filter(Boolean).join(' · '))).join('') + '</div>').join('') + '</div>' : '') +
+    '<div class="set"><span>Frame' + qm('insert') + '</span><div class="seg small" role="group" aria-label="Frame version">' + [['brass', 'Heat-set inserts'], ['bolted', 'Bolted']].map(([v, l]) => '<button type="button" data-act="ver" data-v="' + v + '" aria-pressed="' + (state.version === v) + '">' + l + '</button>').join('') + '</div></div>' +
     '<div class="set"><span>Sides</span><div class="seg small" role="group" aria-label="Side panels">' + [['printed', 'Printed'], ['acrylic', 'Acrylic']].map(([v, l]) => '<button type="button" data-act="sides" data-v="' + v + '" aria-pressed="' + (state.sides === v) + '">' + l + '</button>').join('') + '</div></div>' +
     '<div class="set"><span>Frame colour</span>' + sw('frame', state.frame) + '</div>' +
     '<div class="set"><span title="For parts without their own colour; pick a part to give it one">Default panel</span>' + sw('panel', state.panel) + '</div>' +
@@ -765,7 +831,7 @@ function frameParts() {
    not part of the layout). Sizes in mm; ≈ ones are estimates. The horizontal pieces span the outer width and are as wide as the ring
    (FRAME in view3d.js), which agrees with the Lab Rax article: they only fit a 256 mm bed diagonally and not a 220 mm bed. Posts and
    side panels are as tall as the rack up to 5U ("5U being the largest that fits a 250 mm print bed"), edge pieces and side panels
-   are 170 mm deep and the top and bottom panels 228 × 171.5 mm (catalog frame dimensions). Catalog panels and mounts are taken as a
+   are 170 mm deep and the top and bottom panels 228 × 171.5 mm (rack.js dimensions). Catalog panels and mounts are taken as a
    full 10″ (254 mm) wide; custom parts are as parts.js makes them. */
 const PANEL_10 = 254;
 const SPLIT_FRAME = 'mw2452007'; // "5U for A1 mini (split parts)" in Frame & extras
@@ -773,11 +839,11 @@ const bedPrinter = () => window.LRPrinters.bed(ui.printer);
 // ways: the footprints a piece can lie on, [a, b, height it then stands]; size: what the lists show
 const piece = (name, ways, est, size) => ({ name, ways, est: !!est, size: size || ways[0].slice(0, 2) });
 function framePieces() {
-  const F = (window.LRView3D && window.LRView3D.FRAME) || { ring: 32, top: 36, post: 26, postDepth: 20 }, dm = CAT.frame.dimensions || {};
-  const n = Math.min(state.h, 5), tall = n * P.U, deep = dm.sideBeam || 170, tp = dm.topPanel || [228, 171.5];
+  const F = RACK.frame, dm = DIMS;
+  const n = Math.min(state.h, 5), tall = n * P.U, deep = dm.sideBeam, tp = dm.topPanel;
   const sides = (add, always) => always || state.sides !== 'acrylic' ? [piece('side panels (' + n + 'U)', [[tall, deep + add, 3]], true)] : [];
   return {
-    ring: [piece('horizontal pieces', [[dm.outerWidth || 280, F.ring, F.top]], true), piece('edge pieces', [[deep, F.ring, F.top]], true),
+    ring: [piece('horizontal pieces', [[dm.outerWidth, F.ring, F.top]], true), piece('edge pieces', [[deep, F.ring, F.top]], true),
       ...(!state.top || !state.bottom ? [piece(!state.top && !state.bottom ? 'top and bottom panels' : state.top ? 'bottom panel' : 'top panel', [[tp[0], tp[1], 3]], true)] : [])],
     posts: [piece('posts (' + n + 'U)', [[tall, F.post, F.postDepth]], true), ...sides(0)],
     top: [piece('top', [[tp[0], tp[1], 3]], true)],
@@ -801,6 +867,10 @@ function bedText(r, short) { // a print-list row's pieces that don't fit the bed
   return [r.bad.length ? (short ? 'Too big: ' : 'Too big for your printer: ') + names(r.bad) + '.' : '', r.turned.length ? (short ? 'Only diagonally: ' : 'Fits only diagonally: ') + names(r.turned) + '.' : ''].filter(Boolean).join(' ');
 }
 const bedBad = pk => pk.filter(x => x.bed && x.bed.bad.length);
+function smallBedHint() {
+  const b = bedPrinter();
+  return b && window.LRPrinters.fitRect(254, DIMS.u, b.w, b.d) === 0 ? '<p class="wz-warn">10-inch panels need about 254 mm across the bed. Your bed cannot fit that even diagonally. Use a 256 mm bed, a print service, or source-confirmed split models; the planner cannot automatically substitute unverified splits.</p>' : '';
+}
 function printerPicker(px) { // the printer select, and the bed size when it's your own
   const pr = ui.printer || {}, L = window.LRPrinters, custom = pr.id === 'custom';
   return '<span class="bedset"><select class="field pr-sel" id="' + px + '-printer" aria-label="Your 3D printer"><option value="">' + (px === 'wz' ? 'Skip for now' : 'Pick your printer to check the bed') + '</option>' +
@@ -834,22 +904,22 @@ function printPack() {
     (pieces || []).forEach(p => { if (!ex.pieces.some(q => q.name === p.name && q.size.join() === p.size.join())) ex.pieces.push(p); });
   };
   const fp = framePieces();
-  const variant = d => ({ key: d.key, name: d.name, label: d.label || '', h2: d.h2, u: d.top ? 'top' : d.extra ? 'extra' : fmtU(d.h2) });
+  const variant = d => ({ key: d.key + (d.opt ? ':' + d.opt : ''), name: d.optionName ? fullName(d) : d.name, label: d.label || '', h2: d.h2, u: d.top ? 'top' : d.extra ? 'extra' : fmtU(d.h2) });
   const fm = br ? fr.brass : fr.bolted;
   const acr = state.sides === 'acrylic';
   add(fm.name, h === 5 ? 'Complete 5U frame' + (acr ? '; skip the side panels, yours are acrylic' : ' with side panels') : 'Base frame: edges, horizontals, handles, feet', fm.url, 1, 'mw', null, h === 5 ? fp.ring.concat(fp.posts) : fp.ring);
   if (h !== 5) add(fr.sizes.name, 'Posts' + (acr ? '' : ' and side panels') + ' for ' + h + 'U', fr.sizes.url, 1, 'mw', null, fp.posts);
   if (h > 5) add(fr.extension.name, '4 joiners for ' + h + 'U', fr.extension.url, 1, 'mw');
   if (bottomPart()) { const d = bottomPart(); add(fullName(d), 'Replaces the bottom panel', d.url, 1, 'mw', variant(d), fp.top); }
-  if (state.top) { const d = LIB[state.top]; add(fullName(d), 'Replaces the top panel', d.url, 1, 'mw', variant(d), fp.top); }
-  state.extras.forEach(k => { const d = LIB[k]; add(fullName(d), 'Frame extra', d.url, 1, 'mw', variant(d), fp.extra(d)); });
+  if (state.top) { const d = catalogPart(state.top); add(fullName(d), 'Replaces the top panel', d.url, 1, 'mw', variant(d), fp.top); }
+  state.extras.forEach(k => { const d = catalogPart(k); add(fullName(d), 'Frame extra' + (profileChoiceText(d) ? ' · ' + profileChoiceText(d) : '') + (d.options.length && !d.opt ? ' · choose a print profile on the part' : ''), d.url, 1, 'mw', variant(d), fp.extra(d)); });
   let missing = 0;
   byPos().forEach(i => {
     const d = info(i);
     const col = i.color ? ' · ' + colorName(i.color) : '';
     if (i.key === 'gen') { add(i.name, genLabel(i.params) + ' · ' + uRange(i.pos2, d.h2) + atBack(i) + col + ' · in the build pack', null, 1, 'gen', null, itemPieces(i, d)); return; }
     if (!d.url) { if (d.custom) missing++; return; }
-    add(fullName(d), (i.label || shortName(d)) + ' · ' + uRange(i.pos2, d.h2) + atBack(i) + col + (slotText(i) ? ' · ' + slotText(i) : ''), d.url, 1, 'mw', variant(d), itemPieces(i, d));
+    add(fullName(d), (i.label || shortName(d)) + ' · ' + uRange(i.pos2, d.h2) + atBack(i) + col + (slotText(i) ? ' · ' + slotText(i) : '') + (profileChoiceText(d) ? ' · ' + profileChoiceText(d) : ''), d.url, 1, 'mw', variant(d), itemPieces(i, d));
   });
   // a page with several variants lists them, e.g. "½U ×2, 1U ×1", so it's clear which files to print
   out.forEach(x => {
@@ -870,7 +940,7 @@ function printPack() {
    fans with safe 5 V power, network, power supplies, acrylic and handy extras (tips.json). Shop links come from
    catalog.json "shops", with the maintainer's affiliate tag or deep-link template when one is set. */
 let TIPS = null; // tips.json: { items, tips }, loaded after the catalog when it exists
-const SHOP_GROUPS = [['print', 'Filament'], ['fasteners', 'Screws and inserts'], ['tools', 'Tools'], ['cooling', 'Fans and fan power'], ['power', 'Power'], ['network', 'Network'], ['acrylic', 'Acrylic'], ['other', 'Handy extras']];
+const SHOP_GROUPS = [['devices', 'Devices to buy'], ['print', 'Printing'], ['fasteners', 'Screws and inserts'], ['tools', 'Tools'], ['cooling', 'Fans and fan power'], ['power', 'Power'], ['network', 'Network'], ['acrylic', 'Acrylic'], ['other', 'Handy extras']];
 function shopLinks(q) { return q ? window.LRMarket.links(q,state.market,(CAT && CAT.shops)||{}) : []; }
 const shopUrl = q => (shopLinks(q)[0] || {}).url || null;
 const affiliate = () => { const S = (CAT && CAT.shops) || {}; return Object.keys(S).some(k => S[k] && (S[k].tag || S[k].wrap)); };
@@ -892,30 +962,40 @@ function estimateHTML(includeSummary = true) {
   const field=(key,label,value,step='1')=>'<label style="display:flex;flex-direction:column;gap:3px">'+esc(label)+'<input class="field" data-cost="'+esc(key)+'" type="number" min="'+(key==='gramsHour'?'0.1':'0')+'" step="'+step+'" value="'+(value==null?'':value)+'" placeholder="Estimate"></label>';
   return (includeSummary ? '<p><b>≈ '+e.grams.toFixed(0)+' g · '+e.hours.toFixed(1)+' machine hours · '+money(e.printing)+' print use</b></p><p>Remaining purchase budget: '+(e.unknown.length?'known subtotal ':'≈ ')+money(e.total)+(e.unknown.length?' + '+e.unknown.length+' unpriced items':'')+'</p>' : '')+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+field('kgPrice','Filament / kg ('+s.currency+')',s.kgPrice,'.01')+field('kwhPrice','Electricity / kWh ('+s.currency+')',s.kwhPrice,'.01')+field('watts','Average printer power (W)',s.watts)+field('gramsHour','Rough throughput (g/h)',s.gramsHour,'.1')+field('slicedGrams','Slicer total (g), optional',s.slicedGrams)+field('slicedHours','Slicer total (hours), optional',s.slicedHours,'.1')+'</div>'+
-    '<p class="hint">Editable prices in '+s.currency+'; no currency conversion or live quotes. Budget accounts for owned stock, then buys whole spools and hardware packs. Excludes devices, tools and delivery. Blank slicer fields use rough estimates.</p>'+
+    '<p class="hint">Editable prices in '+s.currency+'; no currency conversion or live quotes. Budget accounts for owned stock, then buys whole spools and hardware packs. Device prices stay unpriced until entered. Excludes tools and delivery. Blank slicer fields use rough estimates.</p>'+
     '<details><summary>Edit hardware allowances (per pack / item)</summary>'+e.supplies.map(r=>field('price:'+r.key,r.name+(r.pack>1?' / '+r.pack+' pack':''),r.price,'.01')).join('')+'</details>';
 }
 const modsOf = d => { const s = d && d.shape; return s ? [].concat(...(s.rows || [s.row || []])).filter(m => m && typeof m === 'object') : []; };
 function facts() { // what the layout holds, for the shopping list and the guide
-  const f = { ks: 0, pi5: 0, pi4: 0, poePi5: 0, poePi4: 0, boards: 0, eth: 0, mains: 0, drives: 0, strip: false, gateway: false, fanParts: [], fans: new Map(), amps: 0 };
+  const f = { ks: 0, pi5: 0, pi4: 0, poePi5: 0, poePi4: 0, boards: 0, eth: 0, mains: 0, buyPi5: 0, buyPi4: 0, buyPoePi5: 0, buyPoePi4: 0, buyEth: 0, buyMains: 0, drives: 0, strip: false, gateway: false, fanParts: [], fans: new Map(), amps: 0 };
   const fanPart = d => { let n = 0; (d.hardware || []).forEach(x => { const hw = CAT.hardware[x.part]; if (hw && hw.mm) { n += x.qty; f.fans.set(x.part, (f.fans.get(x.part) || 0) + x.qty); f.amps += x.qty * (hw.amp || .15); } }); if (n) f.fanParts.push({ name: fullName(d), n }); };
   placed().forEach(i => {
     const d = info(i), mods = modsOf(d), name = fullName(d);
-    mods.forEach(m => { if (typeof m.ks === 'number') f.ks += m.ks; });
+    mods.forEach(m => { if (typeof m.ks === 'number') f.ks += m.fill != null ? m.fill : m.ks; });
     if (i.key === 'gen' && i.params.type === 'keystone') f.ks += (i.params.ports || 12) * (i.params.rows || 1);
-    let boards = 0, pi5 = 0, pi4 = 0; mods.forEach(m => { if (m.sbc) { const n = typeof m.sbc === 'number' ? m.sbc : 1; boards += n; if (/pi4/.test(m.board || '')) pi4 += n; else if (/pi/.test(m.board || 'pi5')) pi5 += n; } });
-    if (!boards && d.tab === 'devices' && /raspberry|\bpi ?[345]\b/i.test(name)) { boards = 1; if (/pi ?4/i.test(name)) pi4++; else pi5++; }
+    let boards = 0, pi5 = 0, pi4 = 0; mods.forEach(m => { if (m.sbc) { const n = typeof m.sbc === 'number' ? (m.fill != null ? m.fill : m.sbc) : 1; boards += n; if (/pi4/.test(m.board || '')) pi4 += n; else if (/pi/.test(m.board || 'pi5')) pi5 += n; } });
+    if (!mods.some(m => m.sbc) && !boards && d.tab === 'devices' && /raspberry|\bpi ?[345]\b/i.test(name)) { boards = 1; if (/pi ?4/i.test(name)) pi4++; else pi5++; }
     f.boards += boards; f.pi5 += pi5; f.pi4 += pi4;
+    const on = onPoe(i, powerOf(d, i)), powerNeeded = !haveDevice(i) || i.needPower, cableNeeded = !haveDevice(i) || i.needCable;
+    if (powerNeeded) { if (on) { f.buyPoePi5 += pi5; f.buyPoePi4 += pi4; } else { f.buyPi5 += pi5; f.buyPi4 += pi4; if (!boards && devicePart(d)) f.buyMains++; } }
+    if (cableNeeded && devicePart(d)) f.buyEth += mods.some(m => m.sbc) ? boards : 1;
     if (onPoe(i, powerOf(d, i))) { f.poePi5 += pi5; f.poePi4 += pi4; } // Pis on PoE get a PoE+ HAT instead of a USB-C supply
-    if (/drv/.test(d.face || '') || mods.some(m => m.bay)) f.drives++;
+    if (mods.some(m => m.bay)) f.drives += mods.reduce((n, m) => n + (m.bay ? (m.fill != null ? m.fill : typeof m.bay === 'number' ? m.bay : 1) : 0), 0);
+    else if (/drv/.test(d.face || '')) f.drives++;
     if (d.group && /gateway/i.test(d.group)) f.gateway = true;
     if (d.tab === 'panels' && /strip|pdu|outlet/i.test(name)) f.strip = true;
-    if ((d.tab === 'devices' && !/power/i.test(d.group || '')) || d.custom || (i.key === 'gen' && i.params.type === 'shelf')) { f.eth += boards || 1; if (!boards) f.mains++; }
+    if ((d.tab === 'devices' && !/power/i.test(d.group || '')) || d.custom || (i.key === 'gen' && i.params.type === 'shelf')) { f.eth += mods.some(m => m.sbc) ? boards : boards || 1; if (!boards && !mods.some(m => m.sbc)) f.mains++; }
     fanPart(d);
   });
-  if (state.top) fanPart(LIB[state.top]);
-  state.extras.forEach(k => fanPart(LIB[k]));
+  if (state.top) fanPart(catalogPart(state.top));
+  state.extras.forEach(k => fanPart(catalogPart(k)));
   return f;
+}
+// device mounts and extras in the build without a hardware list of their own (panels only need the panel screws)
+function noHardwareParts() {
+  const seen = new Set(), out = [];
+  placed().map(i => info(i)).concat(state.extras.map(k => catalogPart(k))).forEach(d => { if (d && !d.gen && !d.custom && (d.tab === 'devices' || d.extra) && !(d.hardware || []).length && !seen.has(d.key)) { seen.add(d.key); out.push(d); } });
+  return out;
 }
 function orderList() {
   const m = new Map(), add = (p, q) => { if (CAT.hardware[p] && q > 0) m.set(p, (m.get(p) || 0) + q); }, br = state.version === 'brass', f = facts();
@@ -923,23 +1003,23 @@ function orderList() {
   const sc = placed().reduce((n, i) => n + (H(i) === 1 ? 2 : 4), 0);
   if (sc) { add(br ? 'm6x10' : 'm6x12', sc); add(br ? 'insert' : 'nut', sc); }
   placed().forEach(i => (info(i).hardware || []).forEach(x => add(x.part, x.qty)));
-  if (state.top) (LIB[state.top].hardware || []).forEach(x => add(x.part, x.qty));
+  if (state.top) (catalogPart(state.top).hardware || []).forEach(x => add(x.part, x.qty));
   if (bottomPart()) (bottomPart().hardware || []).forEach(x => add(x.part, x.qty));
-  state.extras.forEach(k => (LIB[k].hardware || []).forEach(x => add(x.part, x.qty)));
+  state.extras.forEach(k => (catalogPart(k).hardware || []).forEach(x => add(x.part, x.qty)));
   if (br) add('inserttip', 1);
   add('hexkey', 1);
   if (f.boards) add('m25kit', 1);
   // fans: each fan part gets a USB-to-fan cable, a splitter when it holds more than one fan, and a USB port
   if (f.fanParts.length) { add('fanusb', f.fanParts.length); add('fansplit', f.fanParts.filter(p => p.n > 1).length); add('usbpower', Math.ceil(f.fanParts.length / 2)); add('fanspeed', 1); }
-  if (f.pi5 > f.poePi5) { add('pi5psu', f.pi5 - f.poePi5); add('usbc', f.pi5 - f.poePi5); }
-  if (f.pi4 > f.poePi4) { add('pi4psu', f.pi4 - f.poePi4); add('usbc', f.pi4 - f.poePi4); }
-  add('poehat5', f.poePi5); add('poehat4', f.poePi4);
+  if (f.buyPi5) { add('pi5psu', f.buyPi5); add('usbc', f.buyPi5); }
+  if (f.buyPi4) { add('pi4psu', f.buyPi4); add('usbc', f.buyPi4); }
+  add('poehat5', f.buyPoePi5); add('poehat4', f.buyPoePi4);
   // PoE devices that no switch in the rack can power: an injector each (the Power section also suggests a bigger switch)
-  const off = powerModel().poe.unpowered, bt = off.filter(p => p.need === 'bt').length;
+  const off = powerModel().poe.unpowered.filter(p => { const it = p.ref?.startsWith('i') ? find(+p.ref.slice(1)) : null; return !it || !haveDevice(it) || it.needPower; }), bt = off.filter(p => p.need === 'bt').length;
   add('poeinj', off.length - bt); add('poeinjbt', bt);
-  if (f.mains && !f.strip) add('powerstrip', Math.ceil((f.mains + (f.fanParts.length ? 1 : 0)) / 6));
+  if (f.buyMains && !f.strip) add('powerstrip', Math.ceil((f.buyMains + (f.fanParts.length ? 1 : 0)) / 6));
   if (f.ks) add('keystone', f.ks);
-  if (f.eth) add('patch', f.eth + Math.min(f.ks, f.eth));
+  if (f.buyEth) add('patch', f.buyEth + Math.min(f.ks, f.buyEth));
   add('ties', 1);
   const out = [...m].map(([p, q]) => { const hw = CAT.hardware[p], q2 = hw.search || hw.name, packs = hw.pack > 1 ? Math.ceil(q / hw.pack) : null;
     return { key: p, group: hw.group || 'other', name: hw.name, spec: hw.spec || '', qty: q, pack: hw.pack || null, packs, links: shopLinks(q2), buy: hw.buy || shopUrl(q2),
@@ -952,19 +1032,47 @@ function orderList() {
     out.push({ key: 'filament-' + x.c, group: 'print', name: fil.name.replace('1.75 mm', named ? cn : 'custom ' + cn) + ', 1.75 mm', spec: '≈ ' + x.grams + ' g with 10 % spare; an estimate before slicing', qty: Math.ceil(x.grams / 1000), unit: 'spool', swatch: x.c, links: shopLinks(q2), buy: shopUrl(q2) }); });
   if (state.sides === 'acrylic') { const a = CAT.hardware.acrylic || {};
     out.push({ key: 'acrylic', group: 'acrylic', name: a.name || 'Acrylic sheet, 3 mm, cut to size', spec: (a.spec || '') + '. Take the size from the printed side panel model; the planner has no measured size yet.', qty: 2, links: [], buy: null, cutters: (CAT.acrylic || []).filter(c => ['NL','BE'].includes(state.market) || /worldwide/i.test(c.note || '')) }); }
-  if (state.bottom === 'acrylic') { const a = CAT.hardware.acrylic || {}, tp = (CAT.frame.dimensions || {}).topPanel || [228, 171.5];
+  if (state.bottom === 'acrylic') { const a = CAT.hardware.acrylic || {}, tp = DIMS.topPanel;
     out.push({ key: 'acrylic-bottom', group: 'acrylic', name: 'Acrylic bottom panel, 3 mm', spec: tp[0] + ' × ' + tp[1] + ' mm, the size of the printed bottom panel; check it against the frame model before ordering', qty: 1, links: [], buy: null, cutters: (CAT.acrylic || []).filter(c => ['NL', 'BE'].includes(state.market) || /world|eu/i.test(c.note || '')) }); }
-  if (state.extras.some(k => LIB[k].shape && LIB[k].shape.wall)) out.push({ key: 'wallfixings', group: 'fasteners', name: 'Wall bracket fixings', spec: 'Choose for the selected bracket, loaded rack and wall', qty: null, links: [], buy: null });
+  if (state.extras.some(k => catalogPart(k).shape && catalogPart(k).shape.wall)) out.push({ key: 'wallfixings', group: 'fasteners', name: 'Wall bracket fixings', spec: 'Choose for the selected bracket, loaded rack and wall', qty: null, links: [], buy: null });
+  // parts that don't list their own hardware: the panel screws are counted, anything else they need isn't known
+  const bare = noHardwareParts(); if (bare.length) out.push({ key: 'parthardware', group: 'fasteners', name: 'Hardware the parts themselves need', spec: bare.length + (bare.length > 1 ? ' parts don’t' : ' part doesn’t') + ' list their own screws, nuts or magnets (' + bare.slice(0, 3).map(d => fullName(d)).join(', ') + (bare.length > 3 ? '…' : '') + '); check their model pages', qty: null, links: [], buy: null });
   if (state.h > 5) out.push({ key: 'joiners', group: 'fasteners', name: 'Fasteners for the 4 post joiners', spec: 'Not confirmed yet; check the extension model page', qty: null, links: [], buy: null, check: CAT.frame.extension.url });
   // handy extras from tips.json, when they fit this rack
   const when = { always: true, fans: f.fanParts.length > 0, acrylic: state.sides === 'acrylic' || state.bottom === 'acrylic', brass: br, bolted: !br, network: f.eth > 0 || f.ks > 0, sbc: f.boards > 0, drives: f.drives > 0, tall: state.h > 5, power: f.mains > 0 };
   ((TIPS && TIPS.items) || []).forEach(t => { if (!t || !t.name || !when[t.when || 'always'] || out.some(o => o.key === t.id)) return;
     out.push({ key: t.id, group: t.group || 'other', name: t.name, spec: t.spec || '', why: t.why || '', qty: t.qty || 1, pack: t.pack || null, packs: null, optional: true, links: shopLinks(t.search || t.name), buy: shopUrl(t.search || t.name) }); });
+  const profileParts = [...placed().map(i => info(i)), ...state.extras.map(k => catalogPart(k)), state.top ? catalogPart(state.top) : null, bottomPart()].filter(d => d?.options?.length);
+  const seenProfiles = new Set();
+  for (const d of profileParts) {
+    const key = d.key + ':' + (d.opt || ''); if (seenProfiles.has(key)) continue; seenProfiles.add(key);
+    out.push({ key: 'profile-' + key, group: 'print', name: 'Print profile: ' + d.name, spec: d.optionName ? d.optionName + (d.optionNote ? '. ' + d.optionNote : '') + (profileChoiceText(d) ? '. ' + profileChoiceText(d) : '') : 'Choose a print profile on the part before downloading its model.', qty: null, links: d.url ? [{ shop: 'Model profiles', url: d.url }] : [], buy: null });
+  }
+  const boardNames = { pi5: 'Raspberry Pi 5', pi4: 'Raspberry Pi 4', pi3: 'Raspberry Pi 3', zero: 'Raspberry Pi Zero', opiz3: 'Orange Pi Zero 3', rock5b: 'Radxa ROCK 5B', uno: 'Arduino Uno', generic: 'Single-board computer (check model)' };
+  for (const it of placed().filter(it => !haveDevice(it) && devicePart(info(it)))) {
+    const d = info(it), modules = modsOf(d).filter(m => m.sbc);
+    const devices = modules.length ? modules.map(m => ({ id: m.board || 'pi5', name: boardNames[m.board || 'pi5'] || m.board, qty: m.fill != null ? m.fill : typeof m.sbc === 'number' ? m.sbc : 1 })) : [{ id: 'device', name: d.name, qty: 1 }];
+    for (const device of devices.filter(x => x.qty > 0)) {
+      const key = 'device-' + d.key + '-' + device.id, existing = out.find(r => r.key === key);
+      if (existing) { existing.qty += device.qty; continue; }
+      out.push({ key, group: 'devices', name: device.name, spec: 'Device, not the printed mount. Check what is included in the box; power supplies and cables listed separately need checking before purchase.', qty: device.qty, links: shopLinks(device.name), buy: shopUrl(device.name), price: null });
+    }
+  }
+  for (const it of placed()) {
+    const d = info(it); if (!devicePart(d) || haveDevice(it) && !it.needPower || onPoe(it, powerOf(d, it))) continue;
+    const boards = modsOf(d).filter(m => m.sbc);
+    if (boards.length ? boards.every(m => ['pi4', 'pi5'].includes(m.board || 'pi5')) : /raspberry|\bpi ?[45]\b/i.test(d.name)) continue;
+    out.push({ key: 'device-supply-' + it.id, group: 'power', name: 'Check power supply: ' + d.name, spec: haveDevice(it) ? 'Marked missing. Confirm the required input and compatible supply in the device manual.' : 'Check what is included in the device box before buying a separate power supply.', qty: null, links: [], buy: null });
+  }
   const order = SHOP_GROUPS.map(g => g[0]);
   return out.sort((a, b) => order.indexOf(a.group) - order.indexOf(b.group));
 }
 const qtyText = r => r.qty == null ? 'check' : r.unit === 'spool' ? r.qty + (r.qty > 1 ? ' spools' : ' spool') : r.packs ? r.qty + ' · ' + r.packs + (r.packs > 1 ? ' packs' : ' pack') + ' of ' + r.pack : r.qty + '×';
 const linksHTML = ls => ls && ls.length ? '<span class="slinks">' + ls.map(l => '<a href="' + esc(l.url) + '" target="_blank" rel="noopener' + (l.aff ? ' sponsored' : '') + '">' + esc(l.shop) + '</a>').join('') + '</span>' : '';
+function inventoryHTML() {
+  const e = buildEstimate(), field = (k, n, label) => '<input class="field mini" type="number" min="0" step="1" data-cost="' + esc(k) + '" aria-label="' + esc(label) + '" value="' + n + '">';
+  return '<details class="abd" data-sec="inventory"' + (ui.sec.inventory ? ' open' : '') + '><summary>What I already have — supplies and filament</summary><p class="hint">Enter pieces, not packs. These quantities reduce the purchase budget; device ownership is set on each device.</p>' + e.colours.map(r => '<label class="owned-row"><span>' + esc(colorName(r.c)) + '</span><span>≈ ' + Math.round(r.grams) + ' g needed</span>' + field('stock:' + r.c, r.owned, 'Owned filament grams') + '</label>').join('') + e.supplies.filter(r => r.group !== 'devices').map(r => '<label class="owned-row"><span>' + esc(r.name) + '</span><span>' + (r.qty == null ? 'Check model' : r.qty + ' needed') + '</span>' + field('owned:' + r.key, r.owned, 'Owned ' + r.name) + '</label>').join('') + '</details>';
+}
 function shopHTML(rows) {
   return SHOP_GROUPS.map(([g, title]) => { const rs = rows.filter(r => r.group === g); if (!rs.length) return '';
     return '<p class="sgroup">' + title + '</p><ul class="slist">' + rs.map(r => '<li class="srow">' +
@@ -973,7 +1081,7 @@ function shopHTML(rows) {
       (r.models || []).map(mo => '<small class="smodel">' + esc(mo.label) + ': ' + esc(mo.name) + linksHTML(mo.links) + '</small>').join('') +
       (r.cutters || []).map(c => '<small class="smodel"><a href="' + esc(c.url) + '" target="_blank" rel="noopener">' + esc(c.name) + '</a> · ' + esc(c.note || '') + '</small>').join('') +
       (r.check ? '<small><a href="' + esc(r.check) + '" target="_blank" rel="noopener">Check the model page</a></small>' : '') +
-      '</div><span class="sqty">' + qtyText(r) + '</span>' + (r.models && r.models.length ? '' : linksHTML(r.links)) + '</li>').join('') + '</ul>'; }).join('');
+      '</div><span class="sqty">' + qtyText(r) + '</span>' + (r.models && r.models.length ? '' : linksHTML(r.links)) + '</li>').join('') + '</ul>'; }).join('') + inventoryHTML();
 }
 function guide() {
   const f = facts(), br = state.version === 'brass', acr = state.sides === 'acrylic', fp = frameParts(), screw = br ? 'M6×10 screw' : 'M6×12 screw and nut', S = [];
@@ -992,7 +1100,7 @@ function guide() {
     'Base: put ' + (state.bottom === 'acrylic' ? 'the 3 mm acrylic bottom panel' : bottomPart() ? fullName(bottomPart()) + ' as the bottom panel' : 'the bottom panel') + ' between two edge pieces and two horizontal pieces, one ' + screw + ' per joint.',
     'Stand the four posts on the base, one screw per joint' + (fp.joiners ? ', and join them to ' + state.h + 'U with the post joiners' : '') + '.',
     'Slide the ' + (acr ? '3 mm acrylic ' : '') + 'side panels into the slots between the posts' + (fp.joiners ? '; turn them the opposite way to the posts so the seams don’t line up' : '') + '.',
-    'Add the top horizontal pieces, then ' + (state.top ? 'the ' + fullName(LIB[state.top]) : 'the top panel') + ', and close the top with the last two edge pieces.',
+    'Add the top horizontal pieces, then ' + (state.top ? 'the ' + fullName(catalogPart(state.top)) : 'the top panel') + ', and close the top with the last two edge pieces.',
     'Screw the handles on top and the feet underneath; they use the same hole pattern.']);
   add('mount', 'Mount the parts, top to bottom', ['Fit each device into its mount first, then screw the panel to the front of the posts: ½U panels take one ' + screw + ' per side, 1U and taller two per side.']
     .concat(byPos().map(i => { const d = info(i); return uRange(i.pos2, d.h2) + atBack(i) + ': ' + (i.label ? i.label + ' – ' : '') + fullName(d) + ' (' + (H(i) === 1 ? 2 : 4) + ' screws' + (sideOf(i) === 'back' ? ', on the rear posts, facing out the back' : '') + ')'; })));
@@ -1022,8 +1130,8 @@ function guide() {
 }
 function guideData() {
   return { h: state.h, version: state.version === 'brass' ? 'Heat-set inserts' : 'Bolted', sides: state.sides,
-    frame: state.frame, panel: state.panel, accent: state.accent, top: state.top ? fullName(LIB[state.top]) : null,
-    wallMounts: state.extras.filter(k => LIB[k].shape && LIB[k].shape.wall).map(k => ({ name: fullName(LIB[k]), url: LIB[k].url })), frameParts: frameParts(), guide: guide(), items: byPos().map(i => { const d = info(i); return {
+    frame: state.frame, panel: state.panel, accent: state.accent, top: state.top ? fullName(catalogPart(state.top)) : null,
+    wallMounts: state.extras.filter(k => catalogPart(k).shape && catalogPart(k).shape.wall).map(k => ({ name: fullName(catalogPart(k)), url: catalogPart(k).url })), frameParts: frameParts(), guide: guide(), items: byPos().map(i => { const d = info(i); return {
       pos: uRange(i.pos2, d.h2), pos2: i.pos2, h2: d.h2, name: fullName(d), label: i.label || '', back: sideOf(i) === 'back', face: faceSVG(d, colorOf(i), upperHalf(i)) }; }) };
 }
 function guideHTML() { return window.LRGuide.html(guideData()); }
@@ -1045,7 +1153,7 @@ const JOINER_NOTE = 'Above 5U the posts are joined. How the post joiners are fas
    seams between panels), the fans with their rated flow and direction, and the walls. */
 const RATED = [35, 40];                             // hottest air up to 35 °C is cool, up to 40 °C warm; most gear is rated for 0–40 °C
 const HEAT_SPAN = 25;                               // the colour scale runs from room temperature to 25 °C above it
-const BAY_W = .222, RACK_D = .24, SIDE_D = .17;     // m: width between the posts, rack depth, side panel depth
+const BAY_W = DIMS.clearWidth / 1000, RACK_D = DIMS.depth / 1000, SIDE_D = DIMS.sideBeam / 1000;     // m: width between the posts, rack depth, side panel depth
 const TOP_A = .216 * .176;                          // m², the opening of the top panel
 const DIR_BTN = { intake: 'In', exhaust: 'Out', cross: 'In + out' };
 const fmtT = t => t > 60 ? '60+ °C' : Math.round(t) + ' °C'; // past 60 °C the exact figure means little: gear shuts down long before
@@ -1076,9 +1184,9 @@ const dirText = (dir, place) => dir === 'intake' ? 'blows in' : dir === 'exhaust
 function fanParts() { // every part in the rack with fans
   const out = [], add = (ref, d, kind, chosen, name, it) => { const place = fanPlace(d, kind, it); out.push({ ref, d, it, kind, place, dir: dirFor(d, chosen, place, kind), name, where: it ? uRange(it.pos2, d.h2) + atBack(it) : place === 'side' ? 'sides' : place }); };
   byPos().forEach(it => { const d = info(it); if (cfmOf(d)) add('i' + it.id, d, 'item', it.dir, it.label || fullName(d), it); });
-  if (state.top && cfmOf(LIB[state.top])) add('top', LIB[state.top], 'top', state.topDir, fullName(LIB[state.top]));
+  if (state.top && cfmOf(catalogPart(state.top))) add('top', catalogPart(state.top), 'top', state.topDir, fullName(catalogPart(state.top)));
   if (bottomPart() && cfmOf(bottomPart())) add('bottom', bottomPart(), 'bottom', state.bottomDir, fullName(bottomPart()) + ' (bottom)');
-  state.extras.forEach(k => { if (cfmOf(LIB[k])) add('x' + k, LIB[k], 'extra', state.xdir[k], fullName(LIB[k])); });
+  state.extras.forEach(k => { if (cfmOf(catalogPart(k))) add('x' + k, catalogPart(k), 'extra', state.xdir[k], fullName(catalogPart(k))); });
   return out;
 }
 // reassigns rather than edits, so predict() can put the old values back
@@ -1119,11 +1227,11 @@ function rackModel() {
     const g = group('slot', 'Open ' + fmtU(e - s), uRange(s, e - s)); for (let k = s; k < e; k++) hole(g, BAY_W * dz, k);
     s = e;
   }
-  const back = state.back !== 'closed', top = state.top ? LIB[state.top] : null, topVent = top && top.vent || 0;
+  const back = state.back !== 'closed', top = state.top ? catalogPart(state.top) : null, topVent = top && top.vent || 0;
   if (back && occB.some(o => !o)) { const g = group('back', occB.some(o => o) ? 'Open part of the back' : 'Open back', 'back'); for (let s = 0; s < n; s++) if (!occB[s]) hole(g, BAY_W * dz, s); }
   if (topVent) hole(group('top', fullName(top), 'top'), TOP_A * topVent, 0, 'top');
   const bot = bottomPart(); if (bot && bot.vent) hole(group('bottom', fullName(bot) + ' (bottom)', 'bottom'), TOP_A * bot.vent, 0, 'bottom');
-  state.extras.forEach(k => { const d = LIB[k]; if (d.at === 'side' && d.vent) { const g = group('side', fullName(d), 'both sides'); for (let s = 0; s < n; s++) hole(g, 2 * SIDE_D * dz * d.vent, s); } });
+  state.extras.forEach(k => { const d = catalogPart(k); if (d.at === 'side' && d.vent) { const g = group('side', fullName(d), 'both sides'); for (let s = 0; s < n; s++) hole(g, 2 * SIDE_D * dz * d.vent, s); } });
   const seams = group('seams', 'Seams between panels', 'everywhere');
   for (let s = 0; s < n; s++) hole(seams, K.leak, s);
   hole(seams, K.leakTB, 0, 'top'); hole(seams, K.leakTB, 0, 'bottom');
@@ -1276,7 +1384,7 @@ function powerOf(d, it) {
     if (x.sbc) { const n = typeof x.sbc === 'number' ? (x.fill != null ? x.fill : x.sbc) : 1, b = x.board || 'pi5'; if (NO_LAN.test(b)) return; if (!own && OWN_BOARDS.test(b)) boards += n; else extra += n; }
     else if (typeof x.dev === 'string' && PWDEV[x.dev]) { const o = PWDEV[x.dev], n = x.n || 1, p = provPorts(o); for (let k = 0; k < n; k++) if (p) extraProvs.push(p); else extra += o.eth != null ? o.eth : 1; }
   });
-  const n = own || boards || 1, isDev = !!d.pwDev, poeIn = f('poeIn'), ports = isDev ? provPorts(dev) : 0;
+  const n = own || (mods.some(x => x.sbc && OWN_BOARDS.test(x.board || 'pi5')) ? boards : 1), isDev = !!d.pwDev, poeIn = f('poeIn'), ports = isDev ? provPorts(dev) : 0;
   const eth = ports ? 0 : dev.eth != null ? dev.eth : !isDev ? 0 : d.top ? (poeIn ? 1 : 0) : 1;
   r.provs = m.ports !== undefined ? (m.ports ? [m.ports] : []) : Array(ports ? n : 0).fill(ports).concat(extraProvs);
   r.eth = m.eth !== undefined ? m.eth : eth * n + extra;
@@ -1300,8 +1408,8 @@ function powerModel() {
     rows.push({ ref, it, d, name, where, w: hw.w, est: hw.est, own: !!hw.own, p, on });
   };
   byPos().forEach(it => { const d = info(it); part('i' + it.id, it, d, uRange(it.pos2, d.h2) + atBack(it), it.label || fullName(d), it); });
-  if (state.top) part('top', null, LIB[state.top], 'top', fullName(LIB[state.top]), state.power.topPoe);
-  state.extras.forEach(k => { if (LIB[k].watts > 0) part('x' + k, null, LIB[k], 'frame', fullName(LIB[k])); });
+  if (state.top) part('top', null, catalogPart(state.top), 'top', fullName(catalogPart(state.top)), state.power.topPoe);
+  state.extras.forEach(k => { if (catalogPart(k).watts > 0) part('x' + k, null, catalogPart(k), 'frame', fullName(catalogPart(k))); });
   if (f.amps) draws.push({ name: 'Fans', w: f.amps * 5, est: true });
   const ext = state.power.ext;
   ext.forEach((x, i) => { draws.push({ name: x.name, w: x.n * x.w, est: true }); for (let k = 0; k < x.n; k++) pds.push({ id: 'e' + i + ':' + k, ref: 'e' + i, name: x.name, w: x.w, typ: x.w }); });
@@ -1381,12 +1489,120 @@ function powerParts() { // the Power & network section: a one-line summary and t
 
 /* ---------- render: build column ---------- */
 /* Sections fold to one line each, so the column stays short; the open ones are remembered. */
+/* ---------- Connect: power, fans, PoE and lighting for what this build holds (connect.js holds the cards) ---------- */
+function connectFacts() {
+  const r = powerModel(), P = r.poe || { sources: [] }, srcOf = ref => { const s = (P.sources || []).find(x => (x.pds || []).some(p => p.ref === ref)); return s ? s.name : null; };
+  let pi5 = 0, boards = 0; const devices = [];
+  byPos().forEach(it => {
+    const d = info(it), sbc = modsOf(d).filter(m => m.sbc).reduce((n, m) => { const k = typeof m.sbc === 'number' ? (m.fill != null ? m.fill : m.sbc) : 1; if ((m.board || 'pi5') === 'pi5') pi5 += k; boards += k; return n + k; }, 0);
+    if (heatOf(it).w > 0 || sbc) devices.push({ input: d.pwDev?.input, inputEvidence: d.pwDev?.inputEvidence, own: haveDevice(it), name: it.label || shortName(d), poe: srcOf('i' + it.id), note: sbc ? (haveDevice(it) ? 'Have it: use the power supply you already have. ' : 'To buy: check what is in the box. ') + sbc + (sbc > 1 ? ' boards, each on its own supply or PoE HAT (see below)' : ' board on its own supply or PoE HAT (see below)') : null });
+  });
+  const fans = [];
+  fanParts().forEach(f => (f.d.hardware || []).forEach(h => { const hw = CAT.hardware[h.part]; if (hw && hw.cfm) fans.push({ name: f.name, qty: h.qty, mm: hw.mm, volt: hw.volt, amp: hw.amp }); }));
+  const logo = state.extras.map(k => catalogPart(k) && catalogPart(k).shape && catalogPart(k).shape.logo).find(Boolean) || null;
+  return { devices, fans, pi5, boards, poe: P.budget > 0 || P.load > 0 ? { budget: P.budget || 0, load: P.load || 0, sources: (P.sources || []).map(s => s.name) } : null,
+    logo, ups: state.power && state.power.ups && state.power.ups.size ? state.power.ups : null };
+}
+const cardHTML = c => '<div class="ccard"><h4>' + esc(c.title) + '</h4>' + (c.lead ? '<p>' + esc(c.lead) + '</p>' : '') +
+  (c.items && c.items.length ? '<ul class="citems">' + c.items.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '') +
+  (c.steps.length ? '<ol class="csteps">' + c.steps.map(x => '<li>' + esc(x) + '</li>').join('') + '</ol>' : '') +
+  (c.sources.length ? '<p class="csrc">Sources: ' + c.sources.map(([t, u]) => '<a href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(t) + '</a>').join(' · ') + '</p>' : '') + '</div>';
+/* ---------- Guides and Resources (the header's Guides button) ---------- */
+let RESOURCES = null;
+const STEP_ABOUT = { 1: 'The frame and its version, the height, your 3D printer and the country for the shop links.', 2: 'Your devices with a printed mount for each, panels and custom parts; the Where bar picks the front, back, top, bottom, sides or inside.',
+  3: 'How everything gets power, network and air: supplies, fans, PoE and lights, for what your build holds.', 4: 'Build readiness: what is missing, what clashes and what the planner can’t confirm.',
+  5: 'What to print and on which printer, the frame parts and the build guide, step by step.', 6: 'The build plan PDF, the build pack, the shopping list, a share link and a rack file to open later.' };
+function renderHelp(tab) {
+  const body = $('#help-body'); if (!body) return;
+  document.querySelectorAll('#helpdlg [data-act="help-tab"]').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === tab));
+  if (tab === 'resources') {
+    body.innerHTML = !RESOURCES ? '<p class="hint">The list of resources didn’t load.</p>' : '<p class="hint">Places to learn more, find models and check facts. Model searches are searches, not checked lists. Checked ' + esc(RESOURCES.checked || '') + '.</p>' +
+      RESOURCES.groups.map(g => '<p class="sgroup">' + esc(g.title) + '</p><ul class="reslist">' + g.items.map(r => '<li><a href="' + esc(r.url) + '" target="_blank" rel="noopener">' + esc(r.title) + '</a><span class="badge">' + esc(r.kind) + '</span><small>' + esc(r.about) + '</small></li>').join('') + '</ul>').join('');
+    return;
+  }
+  body.innerHTML = '<p class="sgroup">The six steps</p><ol class="hsteps">' + STEPS.map(([n, l]) => '<li><b>' + l + '</b> ' + esc(STEP_ABOUT[n]) + ' <button type="button" class="lnk" data-act="help-go" data-step="' + n + '">Go there</button></li>').join('') + '</ol>' +
+    '<p class="sgroup">Connecting things</p>' + window.LRConnect.guides().map(cardHTML).join('') +
+    '<p class="sgroup">Words</p><dl class="hterms">' + Object.values(TERMS).map(([t, d]) => '<dt>' + esc(t) + '</dt><dd>' + esc(d) + '</dd>').join('') + '</dl>' +
+    '<p class="sgroup">Your rack</p><p><button type="button" class="btn small" data-act="help-buildguide">Open the build guide for this rack</button></p>';
+}
+function connectHTML() {
+  const cs = window.LRConnect.cards(connectFacts());
+  if (!cs.length) return '';
+  const body = '<p class="hint">How everything gets power, network and air, for the parts in this build. Facts carry their source; where nothing is documented the card says so.</p>' +
+    cs.map(cardHTML).join('');
+  return sec('connect', 'Connect', '<span>' + cs.map(c => c.title.replace(/ \(.*\)$/, '')).join(' · ') + '</span>', body);
+}
+
+/* ---------- plain-language help for the words the planner uses ---------- */
+// [title, explanation]; a "?" button (qm) opens it. Only standard or measured facts here; no guesses.
+const TERMS = {
+  u: ['Rack units (U)', 'Rack height is counted in units: 1U is 44.45 mm (1.75 inch). A 5U rack holds five of them. Mounting holes repeat every U, so whole-U panels start on a U line; a ½U panel uses half of one. A printed ½U Lab Rax panel is a little taller than half a U (measured from the model), so two of them don’t fit in one U.'],
+  depth: ['Depth', 'How far a part reaches into the rack. Parts on the front posts and parts on the back posts at the same height share the depth between them; if together they’re deeper than the inside of the rack, one of them has to move.'],
+  poe: ['PoE (Power over Ethernet)', 'A PoE switch powers devices through the network cable, such as access points or a Raspberry Pi with a PoE HAT. The standards: 802.3af gives up to 15.4 W at the switch port (12.95 W at the device), 802.3at (PoE+) 30 W (25.5 W) and 802.3bt (PoE++) 60 or 90 W (51 or 71.3 W). A switch also has a total PoE budget shared by all its ports.'],
+  airflow: ['Airflow: intake and exhaust', 'Intake fans blow room air in, exhaust fans blow warm air out. Warm air rises, so air in low at the front and out at the top or back works with it. The planner estimates the air temperature around your parts from their typical heat; it is an estimate, not a measurement of the parts themselves.'],
+  insert: ['Heat-set inserts or bolted', 'Heat-set inserts are small threaded brass sleeves you press into the printed holes with a soldering iron; the screws then go into metal threads. A bolted frame uses screws with nuts instead, so you don’t need a soldering iron.'],
+  keystone: ['Keystone', 'A keystone is a standard snap-in jack (network, HDMI, USB and more) that clips into the square openings of a keystone panel. You buy the jacks; the panel is printed.'],
+  verification: ['How sure is this?', 'Each claim about a part has its own status. Verified: measured from the model file or tested, with the date. Documented: the creator or maker states it, not checked here. Community reported: a builder reports that it works. Estimated: taken from the title, photos or a similar part. Unknown: no information yet. A verified height says nothing about print quality, or about whether your device fits.'],
+  estimate: ['Estimated (≈)', 'A value marked ≈ hasn’t been checked against the model or the real part. It comes from the model’s title, photos or a similar part. Check it on the model page, or print one test piece, before you print everything.']
+};
+const qm = k => TERMS[k] ? '<button type="button" class="qm" data-act="explain" data-k="' + k + '" aria-label="What is ' + esc(TERMS[k][0]) + '?" title="What is this?">?</button>' : '';
+const TERM_OF = { overlap: 'u', clash: 'depth', cooling: 'airflow', estimated: 'estimate', frame: 'estimate' };
+
+/* ---------- build readiness and the six steps (ready.js holds the checks) ---------- */
+const STEPS = [[1, 'Rack'], [2, 'Hardware'], [3, 'Connect'], [4, 'Check'], [5, 'Print & assemble'], [6, 'Export']];
+let READY = [];
+function readyFacts(pk) {
+  const pl = placed(), cl = pl.filter(i => clashes(i).length), ov = pl.filter(i => overlaps(i).length), a = airflow();
+  return {
+    parts: pl.length, unplaced: state.items.length - pl.length, clashes: cl.length, clashId: cl[0] && cl[0].id, overlaps: ov.length, overlapId: ov[0] && ov[0].id,
+    printer: pk.printer ? { name: bedName(pk.printer), smallBed: window.LRPrinters.fitRect(254, DIMS.u, pk.printer.w, pk.printer.d) === 0, bad: bedBad(pk).length, turned: pk.some(x => x.bed && x.bed.turned.length) } : null,
+    cooling: { level: !a.Q ? 'none' : a.maxT <= RATED[0] ? 'cool' : a.maxT <= RATED[1] ? 'warm' : 'hot', maxT: a.maxT },
+    power: window.LRPower.issues(powerModel()), estimated: pl.filter(i => info(i).est).length, noHardware: noHardwareParts().length,
+    adapterFix: powerModel().rows.find(x => x.on && /raspberry|\bpi ?[45]\b/i.test(x.name) && powerModel().poe.unpowered.some(p => p.ref === x.ref))?.ref,
+    profileMismatches: [...pl.map(info), ...state.extras.map(catalogPart), state.top && catalogPart(state.top), bottomPart()].filter(d => d && d.optionFrame && d.optionFrame !== state.version).map(d => fullName(d)),
+    market: (window.LRMarket.regions[state.market] || {}).name
+  };
+}
+function readyHTML(pk) {
+  READY = window.LRReady.checks(readyFacts(pk));
+  const s = window.LRReady.summary(READY), order = { warn: 0, todo: 1, info: 2, ok: 3 }, icon = { warn: '!', todo: '○', info: 'i', ok: '✓' };
+  const head = s.ready ? 'Ready to build' : [s.warn ? s.warn + (s.warn > 1 ? ' problems' : ' problem') : '', s.todo ? s.todo + (s.todo > 1 ? ' things' : ' thing') + ' to do' : ''].filter(Boolean).join(' · ');
+  const fix = c => !c.fix ? '' : c.fix.act === 'go-country' ? '<select class="field mini" id="ready-market" aria-label="Country for the shop links">' + Object.entries(window.LRMarket.regions).map(([k, r]) => '<option value="' + k + '"' + (state.market === k ? ' selected' : '') + '>' + esc(r.name) + '</option>').join('') + '</select>'
+    : '<button type="button" class="btn small" data-act="' + c.fix.act + '"' + (c.fix.step ? ' data-step="' + c.fix.step + '"' : '') + (c.fix.id != null ? ' data-id="' + c.fix.id + '"' : '') + (c.fix.ref ? ' data-ref="' + esc(c.fix.ref) + '" data-v="0"' : '') + '>' + esc(c.fix.label) + '</button>';
+  return '<section class="ready' + (s.ready ? ' ok' : '') + '" id="ready" aria-labelledby="ready-h"><h3 id="ready-h"><span class="rdot" aria-hidden="true"></span>' + esc(head) + '</h3>' +
+    '<p class="hint">' + (s.ready ? 'Everything checks out. The notes below are what the planner can’t confirm for you.' : 'What still stands between this plan and a rack you can build.') + '</p>' +
+    '<ul class="rlist">' + READY.slice().sort((x, y) => order[x.state] - order[y.state]).map(c => '<li class="rk rk-' + c.state + '"><span class="rki" aria-hidden="true">' + icon[c.state] + '</span><div class="rkt"><b>' + esc(c.title) + qm(TERM_OF[c.id] || (/^power\d/.test(c.id) ? 'poe' : '')) + '</b>' + (c.why ? '<small>' + esc(c.why) + '</small>' : '') + '</div>' + fix(c) + '</li>').join('') + '</ul>' +
+    '<div class="rexport" id="export"><button type="button" class="btn small primary" data-act="pdf">Build plan PDF</button><button type="button" class="btn small" data-act="pack">Build pack (ZIP)</button><button type="button" class="btn small" data-act="share">Copy share link</button><button type="button" class="btn small" data-act="save-file">Save rack file</button></div></section>';
+}
+function renderSteps() {
+  const el = $('#steps'); if (!el) return;
+  el.innerHTML = STEPS.map(([n, label]) => { const sm = window.LRReady.summary(READY), st = n === 6 ? '' : n === 4 ? (sm.warn ? 'warn' : sm.todo ? 'todo' : 'ok') : window.LRReady.stepState(READY, n);
+    return '<button type="button" class="step' + (st ? ' s-' + st : '') + '" data-act="go-step" data-step="' + n + '"' + (st ? ' title="' + (st === 'ok' ? 'Done' : st === 'warn' ? 'Needs attention' : 'To do') + '"' : '') + '><span class="sn">' + n + '</span>' + label + '</button>'; }).join('');
+}
+// jump to where a step's work happens, with a short flash so the eye finds it
+function goStep(n) {
+  const at = el => { if (!el) return; el.style.scrollMarginTop = (Math.max(0, $('header.top').getBoundingClientRect().bottom) + 8) + 'px'; el.scrollIntoView({ behavior: 'smooth', block: 'start' }); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); };
+  if (n === 1) return at($('#settings'));
+  if (n === 2) { if (where() !== 'front' && where() !== 'back') setWhere('front'); at($('.lib')); setTimeout(() => { const q = $('#q'); if (q) q.focus({ preventScroll: true }); }, 400); return; }
+  const id = { 3: 'connect', 5: 'print' }[n];
+  if (id) { ui.sec[id] = true; if (n === 3) ui.sec.power = true; saveUI(); renderBuild(); return at($('[data-sec="' + id + '"]') || $('[data-sec="power"]')); }
+  at($(n === 6 ? '#export' : '#ready'));
+}
+// the first visit: four ways in, over the rack
+function renderStart() {
+  const el = $('#startcard'); if (!el) return;
+  const show = !!state.example && !ui.started; el.hidden = !show; if (!show) return;
+  const opt = (v, t, d, cls) => '<button type="button" class="sc-opt' + (cls ? ' ' + cls : '') + '" data-act="start" data-v="' + v + '"><b>' + t + '</b><span>' + d + '</span></button>';
+  el.innerHTML = '<div class="sc-in"><h2>Plan a 10-inch rack you can actually build</h2><p>Pick your hardware, see it in 3D, check that it fits, stays cool and gets power, then take the print list, shopping list and build plan with you.</p><div class="sc-opts">' +
+    opt('guide', 'Guide me', 'A few questions about your hardware, then a suggested layout', 'primary') + opt('empty', 'Start empty', 'A 5U Lab Rax; add the parts yourself') +
+    opt('example', 'Explore the example', 'A gateway, a PoE switch, four Pis and a fan') + opt('file', 'Open a build file', 'A .rack.json you saved before') + '</div></div>';
+}
 const sec = (id, title, sum, body) => '<details class="sec" data-sec="' + id + '"' + (ui.sec[id] ? ' open' : '') + '><summary><span class="sec-t">' + title + '</span><span class="sec-s">' + sum + '</span><span class="chev" aria-hidden="true">›</span></summary><div class="sec-b">' + body + '</div></details>';
 function renderBuild() {
   if (!CAT) return;
   const h = state.h, used = onSide(rackSide).reduce((n, i) => n + H(i), 0), free = slots() - used, fp = frameParts(), br = state.version === 'brass';
   const pk = printPack(), done = pk.filter(x => state.done[x.k]).length, count = placed().length + (state.top ? 1 : 0);
-  let html = '<div><h2 class="title">Your build</h2><span class="muted">' + h + 'U · ' + count + (count === 1 ? ' part · ' : ' parts · ') + (free ? fmtU(free) + ' open' : 'no open slots') + '</span></div>';
+  let html = '<div><h2 class="title">Your build</h2><span class="muted">' + h + 'U · ' + count + (count === 1 ? ' part · ' : ' parts · ') + esc(openSpace(rackSide).text) + '</span></div>' + readyHTML(pk);
 
   const rowAir = {}, ra = url => rowAir[url] || (rowAir[url] = { w: 0, est: false, fans: [] }); // heat and fans per model page
   byPos().forEach(i => { const d = info(i), hw = heatOf(i); if (d.url && hw.w) { const r = ra(d.url); r.w += hw.w; r.est = r.est || hw.est; } });
@@ -1418,6 +1634,7 @@ function renderBuild() {
   html += sec('air', 'Cooling', air.sum, air.body);
   const pw = powerParts();
   html += sec('power', 'Power & network', pw.sum, pw.body);
+  html += connectHTML();
 
   const ol = orderList(), kg = filament().reduce((n, x) => n + x.grams, 0) / 1000, amazonTag = CAT.shops && CAT.shops.amazon && CAT.shops.amazon.tag;
   html += sec('shop', 'Shopping list', '<span>' + ol.length + ' items · ≈ ' + kg.toFixed(1) + ' kg PETG</span>', shopHTML(ol) +
@@ -1426,7 +1643,7 @@ function renderBuild() {
   const G = guide();
   html += sec('guide', 'Build guide', '<span>' + window.LRGuide.cards(guideData()).length + ' illustrated steps</span>', guideHTML(G));
 
-  const top = state.top ? LIB[state.top] : null;
+  const top = state.top ? catalogPart(state.top) : null;
   html += sec('frame', 'Frame parts', '<span>' + (br ? 'Heat-set inserts' : 'Bolted') + ' · ' + (state.sides === 'acrylic' ? 'acrylic' : 'printed') + ' sides</span>', '<dl class="kv">' +
     '<dt>Vertical posts</dt><dd>' + fp.posts + '</dd>' + (fp.joiners ? '<dt>Post joiners</dt><dd>4</dd>' : '') +
     '<dt>Side panels</dt><dd>' + fp.sides + (state.sides === 'acrylic' ? ' acrylic' : '') + '</dd>' + (state.sides === 'acrylic' ? '<div class="note">Acrylic sides: 3 mm, cut to the size of the printed side panel. Take it from that model; the planner has no measured size yet.</div>' : '') + (fp.joiners && fp.b !== 5 ? '<div class="note">Fit the side panels the opposite way to the posts so the seams don’t line up.</div>' : '') +
@@ -1436,24 +1653,26 @@ function renderBuild() {
     '<div class="note">The horizontal pieces need a print bed of about 250 mm; they don’t fit on 220 mm beds.' + (h > 5 ? ' Above 10U the printed frame gets too weak for a full rack, so the planner stops at 10U.' : '') + '</div></dl>');
 
   html += '<div class="actions"><button type="button" class="btn small" data-act="copy">Copy list</button><button type="button" class="btn small" data-act="share">Share link</button>' +
-    '<button type="button" class="btn small" data-act="save-file" title="Download this layout as a .rack.json file">Save as file</button><button type="button" class="btn small" data-act="open-file" title="Open a .rack.json file">Open file</button><button type="button" class="btn small" data-act="fill"' + (free ? '' : ' disabled') + '>Fill open slots' + (rackSide === 'back' ? ' at the back' : '') + '</button><button type="button" class="btn small danger" data-act="clear"' + (state.items.length ? '' : ' disabled') + '>Clear rack</button></div><div id="copyfall"></div>';
+    '<button type="button" class="btn small" data-act="save-file" title="Download this layout as a .rack.json file">Save as file</button><button type="button" class="btn small" data-act="open-file" title="Open a .rack.json file">Open file</button>' + (previousRack() ? '<button type="button" class="btn small" data-act="previous-rack">Previous rack</button>' : '') + '<button type="button" class="btn small" data-act="fill"' + (free ? '' : ' disabled') + '>Fill open slots' + (rackSide === 'back' ? ' at the back' : '') + '</button><button type="button" class="btn small danger" data-act="clear"' + (state.items.length ? '' : ' disabled') + '>Clear rack</button></div><div id="copyfall"></div>';
   $('#build').innerHTML = html;
+  renderSteps();
 }
 
 function listText() {
   const fp = frameParts(), br = state.version === 'brass', L = [];
   L.push((state.label && state.label !== 'Lab Rax' ? state.label + ' – ' : '') + 'Lab Rax ' + state.h + 'U (' + (br ? 'heat-set inserts' : 'bolted') + ')');
-  L.push((state.h * P.U).toFixed(1) + ' mm inner height · 222 mm usable width', '', 'Layout (top to bottom)');
-  if (state.top) L.push('  top     ' + fullName(LIB[state.top]));
+  L.push((state.h * P.U).toFixed(1) + ' mm inner height · ' + DIMS.clearWidth + ' mm usable width', '', 'Layout (top to bottom)');
+  if (state.top) L.push('  top     ' + fullName(catalogPart(state.top)));
   onSide('front').forEach(i => { const d = info(i); L.push('  ' + uRange(i.pos2, d.h2).padEnd(8) + (i.label ? '[' + i.label + '] ' : '') + fullName(d) + ' (' + uTxt(d) + ')'); });
-  const used = onSide('front').reduce((n, i) => n + H(i), 0); if (slots() - used > 0) L.push('  Open: ' + fmtU(slots() - used));
+  const used = onSide('front').reduce((n, i) => n + H(i), 0); if (slots() - used > 0) L.push('  Open: ' + openSpace('front').text);
   if (onSide('back').length) { L.push('', 'Back (top to bottom)'); onSide('back').forEach(i => { const d = info(i); L.push('  ' + uRange(i.pos2, d.h2).padEnd(8) + (i.label ? '[' + i.label + '] ' : '') + fullName(d) + ' (' + uTxt(d) + ')'); }); }
   L.push('', 'Frame', '- Vertical posts: ' + fp.posts); if (fp.joiners) L.push('- Post joiners: 4');
-  L.push('- Side panels: ' + fp.sides + (state.sides === 'acrylic' ? ' (3 mm acrylic)' : ''), '- Horizontal pieces: 4', '- Edge pieces: 4', '- Handles · feet: 2 · 4', '- Bottom: ' + bottomName(), state.top ? '- Top: ' + fullName(LIB[state.top]) + '\n- Bottom panel: 1' : '- Top + bottom panel: 1 + 1');
+  L.push('- Side panels: ' + fp.sides + (state.sides === 'acrylic' ? ' (3 mm acrylic)' : ''), '- Horizontal pieces: 4', '- Edge pieces: 4', '- Handles · feet: 2 · 4', '- Bottom: ' + bottomName(), state.top ? '- Top: ' + fullName(catalogPart(state.top)) + '\n- Bottom panel: 1' : '- Top + bottom panel: 1 + 1');
   const pk = printPack();
   L.push('', 'Print pack' + (pk.printer ? ', checked against your ' + bedName(pk.printer) : ''));
   pk.forEach(x => { L.push('- ' + x.qty + '× ' + x.name + (x.variants ? ' (' + x.variants + ')' : '') + (x.url ? '  ' + x.url : '  (custom STL in build pack)')); if (x.bed) L.push('  ' + bedText(x.bed)); });
-  L.push('', 'Shopping list'); orderList().forEach(x => L.push('- ' + qtyText(x) + ' ' + x.name + (x.spec ? ' (' + x.spec + ')' : '') + (x.check ? ' – ' + x.check : '')));
+  const shop = orderList();
+  for (const optional of [false, true]) { L.push('', optional ? 'Nice to have (optional)' : 'Shopping list — needed'); shop.filter(x => !!x.optional === optional).forEach(x => L.push('- ' + (optional ? '[Optional] ' : '') + qtyText(x) + ' ' + x.name + (x.spec ? ' (' + x.spec + ')' : '') + (x.check ? ' – ' + x.check : ''))); }
   guide().forEach((g, n) => { L.push('', (n + 1) + '. ' + g.title); g.steps.forEach(t => L.push('- ' + t)); });
   const a = airflow();
   if (a.Q) {
@@ -1473,19 +1692,19 @@ function listText() {
 }
 function csv(rows) { return '﻿' + rows.map(r => r.map(v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(',')).join('\n'); }
 
-function render() { renderControls(); renderRack(); renderSel(); renderUnplaced(); renderBuild(); renderLib(); save(); if (view === '3d' && window.LRView3D) window.LRView3D.update(snapshot()); }
+function render() { renderStart(); renderControls(); renderRack(); renderSel(); renderUnplaced(); renderBuild(); renderLib(); save(); if (view === '3d' && window.LRView3D) window.LRView3D.update(snapshot()); }
 
 /* ---------- 3D snapshot for view3d.js ---------- */
 function snapshot() {
   return {
-    h: state.h, version: state.version, sides: state.sides, frame: state.frame, panel: state.panel, accent: state.accent, label: state.label || 'Lab Rax', top: state.top ? fullName(LIB[state.top]) : null,
-    topPart: state.top ? LIB[state.top] : null, bottom: state.bottom, bottomPart: bottomPart(), mods: frameMods(),
+    h: state.h, version: state.version, sides: state.sides, frame: state.frame, panel: state.panel, accent: state.accent, label: state.label || 'Lab Rax', top: state.top ? fullName(catalogPart(state.top)) : null,
+    topPart: state.top ? catalogPart(state.top) : null, bottom: state.bottom, bottomPart: bottomPart(), mods: frameMods(),
     items: byPos().map(i => { const d = info(i); return { id: i.id, pos2: i.pos2, h2: d.h2, name: i.label || shortName(d), face: d.face, look: d, color: colorOf(i), depth: d.depth || (i.key === 'gen' && i.params.type === 'shelf' ? i.params.dd : null), gen: i.key === 'gen' ? i.params : null, sel: i.id === sel, back: sideOf(i) === 'back', upper: upperHalf(i) }; })
   };
 }
 
 /* ---------- files out ---------- */
-const TOP_WIN = (() => { try { return window.self === window.top; } catch (e) { return false; } })();
+const TOP_WIN = (() => { try { return window.self === window.top || /[?&]selftest\b/.test(location.search); } catch (e) { return false; } })(); // the self-test runs the planner in a frame and catches its downloads
 async function saveFile(filename, blob) {
   let dl = null;
   try { dl = window.claude && window.claude.use ? await window.claude.use('downloads') : null; } catch (e) { dl = null; }
@@ -1552,7 +1771,7 @@ async function buildPack() {
   const bedCol = x => pk.printer ? [x.pieces.length ? bedText(x.bed) || 'Fits' : ''] : []; // empty: no sizes known for that model
   files.push({ name: 'print-list.csv', data: csv([['Qty', 'Part', 'Variants', 'Where', 'Link', ...(pk.printer ? ['Print bed: ' + bedName(pk.printer)] : [])], ...pk.map(x => [x.qty, x.name, x.variants, x.subs.join('; '), x.url || 'custom-parts/', ...bedCol(x)])]) });
   files.push({ name: base + '.rack.json', data: rackFile() });
-  files.push({ name: 'shopping-list.csv', data: csv([['Group', 'Qty', 'Item', 'Spec', ...((shopLinks('x')).map(l => l.shop))], ...orderList().map(x => [(SHOP_GROUPS.find(g => g[0] === x.group) || ['', ''])[1], qtyText(x), x.name, x.spec || '', ...(x.links || []).map(l => l.url)])]) });
+  files.push({ name: 'shopping-list.csv', data: csv([['Group', 'Qty', 'Item', 'Spec', 'Optional', ...((shopLinks('x')).map(l => l.shop))], ...orderList().map(x => [(SHOP_GROUPS.find(g => g[0] === x.group) || ['', ''])[1], qtyText(x), x.name, x.spec || '', x.optional ? 'Yes' : 'No', ...(x.links || []).map(l => l.url)])]) });
   files.push({ name: 'build-guide.html', data: buildGuidePage() });
   files.push({ name: 'README.txt', data: 'Mini Rack Planner build pack — ' + (state.label || 'Lab Rax') + ', ' + state.h + 'U\n\n' + listText() +
     '\n\nCommunity models stay on MakerWorld under their own licenses: open download-list.html, download each model there as 3MF and tick it off.\nCustom parts in custom-parts/ were generated by the Lab Rax Planner (MIT) and print without supports: panels and shelves face-down, label plates face-up.\n' +
@@ -1581,21 +1800,20 @@ function updateFinalize() {
 function openFinalize(format) {
   let dialog=$('#finalize-build');
   if(!dialog){dialog=document.createElement('dialog');dialog.id='finalize-build';dialog.className='finalize-build';document.body.appendChild(dialog);}
-  const e=buildEstimate(),input=(key,v,max)=>'<input class="field" type="number" min="0"'+(max?' max="'+max+'"':'')+' step="1" data-cost="'+key+'" aria-label="Already owned quantity" value="'+v+'">';
+  const e=buildEstimate();
   dialog.dataset.format=format;
-  dialog.innerHTML='<div class="finalize-head"><div><h2>Ready to build?</h2><p>Check what you already have. Your download will show what is still needed.</p></div><button class="btn small" data-act="final-close">Close</button></div><p id="finalize-total" class="finalize-total"></p>'+
-    '<div style="display:flex;gap:16px;flex-wrap:wrap"><label>Ship to <select class="field" id="final-market">'+Object.entries(window.LRMarket.regions).map(([k,r])=>'<option value="'+k+'"'+(state.market===k?' selected':'')+'>'+r.name+'</option>').join('')+'</select></label><label>Currency <select class="field" id="final-currency">'+['EUR','USD','GBP','CAD','AUD'].map(k=>'<option'+(e.s.currency===k?' selected':'')+'>'+k+'</option>').join('')+'</select></label></div><p class="hint">Shop links follow your destination. No automatic currency conversion. Enter local prices in Print time &amp; budget; unpriced items stay visible.</p><h3>Filament</h3><div class="owned-row owned-label"><span>Colour</span><span>Needed</span><span>Have (g)</span></div>'+e.colours.map(r=>'<label class="owned-row"><span><i class="swatchdot" style="--c:'+r.c+'"></i>'+esc(colorName(r.c))+'</span><span>≈ '+Math.round(r.grams)+' g</span>'+input('stock:'+r.c,r.owned)+'</label>').join('')+
-    '<h3>Essential supplies</h3><div class="owned-row owned-label"><span>Item</span><span>Needed</span><span>Have (pieces)</span></div>'+e.supplies.map(r=>'<label class="owned-row"><span>'+esc(r.name)+'</span><span>'+(r.qty==null?'Check model':r.qty+'×')+'</span>'+input('owned:'+r.key,r.owned)+'</label>').join('')+
+  dialog.innerHTML='<div class="finalize-head"><div><h2>Ready to build?</h2><p>Review ownership and supplies in the Shopping list. Your download shows what is still needed.</p></div><button class="btn small" data-act="final-close">Close</button></div><p id="finalize-total" class="finalize-total"></p>'+
+    '<div style="display:flex;gap:16px;flex-wrap:wrap"><label>Ship to <select class="field" id="final-market">'+Object.entries(window.LRMarket.regions).map(([k,r])=>'<option value="'+k+'"'+(state.market===k?' selected':'')+'>'+r.name+'</option>').join('')+'</select></label><label>Currency <select class="field" id="final-currency">'+['EUR','USD','GBP','CAD','AUD'].map(k=>'<option'+(e.s.currency===k?' selected':'')+'>'+k+'</option>').join('')+'</select></label></div><p class="hint">Shop links follow your destination. No automatic currency conversion. Enter local prices in Print time &amp; budget; unpriced items stay visible.</p>'+
     '<details class="finalize-prices"><summary>Print time and local price settings</summary>'+estimateHTML(false)+'</details><p class="hint">Enter pieces, not packs. Unknown bracket or joiner quantities still need checking. Print time and cost assumptions can be changed in Print time & budget.</p><div class="finalize-actions"><button class="btn primary" data-act="final-download">Download '+(format==='pack'?'build pack':'PDF')+'</button></div>';
   updateFinalize();dialog.showModal();
 }
 function pdfData() {
   const pk = printPack();
   return { title: (state.label || 'Lab Rax') + ' · ' + state.h + 'U', h: state.h, version: state.version === 'brass' ? 'Heat-set inserts' : 'Bolted', frame: state.frame, panel: state.panel, accent: state.accent, label: state.label || 'Lab Rax',
-    top: state.top ? fullName(LIB[state.top]) : null, topLook: state.top ? LS.topFor(LIB[state.top], colorsFor()) : null, // the top mount as drawn above the frame
-    items: byPos().map(i => { const d = info(i); return { pos: uRange(i.pos2, d.h2) + atBack(i), pos2: i.pos2, h2: d.h2, name: fullName(d), label: i.label || '', u: uTxt(d), url: d.url || '', author: d.author || '', color: colorOf(i), face: faceSVG(d, colorOf(i), upperHalf(i)), plate: plateBox(i, d), depth: partDepth(i), back: sideOf(i) === 'back' }; }),
+    top: state.top ? fullName(catalogPart(state.top)) : null, topLook: state.top ? LS.topFor(catalogPart(state.top), colorsFor()) : null, // the top mount as drawn above the frame
+    items: byPos().map(i => { const d = info(i); return { pos: uRange(i.pos2, d.h2) + atBack(i), pos2: i.pos2, h2: d.h2, name: fullName(d) + (devicePart(d) ? (haveDevice(i) ? ' [Have it]' : ' [To buy]') : ''), label: i.label || '', u: uTxt(d), url: d.url || '', author: d.author || '', color: colorOf(i), face: faceSVG(d, colorOf(i), upperHalf(i)), plate: plateBox(i, d), depth: partDepth(i), back: sideOf(i) === 'back' }; }),
     print: pk.map(x => ({ qty: x.qty, name: x.name, sub: x.subs.join(', '), vars: x.variants, url: x.url, bed: bedText(x.bed, true), bad: !!(x.bed && x.bed.bad.length) })),
-    printer: pk.printer ? { name: bedName(pk.printer), bad: bedBad(pk).length, turned: pk.some(x => x.bed && x.bed.turned.length), est: pk.some(x => x.bed && [...x.bed.bad, ...x.bed.turned].some(q => q.est)) } : null, shop: orderList(), guide: guide(), estimate: buildEstimate(), market: state.market, wallMounts: state.extras.filter(k => LIB[k].shape && LIB[k].shape.wall).map(k => ({ name: fullName(LIB[k]), url: LIB[k].url })), sides: state.sides, dimensions: CAT.frame.dimensions, shareUrl: TOP_WIN ? shareLink() + '&s=shop' : null, frameParts: frameParts(), notes: state.h > 5 ? [JOINER_NOTE] : [],
+    printer: pk.printer ? { name: bedName(pk.printer), smallBed: window.LRPrinters.fitRect(254, DIMS.u, pk.printer.w, pk.printer.d) === 0, bad: bedBad(pk).length, turned: pk.some(x => x.bed && x.bed.turned.length), est: pk.some(x => x.bed && [...x.bed.bad, ...x.bed.turned].some(q => q.est)) } : null, shop: orderList(), guide: guide(), estimate: buildEstimate(), market: state.market, wallMounts: state.extras.filter(k => catalogPart(k).shape && catalogPart(k).shape.wall).map(k => ({ name: fullName(catalogPart(k)), url: catalogPart(k).url })), sides: state.sides, dimensions: DIMS, shareUrl: TOP_WIN ? shareLink() + '&s=shop' : null, frameParts: frameParts(), notes: state.h > 5 ? [JOINER_NOTE] : [],
     cooling: pdfCooling(), power: pdfPower(), shareUrl: TOP_WIN ? shareLink() + '&s=shop' : null }; // the QR code opens this layout with its shopping list
 }
 function pdfPower() { // the Power & network block for the PDF; null when nothing draws power or needs a port
@@ -1699,7 +1917,7 @@ async function mkPreview() {
    and storage, power at the bottom; ½U vent gaps between warm parts; the airflow estimate decides on a fan when asked to. */
 const PRESETS = [['Lab Rax', '#26282B', '#26282B', '#B5CF2A'], ['Stealth', '#26282B', '#26282B', '#7D848B'], ['Arctic', '#E9EBEC', '#E9EBEC', '#2E5E9E'],
   ['Contrast', '#26282B', '#E9EBEC', '#E07A2E'], ['Forest', '#26282B', '#3E8E5A', '#E9EBEC'], ['Signal', '#7D848B', '#26282B', '#C8372D']];
-const WZ_STEPS = ['Look', 'Build', 'Name', 'Hardware', 'Your rack'];
+const WZ_STEPS = ['Hardware', 'Build', 'Look', 'Name', 'Your rack'], WZ_BODY = [3, 1, 0, 2, 4]; // hardware first: what goes in decides the rack; the look comes later
 const ROLES = [[/gateway|switch|tp-link|omada|netgear|mikrotik|modem|fibre|firewall/i, 1], [/smart home|kvm|tuner/i, 2], [/mini pc|apple|itx|motherboard/i, 3],
   [/raspberry|single-board/i, 4], [/storage|nas/i, 6], [/power/i, 8]];
 const roleOf = group => (ROLES.find(([re]) => re.test(group)) || [0, 5])[1];
@@ -1715,25 +1933,28 @@ function wzDevices() { // every device with at least one front mount, flattened
 }
 // the mount to suggest: one for this device alone (not a combination with other gear), then made for Lab Rax, a known height, the lowest
 const combo = m => /\+|together|with .*(switch|router|kvm|zero|nas)/i.test(m.label);
-const bestMount = dev => dev.mounts.slice().sort((a, b) => (combo(a) - combo(b)) || (!!b.labrax - !!a.labrax) || (!!a.estimated - !!b.estimated) || (a.u - b.u))[0].id;
-function lowestFree(h2, side) { for (let p = slots() - h2; p >= 0; p--) if (isFree(p, h2, undefined, side || 'front')) return p; return null; }
+const mountAddon = m => {
+  const d = LIB[m.id], p = powerOf(d);
+  return !!m.needs?.length || modsOf(d).some(x => x.hat) || !!m.poeIn || !!(p.poeIn && !p.poeIn.optional);
+};
+const bestMount = dev => dev.mounts.slice().sort((a, b) => (mountAddon(a) - mountAddon(b)) || (combo(a) - combo(b)) || (!!b.labrax - !!a.labrax) || (!!a.estimated - !!b.estimated) || (a.u - b.u))[0].id;
+
+function lowestFree(h2, side) { for (let p = slots() - h2; p >= 0; p--) if (isFree(p, h2, undefined, side || 'front') && !overlaps({ id: -1, key: 'fan40', pos2: p, side: side || 'front' }).length) return p; return null; }
 function planLayout(w) {
-  const look = PRESETS[w.preset], half = w.fans === 'none' || !LIB.mw1385541 ? 'vent05' : 'mw1385541', list = [], items = [];
+  const look = PRESETS[w.preset], list = [], items = [];
   if (w.patch && LIB.keystone) list.push({ key: 'keystone', role: 0 });
-  w.picks.forEach(p => { for (let i = 0; i < p.qty; i++) list.push({ key: p.mount, role: roleOf(p.group) }); });
+  w.picks.forEach(p => { for (let i = 0; i < p.qty; i++) list.push({ key: p.mount, own: p.own !== false, role: roleOf(p.group) }); });
   if (w.power && LIB.mw2010724) list.push({ key: 'mw2010724', role: 9 });
   list.sort((a, b) => a.role - b.role);
-  let p = 0, id = 1, prevHot = false;
-  const put = (key, at) => items.push({ id: id++, key, pos2: at });
-  list.forEach(x => {
-    const h2 = LIB[x.key].h2, hot = heatOf({ key: x.key }).w >= 15;
-    let gap = prevHot && hot ? 1 : 0;                                  // let two warm parts breathe
-    if (h2 > 1 && (p + gap) % 2) gap++;                                // whole-U parts start on a U boundary
-    if (gap === 2 && !(p % 2)) { put('vent1', p); p += 2; }            // one 1U vent rather than two halves
-    else for (let i = 0; i < gap; i++) { put(prevHot && hot ? 'vent05' : half, p); p += 1; }
-    put(x.key, p); p += h2; prevHot = hot;
-  });
-  const cand = Object.assign(defaultState(), { h: Math.min(10, Math.max(1, Math.ceil(p / 2) + w.spare)), version: w.version, sides: w.sides, frame: look[1], panel: look[2], accent: look[3],
+  let p = 0, id = 1;
+  const put = (key, at, own) => {
+    const it = { id: id++, key, pos2: at, ...(own === false ? { own: false } : {}) }, h2 = LIB[key].h2;
+    // Use the editor's alignment and physical panel-overlap rules, including protruding Lab Rax half-U panels.
+    while (!LY.aligned(it.pos2, h2) || overlaps(it, items).length) it.pos2++;
+    items.push(it); return it.pos2;
+  };
+  list.forEach(x => { p = put(x.key, p, x.own) + LIB[x.key].h2; });
+  const cand = Object.assign(defaultState(), { h: Math.min(10, Math.max(1, Math.ceil(p / 2))), version: w.version, sides: w.sides, frame: look[1], panel: look[2], accent: look[3],
     label: (w.label || 'Lab Rax').slice(0, 16), top: w.fans === 'top' && LIB.mw1875867 ? 'mw1875867' : null, extras: [], back: 'open', items, nextId: id, example: false, done: {} });
   const keep = state; state = cand;
   try {
@@ -1744,18 +1965,26 @@ function planLayout(w) {
       if (lowestFree(2) == null && state.h < 10) state.h++;
       const q = lowestFree(2); if (q != null) { state.items.push({ id: state.nextId++, key: 'fan40', pos2: q }); a = airflow(); }
     }
-    const [k1, k05] = a.cfm > 0 ? blankKeys() : ['vent1', 'vent05']; // close the rest: blanks with fans, vents without
-    for (let s = 0; s < slots();) { if (isFree(s, 2, undefined, 'front')) { state.items.push({ id: state.nextId++, key: k1, pos2: s }); s += 2; } else if (isFree(s, 1, undefined, 'front') && halfFits(k05, s)) { state.items.push({ id: state.nextId++, key: k05, pos2: s }); s += 1; } else s++; }
+    // Grow space is deliberately empty. Only fill existing internal gaps if the airflow model calls for ventilation.
+    const contentEnd = Math.max(0, ...state.items.filter(i => i.pos2 != null).map(i => i.pos2 + H(i)));
+    const bodyU = Math.max(1, Math.ceil(contentEnd / 2));
+    state.h = Math.min(10, bodyU + w.spare);
+    const ventilation = a.maxT > RATED[0];
+    if (ventilation) for (let q = 0; q < contentEnd; q++) {
+      const h2 = isFree(q, 2, undefined, 'front') && q + 2 <= contentEnd ? 2 : isFree(q, 1, undefined, 'front') ? 1 : 0;
+      const key = h2 === 2 ? 'vent1' : 'vent05';
+      if (h2 && !overlaps({ id: -1, key, pos2: q }, state.items).length) { state.items.push({ id: state.nextId++, key, pos2: q }); q += h2 - 1; }
+    }
     a = airflow();
     const pk = printPack();
-    return { state: cand, a, unplaced: cand.items.filter(i => i.pos2 == null).length, tooBig: bedBad(pk).length, printer: pk.printer };
+    return { state: cand, a, partsH2: list.reduce((n, x) => n + LIB[x.key].h2, 0), bodyU, spareU: state.h - bodyU, ventilation, unplaced: cand.items.filter(i => i.pos2 == null).length, tooBig: bedBad(pk).length, printer: pk.printer };
   } finally { state = keep; }
 }
 function openWizard() {
   if (!CAT) return;
   if (!wz) {
     const pi = PRESETS.findIndex(p => p[1] === state.frame && p[2] === state.panel && p[3] === state.accent);
-    wz = { step: 0, preset: Math.max(0, pi), version: state.version, sides: state.sides, fans: 'auto', label: state.label || 'Lab Rax', q: '', picks: [], patch: true, power: false, spare: 1 };
+    wz = { step: 0, preset: Math.max(0, pi), version: state.version, sides: state.sides, fans: 'auto', label: state.label || 'Lab Rax', q: '', picks: [], patch: true, power: false, spare: 1, intent: 'have' };
   }
   wz.step = 0; renderWizard();
   const dlg = $('#wizard'); if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
@@ -1783,11 +2012,11 @@ function wzPicked() {
   if (!wz.picks.length) return '<p class="hint">Nothing picked yet. Search below and add your devices.</p>';
   return wz.picks.map((p, i) => { const dev = wzDevices().find(d => d.id === p.dev);
     return '<div class="wz-pick"><b>' + esc(dev.device) + '</b><select data-i="' + i + '" class="wz-mount" aria-label="Mount for ' + esc(dev.device) + '">' +
-      dev.mounts.map(m => '<option value="' + m.id + '"' + (m.id === p.mount ? ' selected' : '') + '>' + esc(m.label) + ' · ' + uTxt(LIB[m.id]) + (m.labrax && !/lab ?rax/i.test(m.label) ? ' · Lab Rax' : '') + '</option>').join('') + '</select>' +
+      dev.mounts.map(m => '<option value="' + m.id + '"' + (m.id === p.mount ? ' selected' : '') + '>' + esc(m.label) + ' · ' + uTxt(LIB[m.id]) + (m.labrax && !/lab ?rax/i.test(m.label) ? ' · Lab Rax' : '') + '</option>').join('') + '</select><label class="hint">Hardware <select class="field" data-wz-own="' + i + '"><option value="have"' + (p.own !== false ? ' selected' : '') + '>Have it</option><option value="buy"' + (p.own === false ? ' selected' : '') + '>To buy</option></select></label>' +
       '<span class="stepper small"><button type="button" data-act="wz-qty" data-i="' + i + '" data-d="-1" aria-label="One less">−</button><output>' + p.qty + '</output><button type="button" data-act="wz-qty" data-i="' + i + '" data-d="1" aria-label="One more">+</button></span></div>'; }).join('');
 }
 function renderWizard() {
-  const st = wz.step, look = PRESETS[wz.preset];
+  const at = wz.step, st = WZ_BODY[at], look = PRESETS[wz.preset]; // at: the position in the wizard, st: which page it shows
   let body = '';
   if (st === 0) body = '<h3 class="wz-h">Pick a look</h3><p class="hint">Frame, panels and accent. You can change every colour later, also per part.</p><div class="wz-presets">' +
     PRESETS.map((p, i) => '<button type="button" class="wz-preset" data-act="wz-preset" data-i="' + i + '" aria-pressed="' + (wz.preset === i) + '"><span class="wz-mini" style="--f:' + p[1] + ';--p:' + p[2] + ';--a:' + p[3] + '"><i></i><i></i><i></i></span><b>' + p[0] + '</b></button>').join('') + '</div>';
@@ -1795,11 +2024,11 @@ function renderWizard() {
     wzOption('version', 'Frame', [['brass', 'Heat-set inserts', 'Brass inserts you melt in with a soldering iron. Neat, and the screws go straight in.'], ['bolted', 'Bolted', 'M6 or #10-32 screws with nuts. No inserts, no soldering iron.']]) +
     wzOption('sides', 'Side panels', [['printed', 'Printed', 'Printed with the frame, in the frame colour.'], ['acrylic', 'Acrylic', '3 mm acrylic cut to size, so you can see inside.']]) +
     wzOption('fans', 'Fans', [['auto', 'Only if needed', 'The planner checks the airflow and adds a fan when the rack would get warm.'], ['top', 'Top fan', 'A 120 mm fan in the top panel, blowing out.'], ['none', 'No fans', 'Quiet: vent panels instead of fans.']]) +
-    '<fieldset class="wz-opt"><legend>Printer</legend>' + printerPicker('wz') + '<p class="hint" style="margin-top:6px">The print list then marks parts too big for your bed. Remembered in this browser, not saved with the layout.</p></fieldset>';
+    '<fieldset class="wz-opt"><legend>Printer</legend>' + printerPicker('wz') + '<p class="hint" style="margin-top:6px">The print list then marks parts too big for your bed. Remembered in this browser, not saved with the layout.</p>' + smallBedHint() + '</fieldset>';
   else if (st === 2) body = '<h3 class="wz-h">Give it a name</h3><p class="hint">It goes on the front of the rack, like the Lab Rax logo.</p>' +
     '<input class="field wz-name" id="wz-name" type="text" maxlength="16" value="' + esc(wz.label) + '" placeholder="Lab Rax" aria-label="Rack name">' +
     '<div class="wz-logo" style="--f:' + look[1] + ';--a:' + look[3] + '"><span id="wz-logo">' + esc(wz.label || 'Lab Rax') + '</span></div>';
-  else if (st === 3) body = '<h3 class="wz-h">What goes in it?</h3><p class="hint">Add your devices. For each one the planner picks a mount, preferring ones made for Lab Rax; you can change it.</p>' +
+  else if (st === 3) body = wzOption('intent', 'What are you building?', [['have', 'Print mounts for hardware I have', 'Devices default to Have it; only missing supplies need buying.'], ['buy', 'A complete build, devices included', 'Devices default to To buy. Check what each box includes.'], ['mix', 'Some of each', 'Set Have it or To buy per device below. The first starts as owned; later devices start as To buy.']]) + '<h3 class="wz-h">What goes in it?</h3><p class="hint">Add your devices. For each one the planner picks a mount, preferring ones made for Lab Rax; you can change it.</p>' +
     '<div id="wz-picked" class="wz-picked">' + wzPicked() + '</div>' +
     '<label class="search" for="wz-q"><input id="wz-q" type="search" placeholder="Search devices, e.g. UCG-Max, Pi 5, Mac mini" autocomplete="off" value="' + esc(wz.q) + '"></label>' +
     '<div id="wz-results" class="wz-results">' + wzResults() + '</div>' +
@@ -1810,6 +2039,10 @@ function renderWizard() {
     const r = planLayout(wz), a = r.a, lvl = airLevel(a)[0].toLowerCase(), s = r.state;
     body = '<h3 class="wz-h">Your rack</h3><div class="wz-result">' + miniRack(s) + '<div class="wz-sum">' +
       '<p><b>' + s.h + 'U</b> · ' + s.items.filter(i => i.pos2 != null).length + ' parts · ' + (s.version === 'brass' ? 'heat-set inserts' : 'bolted') + ' · ' + s.sides + ' sides</p>' +
+      '<p>' + fmtU(r.partsH2) + ' parts + ' + fmtU(r.bodyU * 2 - r.partsH2) + ' alignment/cooling space + ' + r.spareU + 'U open for growth = ' + s.h + 'U.</p>' +
+      (r.bodyU === 5 ? '<fieldset class="wz-opt"><legend>Choose the rack height</legend><p class="hint">5U uses the base frame. 6U adds 1U open space and needs extension side panels and post joiners, with extra prints and fasteners to check.</p><div class="actions"><button type="button" class="btn" data-act="wz-result-spare" data-v="0" aria-pressed="' + (wz.spare === 0) + '">Stay at 5U (no spare)</button><button type="button" class="btn" data-act="wz-result-spare" data-v="1" aria-pressed="' + (wz.spare === 1) + '">Keep 6U (1U spare)</button></div></fieldset>' : '') +
+      (s.h > 5 ? '<p class="wz-warn">Above 5U: extension side panels and post joiners are needed. Their fasteners are not confirmed; check the extension model.</p>' : '') +
+      '<p class="hint">' + (r.ventilation ? 'Vent panels fill only internal gaps where the airflow estimate calls for ventilation.' : 'No vent fillers added: the airflow estimate does not call for them.') + ' Growth space stays empty.</p>' +
       (a.Q ? '<p>Hottest air ≈ ' + fmtT(a.maxT) + ' in a ' + a.room + ' °C room (' + lvl + ')' + (s.top ? ', with a 120 mm fan in the top' : '') + (s.items.some(i => i.key === 'fan40') ? ' and a fan panel' : '') + '.</p>' : '') +
       (r.tooBig ? '<p class="wz-warn">' + r.tooBig + (r.tooBig > 1 ? ' prints have parts' : ' print has a part') + ' too big for your ' + esc(bedName(r.printer)) + '. The print list shows which.</p>' : '') +
       (r.unplaced ? '<p class="wz-warn">' + r.unplaced + (r.unplaced > 1 ? ' parts don’t' : ' part doesn’t') + ' fit in 10U. Take some hardware out, or place them later.</p>' : '') +
@@ -1817,10 +2050,10 @@ function renderWizard() {
       '<ul class="wz-list">' + wz.picks.map(p => { const d = LIB[p.mount]; return '<li>' + (p.qty > 1 ? p.qty + '× ' : '') + esc(fullName(d)) + ' <span class="muted">' + uTxt(d) + '</span>' + (d.url ? ' <a href="' + esc(d.url) + '" target="_blank" rel="noopener">↗</a>' : '') + '</li>'; }).join('') + '</ul>' +
       '<p class="hint">After you create it, everything stays editable: move, swap, recolour or remove parts. Undo brings back your current layout.</p></div></div>';
   }
-  $('#wz-steps').innerHTML = WZ_STEPS.map((l, i) => '<li' + (i === st ? ' aria-current="step"' : '') + (i < st ? ' class="done"' : '') + '>' + (i + 1) + ' ' + l + '</li>').join('');
+  $('#wz-steps').innerHTML = WZ_STEPS.map((l, i) => '<li' + (i === at ? ' aria-current="step"' : '') + (i < at ? ' class="done"' : '') + '>' + (i + 1) + ' ' + l + '</li>').join('');
   $('#wz-body').innerHTML = body;
-  $('#wz-foot').innerHTML = (st ? '<button type="button" class="btn" data-act="wz-back">Back</button>' : '<span></span>') +
-    (st < 4 ? '<button type="button" class="btn primary" data-act="wz-next">' + (st === 3 ? 'Show my rack' : 'Next') + '</button>' : '<button type="button" class="btn primary" data-act="wz-create">Create rack</button>');
+  $('#wz-foot').innerHTML = (at ? '<button type="button" class="btn" data-act="wz-back">Back</button>' : '<span></span>') +
+    (at < 4 ? '<button type="button" class="btn primary" data-act="wz-next">' + (at === 3 ? 'Show my rack' : 'Next') + '</button>' : '<button type="button" class="btn primary" data-act="wz-create">Create rack</button>');
 }
 function wzCreate() {
   const r = planLayout(wz);
@@ -1839,6 +2072,22 @@ document.addEventListener('click', async e => {
     case 'theme': cycleTheme(); break;
     case 'tab': tab = a.dataset.t; renderLib(); break;
     case 'where': setWhere(a.dataset.v); break;
+    case 'go-step': goStep(+a.dataset.step); break;
+    case 'help': $('#helpdlg').showModal(); renderHelp('guides'); break;
+    case 'help-tab': renderHelp(a.dataset.v); break;
+    case 'help-close': $('#helpdlg').close(); break;
+    case 'help-go': $('#helpdlg').close(); goStep(+a.dataset.step); break;
+    case 'help-buildguide': $('#helpdlg').close(); ui.sec.guide = true; saveUI(); renderBuild(); { const g = $('[data-sec="guide"]'); if (g) g.scrollIntoView({ behavior: 'smooth', block: 'start' }); } break;
+    case 'rack-variants': ui.rackOpen = !ui.rackOpen; saveUI(); renderSettings(); break;
+    case 'explain': { const t = TERMS[a.dataset.k]; if (t) askUser(t[0], t[1], [['', 'Got it', 'primary']]); } break;
+    case 'go-printer': ui.sec.print = true; saveUI(); renderBuild(); { const p = document.querySelector('#build select[id$="-printer"]'); if (p) { p.scrollIntoView({ behavior: 'smooth', block: 'center' }); p.focus({ preventScroll: true }); } } break;
+    case 'go-unplaced': { const u = $('#unplaced'); if (u) u.scrollIntoView({ behavior: 'smooth', block: 'center' }); } break;
+    case 'go-part': { const id = +a.dataset.id; if (find(id)) { sel = id; if (view === '3d' || view === 'air') await setView(sideOf(find(id))); render(); const el = document.querySelector('#rack .item[data-id="' + id + '"]'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } } break;
+    case 'start': { ui.started = true; saveUI(); const v = a.dataset.v;
+      if (v === 'guide') openWizard();
+      else if (v === 'empty') { undo = JSON.stringify(state); state = Object.assign(defaultState(), { items: [], nextId: 1, example: false }); sel = null; sanitize(); renderLib(); render(); say('An empty 5U rack. Add your hardware from the library.', true); goStep(2); }
+      else if (v === 'file') $('#rackfile').click();
+      renderStart(); break; }
     case 'bottom': state.bottom = a.dataset.v || null; if (!bottomPart()) state.bottomDir = null; touch(); render(); say('Bottom: ' + bottomName() + '.'); break;
     case 'lib-group': { const g = a.dataset.g; if (ui.open[g]) delete ui.open[g]; else ui.open[g] = true; saveUI(); renderLib(); break; }
     case 'lib-more': { const d = a.dataset.dev; if (devOpen.has(d)) devOpen.delete(d); else devOpen.add(d); renderLib(); break; }
@@ -1856,7 +2105,7 @@ document.addEventListener('click', async e => {
     case 'part-color': { const it = find(sel); if (!it) break; if (a.dataset.c) it.color = a.dataset.c; else delete it.color; touch(); render(); break; }
     case 'acc': state.accent = a.dataset.c; touch(); render(); break;
     case 'lib': {
-      const k = a.dataset.key, d = LIB[k];
+      const k = a.dataset.key, d = catalogPart(k);
       if (d.top) { const on = state.top !== k; state.top = on ? k : null; touch(); render(); renderLib(); say(on ? fullName(d) + ' now sits on top of the rack, replacing the top panel.' : 'Regular top panel restored.'); }
       else if (d.extra) { const i = state.extras.indexOf(k); if (i < 0) state.extras.push(k); else state.extras.splice(i, 1); touch(); render(); renderLib(); say(i < 0 ? fullName(d) + ' added to your build.' : fullName(d) + ' removed from your build.'); }
       else addItem({ key: k });
@@ -1883,9 +2132,10 @@ document.addEventListener('click', async e => {
     case 'wz-next': wz.step = Math.min(4, wz.step + 1); renderWizard(); break;
     case 'wz-back': wz.step = Math.max(0, wz.step - 1); renderWizard(); break;
     case 'wz-preset': wz.preset = +a.dataset.i; renderWizard(); break;
-    case 'wz-set': wz[a.dataset.k] = a.dataset.v; renderWizard(); break;
-    case 'wz-add': { const dev = wzDevices().find(d => d.id === a.dataset.dev); if (dev) wz.picks.push({ dev: dev.id, group: dev.group, mount: bestMount(dev), qty: 1 }); $('#wz-picked').innerHTML = wzPicked(); $('#wz-results').innerHTML = wzResults(); break; }
+    case 'wz-set': wz[a.dataset.k] = a.dataset.v; if (a.dataset.k === 'intent') wz.picks.forEach((p, i) => { p.own = a.dataset.v === 'have' || a.dataset.v === 'mix' && i === 0; }); renderWizard(); break;
+    case 'wz-add': { const dev = wzDevices().find(d => d.id === a.dataset.dev); if (dev) wz.picks.push({ dev: dev.id, group: dev.group, mount: bestMount(dev), qty: 1, own: wz.intent !== 'buy' && (wz.intent !== 'mix' || wz.picks.length === 0) }); $('#wz-picked').innerHTML = wzPicked(); $('#wz-results').innerHTML = wzResults(); break; }
     case 'wz-qty': { const i = +a.dataset.i, p = wz.picks[i]; p.qty = Math.min(8, p.qty + +a.dataset.d); if (p.qty < 1) wz.picks.splice(i, 1); $('#wz-picked').innerHTML = wzPicked(); $('#wz-results').innerHTML = wzResults(); break; }
+    case 'wz-result-spare': wz.spare = +a.dataset.v === 0 ? 0 : 1; renderWizard(); break;
     case 'wz-create': wzCreate(); break;
     case 'air-blank': fillGaps(blankKeys(), 'blank panel', 'front'); break;
     case 'air-add': addItem({ key: a.dataset.key, side: 'front' }, +a.dataset.pos); break;
@@ -1902,6 +2152,7 @@ document.addEventListener('click', async e => {
     case 'undo': if (undo) { state = JSON.parse(undo); undo = null; render(); renderLib(); say('Restored.'); } break;
     case 'copy': copyText(listText(), 'List copied.'); break;
     case 'save-file': saveFile(rackName() + '.rack.json', new Blob([rackFile()], { type: 'application/json' })); break;
+    case 'previous-rack': { const previous = previousRack(); if (previous) applyLayout(previous, 'Previous rack restored.'); break; }
     case 'open-file': $('#rackfile').click(); break;
     case 'share': if (TOP_WIN) copyText(shareLink(), 'Share link copied. Anyone who opens it sees this layout.'); else say('Open the planner on its own page to share a link.'); break;
     case 'maker': openMaker(null); break;
@@ -1934,6 +2185,18 @@ document.addEventListener('click', async e => {
     case 'v3d': if (window.LRView3D) window.LRView3D.action(a.dataset.v); break;
   }
 });
+// the shop country, from the readiness list
+document.addEventListener('change', e => {
+  if (!e.target.matches('[data-part-opt]')) return;
+  const key = e.target.dataset.key, value = e.target.value, base = LIB[key];
+  if (!base || value && !(base.options || []).some(o => o.id === value)) return;
+  undo = JSON.stringify(state);
+  const item = e.target.dataset.item ? find(+e.target.dataset.item) : null;
+  if (item) { if (value) item.opt = value; else delete item.opt; }
+  else { state.optionChoices ||= {}; if (value) state.optionChoices[key] = value; else delete state.optionChoices[key]; }
+  touch(); render(); renderLib(); say('Print profile updated. Check the original model page before printing.', true);
+});
+document.addEventListener('change', e => { if (e.target.id === 'ready-market' && own(window.LRMarket.regions, e.target.value)) { state.market = e.target.value; touch(); render(); } });
 document.addEventListener('change', e => {
   if(e.target.id!=='final-market'&&e.target.id!=='final-currency')return;
   const dialog=$('#finalize-build'),format=dialog.dataset.format;
@@ -1965,6 +2228,8 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('change', e => {
   const t = e.target;
+  if (t.dataset.wzOwn != null) { wz.picks[+t.dataset.wzOwn].own = t.value !== 'buy'; return; }
+  if (t.dataset.ownItem || t.dataset.missingItem) { const it = find(+(t.dataset.ownItem || t.dataset.missingItem)); if (!it) return; undo = JSON.stringify(state); if (t.dataset.ownItem) it.own = t.value !== 'buy'; else it[t.dataset.missing] = t.checked; touch(); render(); return; }
   if (t.id === 'wz-patch' || t.id === 'wz-power') { wz[t.id.slice(3)] = t.checked; return; }
   if (t.id === 'wz-spare') { wz.spare = +t.value; return; }
   if (t.classList.contains('pr-sel')) { setPrinter(t.value || null); return; }
@@ -2022,7 +2287,7 @@ function previewHTML(d) {
   let front = '';
   if (d.top) { const t = LS.topFor(d, colorsFor()); if (t.h > 1.5) front = '<div class="lp-front" style="aspect-ratio:' + t.w + '/' + t.h.toFixed(1) + '">' + t.svg + '</div>'; }
   else if (!d.extra) front = '<div class="lp-front" style="aspect-ratio:250/' + LS.fit(d).h.toFixed(1) + '">' + faceSVG(d) + '</div>';
-  return '<div class="lp-3d">' + thumbSVG(d) + '</div>' + front + (size ? '<span class="mono">' + esc(d.name) + ' · ' + size + '</span>' : '');
+  return '<div class="lp-3d">' + thumbSVG(d) + '</div>' + front + (size ? '<span class="mono">' + esc(d.name) + ' · ' + size + '</span>' : '') + lookHint(d) + evidenceHTML(d);
 }
 $('#cards').addEventListener('pointermove', e => {
   if (e.pointerType !== 'mouse' || !lprev || drag) return;
@@ -2106,26 +2371,24 @@ function cycleTheme() { theme = THEMES[(THEMES.indexOf(theme) + 1) % 3]; try { l
 /* ---------- share link (own page only) and rack file ---------- */
 // share links: "#c=" + base64url of the compact layout, [settings that differ from the defaults, parts as [key, pos2, other fields]],
 // short enough for a QR code; old "#l=" links (the whole state) still open. A rack file holds the same compact layout.
-const SHARE_KEYS = ['h', 'version', 'frame', 'panel', 'accent', 'label', 'top', 'topDir', 'extras', 'xdir', 'market', 'costs', 'back', 'sides', 'room', 'power', 'bottom', 'bottomDir'];
-function compactLayout() {
-  const d = Object.assign(defaultState(), { market: 'NL', costs: window.LREstimate.settings() }), same = (x, y) => JSON.stringify(x) === JSON.stringify(y), st = {}; // sanitize() fills in the defaults
-  SHARE_KEYS.forEach(k => { if (state[k] !== undefined && !same(state[k], d[k])) st[k] = state[k]; });
-  const items = state.items.map(i => { const { id, key, pos2, ...rest } = i; return Object.keys(rest).length ? [key, pos2, rest] : [key, pos2]; });
-  return [st, items];
-}
-function expandLayout(st, items) { // a compact layout as a state, before sanitize(); null when it can't be one
-  const list = Array.isArray(items) ? items : [], o = {};
-  if (st && typeof st === 'object') SHARE_KEYS.forEach(k => { if (own(st, k)) o[k] = st[k]; }); // settings this planner knows
-  Object.assign(o, { items: list.map((x, n) => Object.assign({}, Array.isArray(x) && x[2] && typeof x[2] === 'object' ? x[2] : {}, { id: n + 1, key: Array.isArray(x) ? x[0] : null, pos2: Array.isArray(x) ? x[1] : null })), nextId: list.length + 1 });
-  const s2 = Object.assign(defaultState(), o, { example: false, done: {} });
-  return s2.h >= 1 && s2.h <= 10 ? s2 : null;
-}
+const SHARE_KEYS = ['h', 'version', 'frame', 'panel', 'accent', 'label', 'top', 'topDir', 'extras', 'xdir', 'market', 'costs', 'back', 'sides', 'room', 'power', 'bottom', 'bottomDir', 'optionChoices'];
+function compactLayout() { return LRCodec.compact(state, Object.assign(defaultState(), { market: 'NL', costs: window.LREstimate.settings() }), SHARE_KEYS); } // sanitize() fills in the defaults
+function expandLayout(st, items) { return LRCodec.expand(st, items, defaultState(), SHARE_KEYS); } // a compact layout as a state, before sanitize(); null when it can't be one
 function shareLink() {
-  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(compactLayout())))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const b64 = LRCodec.toB64(compactLayout());
   return location.origin + location.pathname + location.search + '#c=' + b64;
 }
 // replace the layout with one from a link or a file; Undo brings the current one back
-function applyLayout(s2, msg) {
+function previousRack() {
+  try { const s = JSON.parse(localStorage.getItem(PREVIOUS_STORE)); return s && Array.isArray(s.items) && s.h >= 1 && s.h <= 10 && s.nextId ? s : null; } catch (e) { return null; }
+}
+async function applyLayout(s2, msg) {
+  if (!state.example && (state.items.length || state.extras.length || state.top || state.bottom)) {
+    const answer = await askUser('Open this rack?', 'Replace ' + (state.label || 'your rack') + ' (' + state.items.length + ' parts)? Your current rack will be kept as Previous rack, even after a reload.', [['', 'Cancel'], ['open', 'Open rack', 'primary']]);
+    if (answer !== 'open') { render(); return; }
+    try { localStorage.setItem(PREVIOUS_STORE, JSON.stringify(state)); }
+    catch (e) { say('Your current rack could not be kept. Save it as a file before opening another rack.'); render(); return; }
+  }
   const count = s => (Array.isArray(s.items) ? s.items.length : 0) + (Array.isArray(s.extras) ? s.extras.length : 0) + (s.top ? 1 : 0), n = count(s2);
   undo = JSON.stringify(state); state = s2; sel = null;
   sanitize(); renderLib(); render();
@@ -2139,33 +2402,23 @@ function loadShared() {
 }
 /* Rack file (<name>-<h>u.rack.json): the compact layout with a format name and version, written one part per line.
    A newer version still opens; what this planner doesn't know is left out. */
-const RACK_FORMAT = 'mini-rack-planner', RACK_VERSION = 1;
 const rackName = () => slug(state.label || 'lab-rax') + '-' + state.h + 'u';
-function rackFile() {
-  const [settings, parts] = compactLayout();
-  return '{\n  "format": "' + RACK_FORMAT + '",\n  "version": ' + RACK_VERSION + ',\n  "settings": ' + JSON.stringify(settings) + ',\n  "parts": [' +
-    parts.map(x => '\n    ' + JSON.stringify(x)).join(',') + (parts.length ? '\n  ' : '') + ']\n}\n';
-}
-function readRackFile(text) { // { state, newer }, or null when the text isn't a rack file
-  let o = null; try { o = JSON.parse(String(text).replace(/^\uFEFF/, '')); } catch (e) {}
-  if (!o || o.format !== RACK_FORMAT || !Number.isInteger(o.version) || o.version < 1) return null;
-  const s2 = expandLayout(o.settings, o.parts);
-  return s2 ? { state: s2, newer: o.version > RACK_VERSION } : null;
-}
+function rackFile() { return LRCodec.fileText(compactLayout()); }
+function readRackFile(text) { return LRCodec.readFile(text, defaultState(), SHARE_KEYS); } // { state, newer }, or null when the text isn't a rack file
 async function openRackFile(file) {
   if (!file || !CAT) return;
   let text = null;
   if (file.size <= 1e6) try { text = await file.text(); } catch (e) {}
   const r = text == null ? null : readRackFile(text);
   if (!r) { say(file.name + ' isn’t a rack file from this planner.'); return; }
-  applyLayout(r.state, 'Opened ' + file.name + '.' + (r.newer ? ' It was saved by a newer version of the planner, so some settings may be left out.' : ''));
+  await applyLayout(r.state, 'Opened ' + file.name + '.' + (r.newer ? ' It was saved by a newer version of the planner, so some settings may be left out.' : ''));
 }
 function decodeShared() {
   const m = location.hash.match(/^#([lc])=([^&]*)(.*)$/); // l: the whole state (older links), c: compact
   if (!m) return null;
   try {
     if (/&s=shop\b/.test(m[3])) { ui.sec.shop = true; setTimeout(() => { const b = $('#build'); if (b) b.scrollIntoView({ block: 'start' }); }, 300); }
-    const raw = JSON.parse(decodeURIComponent(escape(atob(m[2].replace(/-/g, '+').replace(/_/g, '/')))));
+    const raw = LRCodec.fromB64(m[2]); if (raw === undefined) return null;
     history.replaceState(null, '', location.pathname + location.search);
     if (m[1] === 'c') { const [st, items] = Array.isArray(raw) ? raw : [{}, []]; return expandLayout(st, items); }
     const o = raw;
@@ -2183,9 +2436,10 @@ fetch('catalog.json', { cache: 'no-cache' })
   .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
   .then(c => {
     buildCatalog(c);
+    fetch('resources.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).then(x => { if (x && Array.isArray(x.groups)) RESOURCES = x; }).catch(() => {});
     fetch('tips.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).then(t => { if (t && (Array.isArray(t.items) || Array.isArray(t.tips))) { TIPS = t; renderBuild(); } }).catch(() => {});
     sanitize();
-    if (!loadShared()) { renderLib(); render(); }
+    renderLib(); render(); loadShared();
     setView(ui.lastView === 'front' || ui.lastView === 'air' ? ui.lastView : '3d'); // 3D the first time
     window.addEventListener('hashchange', loadShared);
     let rw = 0;
@@ -2195,4 +2449,6 @@ fetch('catalog.json', { cache: 'no-cache' })
   .catch(e => { console.error(e); $('#cards').innerHTML = '<p class="hint">The parts catalog could not be loaded. Reload the page to try again.</p>'; });
 
 window.LRApp = { snapshot, select: id => { sel = id; render(); }, say, toggleSides: () => { state.sides = state.sides === 'acrylic' ? 'printed' : 'acrylic'; touch(); render(); }, tip: (id, x, y) => id == null ? hideTip() : showTip(id, x, y) };
+// tools/selftest.html drives the planner through these; only on a page opened with ?selftest
+if (/[?&]selftest\b/.test(location.search)) window.LRApp.test = { get state() { return state; }, printPack, orderList, addItem, move, setHeight, histGo, shareLink, rackFile, readRackFile, byPos, facts, powerModel, listText, openRackFile, ready: () => window.LRReady.summary(READY) };
 })();

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    .tile{fill:#16181B}.edge{fill:none;stroke:#3A3C41}.post{fill:#9A9EA4}.unit{fill:#ECEDEE}.open{fill:#ECEDEE;fill-opacity:.28}.act{fill:#3CC27A}
+    @media (prefers-color-scheme: dark){.tile{fill:#ECEDEE}.edge{stroke:#C2C5CA}.post{fill:#6A6F76}.unit{fill:#16181B}.open{fill:#16181B;fill-opacity:.25}.act{fill:#17824A}}
+  </style>
+  <rect class="tile" width="32" height="32" rx="7"/>
+  <rect class="edge" x=".5" y=".5" width="31" height="31" rx="6.5"/>
+  <rect class="post" x="6" y="5" width="2.5" height="22" rx="1"/>
+  <rect class="post" x="23.5" y="5" width="2.5" height="22" rx="1"/>
+  <rect class="unit" x="10.5" y="7.5" width="11" height="4.5" rx="1"/>
+  <rect class="act" x="10.5" y="13.75" width="11" height="4.5" rx="1"/>
+  <rect class="open" x="10.5" y="20" width="11" height="4.5" rx="1"/>
+</svg>
