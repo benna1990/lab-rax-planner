@@ -19,6 +19,8 @@ Before you change code, claim it here: what, which files, since when. One writer
 
 | Who | Working on | Files | Since |
 |---|---|---|---|
+| Codex | T-15 compact wizard, growth space and guidance | `app.js`, `layout.js`, `ready.js`, `tools/selftest.html`, layout/readiness tests | 2026-10-16 11:39 CEST |
+| Claude (design session) | Logo, favicon, site icons, manifest, og image | `index.html` (head and `.brand` only), `assets/` | 2026-10-16 |
 | Antigravity | T-10 (model page records, frame extras) & T-3 | `docs/audit/model-pages.json`, `docs/audit/power-inputs.json` | 2026-10-16 11:36 CEST |
 
 ## Task board
@@ -407,6 +409,9 @@ Claude reads this file at the start of every work session on the branch. Other d
 
 → **Codex**, after R-15.
 
+### R-36: Shop links are searches, so a beginner can buy the wrong thing (S2)
+*Claude, from the owner:* details, approach and tasks in [SHOPPING_PLAN.md](SHOPPING_PLAN.md). → **T-21** (Codex, after T-20) and **T-22** (Antigravity, after T-10 and T-3; the owner approves the picks).
+
 ## Closed
 
 ### R-1: Verification states too optimistic
@@ -563,3 +568,32 @@ Validator, all Node tests and **25/25 independent Chromium checks** pass. Regres
 - Small, not blocking: after Cancel the `#c=` link stays in the address bar, so a reload asks again. That's acceptable.
 
 **R-17 and R-18 closed.** R-30: the export half is done (the CSV Optional column, and needed and optional in the README); the rest stays open.
+
+### Antigravity — T-10 Batch 1 (20 frame-extra records), 16 October 2026
+
+Batch 1 (20 records, `mw1294478` through `mw1862122`) is added to `docs/audit/model-pages.json` (total 21 records with `mw1931511`).
+- Alle records zijn direct geverifieerd tegen de MakerWorld Next.js-state van de modelpagina's: licentie, profielen (inclusief profielteksten), afgeleide keuzes, aanhechtpunten (`attaches`), stated sizes (strikt alleen wat op de pagina staat; null waar niet vermeld) en visuele vergelijking (`look`).
+- Opgenomen modellen in Batch 1:
+  - `mw1294478`: Posts & side panels 1–5U (mklements)
+  - `mw1304384`: Extension side panels & post joiners (mklements)
+  - `mw3211714`: Upgraded 1U extension module (mklements)
+  - `mw2452007`: 5U for A1 mini (split parts) (cwlsmith)
+  - `mw1585859`: 6U bolted (Cowasaur)
+  - `mw2518831`: 6U bolted, complete (Shiv) — M6x12 schroeven (16 stuks)
+  - `mw2791796`: 4U, brass insert edition (Frostyy)
+  - `mw3286521`: 3U / 4U with improved nut holders (Piotrek)
+  - `mw1787687`: LowProfile frame (keineantwort) — 4x M6x5x8 inserts
+  - `mw1893186`: LowProfile frame, bolted (280 × 240 mm) (iGoX)
+  - `mw3039779`: Top & bottom mod frame (+2U, handle styles) (RULERULAS) — 12 profielen
+  - `mw1398316`: Base parts with nut pockets (CyberGWJ)
+  - `mw3050275`: Full mATX frame (244 × 244 mm) (Xtian85) — 6 profielen (2U/3U)
+  - `mw1351551`: EasyMount Edition (Srigger)
+  - `mw2086724`: Deeper sides (+50 mm) (Caraful) — 220 mm diepte
+  - `mw2467685`: Bolted 5U extended (+50 mm) (malves257)
+  - `mw2657818`: Braces & handles for 330 mm depth (RDas) — 330 mm diepte
+  - `mw1321019`: Customisable depth spacers (OpenSCAD) (Jeffrey)
+  - `mw1839684`: Sturdy long post joiner (Kiwiworks)
+  - `mw1862122`: Side panel connector & post joiner V2 (Kiwiworks)
+- `validate.mjs`, syntax checks en Node-tests slagen. `import-model-pages.mjs` testdraai importeert alle 21 records foutloos.
+- Klaar voor review door Claude en import door Codex. Antigravity gaat direct door met Batch 2 (volgende 20 frame-extra's).
+
