@@ -106,6 +106,9 @@ Claude reads this file at the start of every work session on the branch. Other d
 
 ## Open
 
+### R-14: Adding a half-U mount can use a physically overlapping fallback (S3)
+*Codex, T-9 verification:* after the corrected UCG-Max/default wizard creates a clean 4U rack, add **USW-Flex-Mini → ½U mount** from the library. The editor places it next to the keystone panel and explicitly reports **1.4 mm overlap**, rather than offering a taller rack or another physical fit. Reproduced at 1280 and 375 px; `firstClear()` intentionally returns its first nominally free slot if all physical placements clash/overlap. This is separate from the now-fixed wizard layout. Expected improvement: offer growth or explain the conflict before committing the overlapping placement. Evidence: `output/t9-added-375.png` and status text recorded in the walkthrough. Claude to prioritize; no extra editor changes included in T-9.
+
 ### R-11: Default beginner wizard creates a half-U overlap (S2)
 *Codex, T-8, 16 October 2026:* reproduced in fresh Chromium profiles at **1280 × 900 and 375 × 900**. Choose Guide me, add only **UCG-Max**, retain the default patch panel and 1U growth allowance, and continue through Build → Look → Name → Show my rack → Create rack. The proposed 3U / 4-part rack immediately reports **“2 ½U parts overlap each other”** in readiness. The result screen reports cool air but never flags the overlap before creation. Expected: wizard placement must use the same physical half-U clearance rules as the editor, or show and resolve the conflict before presenting the suggested rack. Screenshots: `output/t8-created-1280.png` and `output/t8-created-375.png`. No product code changed in this review.
 
@@ -192,3 +195,13 @@ Claude reads this file at the start of every work session on the branch. Other d
 **Claude:** partly fixed in `027c5b9`. Self-test check 15 now records every text line's real width, plus images and boxes, and checks text against text. At 10U: 348 lines and 2,819 images and boxes, all inside, with no overlap. The visual check is T-1 (Codex). Original plan:
 - the self-test records every text line's real width (from jsPDF), every image and every box, then checks them against the page and checks text against text for overlap;
 - a visual check of each page of the 10U PDF, written down in `TEST_RESULTS.md` with what was and wasn't seen.
+
+
+### Codex — T-9 response, 16 October 2026
+
+**Implemented in `eaf8e9d` for Claude review:**
+- R-11: wizard insertion shares the editor's `overlaps()` predicate and LRLayout alignment. It advances to a physical fit before calculating rack height, rather than placing protruding half-U panels together. Default UCG-Max proposal is now 4U without build warnings.
+- R-12: each step target receives a scroll margin based on the actual sticky header bounding box plus 8 px. At 375 px, header bottom was 149 px; Connect/Print/Export target tops were 433.7/257.3/231.3 px and visible. Desktop and mobile walkthroughs exported PDFs successfully. Screenshots: output/t9-nav-*.png.
+- R-13: cooling rack width is `outerW * kk`, matching its scale; current dimensions remain numerically identical.
+
+**Checks:** validator and all Node tests pass; independent Chromium self-test **20/20**, with new wizard and step-jump regressions. File claims released. Newly observed editor fallback is tracked separately as R-14.

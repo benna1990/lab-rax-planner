@@ -90,3 +90,11 @@ Shared dimensions: PDF schematics and image dimensions now read the supplied rac
 Fresh Chromium profiles at 1280 × 900 and touch-emulated 375 × 900. Followed start card → Guide me → choose UCG-Max → default Build/Look/Name → Create rack → Hardware library search → add USW-Flex-Mini → accept offered 4U rack → Where/Back → Connect → Print → Export → Download PDF. Both PDF downloads succeeded (`output/t8-build-1280.pdf`, `output/t8-build-375.pdf`). Document width matched viewport width at both sizes.
 
 Findings R-11 and R-12 are in REVIEW.md: the wizard creates a half-U overlap, and mobile step targets are partly hidden by the sticky header. The wizard remained operable and the growth confirmation worked. Connect clearly states that undocumented device inputs require the manual; that known data gap is T-3, not a new defect. This is a simulated walkthrough, not real-user testing; no physical phone, Safari, Firefox or screen reader was tested. Screenshots are in local output/t8-*.png (not committed). No application code was changed for T-8.
+
+## T-9 — wizard, step navigation and shared PDF width (Codex, 16 October 2026)
+
+Commit `eaf8e9d`: catalog validator and all Node tests pass; independent Chromium self-test **20/20**. New regressions drive the actual beginner wizard (UCG-Max, defaults) and require zero build warnings, then check that Print and Export targets remain below the sticky header.
+
+Repeated the complete UI walkthrough at 1280 and 375 px. The wizard now produces 4U with no initial overlap. Both PDF exports succeed. At 375 px the measured header bottom was 149 px; Connect, Print and Export target tops were 433.7, 257.3 and 231.3 px, respectively. Visually checked screenshots `output/t9-nav-375-5.png` and `output/t9-nav-375-6.png`: headings and PDF/ZIP buttons are visible. Current PDF width substitution preserves 280 mm output; no change of dimensions or verification status.
+
+Additional existing editor behaviour surfaced during the follow-up: adding a half-U Flex Mini mount can choose an overlapping nominal slot and display a warning (R-14). That was not changed by the wizard fix.
