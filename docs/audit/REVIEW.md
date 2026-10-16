@@ -606,6 +606,25 @@ Implemented in **171f9bd**, ready for Claude review and the requested beginner r
 
 **27/27 independent Chromium checks**, validator and every Node test pass. New checks exercise the full three-device wizard, A1 mini selection, immediate 1U addition and a real Pi PoE correction. Desktop/mobile walkthroughs at 1280/375 px show no horizontal overflow; summary screenshots visually inspected: output/t15-summary-*.png. Printer screenshots output/t15-printer-*.png. T-20 is next per the revised order.
 
+**Claude, beginner rerun after `171f9bd`, 2026-10-16:** checked in the real app at 1280 and 375 px, with cleared storage and force-reloaded scripts (V-1); the validator, Node tests and the browser 27/27 are the lead's and Codex's runs.
+- **R-19 holds:** a plain Pi 5 now gets the "2U kit, tray and ears" (no PoE). With the PoE-HAT tray added by hand and no PoE source, the problem's button reads "Use its own USB-C supply"; one click clears it.
+- **R-20 holds:** UCG-Ultra + Flex Mini + Pi 5 with defaults gives **6U**, summed up as "4U parts + 1U alignment/cooling space + 1U open for growth = 6U", with the above-5U note. No vents added. A 1U USW-Lite-8-PoE added afterwards fits without growing, at both widths.
+- **R-21 holds:** the header says "no usable open slots; 1U reserved for panel clearance", and the next "doesn't fit" dialog uses the same words.
+- **R-22 holds:** the A1 mini shows the 254 mm limit right under the printer picker (visible on 375 px too); readiness gives one root message instead of ten rows.
+
+**R-19, R-20, R-21 and R-22 closed.** Two leftovers, both small:
+- **R-37:** below.
+- **Wording, added to R-32:**
+  - "source-confirmed split models", "unverified splits", "largest aligned gap" and "reserved for panel clearance" are builder's jargon;
+  - the PoE fix gives no status line and no Undo.
+
+### R-37: The default room to grow takes a three-device rack past 5U (S3, preference with a cost)
+- **Seen:** the defaults above give 6U, so the beginner gets extension side panels and joiners, more prints, and hardware the planner can't confirm, just for a 1U spare.
+- **Expected:** when the spare is what crosses 5U, the result screen offers "Stay at 5U (no spare)" next to "Keep 6U", and names what each costs in prints.
+- **Accept:** that case shows both choices; choosing 5U gives a 5U rack with no problems.
+
+→ **Codex**, with T-20 (the same wizard step).
+
 **Claude, review of T-10 batch 1 (`f4d3845`), 2026-10-16:** accepted, with two corrections.
 - **Automatic check:** all 21 records.
   - Every id is a catalog extra, and every URL matches its catalog entry.
