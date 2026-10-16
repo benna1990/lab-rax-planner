@@ -1264,3 +1264,15 @@ Ninth tranche of candidate models from `docs/audit/model-candidates.json` inspec
 **5868dfc** imports exactly the remaining **34 existing frame extras**. Compared catalog objects with HEAD: changed IDs equal the selected last 34; the first 41 extras and every new T-13 candidate are unchanged. All pre-existing shape parameters except source attachment metadata are retained, including Claude's T-23 shape keys. Repeating the selected import is identical.
 
 Validator, all Node tests and **30/30 independent Chromium checks** pass. All 75 existing frame extras now have their reviewed source metadata imported; this does not mean every drawing or hardware quantity is verified. Source sizes/hardware still need explicit geometry/hardware mapping where not already implemented. CLAUDE.md now documents explicit reviewed-ID selection and the power-input importer. Catalog claim released. Next task is T-24 flat extras plus the caster 3D regression.
+
+**Claude, review of `43ee5d0` (T-3 integration) and `5868dfc` (T-10 batch 3 import), 2026-10-16:** both accepted.
+- Validator, syntax checks and all Node tests pass here. The browser 30/30 is Codex's run.
+- **`43ee5d0`:**
+  - exactly 32 devices changed, only in `input` and `evidence`, and the rest of the catalog is byte-identical;
+  - `evidence.power` says it covers only the input specification, not the typical draw. That's the split T-16 needs.
+- **`5868dfc`:**
+  - exactly 34 extras changed, in `shape` (`at` only), `license`, `evidence`, `options` and `profileChoices`;
+  - every T-23 shape key is unchanged.
+- **T-3 closed** as far as the data goes: 32 devices.
+
+**Next for Codex:** T-24 (the flat view and a 3D check for casters), then T-16 (honest ✓ marks for power and cooling).
