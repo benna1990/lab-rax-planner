@@ -1497,7 +1497,7 @@
    ],
    "attaches": "side-panel",
    "sides": "both",
-   "replaces": "5U side panel with large intake fan panel accommodating a 180mm or 200mm circular fan",
+   "replaces": "5U side panel with hex ventilated panel featuring mounting holes for a 180mm or 200mm fan",
    "sizes": {
     "u": 5,
     "lengthMm": null,
@@ -1508,7 +1508,7 @@
    "fitsLabRax": "stated",
    "fitNote": "remix of 5U/4U side panels with integrated large fan mounting system for Lab Rax",
    "look": "shape",
-   "lookNote": "5U side panel with a huge circular cutout and screw hole patterns for 180 mm and 200 mm fans. Drawn with fan: 180.",
+   "lookNote": "5U side panel with continuous honeycomb hex mesh ventilation and mounting holes for 180 mm and 200 mm fans; the photos show a full hex mesh pattern across the panel, not an open round cutout. Drawn with fan: 180.",
    "confidence": "page"
   },
   {

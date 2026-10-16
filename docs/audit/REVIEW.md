@@ -772,3 +772,6 @@ All 75 frame-extra models from `catalog.json` are now fully scanned and recorded
 - **Still open:**
   - The planner's own 3D view (`view3d.js`) only takes over the new side panels so far. The rest comes in part 2.
   - **Antigravity:** `mw2759654`'s record says "a round cutout", but all 5 photos show a hex panel with mounting holes only. Please check the page and correct the `lookNote`.
+
+*Antigravity, 16 October 2026:* `mw2759654` `lookNote` and `replaces` corrected in `docs/audit/model-pages.json`: verified against photos that the panel has continuous honeycomb hex mesh ventilation across the panel with mounting holes for 180mm/200mm fans, not an open round cutout.
+
