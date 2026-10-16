@@ -6347,6 +6347,643 @@
    "look": "ok",
    "lookNote": "2U rack unit with multiple vertical hot-swap style drive guide caddies for 2.5\" drives.",
    "confidence": "page"
+  },
+  {
+   "id": "mw3421726",
+   "new": true,
+   "what": "Magnetic snap-on removable side panels for Lab Rax frame",
+   "url": "https://makerworld.com/en/models/3421726",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [],
+   "profilesNote": "the page has no print profiles",
+   "choices": [],
+   "attaches": "side-panel",
+   "sides": "both",
+   "sizes": {
+    "u": 5,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "Uses embedded magnets to allow quick tool-less side panel removal.",
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for Lab Rax by mklements.",
+   "look": "ok",
+   "lookNote": "Flush side panel with magnetic corner retention pads.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2955969",
+   "new": true,
+   "what": "Mounting feet adapter securing Lab Rax onto Yamazen YRM-N50 rack cart grooves",
+   "url": "https://makerworld.com/en/models/2955969",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "YRM-N50 adapter feet"
+    }
+   ],
+   "choices": [],
+   "attaches": "feet",
+   "sides": "both",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Adapter for mounting Lab Rax onto the Yamazen YRM-N50.",
+   "look": "ok",
+   "lookNote": "Base foot adapters with alignment ribs keying into mobile rolling cart slots.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2744672",
+   "new": true,
+   "what": "2-slot wide Pi 5 sled for Pimoroni NVMe Base and HATs in 2U SBC holder",
+   "url": "https://makerworld.com/en/models/2744672",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "2U 7 SBC Holder for 10\" Rack (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "Pi 5 NVMe base sled"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Adaptation of mklements Pi 5 holders taking 2 spots in 2U 7 SBC rack plate.",
+   "look": "ok",
+   "lookNote": "Double-width vertical sled caddy providing extra clearance for bottom NVMe drives and top HATs.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3070448",
+   "new": true,
+   "what": "Longitudinal chassis support beam bracket for extended-depth Lab Rax",
+   "url": "https://makerworld.com/en/models/3070448",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "extended support beam bracket"
+    }
+   ],
+   "choices": [],
+   "attaches": "posts",
+   "sides": "both",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for extended Lab Rax chassis.",
+   "look": "ok",
+   "lookNote": "Reinforced bridge bracket connecting front and rear corner posts.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2645661",
+   "new": true,
+   "what": "10-inch rack mount with M6 brass inserts for Ubiquiti USW-Lite-16-PoE switch",
+   "url": "https://makerworld.com/en/models/2645661",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "USW-Lite-16-PoE mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [
+    {
+     "part": "M6 brass insert",
+     "qty": 2
+    }
+   ],
+   "hardwareNote": "Uses 2x M6 brass inserts (8mm OD, 5-8mm length) to secure the rear clamp panel.",
+   "fitsLabRax": "stated",
+   "fitNote": "Mounted in Lab Rax 10\" Server Rack by mklements.",
+   "look": "ok",
+   "lookNote": "1U faceplate cradle enclosing the 16-port UniFi switch with rear retention bracket.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1843885",
+   "new": true,
+   "what": "1U snap-fit rack mount for TP-Link LS1008G 8-port desktop switch",
+   "url": "https://makerworld.com/en/models/1843885",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 4 walls, 20% infill",
+     "plates": null,
+     "prints": "TP-Link LS1008G 1U mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "Screwless snap-fit design.",
+   "fitsLabRax": "stated",
+   "fitNote": "Tested on Lab Rax 10\" rack.",
+   "look": "ok",
+   "lookNote": "1U bracket with top and bottom retention lips snapping the plastic switch body in place.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2959571",
+   "new": true,
+   "what": "1U flush-mount bracket holding TP-Link TL-SG108 gigabit switch",
+   "url": "https://makerworld.com/en/models/2959571",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 4 walls, 25% infill",
+     "plates": null,
+     "prints": "SG108 flush mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for Lab Rax 10\".",
+   "look": "ok",
+   "lookNote": "1U front faceplate with bottom screw slots locking the steel switch flush with the rack.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1618601",
+   "new": true,
+   "what": "1U internal equipment mounting brackets for Lab Rax",
+   "url": "https://makerworld.com/en/models/1618601",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 10% infill",
+     "plates": null,
+     "prints": "1U brackets"
+    }
+   ],
+   "choices": [],
+   "attaches": "inside",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Lab Rax 1U Bracket.",
+   "look": "ok",
+   "lookNote": "L-shaped angle brackets mounting non-standard accessories to inner frame surfaces.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3228918",
+   "new": true,
+   "what": "2U high-density rack bracket holding up to five Flex-ATX power supplies",
+   "url": "https://makerworld.com/en/models/3228918",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "5x Flex ATX PSU mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Made for Lab Rax 10\" compute cluster builds.",
+   "look": "ok",
+   "lookNote": "2U faceplate with five vertical slots and mounting screw holes for 1U Flex-ATX modular power supplies.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2762349",
+   "new": true,
+   "what": "Split horizontal front top edge printable on 230x225mm beds (Ender 3)",
+   "url": "https://makerworld.com/en/models/2762349",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax top for Small Printers (jipipuya)",
+    "Lab Rax 10\" Server Rack - 5U (mklements)"
+   ],
+   "profiles": [],
+   "profilesNote": "the page has no print profiles",
+   "choices": [],
+   "attaches": "top",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Remix of mklements 10\" Lab Rax Horizontal Edge for small printer beds.",
+   "look": "ok",
+   "lookNote": "Two interlocking half-pieces replacing the single long horizontal front edge.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2132557",
+   "new": true,
+   "what": "3U front panel with recessed grill mounting a 140mm cooling fan",
+   "url": "https://makerworld.com/en/models/2132557",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "PLA Profile",
+     "plates": null,
+     "prints": "PLA fan panel"
+    },
+    {
+     "name": "PETG Profile (Recommended)",
+     "plates": null,
+     "prints": "PETG fan panel"
+    },
+    {
+     "name": "4mm Thick / No Grill",
+     "plates": null,
+     "prints": "thick panel without grill"
+    }
+   ],
+   "choices": [
+    "material: PLA or PETG",
+    "grill: with recessed grill or 4mm thick no grill"
+   ],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 3,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Plate to mount a 140mm fan in a 10 inch rack.",
+   "look": "ok",
+   "lookNote": "3U front plate with recessed 140mm circular fan cutout and blade clearance.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2819880",
+   "new": true,
+   "what": "Anti-sag rack cradle for HP EliteDesk/ProDesk Mini PC with front keystone",
+   "url": "https://makerworld.com/en/models/2819880",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "HP Elitedesk/Prodesk Mini Rack Mount (BadPixel)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "EliteDesk mount with keystone"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1.5,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Fits the Lab Rax 10\" rack without flexing.",
+   "look": "ok",
+   "lookNote": "1.5U cradle enclosing an HP EliteDesk mini PC with a front RJ45 keystone port.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1906064",
+   "new": true,
+   "what": "1U rack mount with M6 screw anchor holding an Orico USB hub",
+   "url": "https://makerworld.com/en/models/1906064",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "10-inch rack mount blanks with FreeCAD file (tuxy)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 3 walls, 13% infill",
+     "plates": null,
+     "prints": "Orico USB hub 1U mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [
+    {
+     "part": "M6 bolt",
+     "qty": 1
+    }
+   ],
+   "hardwareNote": "Hole provided for M6 screw to clamp hub down.",
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for 10-inch rack mount.",
+   "look": "ok",
+   "lookNote": "1U faceplate pocket retaining a multi-port Orico USB hub.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2927666",
+   "new": true,
+   "what": "Horizontal cylindrical cradle mount for 2013 Mac Pro (trashcan)",
+   "url": "https://makerworld.com/en/models/2927666",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.24mm layer, 4 walls, 15% infill",
+     "plates": null,
+     "prints": "Mac Pro cheesegrater grill mount"
+    },
+    {
+     "name": "Non Cheesegrater Version",
+     "plates": null,
+     "prints": "flat face version"
+    }
+   ],
+   "choices": [
+    "front panel style: Cheesegrater grill or Flat face"
+   ],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 4,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "2013 Mac Pro rack mount for Lab Rax.",
+   "look": "ok",
+   "lookNote": "4U multi-unit cradle holding a cylindrical 2013 Mac Pro lying horizontally with front airflow cutouts.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2641656",
+   "new": true,
+   "what": "1.5U front tray adjusted for Intel NUC mini PC in Lab Rax",
+   "url": "https://makerworld.com/en/models/2641656",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.28mm layer extra draft, strngth not needed",
+     "plates": null,
+     "prints": "Intel NUC tray"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1.5,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Suited for Lab Rax system 10-inch rack.",
+   "look": "ok",
+   "lookNote": "1.5U faceplate holding standard square Intel NUC chassis.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3044459",
+   "new": true,
+   "what": "Multi-bay 3.5-inch hot-swappable SATA hard drive cage chassis",
+   "url": "https://makerworld.com/en/models/3044459",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 6 walls, 25% infill",
+     "plates": null,
+     "prints": "3.5\" hot swap HDD chassis"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 4,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "Uses 3x 12mm screws and Heretom hot-swap HDD backplane/caddies from AliExpress.",
+   "fitsLabRax": "stated",
+   "fitNote": "3.5\" HDD hot swappable chassis for Lab-Rax.",
+   "look": "ok",
+   "lookNote": "Large rack module with guide rails for multiple vertical 3.5\" hot-swap drive caddies.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3149006",
+   "new": true,
+   "what": "1U faceplate cover adapting GeeekPi 12-port Cat6 patch panel for Lab Rax",
+   "url": "https://makerworld.com/en/models/3149006",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 10% infill",
+     "plates": null,
+     "prints": "GeeekPi 12-port patch panel cover"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for Lab Rax 10\" rack.",
+   "look": "ok",
+   "lookNote": "1U faceplate securing the GeeekPi metal 12-keystone bracket flush into rack ears.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3087584",
+   "new": true,
+   "what": "1U rack mount for Argon One Raspberry Pi case with side accessory shelf",
+   "url": "https://makerworld.com/en/models/3087584",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 3 walls, 15% infill",
+     "plates": null,
+     "prints": "Argon One 1U rack mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "10-inch 1U rack mount for Lab Rax.",
+   "look": "ok",
+   "lookNote": "1U faceplate holding an angled Argon One Pi case on one side with open vented tray on the other.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2735344",
+   "new": true,
+   "what": "2U snap-fit rack mount panel for 5-inch HDMI LCD display",
+   "url": "https://makerworld.com/en/models/2735344",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.28mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "5\" screen rack mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "5\" screen 10\" rack mount for Lab Rax.",
+   "look": "ok",
+   "lookNote": "2U faceplate with central opening snapping around a 5-inch screen bezel.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3331076",
+   "new": true,
+   "what": "1U cradle mount for Linksys SE3005 5-port gigabit switch",
+   "url": "https://makerworld.com/en/models/3331076",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "Linksys SE3005 bracket"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Mount for a Linksys SE3005 in a 10\" Lab Rax mini rack.",
+   "look": "ok",
+   "lookNote": "1U faceplate holding the Linksys SE3005 switch with front port access.",
+   "confidence": "page"
   }
  ]
 }

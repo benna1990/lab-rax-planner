@@ -1036,4 +1036,48 @@ Fifth tranche of candidate models from `docs/audit/model-candidates.json` inspec
 
 *Antigravity, 16 October 2026:* `mw3395354` and `mw2695637` licences updated from `"BY"` to `"CC BY"` in `docs/audit/model-pages.json`.
 
+### Antigravity — T-13 Batch 6: 26 Candidate Models Inspected (20 Added, 6 Skipped), 16 October 2026
+
+Sixth tranche of candidate models from `docs/audit/model-candidates.json` inspected (covering ranks 233 through 267):
+
+**20 Rack parts documented in `docs/audit/model-pages.json` (`new: true`, `confidence: "page"`):**
+1. `mw3421726` (Rank 233): Magnetic snap-on removable side panels for Lab Rax frame (`CC BY-NC-SA`). Confirmed zero-profile model (`profiles: []`, `profilesNote` added).
+2. `mw2955969` (Rank 235): Mounting feet adapter securing Lab Rax onto Yamazen YRM-N50 cart grooves (`CC BY-NC-SA`).
+3. `mw2744672` (Rank 236): 2-slot wide Pi 5 sled for Pimoroni NVMe Base and HATs in mklements 2U 7 SBC holder (`CC BY-NC-SA`).
+4. `mw3070448` (Rank 239): Longitudinal chassis support beam bracket for extended-depth Lab Rax (`Standard Digital File License`).
+5. `mw2645661` (Rank 241): 10-inch rack mount with M6 brass inserts for Ubiquiti USW-Lite-16-PoE switch (`CC BY-NC-SA`).
+6. `mw1843885` (Rank 242): 1U snap-fit rack mount for TP-Link LS1008G 8-port desktop switch (`Standard Digital File License`).
+7. `mw2959571` (Rank 243): 1U flush-mount bracket holding TP-Link TL-SG108 gigabit switch (`Standard Digital File License`).
+8. `mw1618601` (Rank 244): 1U internal equipment mounting brackets for Lab Rax (`CC BY-SA`).
+9. `mw3228918` (Rank 245): 2U high-density rack bracket holding up to five Flex-ATX power supplies (`CC BY-NC-SA`).
+10. `mw2762349` (Rank 246): Split horizontal front top edge printable on 230x225mm beds (Ender 3) (`CC BY-NC-SA`). Confirmed zero-profile model (`profiles: []`, `profilesNote` added).
+11. `mw2132557` (Rank 248): 3U front panel with recessed grill mounting a 140mm cooling fan (`Standard Digital File License`).
+12. `mw2819880` (Rank 251): Anti-sag rack cradle for HP EliteDesk/ProDesk Mini PC with front keystone (`CC BY-NC-SA`).
+13. `mw1906064` (Rank 253): 1U rack mount with M6 screw anchor holding an Orico USB hub (`CC BY-NC-SA`).
+14. `mw2927666` (Rank 254): Horizontal cylindrical cradle mount for 2013 Mac Pro (trashcan) in 4U (`CC BY-NC-SA`).
+15. `mw2641656` (Rank 257): 1.5U front tray adjusted for Intel NUC mini PC in Lab Rax (`CC BY-NC`).
+16. `mw3044459` (Rank 258): Multi-bay 3.5-inch hot-swappable SATA hard drive cage chassis using Heretom caddies (`Standard Digital File License`).
+17. `mw3149006` (Rank 259): 1U faceplate cover adapting GeeekPi 12-port Cat6 patch panel for Lab Rax (`CC BY-NC-SA`).
+18. `mw3087584` (Rank 261): 1U rack mount for Argon One Raspberry Pi case with side accessory shelf (`CC BY`).
+19. `mw2735344` (Rank 266): 2U snap-fit rack mount panel for 5-inch HDMI LCD display (`CC BY-NC-SA`).
+20. `mw3331076` (Rank 267): 1U cradle mount for Linksys SE3005 5-port gigabit switch (`Standard Digital File License`).
+
+**6 Non-rack / incompatible models skipped (with reasons):**
+- `mw3277270` (Rank 234): "Mini Lab Rax Dual 40mm Fan Mount" by Technology&Toys — Skipped: for 5-inch Mini Lab Rax.
+- `mw2867885` (Rank 237): "Pi 3B / 5 5\" Mini Lab Rax 1U mount .42 OLED screen" by Tommy_S — Skipped: for 5-inch Mini Lab Rax.
+- `mw2816680` (Rank 247): "Lab Rax Mini Tray With End Plate" by Dave MacRae — Skipped: for 5-inch Mini Lab Rax.
+- `mw3440114` (Rank 255): "2U Raspberry Pi 4 + SSD Shelf For 5\" Mini Lab Rax" by FJRC — Skipped: for 5-inch Mini Lab Rax.
+- `mw3077661` (Rank 256): "Mini Lab Rax 7U Expansion Panels" by Owen K — Skipped: for 5-inch Mini Lab Rax.
+- `mw3094890` (Rank 265): "Lab Rax Mini Height Extenders" by LexGear — Skipped: for 5-inch Mini Lab Rax.
+
+**License breakdown across Batch 6 (20 records):**
+- 11 × `CC BY-NC-SA`
+- 6 × `Standard Digital File License`
+- 1 × `CC BY-NC`
+- 1 × `CC BY-SA`
+- 1 × `CC BY`
+
+**Running total for T-13:** 125 new rack parts documented in `model-pages.json`, 33 models skipped (158 candidates checked). Total records in `model-pages.json` is now 200 (75 frame-extras + 125 candidates). All test suites and catalog validation pass.
+
+
 
