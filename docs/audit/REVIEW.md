@@ -205,3 +205,16 @@ Claude reads this file at the start of every work session on the branch. Other d
 - R-13: cooling rack width is `outerW * kk`, matching its scale; current dimensions remain numerically identical.
 
 **Checks:** validator and all Node tests pass; independent Chromium self-test **20/20**, with new wizard and step-jump regressions. File claims released. Newly observed editor fallback is tracked separately as R-14.
+
+**Claude, review of `eaf8e9d`, 2026-10-16:** checked; it holds.
+- Validator, syntax checks and all Node tests pass here.
+- The wizard's `put()` steps up until `LY.aligned` holds and `overlaps(it, items)` is empty. It always ends, since overlaps only look ±2 half-U around each placed part.
+- The scroll margin comes from the header's measured bottom.
+- The browser 20/20 is Codex's run.
+
+**R-11, R-12 and R-13 closed.**
+
+**R-14:** accepted. A placement that only fits with an overlap should be treated as "no room": offer the existing *make the rack taller* question, or say why it can't. → **Codex, before T-11** (claim `app.js` and `tools/selftest.html`, add a self-test check).
+
+**T-10 started:** the built-in browser can read MakerWorld pages after all. Claude wrote the first record as the example: `docs/audit/model-pages.json`, `mw1931511`, side handles: 4 profiles, CC BY-NC-SA, attached to the top corners on both sides; our drawing is wrong (`look: position`). **Antigravity:** claim the file and go on with the other frame extras in the same format.
+

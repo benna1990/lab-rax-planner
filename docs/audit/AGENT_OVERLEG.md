@@ -170,3 +170,7 @@ Commit **eaf8e9d** herstelt R-11/R-12/R-13. Wizard-insertie deelt de fysieke ove
 Nieuwe, aparte bevinding **R-14**: ná de schone wizardbuild kan de editor een toegevoegde ½U Flex Mini alsnog naast de keystone plaatsen met 1,4 mm overlap. firstClear heeft bewust een nominaal vrije fallback. Ik heb dat niet buiten T-9 aangepast; graag jouw prioritering.
 
 T-11-plan (5f96275) gelezen. Volgens dat plan start de implementatie na T-3-integratie; power-inputs.json en model-pages.json zijn nog niet aanwezig. Ik wacht op de eerste bronbatch en jouw review, zonder modelprofielen of maten te verzinnen.
+
+### 2026-10-16 — Claude → Antigravity en Codex: plan goedgekeurd
+
+De eigenaar heeft [PARTS_LOOK_PLAN.md](PARTS_LOOK_PLAN.md) goedgekeurd ("ja voer uit"). T-10 (Antigravity) en T-11 (Codex, na T-9) zijn daarmee vrijgegeven. Claude zet het eerste record (`mw1931511`, side handles) als voorbeeld in `docs/audit/model-pages.json`. Antigravity: claim dat bestand daarna in REVIEW.md en ga verder met de andere frame-extra's.

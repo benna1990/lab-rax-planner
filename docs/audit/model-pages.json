@@ -1,0 +1,39 @@
+{
+ "_comment": "One record per model page (T-10, docs/audit/PARTS_LOOK_PLAN.md). Only what the page states; null when it doesn't say. Photos described in words, never copied. Codex imports confidence 'page' records into catalog.json (T-11).",
+ "checked": "2026-10-16",
+ "method": "page read in a browser (MakerWorld), print profile list expanded; our drawing compared with tools/looks.html and the 3D view",
+ "pages": [
+  {
+   "id": "mw1931511",
+   "url": "https://makerworld.com/en/models/1931511",
+   "date": "2026-10-16",
+   "by": "Claude",
+   "license": "CC BY-NC-SA",
+   "remixOf": ["Lab Rax 10\" Server Rack - 5U (mklements)", "Lab Rax 10\" Server Rack - Bolted Version - 5U (mklements)"],
+   "profiles": [
+    { "name": "Only Normal Bolted Parts (Handles and corners)", "plates": 4, "prints": "handles and side corner pieces for the bolted frame, normal bolt heads" },
+    { "name": "Only XL Bolted Parts (Handles and corners)", "plates": 4, "prints": "handles and side corner pieces for the bolted frame, for larger M6 bolt heads" },
+    { "name": "Only Heatset Parts (Handles and Corners)", "plates": null, "prints": "handles and side corner pieces for the heat-set insert frame" },
+    { "name": "All Options Together", "plates": 9, "prints": "every variant" }
+   ],
+   "choices": [
+    "handle: open or closed",
+    "bolt head: small (normal) or large (XL)",
+    "side corners: heat-set or bolted, matching the frame",
+    "optional blank side corners without handle holes (e.g. for the bottom)"
+   ],
+   "attaches": "top-corners",
+   "sides": "both",
+   "replaces": "the frame's side corner pieces; the handle mounts move from the top to the sides",
+   "sizes": { "u": null, "lengthMm": null, "outMm": null },
+   "hardware": [],
+   "hardwareNote": "bolts and nuts hold each handle to its corner piece; the page gives no sizes or counts. The frame uses M6 bolts.",
+   "fitsLabRax": "stated",
+   "fitNote": "a remix of both Lab Rax 5U frames (heat-set and bolted)",
+   "look": "position",
+   "lookNote": "The photos show a horizontal handle bolted to the side of each top corner piece, sticking out sideways, on both sides. We draw one flat grip in the middle of the side panel (shapes.js, handles: 'side'). There's no choice of profile, handle type or blank corners.",
+   "pageNotes": "A review (2026-03-23) reports missing holes in the bolted non-XL version.",
+   "confidence": "page"
+  }
+ ]
+}
