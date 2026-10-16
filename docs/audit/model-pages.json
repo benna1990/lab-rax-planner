@@ -3578,6 +3578,778 @@
    "look": "ok",
    "lookNote": "Side panel combining IKEA Skadis pegboard holes with Japanese Kumiko lattice aesthetics (AMS compatible).",
    "confidence": "page"
+  },
+  {
+   "id": "mw3067459",
+   "new": true,
+   "what": "+50mm extended post joiner bracket for deeper racks",
+   "url": "https://makerworld.com/en/models/3067459",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax Sturdy Long Post Joiner (Kiwiworks)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "+50mm extended post joiner"
+    }
+   ],
+   "choices": [],
+   "attaches": "posts",
+   "sides": "both",
+   "sizes": {
+    "u": null,
+    "lengthMm": 50,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Extends out 50mm further than original to accommodate deeper Lab Rax setups.",
+   "look": "ok",
+   "lookNote": "Reinforced corner/post joiner bracket extending frame depth by 50mm.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2990125",
+   "new": true,
+   "what": "Rack mount tray for TP-Link Omada ES210X-M2 switch",
+   "url": "https://makerworld.com/en/models/2990125",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "ES210X-M2 switch mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed exclusively for Lab Rax 10\" brass inserts (209 × 126 × 26 mm switch).",
+   "look": "ok",
+   "lookNote": "Custom tray fitting the TP-Link Omada ES210X-M2 switch horizontally.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2189735",
+   "new": true,
+   "what": "Heavy duty top carry handles with +1U rack mounting",
+   "url": "https://makerworld.com/en/models/2189735",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "M6 brass inserts version"
+    },
+    {
+     "name": "M6 Hex Nuts version",
+     "plates": null,
+     "prints": "M6 hex nuts version"
+    }
+   ],
+   "choices": [
+    "fasteners: M6 brass threaded inserts or M6 hex nuts"
+   ],
+   "attaches": "top",
+   "sides": "both",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "Uses M6 brass inserts (8mm length) or M6 hex nuts; adds 1U of mounting space.",
+   "fitsLabRax": "stated",
+   "fitNote": "Upgrade handles for Lab Rax providing +1U rack real estate.",
+   "look": "ok",
+   "lookNote": "Sturdy top handles featuring integrated vertical rails for an extra 1U of equipment.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2240958",
+   "new": true,
+   "what": "Vertical mount bracket for TFX power supply units (4 1/3U)",
+   "url": "https://makerworld.com/en/models/2240958",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 20% infill",
+     "plates": null,
+     "prints": "vertical TFX PSU bracket"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 4.33,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Fits standard rack mounting points.",
+   "look": "ok",
+   "lookNote": "Vertical mounting cradle holding a standard TFX power supply.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2129399",
+   "new": true,
+   "what": "Flip-down 10-inch tablet holder for Home Assistant dashboard",
+   "url": "https://makerworld.com/en/models/2129399",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 10 walls, 15% infill",
+     "plates": null,
+     "prints": "flip-down tablet mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for Lab Rax 10\" server rack.",
+   "look": "ok",
+   "lookNote": "Hinged front bracket holding a tablet that flips down for access behind it.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2270658",
+   "new": true,
+   "what": "Mac Pro cheese-grater style vented top horizontal edge panel",
+   "url": "https://makerworld.com/en/models/2270658",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - Bolted Version - 5U (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.08mm layer, 6 walls, 15% infill",
+     "plates": null,
+     "prints": "cheese-grater vented horizontal edge"
+    }
+   ],
+   "choices": [],
+   "attaches": "top",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Remix of mklements bolted Lab Rax vented edge panel.",
+   "look": "ok",
+   "lookNote": "Horizontal edge piece featuring recessed 3D hemispherical ventilation perforations.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2223974",
+   "new": true,
+   "what": "1U 5.25-inch drive offset bay with adjustable depth",
+   "url": "https://makerworld.com/en/models/2223974",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.24mm layer, 4 walls, 15% infill",
+     "plates": null,
+     "prints": "1U 5.25\" offset drive bay"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for Lab Rax ITX and dual-GPU builds.",
+   "look": "ok",
+   "lookNote": "1U bracket with slotted side rails allowing depth adjustment for a 5.25\" optical or tray drive.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2098309",
+   "new": true,
+   "what": "Clip-on Labrador silhouette logo badges for top vent edge",
+   "url": "https://makerworld.com/en/models/2098309",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Custom sign plate for Lab Rax top vent piece (NK)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "11 badge variants"
+    }
+   ],
+   "choices": [
+    "badge text/style: Mini Lab, Home Lab, silhouette themes"
+   ],
+   "attaches": "top",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Fits on Lab Rax top vent piece.",
+   "look": "ok",
+   "lookNote": "Small rectangular badge snapping into the front top vent piece.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2209689",
+   "new": true,
+   "what": "2U mount for IKEA TIMMERFLOTTE temperature and humidity sensor",
+   "url": "https://makerworld.com/en/models/2209689",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "2U TIMMERFLOTTE mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed as part of the Lab Rax series.",
+   "look": "ok",
+   "lookNote": "2U faceplate with custom cutout holding an IKEA TIMMERFLOTTE sensor display.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2825593",
+   "new": true,
+   "what": "Minimalist 1U air vent panel with angled airflow slats",
+   "url": "https://makerworld.com/en/models/2825593",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "1U smart air vent mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Originally made to fit Lab Rax series.",
+   "look": "ok",
+   "lookNote": "1U cover plate with horizontal louvers directing intake/exhaust airflow.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2265170",
+   "new": true,
+   "what": "1U power distribution (WAGO 221-415) and RJ45 keystone panel",
+   "url": "https://makerworld.com/en/models/2265170",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "WAGO 221-415 mount",
+     "plates": null,
+     "prints": "WAGO 221-415 mount bracket"
+    },
+    {
+     "name": "1U Power and network panel improved RJ45",
+     "plates": null,
+     "prints": "1U power distribution and keystone front panel"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for Lab Rax 10\" rack.",
+   "look": "ok",
+   "lookNote": "1U panel holding WAGO 221-415 terminal blocks internally with front RJ45 keystone pass-through.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3091901",
+   "new": true,
+   "what": "Extended depth side panels for micro-ATX builds (1U to 5U)",
+   "url": "https://makerworld.com/en/models/3091901",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 1-5U Posts & Panels (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "JOINED - 0.2mm layer, 2 walls, 6% infill",
+     "plates": null,
+     "prints": "joined multi-unit side panels"
+    },
+    {
+     "name": "PAIR - 0.2mm layer, 2 walls, 6% infill",
+     "plates": null,
+     "prints": "paired panels"
+    },
+    {
+     "name": "SOLO - 0.2mm layer, 2 walls, 6% infill",
+     "plates": null,
+     "prints": "solo unjoined side panels"
+    }
+   ],
+   "choices": [
+    "height: 1U through 5U",
+    "style: Joined, Pair, or Solo"
+   ],
+   "attaches": "side-panel",
+   "sides": "both",
+   "sizes": {
+    "u": 5,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Resized depth for micro-ATX motherboards on Lab Rax.",
+   "look": "ok",
+   "lookNote": "Elongated side panels with mounting holes matching extended mATX rails.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2759795",
+   "new": true,
+   "what": "1U blanking plate with Under Construction debossed text",
+   "url": "https://makerworld.com/en/models/2759795",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "1U Under Construction blank plate"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Made for 10\" server rack.",
+   "look": "ok",
+   "lookNote": "1U blank plate with stylized 'Under Construction' lettering on the front face.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1772080",
+   "new": true,
+   "what": "Top panel with 120mm fan mount, PWM controller and cable boxes",
+   "url": "https://makerworld.com/en/models/1772080",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - Bolted Version - 5U (mklements)",
+    "Lab Rax 10\" Server Rack - 5U (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "P1/X1 0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "PLA profile"
+    },
+    {
+     "name": "PETG - 0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "PETG profile"
+    }
+   ],
+   "choices": [
+    "material: PLA or PETG"
+   ],
+   "attaches": "top",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "Houses a 120mm fan and generic AliExpress PWM fan controller module.",
+   "fitsLabRax": "stated",
+   "fitNote": "Remix of mklements 10\" Lab Rax top panel.",
+   "look": "ok",
+   "lookNote": "Top panel featuring a 120mm fan grill, side cable management boxes, and controller bracket.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2320818",
+   "new": true,
+   "what": "1U 8-port RJ45 keystone patch panel (254x44.5mm)",
+   "url": "https://makerworld.com/en/models/2320818",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "10\" Rack 1U 8-Port network panel",
+     "plates": null,
+     "prints": "8-port keystone panel"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Made for Lab Rax 10 rack (254 x 44.5 x 3 mm).",
+   "look": "ok",
+   "lookNote": "1U flat patch panel with 8 standard keystone jack sockets evenly spaced.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3165049",
+   "new": true,
+   "what": "3U front panel with 120mm fan mount for full micro-ATX rack",
+   "url": "https://makerworld.com/en/models/3165049",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax Full MATX 244x244 mm (9.6\"x9.6\") (Xtian85)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "3U front panel with 120mm fan cutout"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 3,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Modified for full 244x244mm micro-ATX Lab Rax build.",
+   "look": "ok",
+   "lookNote": "3U front panel with a circular cutout and mounting holes for a 120mm cooling fan.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3266286",
+   "new": true,
+   "what": "Power input socket panel with rocker switch and 1 or 2 PoE slots",
+   "url": "https://makerworld.com/en/models/3266286",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "standart with one POE slot",
+     "plates": null,
+     "prints": "1 PoE keystone slot"
+    },
+    {
+     "name": "standart with 2 POE slots",
+     "plates": null,
+     "prints": "2 PoE keystone slots"
+    },
+    {
+     "name": "strong with 2 POE slots",
+     "plates": null,
+     "prints": "reinforced version with 2 PoE slots"
+    }
+   ],
+   "choices": [
+    "keystones: 1 PoE slot or 2 PoE slots",
+    "strength: standard or reinforced"
+   ],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "Fits standard 10A fused rocker switch socket and RJ45 couplers.",
+   "fitsLabRax": "stated",
+   "fitNote": "Designed to fit Lab Rax 10 inch.",
+   "look": "ok",
+   "lookNote": "1U panel holding an IEC power socket with fuse/switch and RJ45 keystone passthroughs.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2791792",
+   "new": true,
+   "what": "2U blanking panel with Under Construction debossed text",
+   "url": "https://makerworld.com/en/models/2791792",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 4 walls, 20% infill",
+     "plates": null,
+     "prints": "2U Under Construction plate"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for 10\" server racks.",
+   "look": "ok",
+   "lookNote": "2U blank plate with bold 'Under Construction' lettering on the front.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3221960",
+   "new": true,
+   "what": "2U compact mini Lab Rax edge posts with captive nut slots",
+   "url": "https://makerworld.com/en/models/3221960",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - 5U (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "2U edge pieces with nut holders"
+    }
+   ],
+   "choices": [],
+   "attaches": "posts",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Remix of mklements 10\" Lab Rax for 2U mini builds.",
+   "look": "ok",
+   "lookNote": "Short 2U vertical edge posts with hexagonal captive nut pockets.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2331247",
+   "new": true,
+   "what": "Tall continuous edge posts (6U, 7U, 8U, 9U) for bolted frame",
+   "url": "https://makerworld.com/en/models/2331247",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - Bolted Version - 5U (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "continuous 6U-9U edge posts"
+    }
+   ],
+   "choices": [
+    "height: 6U, 7U, 8U, or 9U continuous post"
+   ],
+   "attaches": "posts",
+   "sizes": {
+    "u": 9,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Remix of mklements bolted Lab Rax for large print beds.",
+   "look": "ok",
+   "lookNote": "Single continuous tall vertical corner posts without horizontal joiners.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3162177",
+   "new": true,
+   "what": "5U side panel with hex pattern ventilation cutouts",
+   "url": "https://makerworld.com/en/models/3162177",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - 5U (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "5U hex pattern side panel"
+    }
+   ],
+   "choices": [],
+   "attaches": "side-panel",
+   "sides": "both",
+   "sizes": {
+    "u": 5,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for Lab Rax 10\" Server Rack.",
+   "look": "ok",
+   "lookNote": "5U flat side panel with uniform hexagonal ventilation mesh cutout.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2305469",
+   "new": true,
+   "what": "1U cooling panel for four 40x40mm fans (M3 or M4 screw options)",
+   "url": "https://makerworld.com/en/models/2305469",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "10\" Rack 1U Ventilator panel M3 screws",
+     "plates": null,
+     "prints": "M3 screws (3.2mm hole)"
+    },
+    {
+     "name": "10\" Rack 1U Ventilator panel M4 screws",
+     "plates": null,
+     "prints": "M4 screws (4.2mm hole)"
+    }
+   ],
+   "choices": [
+    "screw size: M3 (3.2mm hole) or M4 (4.2mm hole)"
+   ],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Used for Lab Rax 10 rack (254 x 44.5 x 3 mm).",
+   "look": "ok",
+   "lookNote": "1U front panel with 4 circular fan cutouts and screw mounting holes for 40mm fans.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2336067",
+   "new": true,
+   "what": "Top corner piece with integrated keystone patch panel",
+   "url": "https://makerworld.com/en/models/2336067",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 4 walls, 15% infill",
+     "plates": null,
+     "prints": "keystone top corner panel"
+    }
+   ],
+   "choices": [],
+   "attaches": "top",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Fits original model with heat inserts without modification to save 1U.",
+   "look": "ok",
+   "lookNote": "Top horizontal frame edge with built-in keystone sockets.",
+   "confidence": "page"
   }
  ]
 }

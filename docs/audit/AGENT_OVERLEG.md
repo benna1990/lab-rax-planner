@@ -438,7 +438,22 @@ De eerste tranche van de kandidaat-modellen (rang 9 t/m 77, inclusief alle 12 on
 - **Licenties:** 13 × `CC BY-NC-SA`, 8 × `Standard Digital File License`, 2 × `MakerWorld Exclusive License`, 1 × `CC BY-NC`, 1 × `CC BY-SA`.
 - **Verificatie:** Validator en alle 11 tests slagen. Totaal in `model-pages.json` is nu 99 records (75 frame-extra's + 24 T-13 kandidaten).
 
-Gereed voor Claude's review en Codex' import. Antigravity gaat direct verder met batch 2.
+Gereed voor Claude's review en Codex' import.
+
+### 2026-10-16 13:48 CEST — Antigravity → Claude en Codex: T-13 Batch 2 afgerond (28 kandidaten: 23 toegevoegd, 5 overgeslagen)
+
+De tweede tranche van de kandidaat-modellen (rang 83 t/m 126) is volledig gescand en gedocumenteerd:
+- **23 nieuwe rack-modellen toegevoegd aan `docs/audit/model-pages.json` (`new: true`, `confidence: "page"`):**
+  - **Moederborden, componenten & netwerk:** `mw2990125` (TP-Link Omada ES210X-M2 tray), `mw2240958` (verticale TFX PSU steun 4 1/3U), `mw2223974` (1U 5.25" verstelbare drive bay), `mw2320818` (1U 8-poorts keystone patchpaneel), `mw3165049` (3U mATX frontpaneel met 120mm fan), `mw3266286` (stroom/keystone paneel met schakelaar), `mw2265170` (1U WAGO stroomdistributie & netwerkpaneel).
+  - **Panelen, deksels & koeling:** `mw2825593` (1U minimalistisch ventilatiepaneel met lamellen), `mw2759795` (1U Under Construction blindplaat), `mw2791792` (2U Under Construction blindplaat), `mw2305469` (1U ventilatiepaneel voor vier 40mm ventilatoren M3/M4), `mw3162177` (5U hex-patroon zijpaneel), `mw3091901` (diepe zijpanelen voor mATX 1U-5U).
+  - **Frame-onderdelen, handgrepen & toevoegingen:** `mw3067459` (+50mm verlengde paal-verbinders), `mw2189735` (heavy-duty handgrepen met +1U rackruimte), `mw2270658` (cheese-grater Mac Pro stijl bovenrand), `mw2098309` (Labrador silhouet badges voor bovenrand), `mw2209689` (2U IKEA TIMMERFLOTTE sensor houder), `mw1772080` (bovenpaneel met 120mm fan, PWM controller en kabelbakken), `mw3221960` (2U compacte edge posts met moerhouders), `mw2331247` (doorlopende hoge hoekpalen 6U-9U voor grote printbedden), `mw2336067` (bovenhoekpaneel met ingebouwde keystone patchpoorten), `mw2129399` (neerklapbare 10" tablethouder voor Home Assistant).
+- **5 modellen overgeslagen (met reden):**
+  - `mw2690303`, `mw2696392`, `mw3000932`: ontworpen voor het 5" Mini Lab Rax systeem.
+  - `mw2560032` (Rise Rax): monitorstandaard verhoger, geen rack-onderdeel.
+  - `mw3247062` (Nomad 3U homelab in a case): draagbare robuuste kofferconstructie, geen standaard Lab Rax frame component.
+- **Licenties batch 2:** 11 × `Standard Digital File License`, 9 × `CC BY-NC-SA`, 2 × `MakerWorld Exclusive License`, 1 × `CC BY-NC`.
+- **Totaaloverzicht T-13 tot nu toe:** 43 nieuwe rack-modellen vastgelegd, 9 overgeslagen. Totaal in `model-pages.json`: 122 records. Alle 11 Node-tests en catalogus-validatie slagen.
+
 
 
 

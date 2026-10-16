@@ -818,6 +818,51 @@ First tranche of candidate models from `docs/audit/model-candidates.json` inspec
 - 1 × `CC BY-NC`
 - 1 × `CC BY-SA`
 
-Validation and tests: `node tools/validate.mjs` and all 11 test suites pass without regressions. Ready for Claude review and Codex import into `catalog.json`. Antigravity continues with candidate batch 2.
+Validation and tests: `node tools/validate.mjs` and all 11 test suites pass without regressions. Ready for Claude review and Codex import into `catalog.json`.
+
+### Antigravity — T-13 Batch 2: 28 Candidate Models Inspected (23 Added, 5 Skipped), 16 October 2026
+
+Second tranche of candidate models from `docs/audit/model-candidates.json` inspected (covering ranks 83 through 126):
+
+**23 Rack parts documented in `docs/audit/model-pages.json` (`new: true`, `confidence: "page"`):**
+1. `mw3067459` (Rank 86): +50mm extended post joiner bracket for deeper racks (`CC BY-NC-SA`).
+2. `mw2990125` (Rank 87): Rack mount tray for TP-Link Omada ES210X-M2 switch (`CC BY-NC-SA`).
+3. `mw2189735` (Rank 91): Heavy duty top carry handles with +1U rack mounting (`MakerWorld Exclusive License`). Options for M6 inserts or hex nuts.
+4. `mw2240958` (Rank 92): Vertical mount bracket for TFX power supply units, 4 1/3U (`Standard Digital File License`).
+5. `mw2129399` (Rank 93): Flip-down 10-inch tablet holder for Home Assistant dashboard (`CC BY-NC-SA`).
+6. `mw2270658` (Rank 94): Mac Pro cheese-grater style vented top horizontal edge panel (`CC BY-NC-SA`).
+7. `mw2223974` (Rank 95): 1U 5.25-inch drive offset bay with adjustable depth (`CC BY-NC`).
+8. `mw2098309` (Rank 96): Clip-on Labrador silhouette logo badges for top vent edge (`CC BY-NC-SA`). 11 badge variants.
+9. `mw2209689` (Rank 97): 2U mount for IKEA TIMMERFLOTTE temperature and humidity sensor (`CC BY-NC-SA`).
+10. `mw2825593` (Rank 99): Minimalist 1U air vent panel with angled airflow slats (`Standard Digital File License`).
+11. `mw2265170` (Rank 102): 1U power distribution (WAGO 221-415) and RJ45 keystone panel (`Standard Digital File License`).
+12. `mw3091901` (Rank 104): Extended depth side panels for micro-ATX builds, 1U to 5U (`CC BY-NC-SA`).
+13. `mw2759795` (Rank 105): 1U blanking plate with "Under Construction" debossed text (`Standard Digital File License`).
+14. `mw1772080` (Rank 106): Top panel with 120mm fan mount, PWM controller bracket and cable boxes (`CC BY-NC-SA`).
+15. `mw2320818` (Rank 113): 1U 8-port RJ45 keystone patch panel (`Standard Digital File License`).
+16. `mw3165049` (Rank 114): 3U front panel with 120mm fan mount for full micro-ATX rack (`CC BY-NC-SA`).
+17. `mw3266286` (Rank 115): Power input socket panel with rocker switch and 1 or 2 PoE slots (`Standard Digital File License`).
+18. `mw2791792` (Rank 116): 2U blanking panel with "Under Construction" debossed text (`Standard Digital File License`).
+19. `mw3221960` (Rank 117): 2U compact mini Lab Rax edge posts with captive nut slots (`MakerWorld Exclusive License`).
+20. `mw2331247` (Rank 118): Tall continuous edge posts (6U, 7U, 8U, 9U) for bolted frame on large beds (`CC BY-NC-SA`).
+21. `mw3162177` (Rank 119): 5U side panel with hex pattern ventilation cutouts (`Standard Digital File License`).
+22. `mw2305469` (Rank 124): 1U cooling panel for four 40x40mm fans, M3 or M4 screw options (`Standard Digital File License`).
+23. `mw2336067` (Rank 126): Top corner piece with integrated keystone patch panel (`Standard Digital File License`).
+
+**5 Non-rack / incompatible models skipped (with reasons):**
+- `mw2690303` (Rank 83): "Mini Lab Rax TPLink SG105 Mount" by Technology&Toys — Skipped: for 5-inch Mini Lab Rax.
+- `mw2696392` (Rank 107): "Mini Lab Rax 2.5\" Drive Brackets" by Technology&Toys — Skipped: for 5-inch Mini Lab Rax.
+- `mw2560032` (Rank 108): "Rack System Modular 4x2U stackable to expand" ("Rise Rax") by Daniel007 — Skipped: desk monitor riser system, not Lab Rax frame parts.
+- `mw3000932` (Rank 123): "MINI Lab Rax Rack for 2 RJ45 extender cables" by Kyxie — Skipped: for 5-inch Mini Lab Rax.
+- `mw3247062` (Rank 122): "Portable Offline Internet - 3U Homelab In A Case" by mklements — Skipped: portable rugged briefcase chassis, not a standard Lab Rax frame part.
+
+**License breakdown across Batch 2 (23 records):**
+- 11 × `Standard Digital File License`
+- 9 × `CC BY-NC-SA`
+- 2 × `MakerWorld Exclusive License`
+- 1 × `CC BY-NC`
+
+**Running total for T-13:** 43 new rack parts documented in `model-pages.json`, 9 models skipped. Total records in `model-pages.json` is now 122 (75 frame-extras + 47 new candidates). All test suites pass.
+
 
 
