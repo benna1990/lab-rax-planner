@@ -23,6 +23,7 @@ function checks(f) {
   if (f.profileMismatches?.length) add('profile-frame', 5, 'warn', 'Print profile does not match the frame', f.profileMismatches.join('; ') + '. Choose Automatic to match the frame, or check the model page before printing.', { act: 'go-step', step: 2, label: 'Review profiles' });
   // 1 rack and 5 print
   if (!f.printer) add('printer', 1, 'todo', 'Pick your 3D printer', 'Then the planner checks that every part fits your print bed.', { act: 'go-printer', label: 'Pick printer' });
+  else if (f.printer.smallBed) add('printer', 5, 'warn', 'The printer bed is too small for 10-inch panels', 'A panel about 254 mm wide does not fit this bed, even diagonally. Use a 256 mm bed, a print service or verified split models.', { act: 'go-step', step: 5, label: 'Review prints' });
   else if (f.printer.bad) add('printer', 5, 'warn', plural(f.printer.bad, 'print is', 'prints are') + ' too big for your ' + f.printer.name, 'Use a variant made for smaller beds, split the part, or print it elsewhere.', { act: 'go-step', step: 5, label: 'Show prints' });
   else add('printer', 1, 'ok', 'Every print fits your ' + f.printer.name + (f.printer.turned ? ' (some only diagonally)' : ''));
   // 3 connect
@@ -31,7 +32,7 @@ function checks(f) {
   else if (c.level === 'warm') add('cooling', 3, 'warn', 'Warm inside: about ' + Math.round(c.maxT) + ' °C', 'Within limits but warm. A fan panel or a vented top keeps the parts cooler and longer-lived.', { act: 'go-step', step: 3, label: 'See cooling' });
   else if (c.level === 'cool') add('cooling', 3, 'ok', 'Cooling: about ' + Math.round(c.maxT) + ' °C inside');
   const short = (f.power || []).filter(x => x.level === 'short');
-  if (short.length) short.forEach((x, i) => add('power' + i, 3, 'warn', x.text, '', { act: 'go-step', step: 3, label: 'See power' }));
+  if (short.length) short.forEach((x, i) => add('power' + i, 3, 'warn', x.text, '', i === 0 && f.adapterFix ? { act: 'poe-on', ref: f.adapterFix, label: 'Use its own USB-C supply' } : { act: 'go-step', step: 3, label: 'See power' }));
   else if (f.parts) add('power', 3, 'ok', 'Power, PoE and network ports add up');
   // 4 what is still an estimate
   if (f.noHardware) add('hardware', 5, 'info', plural(f.noHardware, 'part doesn’t', 'parts don’t') + ' list their own hardware', 'Besides the panel screws they may need screws, nuts or magnets of their own; the shopping list can’t count those, so check their model pages.');

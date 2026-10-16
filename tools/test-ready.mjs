@@ -47,3 +47,9 @@ c = run({ profileMismatches: ['Side handles · Only XL Bolted Parts'] });
 assert.equal(c.find(x => x.id === 'profile-frame').state, 'warn');
 assert.match(c.find(x => x.id === 'profile-frame').why, /Only XL Bolted Parts/);
 assert.ok(!run({ profileMismatches: [] }).some(x => x.id === 'profile-frame'));
+
+c = run({ printer: { name: 'A1 mini', smallBed: true, bad: 10 } });
+assert.equal(c.filter(x => x.id === 'printer').length, 1);
+assert.match(c.find(x => x.id === 'printer').why, /254 mm/);
+c = run({ power: [{ level: 'short', text: 'Pi has no PoE source' }], adapterFix: 'i2' });
+assert.equal(c.find(x => x.id === 'power0').fix.act, 'poe-on');

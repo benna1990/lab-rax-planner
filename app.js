@@ -293,6 +293,15 @@ function addItem(obj, pos) {
 // the lowest rack height, up to 10U, with a free slot of h2 half-units on a side; null when even 10U has none
 const heightFor = (h2, side) => LY.heightFor(rackCtx(), h2, side || rackSide, 10);
 const freeSlots = side => LY.freeSlots(rackCtx(), side);
+function openSpace(side) {
+  const sd = side || rackSide, gaps = LY.gaps(rackCtx(), sd), key = blankKeys()[1];
+  const usable = [], blocked = [];
+  for (const gap of gaps) for (let p = gap.pos2; p < gap.pos2 + gap.h2; p++) (halfFits(key, p, sd) ? usable : blocked).push(p);
+  let largest = 0;
+  for (let h2 = 1; h2 <= slots(); h2++) if (firstClear(h2 === 1 ? { key } : { key: 'custom', h2, name: 'Open space' }, h2, sd) != null) largest = h2;
+  const text = usable.length ? fmtU(usable.length) + ' usable open (largest aligned gap ' + fmtU(largest) + ')' : 'no usable open slots';
+  return { usable: usable.length, blocked, text: text + (blocked.length ? '; ' + fmtU(blocked.length) + ' reserved for panel clearance' : '') };
+}
 // the first free slot where the part fits physically; otherwise ask before changing the build
 function firstClear(obj, h2, sd) {
   for (let p = 0; p + h2 <= slots(); p++) if (isFree(p, h2, undefined, sd)) { const o = Object.assign({ id: -1 }, obj, { pos2: p, side: sd }); if (!clashes(o).length && !overlaps(o).length) return p; }
@@ -336,7 +345,7 @@ function askUser(title, text, buttons) {
 async function noRoom(d, sd, place, placeOther, probe) {
   const name = fullName(d) + ' (' + fmtU(d.h2) + ')', free = freeSlots(sd), other = sd === 'back' ? 'front' : 'back';
   const grow = probe ? heightForPhysical(probe, sd) : heightFor(d.h2, sd), spread = !probe && free >= d.h2; // enough room in total, but not in one piece
-  const where = probe && firstFree(d.h2, sd) != null ? 'The available slots overlap neighbouring panels or run into parts on the other side.' : 'The ' + sd + ' of this ' + state.h + 'U rack has ' + (free ? fmtU(free) + ' free' + (spread ? ', but not in one piece' : '') : 'no free slots') + '.';
+  const where = probe && firstFree(d.h2, sd) != null ? 'The available slots overlap neighbouring panels or run into parts on the other side.' : 'The ' + sd + ' of this ' + state.h + 'U rack has ' + openSpace(sd).text + '.';
   say('No room for ' + name + ' at the ' + sd + '.');
   if (spread && packHelps(d.h2, sd)) {
     const v = await askUser('Move parts together?', name + ' doesn’t fit in one gap. ' + where + ' Sliding the parts at the ' + sd + ' up against each other makes one gap at the bottom.', [['', 'Cancel']].concat(grow ? [['grow', 'Make it ' + grow + 'U']] : [], [['pack', 'Move parts together', 'primary']]));
@@ -638,6 +647,7 @@ function renderRack() {
   let items = '';
   // the Back view shows the panels on the rear posts, seen from behind; the Front and Airflow views the front ones
   const rear = view === 'back';
+  for (const p of openSpace(rear ? 'back' : 'front').blocked) items += '<div aria-label="Panel clearance: unusable half-U gap" title="Reserved for the neighbouring panel clearance" style="position:absolute;pointer-events:none;left:0;right:0;top:' + (p * HU).toFixed(1) + 'px;height:' + HU.toFixed(1) + 'px;background:repeating-linear-gradient(135deg,transparent,transparent 5px,#b4773b55 5px,#b4773b55 8px)"></div>';
   onSide(rear ? 'back' : 'front').forEach(it => {
     // no text on the panels, so the faces show what is placed; the name is in the tooltip and the aria-label
     const d = info(it), c = colorOf(it), clash = clashes(it).length > 0, over = overlaps(it)[0], [py, ph] = plateBox(it, d);
@@ -850,6 +860,10 @@ function bedText(r, short) { // a print-list row's pieces that don't fit the bed
   return [r.bad.length ? (short ? 'Too big: ' : 'Too big for your printer: ') + names(r.bad) + '.' : '', r.turned.length ? (short ? 'Only diagonally: ' : 'Fits only diagonally: ') + names(r.turned) + '.' : ''].filter(Boolean).join(' ');
 }
 const bedBad = pk => pk.filter(x => x.bed && x.bed.bad.length);
+function smallBedHint() {
+  const b = bedPrinter();
+  return b && window.LRPrinters.fitRect(254, DIMS.u, b.w, b.d) === 0 ? '<p class="wz-warn">10-inch panels need about 254 mm across the bed. Your bed cannot fit that even diagonally. Use a 256 mm bed, a print service, or source-confirmed split models; the planner cannot automatically substitute unverified splits.</p>' : '';
+}
 function printerPicker(px) { // the printer select, and the bed size when it's your own
   const pr = ui.printer || {}, L = window.LRPrinters, custom = pr.id === 'custom';
   return '<span class="bedset"><select class="field pr-sel" id="' + px + '-printer" aria-label="Your 3D printer"><option value="">' + (px === 'wz' ? 'Skip for now' : 'Pick your printer to check the bed') + '</option>' +
@@ -1511,9 +1525,10 @@ function readyFacts(pk) {
   const pl = placed(), cl = pl.filter(i => clashes(i).length), ov = pl.filter(i => overlaps(i).length), a = airflow();
   return {
     parts: pl.length, unplaced: state.items.length - pl.length, clashes: cl.length, clashId: cl[0] && cl[0].id, overlaps: ov.length, overlapId: ov[0] && ov[0].id,
-    printer: pk.printer ? { name: bedName(pk.printer), bad: bedBad(pk).length, turned: pk.some(x => x.bed && x.bed.turned.length) } : null,
+    printer: pk.printer ? { name: bedName(pk.printer), smallBed: window.LRPrinters.fitRect(254, DIMS.u, pk.printer.w, pk.printer.d) === 0, bad: bedBad(pk).length, turned: pk.some(x => x.bed && x.bed.turned.length) } : null,
     cooling: { level: !a.Q ? 'none' : a.maxT <= RATED[0] ? 'cool' : a.maxT <= RATED[1] ? 'warm' : 'hot', maxT: a.maxT },
     power: window.LRPower.issues(powerModel()), estimated: pl.filter(i => info(i).est).length, noHardware: noHardwareParts().length,
+    adapterFix: powerModel().rows.find(x => x.on && /raspberry|\bpi ?[45]\b/i.test(x.name) && powerModel().poe.unpowered.some(p => p.ref === x.ref))?.ref,
     profileMismatches: [...pl.map(info), ...state.extras.map(catalogPart), state.top && catalogPart(state.top), bottomPart()].filter(d => d && d.optionFrame && d.optionFrame !== state.version).map(d => fullName(d)),
     market: (window.LRMarket.regions[state.market] || {}).name
   };
@@ -1523,7 +1538,7 @@ function readyHTML(pk) {
   const s = window.LRReady.summary(READY), order = { warn: 0, todo: 1, info: 2, ok: 3 }, icon = { warn: '!', todo: '○', info: 'i', ok: '✓' };
   const head = s.ready ? 'Ready to build' : [s.warn ? s.warn + (s.warn > 1 ? ' problems' : ' problem') : '', s.todo ? s.todo + (s.todo > 1 ? ' things' : ' thing') + ' to do' : ''].filter(Boolean).join(' · ');
   const fix = c => !c.fix ? '' : c.fix.act === 'go-country' ? '<select class="field mini" id="ready-market" aria-label="Country for the shop links">' + Object.entries(window.LRMarket.regions).map(([k, r]) => '<option value="' + k + '"' + (state.market === k ? ' selected' : '') + '>' + esc(r.name) + '</option>').join('') + '</select>'
-    : '<button type="button" class="btn small" data-act="' + c.fix.act + '"' + (c.fix.step ? ' data-step="' + c.fix.step + '"' : '') + (c.fix.id != null ? ' data-id="' + c.fix.id + '"' : '') + '>' + esc(c.fix.label) + '</button>';
+    : '<button type="button" class="btn small" data-act="' + c.fix.act + '"' + (c.fix.step ? ' data-step="' + c.fix.step + '"' : '') + (c.fix.id != null ? ' data-id="' + c.fix.id + '"' : '') + (c.fix.ref ? ' data-ref="' + esc(c.fix.ref) + '" data-v="0"' : '') + '>' + esc(c.fix.label) + '</button>';
   return '<section class="ready' + (s.ready ? ' ok' : '') + '" id="ready" aria-labelledby="ready-h"><h3 id="ready-h"><span class="rdot" aria-hidden="true"></span>' + esc(head) + '</h3>' +
     '<p class="hint">' + (s.ready ? 'Everything checks out. The notes below are what the planner can’t confirm for you.' : 'What still stands between this plan and a rack you can build.') + '</p>' +
     '<ul class="rlist">' + READY.slice().sort((x, y) => order[x.state] - order[y.state]).map(c => '<li class="rk rk-' + c.state + '"><span class="rki" aria-hidden="true">' + icon[c.state] + '</span><div class="rkt"><b>' + esc(c.title) + qm(TERM_OF[c.id] || (/^power\d/.test(c.id) ? 'poe' : '')) + '</b>' + (c.why ? '<small>' + esc(c.why) + '</small>' : '') + '</div>' + fix(c) + '</li>').join('') + '</ul>' +
@@ -1557,7 +1572,7 @@ function renderBuild() {
   if (!CAT) return;
   const h = state.h, used = onSide(rackSide).reduce((n, i) => n + H(i), 0), free = slots() - used, fp = frameParts(), br = state.version === 'brass';
   const pk = printPack(), done = pk.filter(x => state.done[x.k]).length, count = placed().length + (state.top ? 1 : 0);
-  let html = '<div><h2 class="title">Your build</h2><span class="muted">' + h + 'U · ' + count + (count === 1 ? ' part · ' : ' parts · ') + (free ? fmtU(free) + ' open' : 'no open slots') + '</span></div>' + readyHTML(pk);
+  let html = '<div><h2 class="title">Your build</h2><span class="muted">' + h + 'U · ' + count + (count === 1 ? ' part · ' : ' parts · ') + esc(openSpace(rackSide).text) + '</span></div>' + readyHTML(pk);
 
   const rowAir = {}, ra = url => rowAir[url] || (rowAir[url] = { w: 0, est: false, fans: [] }); // heat and fans per model page
   byPos().forEach(i => { const d = info(i), hw = heatOf(i); if (d.url && hw.w) { const r = ra(d.url); r.w += hw.w; r.est = r.est || hw.est; } });
@@ -1619,7 +1634,7 @@ function listText() {
   L.push((state.h * P.U).toFixed(1) + ' mm inner height · ' + DIMS.clearWidth + ' mm usable width', '', 'Layout (top to bottom)');
   if (state.top) L.push('  top     ' + fullName(catalogPart(state.top)));
   onSide('front').forEach(i => { const d = info(i); L.push('  ' + uRange(i.pos2, d.h2).padEnd(8) + (i.label ? '[' + i.label + '] ' : '') + fullName(d) + ' (' + uTxt(d) + ')'); });
-  const used = onSide('front').reduce((n, i) => n + H(i), 0); if (slots() - used > 0) L.push('  Open: ' + fmtU(slots() - used));
+  const used = onSide('front').reduce((n, i) => n + H(i), 0); if (slots() - used > 0) L.push('  Open: ' + openSpace('front').text);
   if (onSide('back').length) { L.push('', 'Back (top to bottom)'); onSide('back').forEach(i => { const d = info(i); L.push('  ' + uRange(i.pos2, d.h2).padEnd(8) + (i.label ? '[' + i.label + '] ' : '') + fullName(d) + ' (' + uTxt(d) + ')'); }); }
   L.push('', 'Frame', '- Vertical posts: ' + fp.posts); if (fp.joiners) L.push('- Post joiners: 4');
   L.push('- Side panels: ' + fp.sides + (state.sides === 'acrylic' ? ' (3 mm acrylic)' : ''), '- Horizontal pieces: 4', '- Edge pieces: 4', '- Handles · feet: 2 · 4', '- Bottom: ' + bottomName(), state.top ? '- Top: ' + fullName(catalogPart(state.top)) + '\n- Bottom panel: 1' : '- Top + bottom panel: 1 + 1');
@@ -1769,7 +1784,7 @@ function pdfData() {
     top: state.top ? fullName(catalogPart(state.top)) : null, topLook: state.top ? LS.topFor(catalogPart(state.top), colorsFor()) : null, // the top mount as drawn above the frame
     items: byPos().map(i => { const d = info(i); return { pos: uRange(i.pos2, d.h2) + atBack(i), pos2: i.pos2, h2: d.h2, name: fullName(d), label: i.label || '', u: uTxt(d), url: d.url || '', author: d.author || '', color: colorOf(i), face: faceSVG(d, colorOf(i), upperHalf(i)), plate: plateBox(i, d), depth: partDepth(i), back: sideOf(i) === 'back' }; }),
     print: pk.map(x => ({ qty: x.qty, name: x.name, sub: x.subs.join(', '), vars: x.variants, url: x.url, bed: bedText(x.bed, true), bad: !!(x.bed && x.bed.bad.length) })),
-    printer: pk.printer ? { name: bedName(pk.printer), bad: bedBad(pk).length, turned: pk.some(x => x.bed && x.bed.turned.length), est: pk.some(x => x.bed && [...x.bed.bad, ...x.bed.turned].some(q => q.est)) } : null, shop: orderList(), guide: guide(), estimate: buildEstimate(), market: state.market, wallMounts: state.extras.filter(k => catalogPart(k).shape && catalogPart(k).shape.wall).map(k => ({ name: fullName(catalogPart(k)), url: catalogPart(k).url })), sides: state.sides, dimensions: DIMS, shareUrl: TOP_WIN ? shareLink() + '&s=shop' : null, frameParts: frameParts(), notes: state.h > 5 ? [JOINER_NOTE] : [],
+    printer: pk.printer ? { name: bedName(pk.printer), smallBed: window.LRPrinters.fitRect(254, DIMS.u, pk.printer.w, pk.printer.d) === 0, bad: bedBad(pk).length, turned: pk.some(x => x.bed && x.bed.turned.length), est: pk.some(x => x.bed && [...x.bed.bad, ...x.bed.turned].some(q => q.est)) } : null, shop: orderList(), guide: guide(), estimate: buildEstimate(), market: state.market, wallMounts: state.extras.filter(k => catalogPart(k).shape && catalogPart(k).shape.wall).map(k => ({ name: fullName(catalogPart(k)), url: catalogPart(k).url })), sides: state.sides, dimensions: DIMS, shareUrl: TOP_WIN ? shareLink() + '&s=shop' : null, frameParts: frameParts(), notes: state.h > 5 ? [JOINER_NOTE] : [],
     cooling: pdfCooling(), power: pdfPower(), shareUrl: TOP_WIN ? shareLink() + '&s=shop' : null }; // the QR code opens this layout with its shopping list
 }
 function pdfPower() { // the Power & network block for the PDF; null when nothing draws power or needs a port
@@ -1889,30 +1904,28 @@ function wzDevices() { // every device with at least one front mount, flattened
 }
 // the mount to suggest: one for this device alone (not a combination with other gear), then made for Lab Rax, a known height, the lowest
 const combo = m => /\+|together|with .*(switch|router|kvm|zero|nas)/i.test(m.label);
-const bestMount = dev => dev.mounts.slice().sort((a, b) => (combo(a) - combo(b)) || (!!b.labrax - !!a.labrax) || (!!a.estimated - !!b.estimated) || (a.u - b.u))[0].id;
-function lowestFree(h2, side) { for (let p = slots() - h2; p >= 0; p--) if (isFree(p, h2, undefined, side || 'front')) return p; return null; }
+const mountAddon = m => {
+  const d = LIB[m.id], p = powerOf(d);
+  return !!m.needs?.length || modsOf(d).some(x => x.hat) || !!m.poeIn || !!(p.poeIn && !p.poeIn.optional);
+};
+const bestMount = dev => dev.mounts.slice().sort((a, b) => (mountAddon(a) - mountAddon(b)) || (combo(a) - combo(b)) || (!!b.labrax - !!a.labrax) || (!!a.estimated - !!b.estimated) || (a.u - b.u))[0].id;
+
+function lowestFree(h2, side) { for (let p = slots() - h2; p >= 0; p--) if (isFree(p, h2, undefined, side || 'front') && !overlaps({ id: -1, key: 'fan40', pos2: p, side: side || 'front' }).length) return p; return null; }
 function planLayout(w) {
-  const look = PRESETS[w.preset], half = w.fans === 'none' || !LIB.mw1385541 ? 'vent05' : 'mw1385541', list = [], items = [];
+  const look = PRESETS[w.preset], list = [], items = [];
   if (w.patch && LIB.keystone) list.push({ key: 'keystone', role: 0 });
   w.picks.forEach(p => { for (let i = 0; i < p.qty; i++) list.push({ key: p.mount, role: roleOf(p.group) }); });
   if (w.power && LIB.mw2010724) list.push({ key: 'mw2010724', role: 9 });
   list.sort((a, b) => a.role - b.role);
-  let p = 0, id = 1, prevHot = false;
+  let p = 0, id = 1;
   const put = (key, at) => {
     const it = { id: id++, key, pos2: at }, h2 = LIB[key].h2;
     // Use the editor's alignment and physical panel-overlap rules, including protruding Lab Rax half-U panels.
     while (!LY.aligned(it.pos2, h2) || overlaps(it, items).length) it.pos2++;
     items.push(it); return it.pos2;
   };
-  list.forEach(x => {
-    const h2 = LIB[x.key].h2, hot = heatOf({ key: x.key }).w >= 15;
-    let gap = prevHot && hot ? 1 : 0;                                  // let two warm parts breathe
-    if (h2 > 1 && (p + gap) % 2) gap++;                                // whole-U parts start on a U boundary
-    if (gap === 2 && !(p % 2)) { p = put('vent1', p) + 2; }            // one 1U vent rather than two halves
-    else for (let i = 0; i < gap; i++) { p = put(prevHot && hot ? 'vent05' : half, p) + 1; }
-    p = put(x.key, p) + h2; prevHot = hot;
-  });
-  const cand = Object.assign(defaultState(), { h: Math.min(10, Math.max(1, Math.ceil(p / 2) + w.spare)), version: w.version, sides: w.sides, frame: look[1], panel: look[2], accent: look[3],
+  list.forEach(x => { p = put(x.key, p) + LIB[x.key].h2; });
+  const cand = Object.assign(defaultState(), { h: Math.min(10, Math.max(1, Math.ceil(p / 2))), version: w.version, sides: w.sides, frame: look[1], panel: look[2], accent: look[3],
     label: (w.label || 'Lab Rax').slice(0, 16), top: w.fans === 'top' && LIB.mw1875867 ? 'mw1875867' : null, extras: [], back: 'open', items, nextId: id, example: false, done: {} });
   const keep = state; state = cand;
   try {
@@ -1923,11 +1936,19 @@ function planLayout(w) {
       if (lowestFree(2) == null && state.h < 10) state.h++;
       const q = lowestFree(2); if (q != null) { state.items.push({ id: state.nextId++, key: 'fan40', pos2: q }); a = airflow(); }
     }
-    const [k1, k05] = a.cfm > 0 ? blankKeys() : ['vent1', 'vent05']; // close the rest: blanks with fans, vents without
-    for (let s = 0; s < slots();) { if (isFree(s, 2, undefined, 'front')) { state.items.push({ id: state.nextId++, key: k1, pos2: s }); s += 2; } else if (isFree(s, 1, undefined, 'front') && halfFits(k05, s)) { state.items.push({ id: state.nextId++, key: k05, pos2: s }); s += 1; } else s++; }
+    // Grow space is deliberately empty. Only fill existing internal gaps if the airflow model calls for ventilation.
+    const contentEnd = Math.max(0, ...state.items.filter(i => i.pos2 != null).map(i => i.pos2 + H(i)));
+    const bodyU = Math.max(1, Math.ceil(contentEnd / 2));
+    state.h = Math.min(10, bodyU + w.spare);
+    const ventilation = a.maxT > RATED[0];
+    if (ventilation) for (let q = 0; q < contentEnd; q++) {
+      const h2 = isFree(q, 2, undefined, 'front') && q + 2 <= contentEnd ? 2 : isFree(q, 1, undefined, 'front') ? 1 : 0;
+      const key = h2 === 2 ? 'vent1' : 'vent05';
+      if (h2 && !overlaps({ id: -1, key, pos2: q }, state.items).length) { state.items.push({ id: state.nextId++, key, pos2: q }); q += h2 - 1; }
+    }
     a = airflow();
     const pk = printPack();
-    return { state: cand, a, unplaced: cand.items.filter(i => i.pos2 == null).length, tooBig: bedBad(pk).length, printer: pk.printer };
+    return { state: cand, a, partsH2: list.reduce((n, x) => n + LIB[x.key].h2, 0), bodyU, spareU: state.h - bodyU, ventilation, unplaced: cand.items.filter(i => i.pos2 == null).length, tooBig: bedBad(pk).length, printer: pk.printer };
   } finally { state = keep; }
 }
 function openWizard() {
@@ -1974,7 +1995,7 @@ function renderWizard() {
     wzOption('version', 'Frame', [['brass', 'Heat-set inserts', 'Brass inserts you melt in with a soldering iron. Neat, and the screws go straight in.'], ['bolted', 'Bolted', 'M6 or #10-32 screws with nuts. No inserts, no soldering iron.']]) +
     wzOption('sides', 'Side panels', [['printed', 'Printed', 'Printed with the frame, in the frame colour.'], ['acrylic', 'Acrylic', '3 mm acrylic cut to size, so you can see inside.']]) +
     wzOption('fans', 'Fans', [['auto', 'Only if needed', 'The planner checks the airflow and adds a fan when the rack would get warm.'], ['top', 'Top fan', 'A 120 mm fan in the top panel, blowing out.'], ['none', 'No fans', 'Quiet: vent panels instead of fans.']]) +
-    '<fieldset class="wz-opt"><legend>Printer</legend>' + printerPicker('wz') + '<p class="hint" style="margin-top:6px">The print list then marks parts too big for your bed. Remembered in this browser, not saved with the layout.</p></fieldset>';
+    '<fieldset class="wz-opt"><legend>Printer</legend>' + printerPicker('wz') + '<p class="hint" style="margin-top:6px">The print list then marks parts too big for your bed. Remembered in this browser, not saved with the layout.</p>' + smallBedHint() + '</fieldset>';
   else if (st === 2) body = '<h3 class="wz-h">Give it a name</h3><p class="hint">It goes on the front of the rack, like the Lab Rax logo.</p>' +
     '<input class="field wz-name" id="wz-name" type="text" maxlength="16" value="' + esc(wz.label) + '" placeholder="Lab Rax" aria-label="Rack name">' +
     '<div class="wz-logo" style="--f:' + look[1] + ';--a:' + look[3] + '"><span id="wz-logo">' + esc(wz.label || 'Lab Rax') + '</span></div>';
@@ -1989,6 +2010,9 @@ function renderWizard() {
     const r = planLayout(wz), a = r.a, lvl = airLevel(a)[0].toLowerCase(), s = r.state;
     body = '<h3 class="wz-h">Your rack</h3><div class="wz-result">' + miniRack(s) + '<div class="wz-sum">' +
       '<p><b>' + s.h + 'U</b> · ' + s.items.filter(i => i.pos2 != null).length + ' parts · ' + (s.version === 'brass' ? 'heat-set inserts' : 'bolted') + ' · ' + s.sides + ' sides</p>' +
+      '<p>' + fmtU(r.partsH2) + ' parts + ' + fmtU(r.bodyU * 2 - r.partsH2) + ' alignment/cooling space + ' + r.spareU + 'U open for growth = ' + s.h + 'U.</p>' +
+      (s.h > 5 ? '<p class="wz-warn">Above 5U: extension side panels and post joiners are needed. Their fasteners are not confirmed; check the extension model.</p>' : '') +
+      '<p class="hint">' + (r.ventilation ? 'Vent panels fill only internal gaps where the airflow estimate calls for ventilation.' : 'No vent fillers added: the airflow estimate does not call for them.') + ' Growth space stays empty.</p>' +
       (a.Q ? '<p>Hottest air ≈ ' + fmtT(a.maxT) + ' in a ' + a.room + ' °C room (' + lvl + ')' + (s.top ? ', with a 120 mm fan in the top' : '') + (s.items.some(i => i.key === 'fan40') ? ' and a fan panel' : '') + '.</p>' : '') +
       (r.tooBig ? '<p class="wz-warn">' + r.tooBig + (r.tooBig > 1 ? ' prints have parts' : ' print has a part') + ' too big for your ' + esc(bedName(r.printer)) + '. The print list shows which.</p>' : '') +
       (r.unplaced ? '<p class="wz-warn">' + r.unplaced + (r.unplaced > 1 ? ' parts don’t' : ' part doesn’t') + ' fit in 10U. Take some hardware out, or place them later.</p>' : '') +

@@ -49,3 +49,5 @@ assert.deepEqual(L.pack(r, 'front'), { 1: 0, 2: 2, 3: 4 });
 assert.deepEqual(L.pack(r, 'back'), { 4: 0 });
 
 console.log('Layout checks passed: alignment, collisions, free and nearest slots, needed height, reorder, pack.');
+
+assert.deepEqual(L.gaps({ slots: 6, items: [{ id: 1, pos2: 1, h2: 1, side: 'front' }, { id: 2, pos2: 4, h2: 2, side: 'front' }] }, 'front'), [{ pos2: 0, h2: 1 }, { pos2: 2, h2: 2 }]);

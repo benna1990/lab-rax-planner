@@ -16,6 +16,15 @@ function nearest(r, t, h2, side, except) {
 }
 function firstFree(r, h2, side) { for (let p = 0; p + h2 <= r.slots; p++) if (isFree(r, p, h2, side)) return p; return null; }
 const freeSlots = (r, side) => r.slots - onSide(r, side).reduce((n, o) => n + o.h2, 0);
+function gaps(r, side) {
+  const out = []; let start = null;
+  for (let p = 0; p <= r.slots; p++) {
+    const free = p < r.slots && isFree(r, p, 1, side);
+    if (free && start == null) start = p;
+    if (!free && start != null) { out.push({ pos2: start, h2: p - start }); start = null; }
+  }
+  return out;
+}
 // the lowest rack height in U, above the current one and up to maxU, with room for h2 at the bottom; null when even maxU has none
 function heightFor(r, h2, side, maxU) {
   for (let u = r.slots / 2 + 1; u <= (maxU || 10); u++) if (firstFree({ slots: u * 2, items: r.items }, h2, side) != null) return u;
@@ -40,5 +49,5 @@ function reorder(r, id, t) {
   const ok = all.every(o => o.p >= 0 && o.p + o.h2 <= r.slots && aligned(o.p, o.h2)) && all.every((o, i) => all.every((q, j) => i === j || q.p >= o.p + o.h2 || o.p >= q.p + q.h2));
   return ok ? pos : null;
 }
-window.LRLayout = { aligned, isFree, nearest, firstFree, freeSlots, heightFor, pack, reorder };
+window.LRLayout = { aligned, isFree, nearest, firstFree, freeSlots, gaps, heightFor, pack, reorder };
 })();

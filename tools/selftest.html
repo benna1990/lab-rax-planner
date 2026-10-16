@@ -131,7 +131,8 @@
       return s.warn === 0 && !/parts overlap/.test($('#ready').textContent) ? T().state.h + 'U, no build warnings' : fail($('#ready').textContent);
     });
     await check('Automatic placement asks before growing instead of overlapping a half-U panel', async () => {
-      const before = JSON.stringify(T().state), count = T().state.items.length;
+      T().setHeight(2);
+      const before = JSON.stringify(T().state), count = T().state.items.length, height = T().state.h;
       if (T().addItem({ key: 'flexmini05' })) fail('overlapping placement was accepted');
       await wait(100);
       if (T().state.items.length !== count || !$('#askdlg').open) fail('build changed before a growth choice');
@@ -140,7 +141,7 @@
       T().addItem({ key: 'flexmini05' }); await wait(100);
       const grow = $('#askdlg button[value="grow"]'); if (!grow) fail('no physical growth proposal');
       grow.click(); await wait(200);
-      return T().state.items.length === count + 1 && T().state.h > 4 && T().ready().warn === 0 ? T().state.h + 'U, added without overlaps; cancel preserves the build' : fail($('#ready').textContent);
+      return T().state.items.length === count + 1 && T().state.h > height && T().ready().warn === 0 ? T().state.h + 'U, added without overlaps; cancel preserves the build' : fail($('#ready').textContent);
     });
     await check('Step jumps keep Print and Export below the sticky header', async () => {
       for (const [step, selector] of [[5, '[data-sec="print"]'], [6, '#export']]) {
@@ -204,6 +205,35 @@
       await wait(100); if (!$('#askdlg[open]')) fail('file did not ask'); $('#askdlg').close(''); await opening; await wait(50);
       if (JSON.stringify(T().state) !== before) fail('cancel file changed rack');
       return 'cancel preserved own rack; accepted link backed it up; restore after reload; file asks';
+    });
+    await check('Three-device wizard stays compact, reserves usable growth and explains small printer limits', async () => {
+      $('[data-act="wizard"]').click();
+      while ($('[data-act="wz-qty"][data-d="-1"]')) $('[data-act="wz-qty"][data-d="-1"]').click();
+      for (const name of ['UCG-Ultra', 'USW-Flex-Mini', 'Raspberry Pi 5']) {
+        $('#wz-q').value = name; $('#wz-q').dispatchEvent(new W.Event('input', { bubbles: true }));
+        const b = [...W.document.querySelectorAll('.wz-dev')].find(b => b.textContent.trim() === '+ ' + name); if (!b) fail(name + ' not found'); b.click();
+      }
+      $('[data-act="wz-next"]').click();
+      const pr = $('#wz-printer'); pr.value = 'a1mini'; pr.dispatchEvent(new W.Event('change', { bubbles: true })); await wait(150);
+      if (!$('#wz-body').textContent.includes('254 mm') || !$('#wz-body').textContent.includes('diagonally')) fail('small-bed warning missing at selection');
+      const clear = $('#wz-printer'); clear.value = ''; clear.dispatchEvent(new W.Event('change', { bubbles: true })); await wait(150);
+      for (let i = 0; i < 3; i++) $('[data-act="wz-next"]').click();
+      if (!$('#wz-body').textContent.includes('open for growth')) fail('height breakdown missing');
+      $('[data-act="wz-create"]').click(); await wait(150);
+      const h = T().state.h;
+      if (h > 6 || T().ready().warn) fail('wizard too tall or has warnings: ' + h + 'U ' + $('#ready').textContent);
+      const pi = T().powerModel().rows.find(r => /Raspberry Pi 5/.test(r.name)); if (pi?.on) fail('default Pi runs on PoE');
+      if (!T().addItem({ key: 'ucgmax1' }) || T().state.h !== h) fail('1U addition cannot use growth space');
+      return h + 'U; 1U addition fits without growth, adapter-powered Pi, immediate A1 mini warning';
+    });
+    await check('A Pi PoE warning offers its own USB-C supply and applies that choice', async () => {
+      T().setHeight(10);
+      if (!T().addItem({ key: 'mw2319976' })) fail('PoE fixture could not be placed'); await wait(100);
+      const it = T().state.items[T().state.items.length - 1], button = $('#ready [data-act="poe-on"]');
+      if (!button || !/Use its own USB-C supply/.test(button.textContent)) fail('adapter action missing');
+      button.click(); await wait(100);
+      if (T().powerModel().rows.find(r => r.it?.id === it.id)?.on !== false) fail('adapter action did not switch power mode');
+      return 'USB-C is the first warning action and clears this device from PoE demand';
     });
   } catch (e) { log(false, 'Self-test stopped', e.message); }
   finally { KEYS.forEach((k, i) => saved[i] == null ? localStorage.removeItem(k) : localStorage.setItem(k, saved[i])); }
