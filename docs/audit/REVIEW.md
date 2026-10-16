@@ -31,7 +31,7 @@ Claude sets these tasks; take one by writing your name in *Who works on what*. E
 - **Antigravity** (opening model pages and datasheets, which the others can't): T-3 now, then T-4, then T-5. Commit `docs/audit/power-inputs.json` in batches (the first 15–20 sourced devices first) so Codex can start on the integration.
 - **Claude**: reviews every commit within one watch round, answers findings, keeps the docs current and prepares the merge with the owner. No code claims this round.
 
-**Round 5 (2026-10-16): UX and visual audit.** Claude walked the planner as a beginner at 1280 and 375 px. The findings are R-17 to R-34 under *Open*; the reasoning, the visual review and the plan are in [UX_AUDIT.md](UX_AUDIT.md), and the mock-up is [visual-proposal.html](visual-proposal.html). Order: T-14 → T-15 → T-16 → T-17 → T-18 for **Codex**, one at a time; **Antigravity** goes on with T-10 (already started), then T-3, then T-19. Claude reviews every commit and reruns the beginner route after T-15 and T-17. The T-3 integration still goes first whenever Antigravity's batch is in.
+**Round 5 (2026-10-16): UX and visual audit.** Claude walked the planner as a beginner at 1280 and 375 px. The findings are R-17 to R-35 under *Open* (R-35 came from the owner); the reasoning, the visual review and the plan are in [UX_AUDIT.md](UX_AUDIT.md), and the mock-up is [visual-proposal.html](visual-proposal.html). Order: T-14 → T-15 → T-20 → T-16 → T-17 → T-18 for **Codex**, one at a time; **Antigravity** goes on with T-10 (already started), then T-3, then T-19. Claude reviews every commit and reruns the beginner route after T-15 and T-17. The T-3 integration still goes first whenever Antigravity's batch is in.
 
 ### T-14: Correct counts, keep the user's rack (R-17, R-18, export half of R-30) → **Codex**
 Claim `app.js` and `tools/selftest.html`.
@@ -83,6 +83,27 @@ Claim `app.js`, `index.html` and `tools/selftest.html`. **Done:** the acceptance
 3. Say whether the Side handles (`mw1931511`) replace the base frame's handles or come in addition.
 
 Same rules as T-10: only what the page states, `confidence: "page"`.
+
+### T-20: What you have and what you buy (R-35) → **Codex**, after T-15
+Claim `app.js`, `codec.js`, `connect.js`, `pdf.js` and `tools/selftest.html`.
+1. **The question.** The wizard's first step asks "What are you building?":
+   - print mounts for hardware I have (the default);
+   - a complete build, devices included;
+   - some of each.
+   The answer sets a per-device toggle, *Have it* or *To buy*, which stays editable on every device row and in the part panel.
+2. **Save it.** Per item as an optional `own` field. Share links and rack files carry it; format version 1 stays, and old files load as "Have it".
+3. **The shopping list follows it:**
+   - devices marked *To buy* appear as a "Devices to buy" group, with shop search links and no guessed prices;
+   - power supplies and cables only for devices that are to buy, or that the user marks as missing them;
+   - the "Have" quantities move from the download dialog into the list itself.
+4. **Connect follows it:**
+   - an owned device: "use the adapter it came with";
+   - a device to buy: "check what's in the box".
+
+**Done:**
+- the three answers give three different shopping lists for the same rack;
+- `own` survives a share link and a rack file (`test-codec.mjs`);
+- a self-test check covers it.
 
 ### T-1: Visual check of the 10U PDF (R-8) → **Codex**
 `output/plan-10u-full.pdf` (not committed) is a full 10U rack: UCG-Max, USW-Lite-8-PoE, Pi cluster (4 of 7), two 40 mm fan panels, a keystone panel, a Lenovo Tiny, a vent and a Flex Mini mount at the front; a fan panel and a vent at the back. It has 8 pages. The self-test measured all text, images and boxes inside the page with no text over text, but that measurement uses an estimated line height. Look at every page for clipped or overlapping text, broken tables, images over text, and empty or near-empty pages. Write each problem as R-9, R-10… with the page and where on it. Fix in `pdf.js` if you claim it, or leave the fix to Claude. **Done:** every page checked, and the result is in `TEST_RESULTS.md` ("visual check").
@@ -344,6 +365,17 @@ Claude reads this file at the start of every work session on the branch. Other d
   - a 4 px spacing grid.
 - **Evidence:** `12-visual-light-mid-1280.jpg`, mock-up `20-proposal-desktop.jpg`.
 - **Accept:** no problem row is taller than 4 lines at 1280; the type scale has at most 6 sizes. → **T-17 A and B**
+
+### R-35: The planner never asks what you already have (S2, from the owner; checked in the code)
+- **Routes:** wizard, Shopping list, Connect, exports.
+- **Actual:**
+  - Devices are never on the shopping list: the planner silently assumes you own them.
+  - It does list every accessory for every device: one Pi 27 W supply per Pi, USB-C cables, a power strip, tools.
+  - "What you have" is asked only at the very end, in the "Ready to build?" dialog, per screw and spool (`app.js` ~1758).
+  - So "only print mounts for my existing hardware" gets a list full of supplies the user already has, and "a complete build" gets no devices to buy.
+- **Expected:** ask the scope early (print only, full build, or some of each), as a per-device *Have it / To buy* toggle; the shopping list, Connect and the budget follow it.
+- **Impact:** a wrong budget and wrong purchases in both directions; a beginner who is buying everything has no complete list.
+- **Accept:** see T-20. → **T-20**
 
 ### R-14: Adding a half-U mount can use a physically overlapping fallback (S3)
 *Codex, T-9 verification:* after the corrected UCG-Max/default wizard creates a clean 4U rack, add **USW-Flex-Mini → ½U mount** from the library. The editor places it next to the keystone panel and explicitly reports **1.4 mm overlap**, rather than offering a taller rack or another physical fit. Reproduced at 1280 and 375 px; `firstClear()` intentionally returns its first nominally free slot if all physical placements clash/overlap. This is separate from the now-fixed wizard layout. Expected improvement: offer growth or explain the conflict before committing the overlapping placement. Evidence: `output/t9-added-375.png` and status text recorded in the walkthrough. Claude to prioritize; no extra editor changes included in T-9.

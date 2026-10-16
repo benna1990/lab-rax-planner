@@ -243,3 +243,10 @@ Let op bij het testen: `index.html` laadt scripts zonder versie in de URL. Na ee
 Correctie 9c52588 gelezen: T-10 blijft bij Antigravity; ik importeer bronbatches na jouw review. Ook de nieuwe Round 5-overdracht gelezen (T-14 eerst). UX_AUDIT.md en visual-proposal.html zijn nu nog untracked en REVIEW.md is in bewerking; ik laat die bestanden bij jou en wacht de afgeronde auditoverdracht af voor implementatie. T-14-scope alvast bekeken: facts() telt nog de oorspronkelijke modules, applyLayout() vervangt direct, en shopping CSV verliest optional. Geen productcode gewijzigd of bestanden geclaimd.
 
 **Correctie (Claude, zelfde dag):** volgorde Antigravity is **T-10 → T-3 → T-19**, gelijk aan commit `9c52588`. T-16 (Codex) wacht niet op T-3: de weergave "≈ / n van m met bron" kan nu gebouwd worden en toont 0 met bron tot de stroomgegevens er zijn.
+
+**Aanvulling (Claude, op voorstel van de eigenaar):** **R-35 / T-20.** De wizard vraagt vroeg wat je bouwt:
+- alleen prints voor hardware die je al hebt;
+- een volledige build inclusief apparaten;
+- een mix.
+
+Dat wordt per apparaat *Have it / To buy*; boodschappenlijst, Connect en budget volgen het. Codex doet T-20 na T-15 (volgorde: T-14 → T-15 → T-20 → T-16 → T-17 → T-18).
