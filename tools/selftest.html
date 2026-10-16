@@ -219,6 +219,10 @@
       const clear = $('#wz-printer'); clear.value = ''; clear.dispatchEvent(new W.Event('change', { bubbles: true })); await wait(150);
       for (let i = 0; i < 3; i++) $('[data-act="wz-next"]').click();
       if (!$('#wz-body').textContent.includes('open for growth')) fail('height breakdown missing');
+      const compact = $('[data-act="wz-result-spare"][data-v="0"]'), grow = $('[data-act="wz-result-spare"][data-v="1"]');
+      if (!compact || !grow) fail('5U/6U choice missing'); compact.click();
+      if (!/^5U/.test($('.wz-sum').textContent)) fail('compact choice did not show 5U');
+      $('[data-act="wz-result-spare"][data-v="1"]').click();
       $('[data-act="wz-create"]').click(); await wait(150);
       const h = T().state.h;
       if (h > 6 || T().ready().warn) fail('wizard too tall or has warnings: ' + h + 'U ' + $('#ready').textContent);
@@ -234,6 +238,15 @@
       button.click(); await wait(100);
       if (T().powerModel().rows.find(r => r.it?.id === it.id)?.on !== false) fail('adapter action did not switch power mode');
       return 'USB-C is the first warning action and clears this device from PoE demand';
+    });
+    await check('Wizard offers 5U without spare instead of requiring extension prints', async () => {
+      $('[data-act="wizard"]').click();
+      for (let i = 0; i < 4; i++) $('[data-act="wz-next"]').click();
+      const compact = $('[data-act="wz-result-spare"][data-v="0"]'); if (!compact) fail('compact choice missing'); compact.click();
+      if (!/^5U/.test($('.wz-sum').textContent)) fail('result did not become 5U');
+      $('[data-act="wz-create"]').click(); await wait(150);
+      if (T().state.h !== 5 || T().ready().warn) fail('compact build has warnings: ' + $('#ready').textContent);
+      return '5U base frame, no spare, no build warnings; 6U remains available before creating';
     });
   } catch (e) { log(false, 'Self-test stopped', e.message); }
   finally { KEYS.forEach((k, i) => saved[i] == null ? localStorage.removeItem(k) : localStorage.setItem(k, saved[i])); }

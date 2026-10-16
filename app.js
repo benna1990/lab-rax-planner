@@ -2011,6 +2011,7 @@ function renderWizard() {
     body = '<h3 class="wz-h">Your rack</h3><div class="wz-result">' + miniRack(s) + '<div class="wz-sum">' +
       '<p><b>' + s.h + 'U</b> · ' + s.items.filter(i => i.pos2 != null).length + ' parts · ' + (s.version === 'brass' ? 'heat-set inserts' : 'bolted') + ' · ' + s.sides + ' sides</p>' +
       '<p>' + fmtU(r.partsH2) + ' parts + ' + fmtU(r.bodyU * 2 - r.partsH2) + ' alignment/cooling space + ' + r.spareU + 'U open for growth = ' + s.h + 'U.</p>' +
+      (r.bodyU === 5 ? '<fieldset class="wz-opt"><legend>Choose the rack height</legend><p class="hint">5U uses the base frame. 6U adds 1U open space and needs extension side panels and post joiners, with extra prints and fasteners to check.</p><div class="actions"><button type="button" class="btn" data-act="wz-result-spare" data-v="0" aria-pressed="' + (wz.spare === 0) + '">Stay at 5U (no spare)</button><button type="button" class="btn" data-act="wz-result-spare" data-v="1" aria-pressed="' + (wz.spare === 1) + '">Keep 6U (1U spare)</button></div></fieldset>' : '') +
       (s.h > 5 ? '<p class="wz-warn">Above 5U: extension side panels and post joiners are needed. Their fasteners are not confirmed; check the extension model.</p>' : '') +
       '<p class="hint">' + (r.ventilation ? 'Vent panels fill only internal gaps where the airflow estimate calls for ventilation.' : 'No vent fillers added: the airflow estimate does not call for them.') + ' Growth space stays empty.</p>' +
       (a.Q ? '<p>Hottest air ≈ ' + fmtT(a.maxT) + ' in a ' + a.room + ' °C room (' + lvl + ')' + (s.top ? ', with a 120 mm fan in the top' : '') + (s.items.some(i => i.key === 'fan40') ? ' and a fan panel' : '') + '.</p>' : '') +
@@ -2105,6 +2106,7 @@ document.addEventListener('click', async e => {
     case 'wz-set': wz[a.dataset.k] = a.dataset.v; renderWizard(); break;
     case 'wz-add': { const dev = wzDevices().find(d => d.id === a.dataset.dev); if (dev) wz.picks.push({ dev: dev.id, group: dev.group, mount: bestMount(dev), qty: 1 }); $('#wz-picked').innerHTML = wzPicked(); $('#wz-results').innerHTML = wzResults(); break; }
     case 'wz-qty': { const i = +a.dataset.i, p = wz.picks[i]; p.qty = Math.min(8, p.qty + +a.dataset.d); if (p.qty < 1) wz.picks.splice(i, 1); $('#wz-picked').innerHTML = wzPicked(); $('#wz-results').innerHTML = wzResults(); break; }
+    case 'wz-result-spare': wz.spare = +a.dataset.v === 0 ? 0 : 1; renderWizard(); break;
     case 'wz-create': wzCreate(); break;
     case 'air-blank': fillGaps(blankKeys(), 'blank panel', 'front'); break;
     case 'air-add': addItem({ key: a.dataset.key, side: 'front' }, +a.dataset.pos); break;
