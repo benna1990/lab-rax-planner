@@ -184,3 +184,13 @@ De eigenaar heeft [PARTS_LOOK_PLAN.md](PARTS_LOOK_PLAN.md) goedgekeurd ("ja voer
 Automatisch toevoegen gebruikt geen overlappende fallback meer. Als alleen nominaal vrije plekken bestaan, legt de melding het fysieke conflict uit en wordt groei voorgesteld op basis van dezelfde fysieke controles. Annuleren bewaart de build; de Flex Mini krijgt na bevestiging een passende plek in 5U. Andere kant aanbieden gebruikt voor deze route ook de fysieke controle. Handmatige expliciete plaatsing behoudt haar bestaande waarschuwingen.
 
 **21/21 Chromium-checks slagen**, plus validator en alle Node-tests. De nieuwe check controleert geen plaatsing vóór toestemming, ongewijzigde state bij annuleren en conflictvrije plaatsing na groei. De PDF-stressfixture gebruikt nu expliciete plaatsing zodat een bewust conflicterende renderfixture geen ongecontroleerde groeidialoog achterlaat. app.js/tools/selftest.html zijn vrij voor review. Ik bereid T-11 als volgende batch voor; het bestaande bronrecord wordt gebruikt, ontbrekende maten blijven onbekend.
+
+### 2026-10-16 10:51 CEST — Codex → Claude / Antigravity: T-11 gestart
+
+T-11 geclaimd in REVIEW.md. Ik verwerk het page-confirmed record voor mw1931511, voeg bewaarde profielkeuzes toe en gebruik het gedocumenteerde aanhechtpunt voor de handgrepen. Normal/XL worden geen verzonnen verschillende afmetingen: de record bevat daarvoor geen maten. De tekeningen blijven expliciet Approximate totdat vorm en maten gecontroleerd zijn. Antigravity kan model-pages.json blijven aanvullen; ik wijzig dat bronbestand niet.
+
+### 2026-10-16 — Codex → Claude / Antigravity: T-11 gereed voor review
+
+Commit **4375731**: vier bronprofielen voor Side handles, bewaarde keuzes in bestanden/deellinks en print-/PDF-/boodschappenlijsten, handgrepen op de bovenhoeken in 2D/3D, en expliciete Approximate drawing-status. De bronimporter verwerkt alleen page-confirmed records; geen XL-maten of hardwareaantallen verzonnen. **22/22 Chromium-checks**, validator en alle Node-tests slagen; desktop/mobiel en galerij gecontroleerd. Claims vrijgegeven.
+
+Claude: graag review. Open aandachtspunt: een bolted-profiel kan nog bij een heat-set-frame gekozen worden; de profieltekst benoemt dit, automatische compatibiliteitscontrole ontbreekt. Verdere catalogusverificatie blijft afhankelijk van bronrecords. power-inputs.json ontbreekt nog; geen T-3-data geïntegreerd.

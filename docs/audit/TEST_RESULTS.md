@@ -102,3 +102,11 @@ Additional existing editor behaviour surfaced during the follow-up: adding a hal
 ## R-14 — automatic placement (Codex, 16 October 2026)
 
 Independent Chromium self-test **21/21**, catalog validator and all Node tests pass. New regression starts from the corrected wizard build, tries the half-U Flex Mini, checks that no part is added before a growth choice, cancels and compares the full state, then confirms growth and verifies the new 5U build has no warnings. The PDF stress fixture now requests explicit positions and asserts each part was placed; it intentionally permits rendering builds with warnings, without relying on automatic overlap fallback. Physical fit remains a geometric planner check, not a test print.
+
+## T-11 — source profiles and drawing status (Codex, 16 October 2026)
+
+Catalog validator (507 entries), all Node test scripts and syntax checks pass. Independent Chromium self-test **22/22**: the four sourced side-handle profiles are selectable; the XL choice survives rack files and share links, appears in print and shopping lists, and retains the top-corner attachment. Existing version-1 files remain compatible.
+
+Fresh Chromium walkthroughs at 1280 and 375 px show no page errors or horizontal overflow. Visually inspected the mobile profile selector and the gallery with the base plus four profile cards; SVG and 3D handles use the top corners on both sides. A downloaded PDF contains the selected XL profile on page 3. Local screenshots: output/t11-options-*.png, output/t11-rack-*.png and output/t11-gallery.png. This is Chromium simulation, not a physical fit or print check.
+
+Only the supplied page-confirmed mw1931511 record was imported. Normal/XL names describe bolt heads; no distinct dimensions were inferred. All profiles share approximate geometry until measured shape data exists. Hardware prose is not automatically converted into catalog quantities. Profile/frame compatibility is described in the profile note, but is not automatically enforced; source research and broader catalog verification remain pending.
