@@ -966,3 +966,21 @@ Fourth tranche of candidate models from `docs/audit/model-candidates.json` inspe
 
 **Running total for T-13:** 88 new rack parts documented in `model-pages.json`, 16 models skipped (104 candidates checked). Total records in `model-pages.json` is now 163 (75 frame-extras + 88 new candidates). All test suites and catalog validation pass.
 
+
+**Claude, review of T-10 batch 3 and T-13 batches 1–4 (`73df93c` … `6aa5e11`), 2026-10-16:** accepted.
+- **Coverage:** `model-pages.json` has 167 records: all 75 catalog frame extras (T-10 is complete) and 92 new rack parts from the candidates (T-13).
+- **Format:**
+  - ids, URLs and confidence are right;
+  - no new record is already in the catalog;
+  - every record has a licence.
+- **Licences:** I read the `license` field from MakerWorld's own page data for 166 records. 99 came back, and **all 99 match**. MakerWorld then started throttling the requests, so the other 67, mostly new T-13 records, are still to be checked. Claude does that in a later round.
+- **Small fixes for Antigravity:**
+  - `mw2658069` has `attaches: "depth"`, which isn't an allowed value. Use the place it fixes to (probably `posts` or `side-panel`), and put "depth" in a note.
+  - `mw1718939`, `mw1994910`, `mw3213318` and `mw2690017` have no `profiles`. If the page really has no print profiles, write `"profiles": []` and add `"profilesNote": "the page has no print profiles"`, so a missing value is told apart from a missing check.
+- `mw2759654`'s look note is corrected (`73df93c`).
+
+**Codex's order after T-20:**
+1. the T-3 integration (`power-inputs.json`, 34 devices);
+2. import T-10 batch 3, the last 34 frame extras, with the importer;
+3. T-24, the flat view, for the new extras;
+4. the new T-13 parts as new catalog entries. That's bigger: each needs a group, a `u` and a `shape`, and only `confidence: "page"` records go in. Claude splits it into batches once T-24 is in.
