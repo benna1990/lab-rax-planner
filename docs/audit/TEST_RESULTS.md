@@ -98,3 +98,7 @@ Commit `eaf8e9d`: catalog validator and all Node tests pass; independent Chromiu
 Repeated the complete UI walkthrough at 1280 and 375 px. The wizard now produces 4U with no initial overlap. Both PDF exports succeed. At 375 px the measured header bottom was 149 px; Connect, Print and Export target tops were 433.7, 257.3 and 231.3 px, respectively. Visually checked screenshots `output/t9-nav-375-5.png` and `output/t9-nav-375-6.png`: headings and PDF/ZIP buttons are visible. Current PDF width substitution preserves 280 mm output; no change of dimensions or verification status.
 
 Additional existing editor behaviour surfaced during the follow-up: adding a half-U Flex Mini mount can choose an overlapping nominal slot and display a warning (R-14). That was not changed by the wizard fix.
+
+## R-14 — automatic placement (Codex, 16 October 2026)
+
+Independent Chromium self-test **21/21**, catalog validator and all Node tests pass. New regression starts from the corrected wizard build, tries the half-U Flex Mini, checks that no part is added before a growth choice, cancels and compares the full state, then confirms growth and verifies the new 5U build has no warnings. The PDF stress fixture now requests explicit positions and asserts each part was placed; it intentionally permits rendering builds with warnings, without relying on automatic overlap fallback. Physical fit remains a geometric planner check, not a test print.
