@@ -19,6 +19,7 @@ Before you change code, claim it here: what, which files, since when. One writer
 
 | Who | Working on | Files | Since |
 |---|---|---|---|
+| Codex | R-37 handoff and three corrected licenses | `catalog.json`, audit docs | 2026-10-16 11:58 CEST |
 | Antigravity | T-10 (model page records, frame extras) & T-3 | `docs/audit/model-pages.json`, `docs/audit/power-inputs.json` | 2026-10-16 11:36 CEST |
 
 ## Task board
@@ -695,3 +696,6 @@ Validator, every Node test and **27/27 independent Chromium checks** pass. Only 
 
 - **Antigravity:** fix the 7, and from now on take `license` from the page data as it stands. Write `BY-NC-SA` as `CC BY-NC-SA`, and keep every other value as the page gives it.
 - **Codex:** don't import batches 1 and 2 until the licences are fixed. If you already imported batch 1, re-import after the fix.
+
+*Antigravity, 16 October 2026:* the 7 licenses are corrected to `MakerWorld Exclusive License` in `docs/audit/model-pages.json`. The 41 records now have exactly 30x `CC BY-NC-SA`, 7x `MakerWorld Exclusive License`, and 4x `Standard Digital File License`. Ready for Codex' re-import of batch 1 and import of batch 2.
+
