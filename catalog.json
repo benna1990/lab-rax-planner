@@ -7206,45 +7206,214 @@
     {
      "id": "mw2865309",
      "name": "Tandem: two racks + 19″ converter",
-     "shape": {"u": 4, "hl": "top"},
+     "shape": {
+      "u": 4,
+      "hl": "top",
+      "at": "top"
+     },
      "author": "J0RN",
-     "url": "https://makerworld.com/en/models/2865309"
+     "url": "https://makerworld.com/en/models/2865309",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2865309",
+       "date": "2026-10-16",
+       "note": "remix turning original 5U LabRax into a side-by-side tandem rack"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/2865309",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-4-walls-15-infill",
+       "name": "0.2mm layer, 4 walls, 15% infill",
+       "shape": {},
+       "note": "Dual 10\" side-by-side tandem rack with 19\" mounting support"
+      }
+     ]
     },
     {
      "id": "mw2366022",
      "name": "19″ brace set (bolted)",
-     "shape": {"u": 4, "hl": "posts"},
+     "shape": {
+      "u": 4,
+      "hl": "posts",
+      "at": "posts"
+     },
      "author": "RDas",
-     "url": "https://makerworld.com/en/models/2366022"
+     "url": "https://makerworld.com/en/models/2366022",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2366022",
+       "date": "2026-10-16",
+       "note": "19\" remix of the 10\" Lab Rax modular system using bolted posts"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/2366022",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-3-walls-15-infill-color-logo",
+       "name": "0.2mm layer, 3 walls, 15% infill (color logo)",
+       "shape": {},
+       "note": "Optimized PETG Profile with dual color logo on top brace"
+      },
+      {
+       "id": "0-2mm-layer-3-walls-15-infill-no-logo",
+       "name": "0.2mm layer, 3 walls, 15% infill (no logo)",
+       "shape": {},
+       "note": "Profile without logo on the couplers"
+      }
+     ],
+     "profileChoices": [
+      "top brace: with color logo or without logo"
+     ]
     },
     {
      "id": "mw2176697",
      "name": "19″ cross members",
-     "shape": {"u": 4, "hl": "posts"},
+     "shape": {
+      "u": 4,
+      "hl": "posts",
+      "at": "posts"
+     },
      "author": "STREUKANTE",
-     "url": "https://makerworld.com/en/models/2176697"
+     "url": "https://makerworld.com/en/models/2176697",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2176697",
+       "date": "2026-10-16",
+       "note": "Ein Mod für die Querteile des Lab Rax Racks in 19\" druckbar"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/2176697",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-28mm-layer-2-walls-15-infill",
+       "name": "0.28mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "19 inch cross member mod"
+      }
+     ]
     },
     {
      "id": "mw3202642",
      "name": "KWS depth rack (260 mm)",
-     "shape": {"depth": 20},
+     "shape": {
+      "depth": 20,
+      "at": "side-panel"
+     },
      "author": "matterlord1",
-     "url": "https://makerworld.com/en/models/3202642-lab-rax-kws-depth-rack"
+     "url": "https://makerworld.com/en/models/3202642-lab-rax-kws-depth-rack",
+     "license": "MakerWorld Exclusive License",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/3202642-lab-rax-kws-depth-rack",
+       "date": "2026-10-16",
+       "note": "extend a Lab Rax rack to 260mm of depth (KWS rack depth)"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/3202642-lab-rax-kws-depth-rack",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "All necessary parts to extend Lab Rax to 260mm depth"
+      }
+     ]
     },
     {
      "id": "mw2364486",
      "name": "Long handles for +50 mm sides",
-     "shape": {"handles": "long", "depth": 50},
+     "shape": {
+      "handles": "long",
+      "depth": 50,
+      "at": "top"
+     },
      "author": "obibi",
-     "url": "https://makerworld.com/en/models/2364486-long-handles-for-longer-sides-lab-rax"
+     "url": "https://makerworld.com/en/models/2364486-long-handles-for-longer-sides-lab-rax",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2364486-long-handles-for-longer-sides-lab-rax",
+       "date": "2026-10-16",
+       "note": "longer handles for Deeper Sides for Lab Rax Bolted Version"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/2364486-long-handles-for-longer-sides-lab-rax",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "Print without supports"
+      }
+     ]
     },
     {
      "id": "mw2350077",
      "name": "Sides +50 mm, bolted",
      "label": "Pair with the long handles",
-     "shape": {"depth": 50},
+     "shape": {
+      "depth": 50,
+      "at": "side-panel"
+     },
      "author": "obibi",
-     "url": "https://makerworld.com/en/models/2350077-lab-rax-sides-50mm-longer-bolt-together-version"
+     "url": "https://makerworld.com/en/models/2350077-lab-rax-sides-50mm-longer-bolt-together-version",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2350077-lab-rax-sides-50mm-longer-bolt-together-version",
+       "date": "2026-10-16",
+       "note": "deeper sides for Lab Rax Bolt Version, 50mm longer than original"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/2350077-lab-rax-sides-50mm-longer-bolt-together-version",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "Printed with Tree-Hybrid supports"
+      }
+     ]
     }
    ]
   },
@@ -7254,16 +7423,78 @@
     {
      "id": "mw2317435",
      "name": "Stackable replacement handles",
-     "shape": {"handles": "stackable"},
+     "shape": {
+      "handles": "stackable",
+      "at": "top"
+     },
      "author": "mklements",
-     "url": "https://makerworld.com/en/models/2317435"
+     "url": "https://makerworld.com/en/models/2317435",
+     "license": "MakerWorld Exclusive License",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2317435",
+       "date": "2026-10-16",
+       "note": "official Lab Rax stackable handle replacement by mklements"
+      },
+      "look": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2317435",
+       "date": "2026-10-16",
+       "note": "Drawing compared with the model page; dimensions are not independently measured."
+      }
+     },
+     "options": [
+      {
+       "id": "petg-with-supports-0-2mm-layer-2-walls-15-infill",
+       "name": "PETG With Supports - 0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "PETG with supports"
+      },
+      {
+       "id": "pla-with-supports-0-2mm-layer-2-walls-15-infill",
+       "name": "PLA With Supports - 0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "PLA with supports"
+      }
+     ],
+     "profileChoices": [
+      "material: PETG or PLA"
+     ]
     },
     {
      "id": "mw1896714",
      "name": "Handles without supports",
-     "shape": {"handles": "plain", "hl": "handles"},
+     "shape": {
+      "handles": "plain",
+      "hl": "handles",
+      "at": "top"
+     },
      "author": "Shubham Patel",
-     "url": "https://makerworld.com/en/models/1896714"
+     "url": "https://makerworld.com/en/models/1896714",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1896714",
+       "date": "2026-10-16",
+       "note": "designed for LabRax case, fits original mounting holes"
+      },
+      "look": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1896714",
+       "date": "2026-10-16",
+       "note": "Drawing compared with the model page; dimensions are not independently measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "Print without any supports"
+      }
+     ]
     },
     {
      "id": "mw1931511",
@@ -7328,51 +7559,242 @@
     {
      "id": "mw1941244",
      "name": "Rails for larger bolt heads",
-     "shape": {"hl": "posts"},
+     "shape": {
+      "hl": "posts",
+      "at": "posts"
+     },
      "author": "Blind Badger",
-     "url": "https://makerworld.com/en/models/1941244"
+     "url": "https://makerworld.com/en/models/1941244",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1941244",
+       "date": "2026-10-16",
+       "note": "rails used by both bolted and heatset versions of Lab Rax"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1941244",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "rails-x4",
+       "name": "Rails - x4",
+       "shape": {},
+       "note": "Rails for larger bolt heads"
+      }
+     ]
     },
     {
      "id": "mw1917141",
      "name": "Feet for larger screw heads",
-     "shape": {"feet": "big"},
+     "shape": {
+      "feet": "big",
+      "at": "feet"
+     },
      "author": "Blind Badger",
-     "url": "https://makerworld.com/en/models/1917141"
+     "url": "https://makerworld.com/en/models/1917141",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1917141",
+       "date": "2026-10-16",
+       "note": "enlarged foot holes for Lab Rax 10\" and 6U bolted versions"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1917141",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-3-walls-15-infill",
+       "name": "0.2mm layer, 3 walls, 15% infill",
+       "shape": {},
+       "note": "Enlarged counterbore holes for larger M6 screw heads"
+      }
+     ]
     },
     {
      "id": "mw2960364",
      "name": "Bigger feet",
-     "shape": {"feet": "big"},
+     "shape": {
+      "feet": "big",
+      "at": "feet"
+     },
      "author": "fincrawmcq",
-     "url": "https://makerworld.com/en/models/2960364"
+     "url": "https://makerworld.com/en/models/2960364",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2960364",
+       "date": "2026-10-16",
+       "note": "remix of Lab Rax 10\" Server Rack Bolted Version 5U feet"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/2960364",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-3-walls-15-infill",
+       "name": "0.2mm layer, 3 walls, 15% infill",
+       "shape": {},
+       "note": "Allows bigger screws to fit properly"
+      }
+     ]
     },
     {
      "id": "mw3212268",
      "name": "Wall mounting cleats",
-     "shape": {"wall": true},
+     "shape": {
+      "wall": true,
+      "at": "wall"
+     },
      "author": "mklements",
-     "url": "https://makerworld.com/en/models/3212268"
+     "url": "https://makerworld.com/en/models/3212268",
+     "license": "MakerWorld Exclusive License",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/3212268",
+       "date": "2026-10-16",
+       "note": "official Lab Rax wall mounting cleats by creator mklements"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/3212268",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "petg-oriented-for-strength",
+       "name": "PETG Oriented For Strength",
+       "shape": {},
+       "note": "Interlocking cleats and lower spacers"
+      },
+      {
+       "id": "wall-mount-templates-1u-5u",
+       "name": "Wall Mount Templates 1U & 5U",
+       "shape": {},
+       "note": "Drilling/mounting alignment templates"
+      }
+     ],
+     "profileChoices": [
+      "profile: cleats or mounting templates (1U / 5U)"
+     ]
     },
     {
      "id": "mw2403180",
      "name": "Vertical wall mount system",
-     "shape": {"wall": true},
+     "shape": {
+      "wall": true,
+      "at": "wall"
+     },
      "author": "RDas",
-     "url": "https://makerworld.com/en/models/2403180"
+     "url": "https://makerworld.com/en/models/2403180",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2403180",
+       "date": "2026-10-16",
+       "note": "designed to mount Lab Rax vertically on the wall"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/2403180",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "Adapter feet and wall receiver brackets in PETG"
+      }
+     ]
     },
     {
      "id": "mw1772709",
      "name": "Wall mount",
-     "shape": {"wall": true},
-     "url": "https://makerworld.com/en/models/1772709-lab-rax-wallmount"
+     "shape": {
+      "wall": true,
+      "at": "wall"
+     },
+     "url": "https://makerworld.com/en/models/1772709-lab-rax-wallmount",
+     "license": "Standard Digital File License",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1772709-lab-rax-wallmount",
+       "date": "2026-10-16",
+       "note": "created for Lab Rax to mount in electrical cabinet"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1772709-lab-rax-wallmount",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-6-walls-22-infill",
+       "name": "0.2mm layer, 6 walls, 22% infill",
+       "shape": {},
+       "note": "Wall plate and slide mounts"
+      }
+     ]
     },
     {
      "id": "mw2757835",
      "name": "Caster chassis (mobile base)",
      "label": "Needs 4 casters and M4 inserts",
-     "shape": {"feet": "casters"},
+     "shape": {
+      "feet": "casters",
+      "at": "feet"
+     },
      "author": "Pepe_Lopez",
-     "url": "https://makerworld.com/en/models/2757835"
+     "url": "https://makerworld.com/en/models/2757835",
+     "license": "Standard Digital File License",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2757835",
+       "date": "2026-10-16",
+       "note": "simple mobile chassis for 10-inch LabRax rack replacing original feet"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/2757835",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-4-walls-20-infill",
+       "name": "0.2mm layer, 4 walls, 20% infill",
+       "shape": {},
+       "note": "Left and right chassis base blocks replacing feet"
+      }
+     ]
     }
    ]
   },
@@ -7382,26 +7804,89 @@
     {
      "id": "mw1577920",
      "name": "Hex vent side panels 3–5U",
-     "shape": {"side": "hex"},
+     "shape": {
+      "side": "hex",
+      "at": "side-panel"
+     },
      "author": "AlanMG",
      "url": "https://makerworld.com/en/models/1577920",
      "at": "side",
-     "vent": 0.45
+     "vent": 0.45,
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1577920",
+       "date": "2026-10-16",
+       "note": "sidepanels for 5U, 4U and 3U versions of Lab Rax 10\" minirack with matching hex pattern"
+      },
+      "look": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1577920",
+       "date": "2026-10-16",
+       "note": "Drawing compared with the model page; dimensions are not independently measured."
+      }
+     },
+     "options": [
+      {
+       "id": "abs-0-2mm-layer-2-walls-15-gyroid-infill",
+       "name": "ABS - 0.2mm layer, 2 walls, 15% gyroid infill",
+       "shape": {},
+       "note": "ABS print profile for hex side panel"
+      }
+     ],
+     "profileChoices": [
+      "height: 3U, 4U, or 5U side panels"
+     ]
     },
     {
      "id": "mw1618034",
      "name": "Hex extension panels 4U / 5U",
-     "shape": {"side": "hex", "u": 5},
+     "shape": {
+      "side": "hex",
+      "u": 5,
+      "at": "side-panel"
+     },
      "author": "AlanMG",
      "url": "https://makerworld.com/en/models/1618034",
      "at": "side",
-     "vent": 0.45
+     "vent": 0.45,
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1618034",
+       "date": "2026-10-16",
+       "note": "hex pattern version of 4U and 5U extension side panel for Lab Rax"
+      },
+      "look": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1618034",
+       "date": "2026-10-16",
+       "note": "Drawing compared with the model page; dimensions are not independently measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "Hex pattern version of 4U and 5U extension side panel"
+      }
+     ],
+     "profileChoices": [
+      "height: 4U or 5U extension panel"
+     ]
     },
     {
      "id": "mw2759654",
      "name": "Side panel for a 180/200 mm fan",
      "label": "Needs a 180 or 200 mm fan",
-     "shape": {"fan": 180, "u": 5},
+     "shape": {
+      "fan": 180,
+      "u": 5,
+      "at": "side-panel"
+     },
      "author": "GK-ken",
      "url": "https://makerworld.com/en/models/2759654",
      "hardware": [
@@ -7411,12 +7896,41 @@
       }
      ],
      "fanDir": "intake",
-     "at": "side"
+     "at": "side",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2759654",
+       "date": "2026-10-16",
+       "note": "remix of 5U/4U side panels with integrated large fan mounting system for Lab Rax"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/2759654",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-3-walls-15-infill",
+       "name": "0.2mm layer, 3 walls, 15% infill",
+       "shape": {},
+       "note": "PETG/ABS print profile with precise mounting holes for 180mm and 200mm fans"
+      }
+     ],
+     "profileChoices": [
+      "fan size: 180mm or 200mm fan mounting holes"
+     ]
     },
     {
      "id": "mw2178053",
      "name": "Raised hex panel set (side, top, 120 mm fan)",
-     "shape": {"side": "hex"},
+     "shape": {
+      "side": "hex",
+      "at": "side-panel"
+     },
      "author": "463n7",
      "url": "https://makerworld.com/en/models/2178053",
      "hardware": [
@@ -7428,16 +7942,78 @@
      "fanDir": "exhaust",
      "fanAt": "top",
      "at": "side",
-     "vent": 0.45
+     "vent": 0.45,
+     "license": "MakerWorld Exclusive License",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2178053",
+       "date": "2026-10-16",
+       "note": "designed specifically for the Labrax 3D-printed 10\" rack"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/2178053",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "petg",
+       "name": "PETG",
+       "shape": {},
+       "note": "Modular raised hex panel set (side, top, 120mm fan)"
+      }
+     ],
+     "profileChoices": [
+      "panel type: side panel, top panel, or 120mm fan panel"
+     ]
     },
     {
      "id": "mw1862143",
      "name": "Kumiko side panel, customizable",
-     "shape": {"side": "kumiko"},
+     "shape": {
+      "side": "kumiko",
+      "at": "side-panel"
+     },
      "author": "Kiwiworks",
      "url": "https://makerworld.com/en/models/1862143",
      "at": "side",
-     "vent": 0.3
+     "vent": 0.3,
+     "license": "Standard Digital File License",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1862143",
+       "date": "2026-10-16",
+       "note": "aesthetic side panel for Lab Rax-10 inch server rack"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1862143",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "expansion-type-10-gyroid",
+       "name": "Expansion type - 10% gyroid",
+       "shape": {},
+       "note": "For extended builds with side panel connector"
+      },
+      {
+       "id": "standard-type-10-gyroid",
+       "name": "Standard type - 10% gyroid",
+       "shape": {},
+       "note": "For standard 5U or less builds"
+      }
+     ],
+     "profileChoices": [
+      "build type: standard (<=5U) or expansion (for stacked builds)",
+      "customizable patterns: Asanoha, Goma, Sakura, Yotsuba, Shippo"
+     ]
     },
     {
      "id": "mw1365647",
