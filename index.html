@@ -6,6 +6,23 @@
 <title>Mini Rack Planner</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Mini Rack Planner: plan your 3D-printed 10-inch homelab rack, Lab Rax and more. Pick devices with existing mounts, design custom panels, check the airflow, view it in 3D and download a complete build pack.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="manifest" href="assets/manifest.webmanifest">
+<meta name="theme-color" content="#F3F4F2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141517" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Mini Rack Planner">
+<meta property="og:title" content="Mini Rack Planner">
+<meta property="og:description" content="Plan your 3D-printed 10-inch rack, check that it fits, then take the print list, shopping list and build plan with you. Lab Rax and more.">
+<meta property="og:url" content="https://benna1990.github.io/lab-rax-planner/">
+<meta property="og:image" content="https://benna1990.github.io/lab-rax-planner/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Mini Rack Planner logo: a small rack with one unit placed, one being placed and one open, next to the name.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://benna1990.github.io/lab-rax-planner/assets/og-image.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Audiowide&family=Geist+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
@@ -64,7 +81,7 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;backgroun
 .brand-tx{display:flex;flex-direction:column;line-height:1.15}
 .brand-tx small{font-size:11.5px;font-weight:600;letter-spacing:0;color:var(--muted)}
 @media (max-width:520px){.brand-tx small{display:none}}
-.mark{width:30px;height:30px;border-radius:8px;background:#16181B;display:grid;place-items:center;flex:0 0 auto}
+.mark{width:30px;height:30px;display:block;flex:0 0 auto}.mark svg{display:block}
 .top-actions{display:flex;flex-wrap:wrap;gap:8px}
 .btn{height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
 .btn:hover{border-color:var(--ink-2)}
@@ -534,7 +551,7 @@ dialog.askdlg::backdrop{background:rgba(10,12,14,.55)}
 <header class="top">
   <div class="top-in">
     <div class="brand">
-      <span class="mark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#B5CF2A" stroke-width="1.6"><rect x="2.5" y="2" width="11" height="12" rx="1.5"/><path d="M5 5.5h6M5 8h6M5 10.5h6"/></svg></span>
+      <span class="mark" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#16181B"/><rect x=".5" y=".5" width="31" height="31" rx="6.5" fill="none" stroke="#3A3C41"/><rect x="6" y="5" width="2.5" height="22" rx="1" fill="#9A9EA4"/><rect x="23.5" y="5" width="2.5" height="22" rx="1" fill="#9A9EA4"/><rect x="10.5" y="7.5" width="11" height="4.5" rx="1" fill="#ECEDEE"/><rect x="10.5" y="13.75" width="11" height="4.5" rx="1" fill="#3CC27A"/><rect x="10.5" y="20" width="11" height="4.5" rx="1" fill="#ECEDEE" fill-opacity=".28"/></svg></span>
       <span class="brand-tx">Mini Rack Planner<small>Plan your 3D-printed 10″ rack · Lab Rax and more</small></span>
     </div>
     <div class="top-actions">

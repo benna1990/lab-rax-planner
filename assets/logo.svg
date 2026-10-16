@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Mini Rack Planner">
+  <!-- Mini Rack Planner mark: a 10-inch rack seen from the front. One unit placed, one being placed (green), one still open. -->
+  <rect width="32" height="32" rx="7" fill="#16181B"/>
+  <rect x=".5" y=".5" width="31" height="31" rx="6.5" fill="none" stroke="#3A3C41"/>
+  <rect x="6" y="5" width="2.5" height="22" rx="1" fill="#9A9EA4"/>
+  <rect x="23.5" y="5" width="2.5" height="22" rx="1" fill="#9A9EA4"/>
+  <rect x="10.5" y="7.5" width="11" height="4.5" rx="1" fill="#ECEDEE"/>
+  <rect x="10.5" y="13.75" width="11" height="4.5" rx="1" fill="#3CC27A"/>
+  <rect x="10.5" y="20" width="11" height="4.5" rx="1" fill="#ECEDEE" fill-opacity=".28"/>
+</svg>

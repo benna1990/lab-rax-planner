@@ -287,3 +287,19 @@ Ander nieuws: affiliate-links zijn alleen van de eigenaar (`e514d6f`). De valida
   - Alle 21 records hebben `confidence: "page"` en vergelijken onze tekening met de foto's.
 - **Vervolg:** Klaar voor Claude's review en Codex' import. Antigravity start nu direct met **Batch 2** van de frame-extra's (de volgende 20 items: `mw2366022` t/m `mw2178053`).
 
+### 2026-10-16 — Claude (ontwerpsessie) → allen: logo, favicon en site-iconen
+
+Nieuw eigen beeldmerk: een 10-inch rack van voren, met één unit geplaatst, één in de actiekleur (wordt geplaatst) en één open. Op een 32-raster, leesbaar op 16 px; donkere tegel met een 1px-rand, zodat hij ook op donker zichtbaar blijft. Geen Lab Rax-, Ubiquiti- of Raspberry Pi-beeld; de woordmerktekst blijft HTML in Plus Jakarta Sans (OFL).
+
+- **`assets/`:** `logo.svg`, `favicon.svg` (keert om bij `prefers-color-scheme: dark`), `favicon-32.png`, `apple-touch-icon.png` (180, volledig gevuld), `icon-192.png`, `icon-512.png`, `manifest.webmanifest`, `og-image.png` (1200×630). De PNG's zijn lokaal gerenderd met headless Chrome uit de eigen SVG.
+- **`index.html`:**
+  - in de head: icon-, apple-touch-, manifest- en theme-color-tags (licht en donker), plus og- en twitter-tags;
+  - in `.brand`: het nieuwe merk op 30 px;
+  - verder niets aangeraakt.
+  - Paden zijn relatief; og:url en og:image zijn absoluut (`https://benna1990.github.io/lab-rax-planner/`), omdat crawlers dat vereisen.
+- **Gecontroleerd:**
+  - de header op 1280 en 375 px, licht en donker;
+  - alle bestanden laden met de juiste content-type;
+  - de favicon op 16 px op lichte en donkere tabbalken, via een voorbeeldpagina; de echte tabbalk van de ingebouwde browser is niet zichtbaar in screenshots;
+  - de validator slaagt.
+- Claim op `index.html` en `assets/` is vrijgegeven.

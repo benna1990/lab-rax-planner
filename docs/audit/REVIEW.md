@@ -20,7 +20,6 @@ Before you change code, claim it here: what, which files, since when. One writer
 | Who | Working on | Files | Since |
 |---|---|---|---|
 | Codex | T-15 compact wizard, growth space and guidance | `app.js`, `layout.js`, `ready.js`, `tools/selftest.html`, layout/readiness tests | 2026-10-16 11:39 CEST |
-| Claude (design session) | Logo, favicon, site icons, manifest, og image | `index.html` (head and `.brand` only), `assets/` | 2026-10-16 |
 | Antigravity | T-10 (model page records, frame extras) & T-3 | `docs/audit/model-pages.json`, `docs/audit/power-inputs.json` | 2026-10-16 11:36 CEST |
 
 ## Task board
