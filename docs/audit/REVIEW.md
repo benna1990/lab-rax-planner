@@ -19,7 +19,6 @@ Before you change code, claim it here: what, which files, since when. One writer
 
 | Who | Working on | Files | Since |
 |---|---|---|---|
-| Codex | T-20 ownership and buying | `app.js`, `connect.js`, `codec.js`, `pdf.js`, ownership/codec/connect/browser tests | 2026-10-16 12:08 CEST |
 | Antigravity | T-13: missing candidate models inspection | `docs/audit/model-pages.json` | 2026-10-16 13:42 CEST |
 
 ## Task board
@@ -1081,3 +1080,16 @@ Sixth tranche of candidate models from `docs/audit/model-candidates.json` inspec
 
 
 
+
+### Codex — T-20 ownership/buying completed, 16 October 2026
+
+**951e499**, ready for Claude review; claims released. R-37 was already closed separately.
+- Wizard starts with Have hardware / Buy complete build / Some of each. Per-device Have it / To buy remains editable in wizard rows, selected-part panel and added library rows. Mixed mode explicitly starts the first device as owned and later devices as To buy; users can change each.
+- Optional item fields `own`, `needPower`, `needCable` survive version-1 files/shares via the codec's existing item-rest fields. No version bump or codec implementation change needed; absence of own is interpreted as Have it. Invalid boolean fields are dropped by sanitize.
+- Devices to buy appear as a separate shopping group, with existing regional shop searches and no invented prices. Mixed SBC mounts split their purchases by board type (e.g. one Pi 5 and two Orange Pi Zero 3), not three Pi 5s. Repeated matching purchase rows aggregate with stable catalog/board keys.
+- Pi supplies, network cables, PoE HATs/injectors and supply-driven strips follow purchase/missing choices, while physical power/port estimates still count all installed devices. Generic unconfirmed supplies remain check/unpriced rows with box/manual guidance.
+- Have quantities for supplies/filament moved into the shopping list; editing preserves the open inventory panel and updates the purchase budget. The export dialog now points to that list. Connect distinguishes an existing adapter from checking a new device's box. PDF placement rows show Have it/To buy; shopping and budget exports include the device rows as unpriced until a user enters prices.
+
+Validator, syntax, all Node tests and **29/29 independent Chromium checks** pass. New browser regression tests 0/3/2 device-buy lists for the same three-device rack, file/share persistence, per-part ownership changes, explicit missing supply, saved/open inventory editing and mixed-board counts. The filled-slot regression now correctly requests missing supplies before expecting four purchases; installed board/port counts remain four. Desktop/mobile 1280/375 walkthroughs: no JS errors or horizontal overflow. Screenshots output/t20-intent-*.png, t20-picked-*.png and t20-ownership-*.png; mobile pick and ownership panels visually inspected. Downloaded buying PDF contains To buy placement markers and unpriced device rows; ordinary full-rack bounds checks pass. No verification of power inputs or box contents added here.
+
+Latest sequencing read: after T-20, T-3 integration → reviewed T-10 batch 3 → T-24 flat extras → Claude-scoped new T-13 catalog batches. Source research/records were not modified in T-20.

@@ -136,3 +136,9 @@ Commit 45d51fb. Selected the 21 IDs from reviewed f4d3845 while reading the curr
 ## T-10 Batch 2 catalog integration (Codex, 16 October 2026)
 
 f59c5e2: the explicit selection uses the 41 reviewed IDs from 17ff17e. Catalog object comparison shows exactly the 20 Batch 2 entries changed, with no Batch 1 or unreviewed-entry changes. Validator, every Node test and independent Chromium **28/28** pass. Profiles/license/evidence/attachment metadata imported; source sizes, hardware quantities and outstanding source-specific geometries remain unimplemented.
+
+## T-20 — ownership, purchases and inventory (Codex, 16 October 2026)
+
+951e499: validator, syntax and all Node tests pass; independent Chromium **29/29**. Real wizard modes give 0/3/2 device purchase rows for the same three-device layout. Tests cover unpriced devices, optional own/missing fields through version-1 files/shares, changing ownership after build creation, explicit missing Pi supply, inventory values and preserved expanded state, and separate Pi/Orange Pi quantities in a combined mount. Physical board/port totals are independent of ownership; the existing 4/7 and 0/1/7 occupied-slot checks now mark supplies missing before expecting purchases.
+
+Fresh 1280/375 UI walkthroughs report no page errors or horizontal overflow. Mobile picked-device and selected-part ownership screenshots inspected (output/t20-*.png). A real downloaded buying PDF (output/t20-buy-plan.pdf) includes To buy placement markers and unpriced device shopping rows. Full-rack PDF text/image/box bounds and overlap regressions remain passing. Device prices, box contents and unspecified power inputs are not inferred or verified by this change.
