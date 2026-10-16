@@ -7668,6 +7668,683 @@
    "look": "ok",
    "lookNote": "Heavy-duty 3U faceplate cradle holding the Rigol bench oscilloscope with probe access.",
    "confidence": "page"
+  },
+  {
+   "id": "mw3231273",
+   "new": true,
+   "what": "1.5U rack mount tray for ASECAM AS965 PoE switch in 10-inch mini rack",
+   "url": "https://makerworld.com/en/models/3231273",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 4 walls, 30% infill",
+     "plates": null,
+     "prints": "AS965 1.5U switch tray"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1.5,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed on a Lab Rax 5U, fits any 10\" rack with standard 2U cage-nut/M6 posts.",
+   "look": "ok",
+   "lookNote": "1.5U front-loading tray holding a 200x120x45mm metal PoE switch with front port access.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1378342",
+   "new": true,
+   "what": "10-inch rack mount for Dell Wyse 3030 thin client",
+   "url": "https://makerworld.com/en/models/1378342",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 6 walls, 15% infill",
+     "plates": null,
+     "prints": "Dell Wyse 3030 rack mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [
+    {
+     "part": "M3 nut",
+     "qty": 3
+    },
+    {
+     "part": "M3 bolt",
+     "qty": 3
+    }
+   ],
+   "hardwareNote": "Requires 3x M3 nuts and bolts for customizable back brackets.",
+   "fitsLabRax": "stated",
+   "fitNote": "A 10-inch rack mount for the Dell Wyse 3030.",
+   "look": "ok",
+   "lookNote": "Cradle faceplate holding a vertical Dell Wyse 3030 with adjustable rear clamp brackets.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2302058",
+   "new": true,
+   "what": "Lab Rax top panel with cutout and cable passthrough for UniFi UDR7",
+   "url": "https://makerworld.com/en/models/2302058",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - 5U (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "PLA 0.4mm Nozzle",
+     "plates": null,
+     "prints": "UDR7 top panel cutout"
+    }
+   ],
+   "choices": [],
+   "attaches": "top",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Top panel to fit Lab Rax with a cutout for a UDR7 and rear cable passthrough.",
+   "look": "ok",
+   "lookNote": "Flush horizontal top cover plate with round center cutout receiving the UniFi UDR7 body.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1979285",
+   "new": true,
+   "what": "1U shelf for two 5-port desktop switches (TP-Link TL-SG105)",
+   "url": "https://makerworld.com/en/models/1979285",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.12mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "dual 5-port switch shelf"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Specifically designed to mount two TP-Link 5-port switches in a 10\" server rack.",
+   "look": "ok",
+   "lookNote": "1U tray with dual front openings for two side-by-side compact steel desktop switches.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2778568",
+   "new": true,
+   "what": "Snap-in holder for fan PWM speed controller fitting honeycomb side panel",
+   "url": "https://makerworld.com/en/models/2778568",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.16mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "PWM controller honeycomb holder"
+    }
+   ],
+   "choices": [],
+   "attaches": "side-panel",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for Lab Rax 10\" server case with honeycomb pattern side panel.",
+   "look": "ok",
+   "lookNote": "Hexagonal snap-in bracket housing a small potentiometer speed controller PCB.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3120554",
+   "new": true,
+   "what": "1U 10\" rack tray for Raspberry Pi 5 in Flirc aluminum case",
+   "url": "https://makerworld.com/en/models/3120554",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "Flirc Pi 5 1U tray"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed to mount a Raspberry Pi 5 inside a Flirc case in a 10-inch Lab Rax rack.",
+   "look": "ok",
+   "lookNote": "1U front faceplate with reinforced platform and rear retention tabs holding the Flirc case.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1410623",
+   "new": true,
+   "what": "Blank insert for mklements 1U 3x Raspberry Pi 5 shelf middle slot",
+   "url": "https://makerworld.com/en/models/1410623",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "1U 3 x Raspberry Pi 5 Shelf for 10\" Rack (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "middle slot blank insert"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Snap-in blank for mklements 1U 3x Raspberry Pi 5 shelf for 10\" Rack.",
+   "look": "ok",
+   "lookNote": "Flush blanking insert clipping into unpopulated center bay of the 3-bay Pi shelf.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1836272",
+   "new": true,
+   "what": "1U 10-inch rack mount for Home Assistant Yellow smart home hub",
+   "url": "https://makerworld.com/en/models/1836272",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "19cm Mini Server Rack - HomeAssistant Yellow plate (MrStolarsky)",
+    "1/2U, 1U and 2U Blank Cover Plates for 10\" Rack (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "Standard with 3 walls",
+     "plates": null,
+     "prints": "Home Assistant Yellow 1U mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Compatible with half-width (254mm/10 inch) rack systems and Lab Rax blank covers.",
+   "look": "ok",
+   "lookNote": "1U faceplate framing the Home Assistant Yellow PCB and external antenna connector.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3434496",
+   "new": true,
+   "what": "Vented horizontal front top edge with OnlyLans debossed logo",
+   "url": "https://makerworld.com/en/models/3434496",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - Bolted Version - 5U (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "OnlyLans vented edge"
+    }
+   ],
+   "choices": [],
+   "attaches": "top",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Vented horizontal edge for the bolted version of Lab Rax 10\" Server Rack.",
+   "look": "ok",
+   "lookNote": "Horizontal front frame beam featuring slotted ventilation and dual-color OnlyLans center badge.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2678470",
+   "new": true,
+   "what": "5U IKEA Skadis pegboard side panel for LowProfile Lab Rax rack",
+   "url": "https://makerworld.com/en/models/2678470",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 3 walls, 10% infill",
+     "plates": null,
+     "prints": "LowProfile Skadis side panel"
+    },
+    {
+     "name": "0.2mm layer, 3 walls, 10% infill (Plate 2)",
+     "plates": null,
+     "prints": "Skadis side panel variant"
+    }
+   ],
+   "choices": [],
+   "attaches": "side-panel",
+   "sides": "both",
+   "sizes": {
+    "u": 5,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Custom Skadis side panel sized specifically for LowProfile Lab Rax chassis.",
+   "look": "ok",
+   "lookNote": "5U side panel perforated with standard IKEA Skadis elongated oval peg holes.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2800200",
+   "new": true,
+   "what": "1U 10-inch rack mount with keystone slot for UniFi Cloud Gateway Ultra",
+   "url": "https://makerworld.com/en/models/2800200",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 3 walls, 15% infill",
+     "plates": null,
+     "prints": "UCG-Ultra 1U rack mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Fits standard 10\" racks including Lab Rax.",
+   "look": "ok",
+   "lookNote": "1U faceplate cradle enclosing the UniFi UCG-Ultra with front display and 1 RJ45 keystone slot.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2375559",
+   "new": true,
+   "what": "Rear-mount bracket for TP-Link Omada ER707 / ER706 router on Lab Rax",
+   "url": "https://makerworld.com/en/models/2375559",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "PLA, no supports needed",
+     "plates": null,
+     "prints": "ER707/ER706 rear mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "rear-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [
+    {
+     "part": "M6 screw",
+     "qty": 4
+    }
+   ],
+   "hardwareNote": "Uses M6 screws through unthreaded/empty rack holes to mount router from the rear.",
+   "fitsLabRax": "stated",
+   "fitNote": "Mounts the ER707 and ER706 from the back of regular Lab Rax racks.",
+   "look": "ok",
+   "lookNote": "Rear-facing bracket frame clamping the Omada router against back vertical rails.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2387750",
+   "new": true,
+   "what": "10-inch rack shelf specifically for TP-Link Omada ER707-M2 router",
+   "url": "https://makerworld.com/en/models/2387750",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "ER707-M2 rack shelf"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed exclusively for the Lab Rax 10\" Server Rack system to fit wide ER707-M2 router.",
+   "look": "ok",
+   "lookNote": "Custom-contoured shelf tray providing necessary side clearances for the metal ER707-M2 casing.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2611611",
+   "new": true,
+   "what": "Custom plate mounting SMLIGHT SLZB-06 into mklements 2U 7 SBC Holder",
+   "url": "https://makerworld.com/en/models/2611611",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "2U 7 SBC Holder for 10\" Rack (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "SLZB-06 vertical plate"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Fits mklements 2U 7 SBC Holder for 10\" Rack.",
+   "look": "ok",
+   "lookNote": "Vertical slide-in plate with friction-fit cavity holding the SLZB-06 Zigbee Ethernet dongle.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3107676",
+   "new": true,
+   "what": "Modular 4U rack mount shelf for QNAP TS-453Be / TS-45X 4-bay NAS",
+   "url": "https://makerworld.com/en/models/3107676",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 3 walls, 15% infill",
+     "plates": null,
+     "prints": "QNAP TS-45X 4U shelf"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 4,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Custom-designed 4U shelf to integrate QNAP TS-453Be (168x170x266mm) into 10-inch mini rack.",
+   "look": "ok",
+   "lookNote": "Heavy 3-piece modular shelf cradle supporting the full 4-bay QNAP desktop enclosure.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3021355",
+   "new": true,
+   "what": "1U 10-inch rack mount holding two Raspberry Pi 400 (K400) boards",
+   "url": "https://makerworld.com/en/models/3021355",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Raspberry Pi 400 MiniRack 1U Mount (George)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 4 walls, 10% infill, high bed adhesion",
+     "plates": null,
+     "prints": "dual Pi K400 1U mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Mounts two Raspberry Pi K400 boards into 1U space in 10-inch mini rack.",
+   "look": "ok",
+   "lookNote": "1U faceplate with recessed IO bays mounting two bare Pi 400 mainboards side by side.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2190172",
+   "new": true,
+   "what": "Vertical clip-in mount for UniFi Lite 8 PoE power adapter on honeycomb panel",
+   "url": "https://makerworld.com/en/models/2190172",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Mount for Unifi Power Adapter/Brick (shrimpisbugss)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "UniFi power brick honeycomb mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "side-panel",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Mount for UniFi Lite 8 PoE power brick on Lab Rax honeycomb storage panel.",
+   "look": "ok",
+   "lookNote": "Form-fitted upright retention cradle with back tabs clipping into honeycomb side mesh.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3196367",
+   "new": true,
+   "what": "Custom tray mounting Radxa ROCK 3A into mklements 2U 7 SBC Holder",
+   "url": "https://makerworld.com/en/models/3196367",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [
+    "2U 7 SBC Holder for 10\" Rack (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 6 walls, 70% infill",
+     "plates": null,
+     "prints": "ROCK 3A SBC tray"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Mounts the ROCK 3A onto the Lab Rax 2U 7 SBC enclosure system.",
+   "look": "ok",
+   "lookNote": "Vertical slide-in sled with mounting bosses specifically positioned for ROCK 3A board.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2482542",
+   "new": true,
+   "what": "1U ventilated shelf for Mini MP330n print server in Lab Rax 10\" rack",
+   "url": "https://makerworld.com/en/models/2482542",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 4 walls, 20% infill",
+     "plates": null,
+     "prints": "MP330n printserver 1U shelf"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Ventilated shelf designed to fit the 3D printable LabRax rack system.",
+   "look": "ok",
+   "lookNote": "1U vented faceplate shelf with recess for compact USB print server.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2611570",
+   "new": true,
+   "what": "Custom plate mounting Plejd Gateway GWY-01 into 2U 7 SBC Holder",
+   "url": "https://makerworld.com/en/models/2611570",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "2U 7 SBC Holder for 10\" Rack (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "Plejd Gateway GWY-01 plate"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed to fit mklements 2U 7 SBC Holder for 10\" Rack.",
+   "look": "ok",
+   "lookNote": "Vertical slide-in plate retaining the Plejd smart home gateway with Ethernet port exposed.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1368955",
+   "new": true,
+   "what": "1U rack shelf holding two 3.5\" HDDs using Dell PowerEdge caddies with LED housing",
+   "url": "https://makerworld.com/en/models/1368955",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.28mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "dual 3.5\" HDD tray in PETG"
+    },
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "housing for 2x 3mm activity LEDs"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "Uses 2x Dell PowerEdge 3.5\" HDD caddies from AliExpress and 2x 3mm activity LEDs.",
+   "fitsLabRax": "stated",
+   "fitNote": "For 10-inch NAS / homelab in 1U.",
+   "look": "ok",
+   "lookNote": "1U dual-bay horizontal tray with guide slots for quick-release PowerEdge drive caddies.",
+   "confidence": "page"
   }
  ]
 }

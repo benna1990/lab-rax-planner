@@ -19,6 +19,7 @@ Before you change code, claim it here: what, which files, since when. One writer
 
 | Who | Working on | Files | Since |
 |---|---|---|---|
+| Codex | T-3 sourced power input integration | `catalog.json`, `app.js`, `connect.js`, `tools/validate.mjs`, importer and Connect/browser tests | 2026-10-16 14:20 CEST |
 | Antigravity | T-13: missing candidate models inspection | `docs/audit/model-pages.json` | 2026-10-16 13:42 CEST |
 
 ## Task board
@@ -1151,4 +1152,48 @@ Seventh tranche of candidate models from `docs/audit/model-candidates.json` insp
 - 1 × `CC0`
 
 **Running total for T-13:** 150 new rack parts documented in `model-pages.json`, 38 models skipped (188 candidates checked). Total records in `model-pages.json` is now 225 (75 frame-extras + 150 candidates). All test suites and catalog validation pass.
+
+### Antigravity — T-13 Batch 8: 26 Candidate Models Inspected (21 Added, 5 Skipped), 16 October 2026
+
+Eighth tranche of candidate models from `docs/audit/model-candidates.json` inspected (covering ranks 303 through 335):
+
+**21 Rack parts documented in `docs/audit/model-pages.json` (`new: true`, `confidence: "page"`):**
+1. `mw3231273` (Rank 303): 1.5U rack mount tray for ASECAM AS965 PoE switch in 10-inch mini rack (`CC BY-NC`).
+2. `mw1378342` (Rank 306): 10-inch rack mount for Dell Wyse 3030 thin client (`CC BY-SA`). Uses 3x M3 nuts and bolts.
+3. `mw2302058` (Rank 307): Lab Rax top panel with cutout and cable passthrough for UniFi UDR7 (`CC BY-NC-SA`).
+4. `mw1979285` (Rank 308): 1U shelf for two 5-port desktop switches (TP-Link TL-SG105) (`CC BY-NC`).
+5. `mw2778568` (Rank 309): Snap-in holder for fan PWM speed controller fitting honeycomb side panel (`MakerWorld Exclusive License`).
+6. `mw3120554` (Rank 310): 1U 10" rack tray for Raspberry Pi 5 in Flirc aluminum case (`MakerWorld Exclusive License`).
+7. `mw1410623` (Rank 311): Blank insert for mklements 1U 3x Raspberry Pi 5 shelf middle slot (`CC BY-NC-SA`).
+8. `mw1836272` (Rank 312): 1U 10-inch rack mount for Home Assistant Yellow smart home hub (`CC BY-NC-SA`).
+9. `mw3434496` (Rank 313): Vented horizontal front top edge with OnlyLans debossed logo (`MakerWorld Exclusive License`).
+10. `mw2678470` (Rank 316): 5U IKEA Skadis pegboard side panel for LowProfile Lab Rax rack (`MakerWorld Exclusive License`).
+11. `mw2800200` (Rank 318): 1U 10-inch rack mount with keystone slot for UniFi Cloud Gateway Ultra (`Standard Digital File License`).
+12. `mw2375559` (Rank 321): Rear-mount bracket for TP-Link Omada ER707 / ER706 router on Lab Rax (`Standard Digital File License`). Uses 4x M6 screws.
+13. `mw2387750` (Rank 322): 10-inch rack shelf specifically for TP-Link Omada ER707-M2 router (`MakerWorld Exclusive License`).
+14. `mw2611611` (Rank 324): Custom plate mounting SMLIGHT SLZB-06 into mklements 2U 7 SBC Holder (`CC BY-NC-SA`).
+15. `mw3107676` (Rank 325): Modular 4U rack mount shelf for QNAP TS-453Be / TS-45X 4-bay NAS (`MakerWorld Exclusive License`).
+16. `mw3021355` (Rank 327): 1U 10-inch rack mount holding two Raspberry Pi 400 (K400) boards (`CC BY-NC-SA`).
+17. `mw2190172` (Rank 328): Vertical clip-in mount for UniFi Lite 8 PoE power adapter on honeycomb panel (`CC BY-NC-SA`).
+18. `mw3196367` (Rank 329): Custom tray mounting Radxa ROCK 3A into mklements 2U 7 SBC Holder (`MakerWorld Exclusive License`).
+19. `mw2482542` (Rank 332): 1U ventilated shelf for Mini MP330n print server in Lab Rax 10" rack (`Standard Digital File License`).
+20. `mw2611570` (Rank 334): Custom plate mounting Plejd Gateway GWY-01 into 2U 7 SBC Holder (`CC BY-NC-SA`).
+21. `mw1368955` (Rank 335): 1U rack shelf holding two 3.5" HDDs using Dell PowerEdge caddies with LED housing (`Standard Digital File License`).
+
+**5 Non-rack / incompatible models skipped (with reasons):**
+- `mw2878779` (Rank 314): "Raspberry Pi 3B Rack for LabRax mini" by Dave MacRae — Skipped: for 5-inch Mini Lab Rax.
+- `mw3274026` (Rank 315): "Mini Lab Rax 5\" 1U DFRobot CM4 OpenWRT Router" by mklements — Skipped: for 5-inch Mini Lab Rax.
+- `mw2515337` (Rank 317): "Lenovo 135W Skadis" by felipe — Skipped: standard IKEA Skadis pegboard hook/holder, not a 10-inch Lab Rax frame part or rack unit.
+- `mw2090716` (Rank 320): "Rack Unit Ruler - wallet tool" by veli — Skipped: credit-card sized measuring helper tool, not a rack mount or frame component.
+- `mw3293562` (Rank 333): "KWS-Rack-3U-Leg/Depth Exp. (Lab-Rax-2U)" by BlackShad0w — Skipped: 3U leg and depth expander for KWS Rack v.2, not a Lab Rax frame part.
+
+**License breakdown across Batch 8 (21 records):**
+- 7 × `CC BY-NC-SA`
+- 7 × `MakerWorld Exclusive License`
+- 4 × `Standard Digital File License`
+- 2 × `CC BY-NC`
+- 1 × `CC BY-SA`
+
+**Running total for T-13:** 171 new rack parts documented in `model-pages.json`, 43 models skipped (214 candidates checked). Total records in `model-pages.json` is now 246 (75 frame-extras + 171 candidates). All test suites and catalog validation pass.
+
 
