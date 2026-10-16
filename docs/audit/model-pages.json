@@ -9111,6 +9111,780 @@
    "look": "ok",
    "lookNote": "Form-fitting holder bracket with rear prongs keying into honeycomb side wall mesh.",
    "confidence": "page"
+  },
+  {
+   "id": "mw1349485",
+   "new": true,
+   "what": "10-inch 1U rack blank plate with two rows of IKEA Skadis pegboard holes",
+   "url": "https://makerworld.com/en/models/1349485",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "10-inch Rack Mount Blanks (Mauker)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "10\" Skadis blank plate"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Simple 10\" rack plate with 2 rows of Skadis holes.",
+   "look": "ok",
+   "lookNote": "1U front plate perforated with two rows of standard Skadis oblong pegboard mounting slots.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2725335",
+   "new": true,
+   "what": "1U enclosure mount for TP-Link LS105G 5-port desktop switch in Lab Rax 10\"",
+   "url": "https://makerworld.com/en/models/2725335",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "TP-Link LS105G 1U mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Compatible with Lab Rax 10\".",
+   "look": "ok",
+   "lookNote": "1U faceplate cradle enclosing the compact 5-port TP-Link switch body flush with the front.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3322442",
+   "new": true,
+   "what": "1U mount for a single 120mm fan for vertical airflow in 10\" mini rack",
+   "url": "https://makerworld.com/en/models/3322442",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.24mm layer, 7 walls, 15% infill",
+     "plates": null,
+     "prints": "1U 120mm fan mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": 130,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Standard 1U design fitting 10-inch mini rack systems, depth 130mm.",
+   "look": "ok",
+   "lookNote": "1U horizontal tray mounting a single standard 120mm PC fan blowing vertically.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1943842",
+   "new": true,
+   "what": "Lab Rax side panel with dedicated mounting holes for ISP modem bracket",
+   "url": "https://makerworld.com/en/models/1943842",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - Bolted Version - 5U (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.6mm nozzle",
+     "plates": null,
+     "prints": "side panel with modem mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "side-panel",
+   "sides": "both",
+   "sizes": {
+    "u": 5,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Remix of mklements 5U bolted Lab Rax side panel.",
+   "look": "ok",
+   "lookNote": "5U side panel with custom screw hole pattern attaching an external ISP modem cradle.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3031508",
+   "new": true,
+   "what": "10-inch rack mount kit for NVIDIA Jetson Orin Nano / Super Developer Kit",
+   "url": "https://makerworld.com/en/models/3031508",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "Jetson Orin Nano rack kit"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1.5,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Fits nicely into the Lab Rax 10\" system.",
+   "look": "ok",
+   "lookNote": "Drop-in retention cradle framing the NVIDIA Jetson Orin Nano carrier board without extra screws.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3393026",
+   "new": true,
+   "what": "Customizable 10-inch rack side panel with wire pass-throughs for standard and expansion frames",
+   "url": "https://makerworld.com/en/models/3393026",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill - 3u EXPANSION twin",
+     "plates": null,
+     "prints": "3U expansion side panel"
+    },
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill - 5u EXPANSION twin",
+     "plates": null,
+     "prints": "5U expansion side panel"
+    }
+   ],
+   "choices": [
+    "frame height: 3U or 5U expansion"
+   ],
+   "attaches": "side-panel",
+   "sides": "both",
+   "sizes": {
+    "u": 5,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Customizable side panel designed for Lab Rax 10\" system with USB-A/USB-C wire passthroughs.",
+   "look": "ok",
+   "lookNote": "Side panel featuring wire pass-through slots avoiding the need to dismantle frame for cabling.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2800395",
+   "new": true,
+   "what": "Vertical 2.5-inch SSD tray with SATA-to-USB adapter cutout for mklements 2U SBC holder",
+   "url": "https://makerworld.com/en/models/2800395",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "SSD tray for 2U panel"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Fits the Lab Rax 2U plate by mklements designed to hold Raspberry Pis.",
+   "look": "ok",
+   "lookNote": "Vertical slot caddy with recessed pocket supporting SATA-to-USB bridge dongles.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2957307",
+   "new": true,
+   "what": "Parametric rack identification labels mounting onto rack screw positions",
+   "url": "https://makerworld.com/en/models/2957307",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "Proxmox example, editable text",
+     "plates": null,
+     "prints": "Proxmox label example"
+    },
+    {
+     "name": "NAS Example (Left)",
+     "plates": null,
+     "prints": "NAS label left example"
+    }
+   ],
+   "choices": [
+    "text and logo: Proxmox, NAS or customizable"
+   ],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for 10\" homelab racks mounting using existing rack screws.",
+   "look": "ok",
+   "lookNote": "Slender horizontal clip-on label tags fastened by the front M6 rack screws.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3216137",
+   "new": true,
+   "what": "Lab Rax Enhanced short-depth frame redesign (200mm deep) with bolted and heat insert options",
+   "url": "https://makerworld.com/en/models/3216137",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "Bolted version",
+     "plates": null,
+     "prints": "bolted short depth frame"
+    },
+    {
+     "name": "Heat insert version",
+     "plates": null,
+     "prints": "heat insert short depth frame"
+    },
+    {
+     "name": "top and bottom",
+     "plates": null,
+     "prints": "top and bottom parts"
+    },
+    {
+     "name": "Top and bottom full cover",
+     "plates": null,
+     "prints": "full cover plates"
+    },
+    {
+     "name": "Vertical post heated insert",
+     "plates": null,
+     "prints": "heated insert vertical posts"
+    },
+    {
+     "name": "Vertical post bolted version",
+     "plates": null,
+     "prints": "bolted vertical posts"
+    }
+   ],
+   "choices": [
+    "fastener type: Bolted or Heat insert",
+    "cover: open or full cover"
+   ],
+   "attaches": "top",
+   "sizes": {
+    "u": null,
+    "lengthMm": 200,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Redesign of top and bottom frame for Lab Rax replacing diagonal corner braces with a compact 200mm depth.",
+   "look": "ok",
+   "lookNote": "Complete 200mm shallow-depth frame structure replacing standard 220mm/extended pieces.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2817104",
+   "new": true,
+   "what": "1U recessed shelf for TP-Link TL-SG108-M2 2.5GbE switch in Lab Rax",
+   "url": "https://makerworld.com/en/models/2817104",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "1U Ventilation Panel for 10\" Rack (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "TL-SG108-M2 1U recessed shelf"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Remix of mklements 1U open shelf with recessed support bars to fit wide TL-SG108-M2.",
+   "look": "ok",
+   "lookNote": "1U shelf holding the oversized metal 8-port switch set back between the rack posts.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2865989",
+   "new": true,
+   "what": "1U 10-inch switch mount for TP-Link LS1008G with Hex or Flush face options",
+   "url": "https://makerworld.com/en/models/2865989",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "HEX Face",
+     "plates": null,
+     "prints": "hex face plate mount"
+    },
+    {
+     "name": "Flush Plate",
+     "plates": null,
+     "prints": "flush face plate mount"
+    }
+   ],
+   "choices": [
+    "face style: HEX face or Flush plate"
+   ],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "Includes two optional M3 holes on base if screws are needed.",
+   "fitsLabRax": "stated",
+   "fitNote": "1U 10\" rack switch mount matching the Lab Rax hex design.",
+   "look": "ok",
+   "lookNote": "1U faceplate framing the 8-port switch with hex pattern styling or flush clean border.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3344082",
+   "new": true,
+   "what": "1U thermoformed mesh screen panel for 10\" mini rack",
+   "url": "https://makerworld.com/en/models/3344082",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.24mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "1U thermoformed screen panel"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "1U panel for 10-inch mini racks.",
+   "look": "ok",
+   "lookNote": "1U decorative ventilation bezel holding a formed mesh screen insert.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3422729",
+   "new": true,
+   "what": "1U 10-inch parametric rack shelf for Nokia ONT XS-010X-Q fibre termination",
+   "url": "https://makerworld.com/en/models/3422729",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "PETG 0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "Nokia ONT 1U tray"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for Lab Rax 10\" rack to mount Nokia ONT XS-010X-Q.",
+   "look": "ok",
+   "lookNote": "1U tray supporting the compact white fiber optic ONT unit with fiber port access.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3158809",
+   "new": true,
+   "what": "1U 12-port RJ45 keystone patch panel with port numbering for 10\" rack",
+   "url": "https://makerworld.com/en/models/3158809",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 3 walls, 15% infill",
+     "plates": null,
+     "prints": "12-port keystone panel"
+    }
+   ],
+   "choices": [
+    "thickness: 3mm or 4mm front panel"
+   ],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Full 1U sized patch panel to standard 44.45mm height for 10\" homelab racks.",
+   "look": "ok",
+   "lookNote": "Heavy-duty 1U faceplate featuring 12 cleanly numbered square keystone slots.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3277936",
+   "new": true,
+   "what": "Quick-access removable side frame for Lab Rax in 3U and 5U expansion heights",
+   "url": "https://makerworld.com/en/models/3277936",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill - 3u EXPANSION",
+     "plates": null,
+     "prints": "3U side frame"
+    },
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill - 5u EXPANSION",
+     "plates": null,
+     "prints": "5U side frame"
+    }
+   ],
+   "choices": [
+    "height: 3U expansion or 5U expansion"
+   ],
+   "attaches": "side-panel",
+   "sides": "both",
+   "sizes": {
+    "u": 5,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Alternative side frame for Lab Rax allowing quick internal access without disassembling rack.",
+   "look": "ok",
+   "lookNote": "Open framework side structure permitting tool-less reach into interior rack cabling.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3052148",
+   "new": true,
+   "what": "3.5-inch hard drive sled fitting 2Ux6 multi-HDD 10\" rack enclosure",
+   "url": "https://makerworld.com/en/models/3052148",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Hot Swappable 10\" Rack Drive Tray 2.5U w/cradle (Moo Ideae)"
+   ],
+   "profiles": [
+    {
+     "name": "0.12mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "fine layer HDD sled"
+    },
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "standard 0.2mm HDD sled"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Remix of 3.5\" HDD sled fitting 2U x6 HDD enclosure for 10-inch rack.",
+   "look": "ok",
+   "lookNote": "Slide-in drive tray caddy with front latch handle supporting standard 3.5\" spinning disks.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3088707",
+   "new": true,
+   "what": "Angled laptop riser stand replacing top carry handles on Lab Rax",
+   "url": "https://makerworld.com/en/models/3088707",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "LabRax laptop riser stand"
+    }
+   ],
+   "choices": [],
+   "attaches": "top-corners",
+   "sides": "both",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Laptop stand for Lab Rax replacing top handles to reuse spare ThinkPad laptops.",
+   "look": "ok",
+   "lookNote": "Dual angled support arms bolting to top rack corners elevating a closed or open laptop above the rack.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3237005",
+   "new": true,
+   "what": "Hexagonal mesh ventilation side panel for Lab Rax A1 Mini 5U model",
+   "url": "https://makerworld.com/en/models/3237005",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - 5U for A1 Mini (cwlsmith)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "A1 mini hex mesh side panel"
+    }
+   ],
+   "choices": [],
+   "attaches": "side-panel",
+   "sides": "both",
+   "sizes": {
+    "u": 5,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Hexagonal mesh side panels sized to print on Bambu A1 Mini for the A1 Mini Lab Rax frame.",
+   "look": "ok",
+   "lookNote": "Interlocking two-piece side panel with continuous honeycomb vent cutouts for 180mm print beds.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3220366",
+   "new": true,
+   "what": "Lab Rax Enhanced parametric 10\" rack generator with bolted short-depth presets",
+   "url": "https://makerworld.com/en/models/3220366",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "4U Bolted version 200mm depth",
+     "plates": null,
+     "prints": "4U bolted 200mm depth preset"
+    }
+   ],
+   "choices": [],
+   "attaches": "posts",
+   "sides": "both",
+   "sizes": {
+    "u": 4,
+    "lengthMm": 200,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Customizable parametric rack generator addressing depth and footprint for Lab Rax frames.",
+   "look": "ok",
+   "lookNote": "Modular parametric posts and frame corner blocks generating variable-depth Lab Rax chassis.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3312431",
+   "new": true,
+   "what": "2U rackmount case for Minisforum MS-A2 / MS-01 workstation mini PC in Lab Rax",
+   "url": "https://makerworld.com/en/models/3312431",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 4 walls, 15% infill",
+     "plates": null,
+     "prints": "MS-A2/MS-01 2U case"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "A 2U rackmount case for Minisforum MS-A2 / MS-01 in Lab Rax minirack.",
+   "look": "ok",
+   "lookNote": "2U enclosed chassis sleeve holding the high-power Minisforum workstation PC with PCIe slot access.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2943375",
+   "new": true,
+   "what": "1U 10-inch switch mount for TP-Link LS1210GP1U with Hex or Flush face options",
+   "url": "https://makerworld.com/en/models/2943375",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "Hex Face Plate",
+     "plates": null,
+     "prints": "hex face plate mount"
+    },
+    {
+     "name": "Flat/Flush Face Plate",
+     "plates": null,
+     "prints": "flat flush face plate mount"
+    }
+   ],
+   "choices": [
+    "face style: Hex face plate or Flat/Flush face plate"
+   ],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "1U 10\" rack switch mount matching Lab Rax hex design with click-in fit.",
+   "look": "ok",
+   "lookNote": "1U faceplate framing the 10-port PoE switch with top-insertion click fit and hex styling.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2830941",
+   "new": true,
+   "what": "1U rack mount for ASUS ZenDrive U9M slim external optical CD/DVD drive in Lab Rax",
+   "url": "https://makerworld.com/en/models/2830941",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "1/2U, 1U and 2U Blank Cover Plates for 10\" Rack (mklements)"
+   ],
+   "profiles": [],
+   "profilesNote": "the page has no print profiles",
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Made using mklements 1U blank for Lab Rax 10\" rack.",
+   "look": "ok",
+   "lookNote": "1U shelf with two retention grooves for the rubber feet of an ASUS slim optical drive.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2779882",
+   "new": true,
+   "what": "2U 10-inch rack mount for dual MMDVM hotspots with dual 3.5\" Nextion displays",
+   "url": "https://makerworld.com/en/models/2779882",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "dual MMDVM Nextion 2U mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Clean 2U front panel for running dual MMDVM hotspots in a 10\" rack.",
+   "look": "ok",
+   "lookNote": "2U faceplate holding dual ham radio digital hotspot stacks with twin 3.5-inch color LCD touchscreens.",
+   "confidence": "page"
   }
  ]
 }

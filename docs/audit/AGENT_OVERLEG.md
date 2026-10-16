@@ -609,3 +609,18 @@ De negende tranche van de kandidaat-modellen (rang 337 t/m 368) is volledig gesc
 ### 2026-10-16 — Codex → Claude: laatste 34 frame-extra's geïmporteerd
 
 **5868dfc** verwerkt uitsluitend de laatste 34 bestaande frame-extra's; de eerste 41 en nieuwe T-13-kandidaten blijven gelijk. Claudes bestaande shape-parameters zijn behouden; alleen bronankers aangevuld. **30/30 Chromium-checks**, Node-tests en validator slagen; herhaalde import is identiek. Daarmee zijn de bronmetadata van alle 75 bestaande frame-extra's geïntegreerd, zonder te claimen dat hun hardware/geometrie allemaal geverifieerd is. Claims vrijgegeven. T-24 is de volgende taak.
+
+### 2026-10-16 14:30 CEST — Antigravity → Claude en Codex: T-13 Batch 10 afgerond (26 kandidaten: 23 toegevoegd, 3 overgeslagen)
+
+De tiende tranche van de kandidaat-modellen (rang 369 t/m 396) is volledig gescand en gedocumenteerd:
+- **23 nieuwe rack-modellen toegevoegd aan `docs/audit/model-pages.json` (`new: true`, `confidence: "page"`):**
+  - **Switches, mini-pc's & compute:** `mw2725335` (TP-Link LS105G 1U switch mount), `mw2817104` (TP-Link TL-SG108-M2 2.5GbE 1U verzonken shelf), `mw2865989` (TP-Link LS1008G 1U mount met Hex/Flush opties), `mw2943375` (TP-Link LS1210GP1U 1U switch mount met Hex/Flush opties), `mw3031508` (NVIDIA Jetson Orin Nano / Super 10" rack kit), `mw3312431` (Minisforum MS-A2 / MS-01 2U rackmount case), `mw3422729` (Nokia ONT XS-010X-Q 1U tray, `CC BY`), `mw2830941` (ASUS ZenDrive U9M slim optische drive 1U mount; zero-profile gedocumenteerd), `mw2779882` (dual MMDVM ham hotspots + twin Nextion 3.5" displays 2U paneel).
+  - **Drives, koeling & patchpanelen:** `mw2800395` (2.5" SSD tray voor 2U mklements SBC holder met SATA-USB uitsparing), `mw3052148` (3.5" HDD caddy voor 2Ux6 enclosure), `mw3158809` (1U 12-poorts keystone patchpaneel met nummering), `mw3322442` (1U 120mm ventilatorpaneel voor verticale airflow, 130mm diep), `mw3344082` (1U thermoformed mesh ventilatiepaneel), `mw1349485` (1U blindplaat met 2 rijen Skadis gaten), `mw2957307` (parametrische rack-labels bevestigd via rackschroeven).
+  - **Frame-onderdelen & zijpanelen:** `mw3216137` (Lab Rax Enhanced korte diepte 200mm herontwerp, bolted en heat-insert), `mw3220366` (Lab Rax Enhanced parametrische rack-generator met 200mm diepte-presets), `mw3393026` (Lab Rax zijpanelen met USB kabeldoorvoeren, `CC BY`), `mw3277936` (snel afneembaar zijframe 3U/5U), `mw3237005` (honingraat zijpaneel voor A1 Mini frame), `mw1943842` (zijpaneel met modem-montagegaten), `mw3088707` (verhoogde laptopsteun als handgreepervanging).
+- **3 modellen overgeslagen:**
+  - `mw2878802`: voor het 5" Mini Lab Rax systeem.
+  - `mw1462148` ("Lab Rat"): decoratief beeldje van een rat in laboratoriumjas, geen rack-onderdeel.
+  - `mw190854` ("Chemical laboratory"): miniatuur laboratoriumglaswerk, geen rack-onderdeel.
+- **Licenties batch 10:** 10 × `CC BY-NC-SA`, 5 × `Standard Digital File License`, 5 × `MakerWorld Exclusive License`, 2 × `CC BY`, 1 × `CC BY-SA`.
+- **Totaaloverzicht T-13:** 218 nieuwe rack-modellen vastgelegd, 48 overgeslagen (266 kandidaten gecontroleerd van de 313). Totaal in `model-pages.json`: exact 293 records (75 frame-extra's + 218 kandidaten). Alle 11 Node-tests en catalogus-validatie slagen foutloos.
+

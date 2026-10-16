@@ -1276,3 +1276,47 @@ Validator, all Node tests and **30/30 independent Chromium checks** pass. All 75
 - **T-3 closed** as far as the data goes: 32 devices.
 
 **Next for Codex:** T-24 (the flat view and a 3D check for casters), then T-16 (honest ✓ marks for power and cooling).
+
+### Antigravity — T-13 Batch 10: 26 Candidate Models Inspected (23 Added, 3 Skipped), 16 October 2026
+
+Tenth tranche of candidate models from `docs/audit/model-candidates.json` inspected (covering ranks 369 through 396):
+
+**23 Rack parts documented in `docs/audit/model-pages.json` (`new: true`, `confidence: "page"`):**
+1. `mw1349485` (Rank 369): 10-inch 1U rack blank plate with two rows of IKEA Skadis pegboard holes (`CC BY-NC-SA`).
+2. `mw2725335` (Rank 370): 1U enclosure mount for TP-Link LS105G 5-port desktop switch in Lab Rax 10" (`Standard Digital File License`).
+3. `mw3322442` (Rank 371): 1U mount for a single 120mm fan for vertical airflow in 10" mini rack (`Standard Digital File License`). Stated depth 130mm.
+4. `mw1943842` (Rank 373): Lab Rax side panel with dedicated mounting holes for ISP modem bracket (`CC BY-NC-SA`).
+5. `mw3031508` (Rank 374): 10-inch rack mount kit for NVIDIA Jetson Orin Nano / Super Developer Kit (`MakerWorld Exclusive License`).
+6. `mw3393026` (Rank 375): Customizable 10-inch rack side panel with wire pass-throughs for standard and expansion frames (`CC BY`).
+7. `mw2800395` (Rank 376): Vertical 2.5-inch SSD tray with SATA-to-USB adapter cutout for mklements 2U SBC holder (`CC BY-NC-SA`).
+8. `mw2957307` (Rank 378): Parametric rack identification labels mounting onto rack screw positions (`CC BY-SA`).
+9. `mw3216137` (Rank 379): Lab Rax Enhanced short-depth frame redesign (200mm deep) with bolted and heat insert options (`Standard Digital File License`).
+10. `mw2817104` (Rank 380): 1U recessed shelf for TP-Link TL-SG108-M2 2.5GbE switch in Lab Rax (`CC BY-NC-SA`).
+11. `mw2865989` (Rank 381): 1U 10-inch switch mount for TP-Link LS1008G with Hex or Flush face options (`MakerWorld Exclusive License`).
+12. `mw3344082` (Rank 382): 1U thermoformed mesh screen panel for 10" mini rack (`Standard Digital File License`).
+13. `mw3422729` (Rank 383): 1U 10-inch parametric rack shelf for Nokia ONT XS-010X-Q fibre termination (`CC BY`).
+14. `mw3158809` (Rank 384): 1U 12-port RJ45 keystone patch panel with port numbering for 10" rack (`MakerWorld Exclusive License`).
+15. `mw3277936` (Rank 385): Quick-access removable side frame for Lab Rax in 3U and 5U expansion heights (`CC BY-NC-SA`).
+16. `mw3052148` (Rank 386): 3.5-inch hard drive sled fitting 2Ux6 multi-HDD 10" rack enclosure (`CC BY-NC-SA`).
+17. `mw3088707` (Rank 387): Angled laptop riser stand replacing top carry handles on Lab Rax (`CC BY-NC-SA`).
+18. `mw3237005` (Rank 388): Hexagonal mesh ventilation side panel for Lab Rax A1 Mini 5U model (`CC BY-NC-SA`).
+19. `mw3220366` (Rank 389): Lab Rax Enhanced parametric 10" rack generator with bolted short-depth presets (`Standard Digital File License`).
+20. `mw3312431` (Rank 390): 2U rackmount case for Minisforum MS-A2 / MS-01 workstation mini PC in Lab Rax (`CC BY-NC-SA`).
+21. `mw2943375` (Rank 391): 1U 10-inch switch mount for TP-Link LS1210GP1U with Hex or Flush face options (`MakerWorld Exclusive License`).
+22. `mw2830941` (Rank 393): 1U rack mount for ASUS ZenDrive U9M slim external optical CD/DVD drive in Lab Rax (`CC BY-NC-SA`). Confirmed zero-profile model (`profiles: []`, `profilesNote` added).
+23. `mw2779882` (Rank 394): 2U 10-inch rack mount for dual MMDVM hotspots with dual 3.5" Nextion displays (`MakerWorld Exclusive License`).
+
+**3 Non-rack / incompatible models skipped (with reasons):**
+- `mw2878802` (Rank 377): "Raspberry Pi 4B Rack for LabRax mini" by Dave MacRae — Skipped: for 5-inch Mini Lab Rax.
+- `mw1462148` (Rank 395): "Lab Rat" by Loligo — Skipped: decorative rodent figurine in a lab coat, not a server rack part.
+- `mw190854` (Rank 396): "Chemical laboratory" by DawesProduction — Skipped: miniature chemical glassware model, not a server rack part.
+
+**License breakdown across Batch 10 (23 records):**
+- 10 × `CC BY-NC-SA`
+- 5 × `Standard Digital File License`
+- 5 × `MakerWorld Exclusive License`
+- 2 × `CC BY`
+- 1 × `CC BY-SA`
+
+**Running total for T-13:** 218 new rack parts documented in `model-pages.json`, 48 models skipped (266 candidates checked). Total records in `model-pages.json` is now 293 (75 frame-extras + 218 candidates). All test suites and catalog validation pass.
+
