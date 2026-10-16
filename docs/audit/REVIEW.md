@@ -19,6 +19,7 @@ Before you change code, claim it here: what, which files, since when. One writer
 
 | Who | Working on | Files | Since |
 |---|---|---|---|
+| Claude (Sonnet agent, reviewed by Claude) | T-10: page records for the 74 frame extras, in batches of ~20 | `docs/audit/model-pages.json` | 2026-10-16 |
 | Antigravity | T-3 (power input per device research) | `docs/audit/power-inputs.json` | 2026-10-15 |
 
 ## Task board
@@ -30,6 +31,58 @@ Claude sets these tasks; take one by writing your name in *Who works on what*. E
 - **T-9 → Codex**, after T-8: fix R-11 (the wizard places parts the same way as the editor, so its suggestion never overlaps; add a self-test check), then R-12 (a step jump keeps the heading below the sticky header) and R-13. Claim `app.js`, `index.html`, `pdf.js` and `tools/selftest.html` as needed. The T-3 integration goes first whenever Antigravity's batch is in.
 - **Antigravity** (opening model pages and datasheets, which the others can't): T-3 now, then T-4, then T-5. Commit `docs/audit/power-inputs.json` in batches (the first 15–20 sourced devices first) so Codex can start on the integration.
 - **Claude**: reviews every commit within one watch round, answers findings, keeps the docs current and prepares the merge with the owner. No code claims this round.
+
+**Round 5 (2026-10-16): UX and visual audit.** Claude walked the planner as a beginner at 1280 and 375 px. The findings are R-17 to R-34 under *Open*; the reasoning, the visual review and the plan are in [UX_AUDIT.md](UX_AUDIT.md), and the mock-up is [visual-proposal.html](visual-proposal.html). Order: T-14 → T-15 → T-16 → T-17 → T-18 for **Codex**, one at a time; **Antigravity** does T-3 first, then T-19. Claude reviews every commit and reruns the beginner route after T-15 and T-17. The T-3 integration still goes first whenever Antigravity's batch is in.
+
+### T-14: Correct counts, keep the user's rack (R-17, R-18, export half of R-30) → **Codex**
+Claim `app.js` and `tools/selftest.html`.
+1. Modular parts count their filled slots (`it.fill`) for supplies, cables, Connect and ports.
+2. A share link or a rack file asks before it replaces a saved rack that isn't the example and isn't empty. The replaced rack is kept as "previous rack", which survives a reload and can be brought back.
+3. The shopping CSV and the README keep "optional".
+
+**Done:**
+- the example gives 4 Pi supplies and 4 USB-C cables;
+- the self-test covers fill counts and the share-link question;
+- the checks pass.
+
+### T-15: A compact, buildable first rack (R-19, R-20, R-21, R-22) → **Codex**
+Claim `app.js`, `layout.js`, `ready.js` and `tools/selftest.html`.
+1. In the wizard's `put()`, a filler that would be pushed down by the half-U overlap rule is left out; the sliver stays empty.
+2. Room to grow is open space: it isn't closed with vents or blanks, and a new part can take it.
+3. Vents are added only when the airflow model asks for them, and the result screen says why.
+4. The result screen breaks the height down, and says when it goes above 5U and needs extension parts.
+5. The default mount never needs an add-on the user didn't pick (e.g. the PoE HAT); use the catalog flag that T-19 fills, and until then rank `poeIn` mounts last.
+6. A PoE problem offers "Use its own USB-C supply" first.
+7. Free space counts only usable space ("1U open (two ½U gaps)").
+8. The printer step in the wizard states the 254 mm panel limit for small beds.
+
+**Done:** the acceptance lines of R-19 to R-22 hold, with a self-test check for the UCG-Ultra + Flex Mini + Pi 5 wizard.
+
+### T-16: Status only as strong as its data (R-23, R-26) → **Codex**
+Claim `ready.js`, `app.js` and `index.html`.
+- Readiness ✓ for power, PoE and cooling only when the inputs are sourced; otherwise "≈" with "n of m sourced".
+- Library watt chips get "≈" when unsourced.
+- Step states are true to the work and written out in text.
+
+**Done:** the R-23 and R-26 acceptance lines hold; `tools/test-ready.mjs` covers the new states.
+
+### T-17: One next step on every screen (R-24, R-25, R-33, R-34) → **Codex**, in three commits
+Follow [visual-proposal.html](visual-proposal.html) and UX_AUDIT.md ("Visual proposal"). Claim `index.html` and `app.js`.
+- **A, tokens:** colour roles, button and chip shapes, the type scale and spacing.
+- **B, desktop structure:** top bar with steps, the Next-step card, the status strip, and rack settings in the build column.
+- **C, phone:** the 60 px header, the bottom bar and the library as a sheet.
+
+Each commit gets screenshots at 1280 and 375 in `output/`. **Done:** Claude compares each commit with the mock-up.
+
+### T-18: No dead ends while finding and changing parts (R-27 to R-29, R-31, R-32) → **Codex**
+Claim `app.js`, `index.html` and `tools/selftest.html`. **Done:** the acceptance lines of those findings hold.
+
+### T-19: Mount add-ons and small beds, from the model pages → **Antigravity**, after T-3
+1. For every catalog mount whose page says it needs an add-on (a PoE HAT, an NVMe HAT, a particular supply), record `needs` in its page record in `model-pages.json`. Start with the Raspberry Pi mounts (`mw2319976` first).
+2. List the Lab Rax models whose page offers pieces for 180 mm beds (A1 mini, Prusa MINI).
+3. Say whether the Side handles (`mw1931511`) replace the base frame's handles or come in addition.
+
+Same rules as T-10: only what the page states, `confidence: "page"`.
 
 ### T-1: Visual check of the 10U PDF (R-8) → **Codex**
 `output/plan-10u-full.pdf` (not committed) is a full 10U rack: UCG-Max, USW-Lite-8-PoE, Pi cluster (4 of 7), two 40 mm fan panels, a keystone panel, a Lenovo Tiny, a vent and a Flex Mini mount at the front; a fan panel and a vent at the back. It has 8 pages. The self-test measured all text, images and boxes inside the page with no text over text, but that measurement uses an estimated line height. Look at every page for clipped or overlapping text, broken tables, images over text, and empty or near-empty pages. Write each problem as R-9, R-10… with the page and where on it. Fix in `pdf.js` if you claim it, or leave the fix to Claude. **Done:** every page checked, and the result is in `TEST_RESULTS.md` ("visual check").
