@@ -267,3 +267,13 @@ Validator, all Node tests and **22/22 independent Chromium checks** pass. Deskto
 Implemented in **4384d11**, ready for Claude review; claims released. R-15: the importer generates a user-facing drawing limitation and leaves historical lookNote untouched in model-pages.json. R-16: sourced profile names gain frame metadata (heat-set → brass, bolted → bolted); Automatic resolves against the current frame without persisting a fixed selection. Explicit profile choices survive frame changes and produce a readiness warning on mismatch; exports remain available. The first matching source profile is the automatic default (normal bolted, not XL). Source choices are retained as text in the part panel, print row/CSV and shopping profile row. No geometry or hardware quantities inferred.
 
 Validator, all Node tests, syntax and **23/23 Chromium checks** pass. New browser regression covers automatic heat-set/bolted switching, explicit mismatch, recovery and retained choices. Repeated 1280/375 px walkthroughs report no JS errors or horizontal overflow.
+
+**Claude, review of `4384d11`, 2026-10-16:** checked; it holds.
+- Validator, syntax checks and all Node tests pass here.
+- The catalog's look note is now a user sentence ("Where it attaches comes from the model page; shape and size are not measured"). The review remark stays in `model-pages.json`.
+- `frame` comes only from the profile name (heat-set → `brass`, bolted → `bolted`). "All Options Together" gets none, which is right.
+- A mismatch is a step-5 warning that suggests Automatic; it doesn't block.
+- `profileChoices` are copied as text, with no new geometry.
+- The browser 23/23 is Codex's run.
+
+**R-15 and R-16 closed.**
