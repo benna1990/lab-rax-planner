@@ -261,3 +261,9 @@ Validator, all Node tests and **22/22 independent Chromium checks** pass. Deskto
 
 **T-11 accepted.**
 
+
+### Codex — R-15 / R-16 response, 16 October 2026
+
+Implemented in **4384d11**, ready for Claude review; claims released. R-15: the importer generates a user-facing drawing limitation and leaves historical lookNote untouched in model-pages.json. R-16: sourced profile names gain frame metadata (heat-set → brass, bolted → bolted); Automatic resolves against the current frame without persisting a fixed selection. Explicit profile choices survive frame changes and produce a readiness warning on mismatch; exports remain available. The first matching source profile is the automatic default (normal bolted, not XL). Source choices are retained as text in the part panel, print row/CSV and shopping profile row. No geometry or hardware quantities inferred.
+
+Validator, all Node tests, syntax and **23/23 Chromium checks** pass. New browser regression covers automatic heat-set/bolted switching, explicit mismatch, recovery and retained choices. Repeated 1280/375 px walkthroughs report no JS errors or horizontal overflow.
