@@ -8683,51 +8683,190 @@
     {
      "id": "mw1365647",
      "name": "Honeycomb storage wall panels",
-     "shape": {"side": "honeycomb"},
+     "shape": {
+      "side": "honeycomb",
+      "at": "side-panel"
+     },
      "author": "Jeffrey",
      "url": "https://makerworld.com/en/models/1365647",
      "at": "side",
-     "vent": 0.3
+     "vent": 0.3,
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1365647",
+       "date": "2026-10-16",
+       "note": "replaces side panel of Lab Rax with HSW storage wall compatible panel"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1365647",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-3-walls-15-infill",
+       "name": "0.2mm layer, 3 walls, 15% infill",
+       "shape": {},
+       "note": "0.2mm layer height, 15% gyroid infill, 3 to 4 walls"
+      }
+     ],
+     "profileChoices": [
+      "customizable U height and total depth via SCAD",
+      "solid wall backing behind hex holes (optional)"
+     ]
     },
     {
      "id": "mw2668114",
      "name": "Construction brick side panel",
-     "shape": {"side": "brick"},
+     "shape": {
+      "side": "brick",
+      "at": "side-panel"
+     },
      "author": "Jeffrey",
-     "url": "https://makerworld.com/en/models/2668114"
+     "url": "https://makerworld.com/en/models/2668114",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2668114",
+       "date": "2026-10-16",
+       "note": "replaces side panel of Lab Rax with toy construction brick compatible panel"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/2668114",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "Printed with support, other settings default"
+      }
+     ],
+     "profileChoices": [
+      "customizable U height and total depth via SCAD"
+     ]
     },
     {
      "id": "mw1718939",
      "name": "SKÅDIS side panels 8U",
-     "shape": {"side": "skadis", "u": 8},
+     "shape": {
+      "side": "skadis",
+      "u": 8,
+      "at": "side-panel"
+     },
      "author": "user_154579053",
      "url": "https://makerworld.com/en/models/1718939",
      "at": "side",
-     "vent": 0.1
+     "vent": 0.1,
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1718939",
+       "date": "2026-10-16",
+       "note": "painel lateral para o server rack LabRax na configuração de 8U, com padrão Skadis"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1718939",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     }
     },
     {
      "id": "mw3070181",
      "name": "Panel generator, side / top / bottom",
-     "shape": {"side": "grid"},
+     "shape": {
+      "side": "grid",
+      "at": "side-panel"
+     },
      "author": "Eightbit",
      "url": "https://makerworld.com/en/models/3070181",
      "at": "side",
-     "vent": 0.3
+     "vent": 0.3,
+     "license": "MakerWorld Exclusive License",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/3070181",
+       "date": "2026-10-16",
+       "note": "quick panel generator for the Labrax 10\" server"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/3070181",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "Parametric panel generator"
+      }
+     ],
+     "profileChoices": [
+      "customizable height and depth, optional top/bottom lips for >5U"
+     ]
     },
     {
      "id": "mw2517201",
      "name": "Hex side panels 1–5U, bolted",
-     "shape": {"side": "hex"},
+     "shape": {
+      "side": "hex",
+      "at": "side-panel"
+     },
      "author": "Pepe_Lopez",
      "url": "https://makerworld.com/en/models/2517201-lab-rax-1-5u-hex-side-panels-bolted-version",
      "at": "side",
-     "vent": 0.45
+     "vent": 0.45,
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2517201-lab-rax-1-5u-hex-side-panels-bolted-version",
+       "date": "2026-10-16",
+       "note": "models for all sizes of Lab Rax side panels from 1U to 5U in bolt together design"
+      },
+      "look": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2517201-lab-rax-1-5u-hex-side-panels-bolted-version",
+       "date": "2026-10-16",
+       "note": "Drawing compared with the model page; dimensions are not independently measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-4-walls-20-infill",
+       "name": "0.2mm layer, 4 walls, 20% infill",
+       "shape": {},
+       "note": "Hex side panels 1U through 5U for bolted version"
+      }
+     ],
+     "profileChoices": [
+      "height: 1U, 2U, 3U, 4U, or 5U"
+     ]
     },
     {
      "id": "mw1460771",
      "name": "Side panels with an 80 mm fan",
      "label": "Left + right, 80 mm fan",
-     "shape": {"fan": 80},
+     "shape": {
+      "fan": 80,
+      "at": "side-panel"
+     },
      "url": "https://makerworld.com/en/models/1460771-side-panel-80mm-fan-left-right-lab-rax-10-inch",
      "hardware": [
       {
@@ -8736,49 +8875,203 @@
       }
      ],
      "fanDir": "cross",
-     "at": "side"
+     "at": "side",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1460771-side-panel-80mm-fan-left-right-lab-rax-10-inch",
+       "date": "2026-10-16",
+       "note": "side panels for the Lab Rax server rack by mklements"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1460771-side-panel-80mm-fan-left-right-lab-rax-10-inch",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "Left and Right side panels for 80mm fan"
+      }
+     ],
+     "profileChoices": [
+      "side: left or right panel"
+     ]
     },
     {
      "id": "mw1438705",
      "name": "Multiboard side panel, customisable",
-     "shape": {"side": "multiboard"},
+     "shape": {
+      "side": "multiboard",
+      "at": "side-panel"
+     },
      "url": "https://makerworld.com/en/models/1438705-labrax-multiboard-side-panel-customisable",
      "at": "side",
-     "vent": 0.15
+     "vent": 0.15,
+     "license": "CC BY-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1438705-labrax-multiboard-side-panel-customisable",
+       "date": "2026-10-16",
+       "note": "replaces the side panel of the lab rax with a multiboard storage wall compatible panel"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1438705-labrax-multiboard-side-panel-customisable",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "0.2mm Layer, 2 Walls, 15% infill, with supports"
+      }
+     ],
+     "profileChoices": [
+      "customizable U height and total depth via SCAD"
+     ]
     },
     {
      "id": "mw3159387",
      "name": "Side panel generator, 20+ patterns",
-     "shape": {"side": "kumiko"},
+     "shape": {
+      "side": "kumiko",
+      "at": "side-panel"
+     },
      "author": "RULERULAS",
      "url": "https://makerworld.com/en/models/3159387-labrax-side-panel-generator-20-patterns-vented",
      "at": "side",
-     "vent": 0.3
+     "vent": 0.3,
+     "license": "Standard Digital File License",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/3159387-labrax-side-panel-generator-20-patterns-vented",
+       "date": "2026-10-16",
+       "note": "parametric side panels for 10 inch racks with the Labrax Side Panel Generator"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/3159387-labrax-side-panel-generator-20-patterns-vented",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "all-patterns-ventilated-5u",
+       "name": "All patterns ventilated 5U",
+       "shape": {},
+       "note": "5U ventilated side panels with 20+ patterns"
+      }
+     ],
+     "profileChoices": [
+      "pattern: 20+ different decorative and ventilation patterns via SCAD"
+     ]
     },
     {
      "id": "mw1943808",
      "name": "Side panel with vents",
-     "shape": {"side": "vent"},
+     "shape": {
+      "side": "vent",
+      "at": "side-panel"
+     },
      "author": "Stheev",
      "url": "https://makerworld.com/en/models/1943808-labrax-side-panel-with-vents",
      "at": "side",
-     "vent": 0.3
+     "vent": 0.3,
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1943808-labrax-side-panel-with-vents",
+       "date": "2026-10-16",
+       "note": "remixed the side panel of the amazing LabRax model from mklements to include 2 vents"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1943808-labrax-side-panel-with-vents",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "petg-0-6mm-nozzle",
+       "name": "PETG, 0.6mm nozzle",
+       "shape": {},
+       "note": "PETG 0.6mm nozzle print profile"
+      }
+     ]
     },
     {
      "id": "mw1490030",
      "name": "SKÅDIS side panels",
-     "shape": {"side": "skadis"},
+     "shape": {
+      "side": "skadis",
+      "at": "side-panel"
+     },
      "url": "https://makerworld.com/en/models/1490030-lab-rax-skadis-side-panels",
      "at": "side",
-     "vent": 0.1
+     "vent": 0.1,
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1490030-lab-rax-skadis-side-panels",
+       "date": "2026-10-16",
+       "note": "side panels of your Lab Rax 10 inch rack system with Skadis pattern"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1490030-lab-rax-skadis-side-panels",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "Skadis pegboard side panels"
+      }
+     ]
     },
     {
      "id": "mw1994910",
      "name": "Multiboard side panels",
-     "shape": {"side": "multiboard"},
+     "shape": {
+      "side": "multiboard",
+      "at": "side-panel"
+     },
      "url": "https://makerworld.com/en/models/1994910",
      "at": "side",
-     "vent": 0.15
+     "vent": 0.15,
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1994910",
+       "date": "2026-10-16",
+       "note": "remix of Lab Rax 10\" Server Rack Bolted Version 5U with Multiboard sides"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1994910",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     }
     }
    ]
   },
@@ -8789,72 +9082,352 @@
      "id": "mw3212396",
      "name": "NeoPixel light-up logo",
      "label": "16 LEDs in the front edge",
-     "shape": {"logo": "neopixel"},
+     "shape": {
+      "logo": "neopixel",
+      "at": "top"
+     },
      "author": "mklements",
-     "url": "https://makerworld.com/en/models/3212396"
+     "url": "https://makerworld.com/en/models/3212396",
+     "license": "MakerWorld Exclusive License",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/3212396",
+       "date": "2026-10-16",
+       "note": "official Lab Rax illuminated logo by creator mklements"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/3212396",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "petg-0-2mm-layer-2-walls-15-infill",
+       "name": "PETG 0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "PETG print profile"
+      },
+      {
+       "id": "pla-0-2mm-layer-2-walls-15-infill",
+       "name": "PLA 0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "PLA print profile"
+      }
+     ],
+     "profileChoices": [
+      "material: PETG or PLA"
+     ]
     },
     {
      "id": "mw3232859",
      "name": "NeoPixel logo, nut version",
-     "shape": {"logo": "neopixel"},
+     "shape": {
+      "logo": "neopixel",
+      "at": "top"
+     },
      "author": "fo0bar",
-     "url": "https://makerworld.com/en/models/3232859"
+     "url": "https://makerworld.com/en/models/3232859",
+     "license": "MakerWorld Exclusive License",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/3232859",
+       "date": "2026-10-16",
+       "note": "remix of the NeoPixel Light-Up Lab Rax Logo by mklements for nut retaining Lab Rax cases"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/3232859",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "Nut retaining version of NeoPixel logo"
+      }
+     ]
     },
     {
      "id": "mw3272376",
      "name": "LED hex bar",
-     "shape": {"logo": "hexbar"},
+     "shape": {
+      "logo": "hexbar",
+      "at": "top"
+     },
      "author": "Avaviel",
-     "url": "https://makerworld.com/en/models/3272376"
+     "url": "https://makerworld.com/en/models/3272376",
+     "license": "MakerWorld Exclusive License",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/3272376",
+       "date": "2026-10-16",
+       "note": "remix of NeoPixel Light-Up Lab Rax Logo with hex shape LED cells"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/3272376",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-16mm-layer-2-walls-15-infill",
+       "name": "0.16mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "0.16mm layer height for fine LED cells"
+      }
+     ]
     },
     {
      "id": "mw1651742",
      "name": "Vented edge with 16 mm power switch",
-     "shape": {"edge": "switch"},
+     "shape": {
+      "edge": "switch",
+      "at": "top"
+     },
      "author": "The Layer",
-     "url": "https://makerworld.com/en/models/1651742"
+     "url": "https://makerworld.com/en/models/1651742",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1651742",
+       "date": "2026-10-16",
+       "note": "remixed front edge panel for LabRax 10\" Server Rack Bolted Version"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1651742",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "ABS .2 mm height 15% infill"
+      }
+     ]
     },
     {
      "id": "mw1917602",
      "name": "½U top corner",
      "label": "Adds a ½U keystone spot",
-     "shape": {"corner": 6},
+     "shape": {
+      "corner": 6,
+      "at": "top-corners"
+     },
      "author": "Blind Badger",
-     "url": "https://makerworld.com/en/models/1917602-lab-rax-0-5u-1-2u-top-corner"
+     "url": "https://makerworld.com/en/models/1917602-lab-rax-0-5u-1-2u-top-corner",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1917602-lab-rax-0-5u-1-2u-top-corner",
+       "date": "2026-10-16",
+       "note": "mod to replace a corner of Lab Rax with one that can take a 0.5U mount"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1917602-lab-rax-0-5u-1-2u-top-corner",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "petg-hf-both-versions-labrax-spacing",
+       "name": "PETG HF - Both Versions - LabRax Spacing",
+       "shape": {},
+       "note": "Plate 1 Bolted, Plate 2 Heatset, LabRax hole spacing"
+      },
+      {
+       "id": "petg-hf-both-versions-geekpi-spacing",
+       "name": "PETG HF - Both Versions - GeekPi Spacing",
+       "shape": {},
+       "note": "Lower mounting hole spacing for GeekPi 0.5U units"
+      }
+     ],
+     "profileChoices": [
+      "frame: bolted or heat-set version",
+      "hole spacing: LabRax standard or GeekPi lower spacing"
+     ]
     },
     {
      "id": "mw2963512",
      "name": "½U corner with 11 keystone ports",
-     "shape": {"corner": 11},
+     "shape": {
+      "corner": 11,
+      "at": "top-corners"
+     },
      "author": "Lighthouse actual",
-     "url": "https://makerworld.com/en/models/2963512"
+     "url": "https://makerworld.com/en/models/2963512",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2963512",
+       "date": "2026-10-16",
+       "note": "remix of Lab Rax 0.5U Top Corner by Blind Badger and Lab Rax Bolted Version"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/2963512",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "Integrated 11 keystone ports corner"
+      }
+     ]
     },
     {
      "id": "mw3213318",
      "name": "Integrated 12-keystone top corner",
-     "shape": {"corner": 12},
+     "shape": {
+      "corner": 12,
+      "at": "top-corners"
+     },
      "author": "DarkLight72",
-     "url": "https://makerworld.com/en/models/3213318"
+     "url": "https://makerworld.com/en/models/3213318",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/3213318",
+       "date": "2026-10-16",
+       "note": "mod/remix based on original .5U 12 Port Keystone Panel and Blind Badger top corner"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/3213318",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     }
     },
     {
      "id": "mw2457279",
      "name": "½U horizontal front/back corner",
      "label": "Adds a ½U spot, hex nuts",
-     "shape": {"corner": 6},
-     "url": "https://makerworld.com/en/models/2457279"
+     "shape": {
+      "corner": 6,
+      "at": "top"
+     },
+     "url": "https://makerworld.com/en/models/2457279",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2457279",
+       "date": "2026-10-16",
+       "note": "based on original Lab Rax 10\" Server Rack designed by mklements"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/2457279",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-5-walls-20-infill",
+       "name": "0.2mm layer, 5 walls, 20% infill",
+       "shape": {},
+       "note": "PETG 5 walls, 20% infill"
+      }
+     ]
     },
     {
      "id": "mw2352149",
      "name": "4-keystone plate for the ½U top corner",
-     "shape": {"corner": 4},
-     "url": "https://makerworld.com/en/models/2352149-lab-rax-0-5u-top-corner-4x-keystone-jack"
+     "shape": {
+      "corner": 4,
+      "at": "top-corners"
+     },
+     "url": "https://makerworld.com/en/models/2352149-lab-rax-0-5u-top-corner-4x-keystone-jack",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2352149-lab-rax-0-5u-top-corner-4x-keystone-jack",
+       "date": "2026-10-16",
+       "note": "smaller 0.5u keystone plate for the LabRax 0.5u top corner bracket"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/2352149-lab-rax-0-5u-top-corner-4x-keystone-jack",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-24mm-layer-2-walls-15-infill",
+       "name": "0.24mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "0.5u keystone plate holding 4x jacks"
+      }
+     ]
     },
     {
      "id": "mw2202743",
      "name": "Upper corner for a MAX7219 LED matrix",
-     "shape": {"corner": "matrix"},
+     "shape": {
+      "corner": "matrix",
+      "at": "top-corners"
+     },
      "author": "Lajoix",
-     "url": "https://makerworld.com/en/models/2202743-lab-rax-10-upper-corner-for-max7219-led-matrix"
+     "url": "https://makerworld.com/en/models/2202743-lab-rax-10-upper-corner-for-max7219-led-matrix",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2202743-lab-rax-10-upper-corner-for-max7219-led-matrix",
+       "date": "2026-10-16",
+       "note": "upper corner for the Lab Rax 10 rack system adapted to mount MAX7219 LED matrix"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/2202743-lab-rax-10-upper-corner-for-max7219-led-matrix",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill-petg",
+       "name": "0.2mm layer, 2 walls, 15% infill PETG",
+       "shape": {},
+       "note": "PETG print profile"
+      },
+      {
+       "id": "no-gap-version",
+       "name": "no gap version",
+       "shape": {},
+       "note": "For LED matrix with no gap between segments"
+      }
+     ],
+     "profileChoices": [
+      "matrix version: standard or no gap"
+     ]
     }
    ]
   },
@@ -8865,35 +9438,163 @@
      "id": "mw3212362",
      "name": "Bottom drawer",
      "label": "Replaces the base, takes no rack units",
-     "shape": {"drawer": true},
+     "shape": {
+      "drawer": true,
+      "at": "bottom"
+     },
      "author": "mklements",
-     "url": "https://makerworld.com/en/models/3212362"
+     "url": "https://makerworld.com/en/models/3212362",
+     "license": "MakerWorld Exclusive License",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/3212362",
+       "date": "2026-10-16",
+       "note": "official Lab Rax bottom drawer by creator mklements"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/3212362",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "petg-0-2mm-layer-2-walls-15-infill",
+       "name": "PETG 0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "PETG print profile"
+      },
+      {
+       "id": "pla-0-2mm-layer-2-walls-15-infill",
+       "name": "PLA 0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "PLA print profile"
+      }
+     ],
+     "profileChoices": [
+      "material: PETG or PLA"
+     ]
     },
     {
      "id": "mw3215912",
      "name": "Cable guide",
-     "shape": {"inside": "guide"},
+     "shape": {
+      "inside": "guide",
+      "at": "posts"
+     },
      "author": "mklements",
-     "url": "https://makerworld.com/en/models/3215912"
+     "url": "https://makerworld.com/en/models/3215912",
+     "license": "MakerWorld Exclusive License",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/3215912",
+       "date": "2026-10-16",
+       "note": "official Lab Rax cable guide by creator mklements"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/3215912",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "petg",
+       "name": "PETG",
+       "shape": {},
+       "note": "PETG profile"
+      }
+     ]
     },
     {
      "id": "mw3215942",
      "name": "Cable management combs",
-     "shape": {"inside": "comb"},
+     "shape": {
+      "inside": "comb",
+      "at": "posts"
+     },
      "author": "mklements",
-     "url": "https://makerworld.com/en/models/3215942"
+     "url": "https://makerworld.com/en/models/3215942",
+     "license": "MakerWorld Exclusive License",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/3215942",
+       "date": "2026-10-16",
+       "note": "official Lab Rax cable combs by creator mklements"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/3215942",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "petg-0-2mm-layer-2-walls-15-infill-version-1",
+       "name": "PETG 0.2mm layer, 2 walls, 15% infill (version 1)",
+       "shape": {},
+       "note": "Cable comb profile 1"
+      },
+      {
+       "id": "petg-0-2mm-layer-2-walls-15-infill-version-2",
+       "name": "PETG 0.2mm layer, 2 walls, 15% infill (version 2)",
+       "shape": {},
+       "note": "Cable comb profile 2"
+      }
+     ],
+     "profileChoices": [
+      "version: horizontal or vertical orientation"
+     ]
     },
     {
      "id": "mw1376106",
      "name": "Front-to-back cable bracket",
-     "shape": {"inside": "bracket"},
+     "shape": {
+      "inside": "bracket",
+      "at": "inside"
+     },
      "author": "Jeffrey",
-     "url": "https://makerworld.com/en/models/1376106"
+     "url": "https://makerworld.com/en/models/1376106",
+     "license": "CC BY-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1376106",
+       "date": "2026-10-16",
+       "note": "customisable bracket for cable management for Lab Rax"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1376106",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "0.2mm layer height, gyroid infill"
+      }
+     ],
+     "profileChoices": [
+      "customizable depth in OpenSCAD"
+     ]
     },
     {
      "id": "mw1651940",
      "name": "80 mm intake / outlet fans",
-     "shape": {"inside": "fans"},
+     "shape": {
+      "inside": "fans",
+      "at": "top"
+     },
      "author": "SilvestreDesignLab",
      "url": "https://makerworld.com/en/models/1651940",
      "hardware": [
@@ -8903,63 +9604,302 @@
       }
      ],
      "fanDir": "cross",
-     "at": "top"
+     "at": "top",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1651940",
+       "date": "2026-10-16",
+       "note": "80mm fan cooling for LabRax network rack"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1651940",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "lab-rax-80mm-top-bottom",
+       "name": "Lab Rax 80mm top & bottom",
+       "shape": {},
+       "note": "0.4 mm nozzle 0.2mm layer 2 walls 15% infill"
+      }
+     ],
+     "profileChoices": [
+      "fan configuration: single 80mm fan or dual 80mm fan"
+     ]
     },
     {
      "id": "mw1682896",
      "name": "Synology DS920+ backplate",
-     "shape": {"inside": "bracket"},
+     "shape": {
+      "inside": "bracket",
+      "at": "rear-slot"
+     },
      "author": "sflabbe",
-     "url": "https://makerworld.com/en/models/1682896"
+     "url": "https://makerworld.com/en/models/1682896",
+     "license": "CC BY-NC",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1682896",
+       "date": "2026-10-16",
+       "note": "mod of DS920+ mount backplate for Labrax"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1682896",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-3-walls-10-infill",
+       "name": "0.2mm layer, 3 walls, 10% infill",
+       "shape": {},
+       "note": "Same orientation as original"
+      }
+     ]
     },
     {
      "id": "mw3310115",
      "name": "Vertical ATX motherboard mount",
-     "shape": {"inside": "atx"},
+     "shape": {
+      "inside": "atx",
+      "at": "inside"
+     },
      "author": "Ruben",
-     "url": "https://makerworld.com/en/models/3310115"
+     "url": "https://makerworld.com/en/models/3310115",
+     "license": "MakerWorld Exclusive License",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/3310115",
+       "date": "2026-10-16",
+       "note": "vertical ATX motherboard mount for a 10\" Lab Rax"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/3310115",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "Vertical ATX mount in PETG"
+      }
+     ]
     },
     {
      "id": "mw2753491",
      "name": "mATX motherboard mount",
-     "shape": {"inside": "matx"},
+     "shape": {
+      "inside": "matx",
+      "at": "inside"
+     },
      "author": "austin.18",
-     "url": "https://makerworld.com/en/models/2753491"
+     "url": "https://makerworld.com/en/models/2753491",
+     "license": "MakerWorld Exclusive License",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2753491",
+       "date": "2026-10-16",
+       "note": "mATX motherboard tray that mounts interior to the Lab Rax 10\" rack"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/2753491",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "Interior mATX motherboard tray"
+      }
+     ]
     },
     {
      "id": "mw2138882",
      "name": "UniFi PoE+++ injector side mount",
-     "shape": {"inside": "device"},
+     "shape": {
+      "inside": "device",
+      "at": "side-panel"
+     },
      "author": "BadPixel",
-     "url": "https://makerworld.com/en/models/2138882"
+     "url": "https://makerworld.com/en/models/2138882",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2138882",
+       "date": "2026-10-16",
+       "note": "designed to fit flush to side of a LabRax 10\" rack for UniFi 10G PoE+++ 90W adapter"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/2138882",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "Right and left variants included, PETG/HT-PLA"
+      }
+     ],
+     "profileChoices": [
+      "orientation: right or left side mount"
+     ]
     },
     {
      "id": "mw2404914",
      "name": "MikroTik hEX S side mount",
-     "shape": {"inside": "device"},
+     "shape": {
+      "inside": "device",
+      "at": "side-panel"
+     },
      "author": "mserpis125",
-     "url": "https://makerworld.com/en/models/2404914"
+     "url": "https://makerworld.com/en/models/2404914",
+     "license": "MakerWorld Exclusive License",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2404914",
+       "date": "2026-10-16",
+       "note": "Mikrotik hex S adapter for any rack to mount on either side"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/2404914",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-6-walls-25-infill",
+       "name": "0.2mm layer, 6 walls, 25% infill",
+       "shape": {},
+       "note": "Interference fit mount for either side"
+      }
+     ]
     },
     {
      "id": "pr1513212",
      "name": "MikroTik hAP ac³ / ax³ holder",
-     "shape": {"inside": "device"},
+     "shape": {
+      "inside": "device",
+      "at": "inside"
+     },
      "author": "Robert Sedláček",
-     "url": "https://www.printables.com/model/1513212"
+     "url": "https://www.printables.com/model/1513212",
+     "license": "CC0",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://www.printables.com/model/1513212",
+       "date": "2026-10-16",
+       "note": "holder for MikroTik hAP ac3 / ax3 in 10-inch mini rack"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://www.printables.com/model/1513212",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     }
     },
     {
      "id": "mw2326543",
      "name": "Vertical cable management",
-     "shape": {"inside": "comb"},
-     "url": "https://makerworld.com/en/models/2326543-labrax-vertical-cable-management"
+     "shape": {
+      "inside": "comb",
+      "at": "posts"
+     },
+     "url": "https://makerworld.com/en/models/2326543-labrax-vertical-cable-management",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2326543-labrax-vertical-cable-management",
+       "date": "2026-10-16",
+       "note": "vertical cable management for LabRax 10\" rack"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/2326543-labrax-vertical-cable-management",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-6-walls-25-infill",
+       "name": "0.2mm layer, 6 walls, 25% infill",
+       "shape": {},
+       "note": "Bambu Slicer 0.20 Strength profile in PETG"
+      }
+     ]
     },
     {
      "id": "mw1773035",
      "name": "Keystone cable pass-through inserts",
      "label": "3–7 mm holes, fit any keystone slot",
-     "shape": {"inside": "keystone"},
+     "shape": {
+      "inside": "keystone",
+      "at": "front-slot"
+     },
      "author": "klayf",
-     "url": "https://makerworld.com/en/models/1773035-keystone-insert-passthrough-various-sizes"
+     "url": "https://makerworld.com/en/models/1773035-keystone-insert-passthrough-various-sizes",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1773035-keystone-insert-passthrough-various-sizes",
+       "date": "2026-10-16",
+       "note": "keystone insert cable passthrough for 10-inch patch panels"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1773035-keystone-insert-passthrough-various-sizes",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "all-sizes-petg-0-2mm-layer-2-walls-35-infill",
+       "name": "[All sizes / PETG] 0.2mm layer, 2 walls, 35% infill",
+       "shape": {},
+       "note": "All sizes included in PETG (3mm, 4x2mm, 4mm, 5mm, 6mm, 7mm)"
+      },
+      {
+       "id": "all-sizes-pla-0-2mm-layer-2-walls-35-infill",
+       "name": "[All sizes / PLA] 0.2mm layer, 2 walls, 35% infill",
+       "shape": {},
+       "note": "All sizes included in PLA"
+      }
+     ],
+     "profileChoices": [
+      "diameter: 3mm (optical), 4x2mm (fiber patch), 4mm (DC power), 5mm (CAT5e), 6mm, or 7mm",
+      "material: PETG or PLA"
+     ]
     }
    ]
   }
