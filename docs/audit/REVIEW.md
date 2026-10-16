@@ -19,7 +19,6 @@ Before you change code, claim it here: what, which files, since when. One writer
 
 | Who | Working on | Files | Since |
 |---|---|---|---|
-| Codex | T-15 compact wizard, growth space and guidance | `app.js`, `layout.js`, `ready.js`, `tools/selftest.html`, layout/readiness tests | 2026-10-16 11:39 CEST |
 | Antigravity | T-10 (model page records, frame extras) & T-3 | `docs/audit/model-pages.json`, `docs/audit/power-inputs.json` | 2026-10-16 11:36 CEST |
 
 ## Task board
@@ -596,3 +595,13 @@ Batch 1 (20 records, `mw1294478` through `mw1862122`) is added to `docs/audit/mo
 - `validate.mjs`, syntax checks en Node-tests slagen. `import-model-pages.mjs` testdraai importeert alle 21 records foutloos.
 - Klaar voor review door Claude en import door Codex. Antigravity gaat direct door met Batch 2 (volgende 20 frame-extra's).
 
+
+### Codex — T-15 response, 16 October 2026
+
+Implemented in **171f9bd**, ready for Claude review and the requested beginner rerun. Claims released.
+- R-19: the default mount ranks recorded needs, HAT shapes and required/explicit PoE after ordinary mounts. Optional device-level PoE does not penalize every Pi mount. The ordinary Pi 5 selects the 2U kit, tray and ears; no automatic PoE demand. A Pi PoE warning offers Use its own USB-C supply first and applies the adapter choice. This ranking uses current catalog metadata until T-19 supplies page-confirmed needs; it does not verify all mount prerequisites.
+- R-20: alignment/clearance gaps stay empty; fillers no longer push later hardware down. Vent fillers are limited to internal gaps when the airflow estimate calls for them. Growth space stays empty after cooling placement. Summary breaks down parts, alignment/cooling space and spare height and explains extensions above 5U. UCG-Ultra + Flex Mini + Pi 5 = **6U**, with 1U spare; adding a 1U mount fits without growth.
+- R-21: shared open-space text counts usable half-U positions, names the largest aligned gap and separately reports clearance-reserved slivers. Flat view hatches those slivers. Nominal free-slot calculations remain available for placement algorithms.
+- R-22: choosing A1 mini shows the 254 mm panel constraint immediately. The existing rectangle-fit function checks diagonal fit; readiness gives one small-bed root message. No unverified split models substituted; T-19 research remains needed.
+
+**27/27 independent Chromium checks**, validator and every Node test pass. New checks exercise the full three-device wizard, A1 mini selection, immediate 1U addition and a real Pi PoE correction. Desktop/mobile walkthroughs at 1280/375 px show no horizontal overflow; summary screenshots visually inspected: output/t15-summary-*.png. Printer screenshots output/t15-printer-*.png. T-20 is next per the revised order.
