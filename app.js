@@ -4,6 +4,7 @@
 'use strict';
 
 const STORE = 'labrax-planner-v2';
+const PREVIOUS_STORE = 'labrax-planner-previous';
 const THEMEKEY = 'labrax-planner-theme';
 const REPO_URL = 'https://github.com/benna1990/lab-rax-planner';
 const P = window.LRParts, RACK = window.LRRack, DIMS = RACK.dimensions;
@@ -949,16 +950,17 @@ function facts() { // what the layout holds, for the shopping list and the guide
   const fanPart = d => { let n = 0; (d.hardware || []).forEach(x => { const hw = CAT.hardware[x.part]; if (hw && hw.mm) { n += x.qty; f.fans.set(x.part, (f.fans.get(x.part) || 0) + x.qty); f.amps += x.qty * (hw.amp || .15); } }); if (n) f.fanParts.push({ name: fullName(d), n }); };
   placed().forEach(i => {
     const d = info(i), mods = modsOf(d), name = fullName(d);
-    mods.forEach(m => { if (typeof m.ks === 'number') f.ks += m.ks; });
+    mods.forEach(m => { if (typeof m.ks === 'number') f.ks += m.fill != null ? m.fill : m.ks; });
     if (i.key === 'gen' && i.params.type === 'keystone') f.ks += (i.params.ports || 12) * (i.params.rows || 1);
-    let boards = 0, pi5 = 0, pi4 = 0; mods.forEach(m => { if (m.sbc) { const n = typeof m.sbc === 'number' ? m.sbc : 1; boards += n; if (/pi4/.test(m.board || '')) pi4 += n; else if (/pi/.test(m.board || 'pi5')) pi5 += n; } });
-    if (!boards && d.tab === 'devices' && /raspberry|\bpi ?[345]\b/i.test(name)) { boards = 1; if (/pi ?4/i.test(name)) pi4++; else pi5++; }
+    let boards = 0, pi5 = 0, pi4 = 0; mods.forEach(m => { if (m.sbc) { const n = typeof m.sbc === 'number' ? (m.fill != null ? m.fill : m.sbc) : 1; boards += n; if (/pi4/.test(m.board || '')) pi4 += n; else if (/pi/.test(m.board || 'pi5')) pi5 += n; } });
+    if (!mods.some(m => m.sbc) && !boards && d.tab === 'devices' && /raspberry|\bpi ?[345]\b/i.test(name)) { boards = 1; if (/pi ?4/i.test(name)) pi4++; else pi5++; }
     f.boards += boards; f.pi5 += pi5; f.pi4 += pi4;
     if (onPoe(i, powerOf(d, i))) { f.poePi5 += pi5; f.poePi4 += pi4; } // Pis on PoE get a PoE+ HAT instead of a USB-C supply
-    if (/drv/.test(d.face || '') || mods.some(m => m.bay)) f.drives++;
+    if (mods.some(m => m.bay)) f.drives += mods.reduce((n, m) => n + (m.bay ? (m.fill != null ? m.fill : typeof m.bay === 'number' ? m.bay : 1) : 0), 0);
+    else if (/drv/.test(d.face || '')) f.drives++;
     if (d.group && /gateway/i.test(d.group)) f.gateway = true;
     if (d.tab === 'panels' && /strip|pdu|outlet/i.test(name)) f.strip = true;
-    if ((d.tab === 'devices' && !/power/i.test(d.group || '')) || d.custom || (i.key === 'gen' && i.params.type === 'shelf')) { f.eth += boards || 1; if (!boards) f.mains++; }
+    if ((d.tab === 'devices' && !/power/i.test(d.group || '')) || d.custom || (i.key === 'gen' && i.params.type === 'shelf')) { f.eth += mods.some(m => m.sbc) ? boards : boards || 1; if (!boards && !mods.some(m => m.sbc)) f.mains++; }
     fanPart(d);
   });
   if (state.top) fanPart(catalogPart(state.top));
@@ -1338,7 +1340,7 @@ function powerOf(d, it) {
     if (x.sbc) { const n = typeof x.sbc === 'number' ? (x.fill != null ? x.fill : x.sbc) : 1, b = x.board || 'pi5'; if (NO_LAN.test(b)) return; if (!own && OWN_BOARDS.test(b)) boards += n; else extra += n; }
     else if (typeof x.dev === 'string' && PWDEV[x.dev]) { const o = PWDEV[x.dev], n = x.n || 1, p = provPorts(o); for (let k = 0; k < n; k++) if (p) extraProvs.push(p); else extra += o.eth != null ? o.eth : 1; }
   });
-  const n = own || boards || 1, isDev = !!d.pwDev, poeIn = f('poeIn'), ports = isDev ? provPorts(dev) : 0;
+  const n = own || (mods.some(x => x.sbc && OWN_BOARDS.test(x.board || 'pi5')) ? boards : 1), isDev = !!d.pwDev, poeIn = f('poeIn'), ports = isDev ? provPorts(dev) : 0;
   const eth = ports ? 0 : dev.eth != null ? dev.eth : !isDev ? 0 : d.top ? (poeIn ? 1 : 0) : 1;
   r.provs = m.ports !== undefined ? (m.ports ? [m.ports] : []) : Array(ports ? n : 0).fill(ports).concat(extraProvs);
   r.eth = m.eth !== undefined ? m.eth : eth * n + extra;
@@ -1606,7 +1608,7 @@ function renderBuild() {
     '<div class="note">The horizontal pieces need a print bed of about 250 mm; they don’t fit on 220 mm beds.' + (h > 5 ? ' Above 10U the printed frame gets too weak for a full rack, so the planner stops at 10U.' : '') + '</div></dl>');
 
   html += '<div class="actions"><button type="button" class="btn small" data-act="copy">Copy list</button><button type="button" class="btn small" data-act="share">Share link</button>' +
-    '<button type="button" class="btn small" data-act="save-file" title="Download this layout as a .rack.json file">Save as file</button><button type="button" class="btn small" data-act="open-file" title="Open a .rack.json file">Open file</button><button type="button" class="btn small" data-act="fill"' + (free ? '' : ' disabled') + '>Fill open slots' + (rackSide === 'back' ? ' at the back' : '') + '</button><button type="button" class="btn small danger" data-act="clear"' + (state.items.length ? '' : ' disabled') + '>Clear rack</button></div><div id="copyfall"></div>';
+    '<button type="button" class="btn small" data-act="save-file" title="Download this layout as a .rack.json file">Save as file</button><button type="button" class="btn small" data-act="open-file" title="Open a .rack.json file">Open file</button>' + (previousRack() ? '<button type="button" class="btn small" data-act="previous-rack">Previous rack</button>' : '') + '<button type="button" class="btn small" data-act="fill"' + (free ? '' : ' disabled') + '>Fill open slots' + (rackSide === 'back' ? ' at the back' : '') + '</button><button type="button" class="btn small danger" data-act="clear"' + (state.items.length ? '' : ' disabled') + '>Clear rack</button></div><div id="copyfall"></div>';
   $('#build').innerHTML = html;
   renderSteps();
 }
@@ -1624,7 +1626,8 @@ function listText() {
   const pk = printPack();
   L.push('', 'Print pack' + (pk.printer ? ', checked against your ' + bedName(pk.printer) : ''));
   pk.forEach(x => { L.push('- ' + x.qty + '× ' + x.name + (x.variants ? ' (' + x.variants + ')' : '') + (x.url ? '  ' + x.url : '  (custom STL in build pack)')); if (x.bed) L.push('  ' + bedText(x.bed)); });
-  L.push('', 'Shopping list'); orderList().forEach(x => L.push('- ' + qtyText(x) + ' ' + x.name + (x.spec ? ' (' + x.spec + ')' : '') + (x.check ? ' – ' + x.check : '')));
+  const shop = orderList();
+  for (const optional of [false, true]) { L.push('', optional ? 'Nice to have (optional)' : 'Shopping list — needed'); shop.filter(x => !!x.optional === optional).forEach(x => L.push('- ' + (optional ? '[Optional] ' : '') + qtyText(x) + ' ' + x.name + (x.spec ? ' (' + x.spec + ')' : '') + (x.check ? ' – ' + x.check : ''))); }
   guide().forEach((g, n) => { L.push('', (n + 1) + '. ' + g.title); g.steps.forEach(t => L.push('- ' + t)); });
   const a = airflow();
   if (a.Q) {
@@ -1723,7 +1726,7 @@ async function buildPack() {
   const bedCol = x => pk.printer ? [x.pieces.length ? bedText(x.bed) || 'Fits' : ''] : []; // empty: no sizes known for that model
   files.push({ name: 'print-list.csv', data: csv([['Qty', 'Part', 'Variants', 'Where', 'Link', ...(pk.printer ? ['Print bed: ' + bedName(pk.printer)] : [])], ...pk.map(x => [x.qty, x.name, x.variants, x.subs.join('; '), x.url || 'custom-parts/', ...bedCol(x)])]) });
   files.push({ name: base + '.rack.json', data: rackFile() });
-  files.push({ name: 'shopping-list.csv', data: csv([['Group', 'Qty', 'Item', 'Spec', ...((shopLinks('x')).map(l => l.shop))], ...orderList().map(x => [(SHOP_GROUPS.find(g => g[0] === x.group) || ['', ''])[1], qtyText(x), x.name, x.spec || '', ...(x.links || []).map(l => l.url)])]) });
+  files.push({ name: 'shopping-list.csv', data: csv([['Group', 'Qty', 'Item', 'Spec', 'Optional', ...((shopLinks('x')).map(l => l.shop))], ...orderList().map(x => [(SHOP_GROUPS.find(g => g[0] === x.group) || ['', ''])[1], qtyText(x), x.name, x.spec || '', x.optional ? 'Yes' : 'No', ...(x.links || []).map(l => l.url)])]) });
   files.push({ name: 'build-guide.html', data: buildGuidePage() });
   files.push({ name: 'README.txt', data: 'Mini Rack Planner build pack — ' + (state.label || 'Lab Rax') + ', ' + state.h + 'U\n\n' + listText() +
     '\n\nCommunity models stay on MakerWorld under their own licenses: open download-list.html, download each model there as 3MF and tick it off.\nCustom parts in custom-parts/ were generated by the Lab Rax Planner (MIT) and print without supports: panels and shelves face-down, label plates face-up.\n' +
@@ -2094,6 +2097,7 @@ document.addEventListener('click', async e => {
     case 'undo': if (undo) { state = JSON.parse(undo); undo = null; render(); renderLib(); say('Restored.'); } break;
     case 'copy': copyText(listText(), 'List copied.'); break;
     case 'save-file': saveFile(rackName() + '.rack.json', new Blob([rackFile()], { type: 'application/json' })); break;
+    case 'previous-rack': { const previous = previousRack(); if (previous) applyLayout(previous, 'Previous rack restored.'); break; }
     case 'open-file': $('#rackfile').click(); break;
     case 'share': if (TOP_WIN) copyText(shareLink(), 'Share link copied. Anyone who opens it sees this layout.'); else say('Open the planner on its own page to share a link.'); break;
     case 'maker': openMaker(null); break;
@@ -2318,7 +2322,16 @@ function shareLink() {
   return location.origin + location.pathname + location.search + '#c=' + b64;
 }
 // replace the layout with one from a link or a file; Undo brings the current one back
-function applyLayout(s2, msg) {
+function previousRack() {
+  try { const s = JSON.parse(localStorage.getItem(PREVIOUS_STORE)); return s && Array.isArray(s.items) && s.h >= 1 && s.h <= 10 && s.nextId ? s : null; } catch (e) { return null; }
+}
+async function applyLayout(s2, msg) {
+  if (!state.example && (state.items.length || state.extras.length || state.top || state.bottom)) {
+    const answer = await askUser('Open this rack?', 'Replace ' + (state.label || 'your rack') + ' (' + state.items.length + ' parts)? Your current rack will be kept as Previous rack, even after a reload.', [['', 'Cancel'], ['open', 'Open rack', 'primary']]);
+    if (answer !== 'open') { render(); return; }
+    try { localStorage.setItem(PREVIOUS_STORE, JSON.stringify(state)); }
+    catch (e) { say('Your current rack could not be kept. Save it as a file before opening another rack.'); render(); return; }
+  }
   const count = s => (Array.isArray(s.items) ? s.items.length : 0) + (Array.isArray(s.extras) ? s.extras.length : 0) + (s.top ? 1 : 0), n = count(s2);
   undo = JSON.stringify(state); state = s2; sel = null;
   sanitize(); renderLib(); render();
@@ -2341,7 +2354,7 @@ async function openRackFile(file) {
   if (file.size <= 1e6) try { text = await file.text(); } catch (e) {}
   const r = text == null ? null : readRackFile(text);
   if (!r) { say(file.name + ' isn’t a rack file from this planner.'); return; }
-  applyLayout(r.state, 'Opened ' + file.name + '.' + (r.newer ? ' It was saved by a newer version of the planner, so some settings may be left out.' : ''));
+  await applyLayout(r.state, 'Opened ' + file.name + '.' + (r.newer ? ' It was saved by a newer version of the planner, so some settings may be left out.' : ''));
 }
 function decodeShared() {
   const m = location.hash.match(/^#([lc])=([^&]*)(.*)$/); // l: the whole state (older links), c: compact
@@ -2369,7 +2382,7 @@ fetch('catalog.json', { cache: 'no-cache' })
     fetch('resources.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).then(x => { if (x && Array.isArray(x.groups)) RESOURCES = x; }).catch(() => {});
     fetch('tips.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).then(t => { if (t && (Array.isArray(t.items) || Array.isArray(t.tips))) { TIPS = t; renderBuild(); } }).catch(() => {});
     sanitize();
-    if (!loadShared()) { renderLib(); render(); }
+    renderLib(); render(); loadShared();
     setView(ui.lastView === 'front' || ui.lastView === 'air' ? ui.lastView : '3d'); // 3D the first time
     window.addEventListener('hashchange', loadShared);
     let rw = 0;
@@ -2380,5 +2393,5 @@ fetch('catalog.json', { cache: 'no-cache' })
 
 window.LRApp = { snapshot, select: id => { sel = id; render(); }, say, toggleSides: () => { state.sides = state.sides === 'acrylic' ? 'printed' : 'acrylic'; touch(); render(); }, tip: (id, x, y) => id == null ? hideTip() : showTip(id, x, y) };
 // tools/selftest.html drives the planner through these; only on a page opened with ?selftest
-if (/[?&]selftest\b/.test(location.search)) window.LRApp.test = { get state() { return state; }, printPack, orderList, addItem, move, setHeight, histGo, shareLink, rackFile, readRackFile, byPos, ready: () => window.LRReady.summary(READY) };
+if (/[?&]selftest\b/.test(location.search)) window.LRApp.test = { get state() { return state; }, printPack, orderList, addItem, move, setHeight, histGo, shareLink, rackFile, readRackFile, byPos, facts, powerModel, listText, openRackFile, ready: () => window.LRReady.summary(READY) };
 })();

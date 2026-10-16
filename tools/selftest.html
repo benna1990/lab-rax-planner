@@ -22,12 +22,12 @@
 <iframe id="app" title="The planner under test"></iframe>
 <script>
 (async () => {
-  const KEYS = ['labrax-planner-v2', 'labrax-planner-ui'], saved = KEYS.map(k => localStorage.getItem(k));
+  const KEYS = ['labrax-planner-v2', 'labrax-planner-ui', 'labrax-planner-previous'], saved = KEYS.map(k => localStorage.getItem(k));
   const out = document.getElementById('out'), results = [];
   const wait = ms => new Promise(r => setTimeout(r, ms));
   const log = (ok, name, detail) => { results.push(ok); const li = document.createElement('li'); li.className = ok ? 'ok' : 'bad'; li.textContent = (ok ? '✓ ' : '✗ ') + name + (detail ? ' — ' + detail : ''); out.appendChild(li); };
   const frame = document.getElementById('app');
-  const load = hash => new Promise(res => { frame.onload = () => setTimeout(res, 1800); frame.src = '../index.html?selftest=' + Date.now() + (hash || ''); });
+  const load = (hash, keepQuestion = false) => new Promise(res => { frame.onload = () => setTimeout(() => { const d = frame.contentDocument.querySelector('#askdlg[open]'); if (d && !keepQuestion) { d.close('open'); setTimeout(res, 100); } else res(); }, 1800); frame.src = '../index.html?selftest=' + Date.now() + (hash || ''); });
   let W, errors = [];
   const hook = () => {
     W = frame.contentWindow; errors = []; W.addEventListener('error', e => errors.push(e.message));
@@ -50,6 +50,16 @@
     await load(); hook();
     await check('First visit shows the start screen', () => !$('#startcard').hidden);
     await check('The example passes its checks, apart from picking a printer', () => { const s = T().ready(); return s.warn === 0 && s.todo === 1 ? 'ready apart from 1 to do' : false; });
+    await check('Filled modular slots set supplies, cables, Connect and network counts', () => {
+      const f = T().facts(), shop = T().orderList();
+      if (f.pi5 !== 4 || f.boards !== 4 || shop.find(x => x.key === 'pi5psu')?.qty !== 4 || shop.find(x => x.key === 'usbc')?.qty !== 4) fail('example supplies or boards not four');
+      if (!W.document.body.textContent.includes('4 Pi 5 boards need')) fail('Connect count not four');
+      const cluster = T().powerModel().rows.find(r => r.it?.key === 'sbc7');
+      if (cluster.p.eth !== 4) fail('cluster network ports not four');
+      const item = T().state.items.find(i => i.key === 'sbc7'), fill = item.fill;
+      try { for (const n of [0, 1, 7]) { item.fill = n; const f = T().facts(), rows = T().orderList(); if (f.boards !== n || (rows.find(x => x.key === 'pi5psu')?.qty || 0) !== n || T().powerModel().rows.find(r => r.it?.key === 'sbc7').p.eth !== n) fail('filled count ' + n + ' differs'); } } finally { item.fill = fill; }
+      return '4 boards/supplies/cables/ports; also checked 0, 1 and 7 filled slots';
+    });
     await check('Start empty gives an empty rack', async () => { $('.sc-opt[data-v="empty"]').click(); await wait(500); return T().state.items.length === 0 && $('#startcard').hidden; });
     await check('Parts go to the first free slot', async () => { ['ucgmax1', 'mw2117690', 'sbc7'].forEach(key => T().addItem({ key })); await wait(200);
       const p = T().state.items.map(i => i.key + '@' + i.pos2).join(' '); return p === 'ucgmax1@0 mw2117690@2 sbc7@4' ? p : false; });
@@ -62,8 +72,9 @@
     await check('PDF export', async () => { const f = await download('pdf', /download pdf/i), head = new TextDecoder().decode(f.buf.subarray(0, 5)), pages = (new TextDecoder('latin1').decode(f.buf).match(/\/Type \/Page\b/g) || []).length;
       return head === '%PDF-' && pages >= 4 ? f.name + ', ' + pages + ' pages' : false; });
     await check('Build pack ZIP export', async () => { W.document.querySelector('#finalize-build').close && W.document.querySelector('#finalize-build').close(); await wait(200);
-      const f = await download('pack', /download/i), v = new DataView(f.buf.buffer), eo = f.buf.length - 22, n = v.getUint16(eo + 10, true); let cd = v.getUint32(eo + 16, true); const names = [];
-      for (let i = 0; i < n; i++) { const nl = v.getUint16(cd + 28, true); names.push(new TextDecoder().decode(f.buf.subarray(cd + 46, cd + 46 + nl))); cd += 46 + nl + v.getUint16(cd + 30, true) + v.getUint16(cd + 32, true); }
+      const f = await download('pack', /download/i), v = new DataView(f.buf.buffer), eo = f.buf.length - 22, n = v.getUint16(eo + 10, true); let cd = v.getUint32(eo + 16, true); const names = [], contents = {};
+      for (let i = 0; i < n; i++) { const nl = v.getUint16(cd + 28, true); const name = new TextDecoder().decode(f.buf.subarray(cd + 46, cd + 46 + nl)); names.push(name); const lh = v.getUint32(cd + 42, true), start = lh + 30 + v.getUint16(lh + 26, true) + v.getUint16(lh + 28, true); contents[name] = new TextDecoder().decode(f.buf.subarray(start, start + v.getUint32(cd + 24, true))); cd += 46 + nl + v.getUint16(cd + 30, true) + v.getUint16(cd + 32, true); }
+      if (!/Optional/.test(contents['shopping-list.csv'] || '') || !/,"Yes",/.test(contents['shopping-list.csv'] || '') || !/\[Optional\]/.test(contents['README.txt'] || '')) fail('optional items lost in CSV or README');
       const need = ['.pdf', '.rack.json', 'shopping-list.csv'].filter(x => !names.some(nm => nm.endsWith(x))); return need.length ? fail('missing ' + need.join(', ')) : f.name + ': ' + names.length + ' files'; });
     // regressions from the first review (AUDIT-NL.md, findings 1–4)
     await check('Print list: two variants from one model page share a row and both show', async () => { T().setHeight(8); T().addItem({ key: 'mw1385541' }); T().addItem({ key: 'mw13855411' }); await wait(200);
@@ -174,6 +185,25 @@
       if (W.document.body.textContent.includes('Print profile does not match the frame')) fail('warning remained after automatic correction');
       if (T().state.optionChoices.mw1931511) fail('automatic choice stored as fixed profile');
       return 'automatic heat-set/bolted, explicit mismatch warning, source choices in print list';
+    });
+    await check('Shared racks and files ask first and Previous rack survives reload', async () => {
+      const shared = T().shareLink().split('#')[1];
+      const mine = JSON.parse(JSON.stringify(T().state)); mine.label = 'MY OWN RACK'; mine.example = false;
+      localStorage.setItem(KEYS[0], JSON.stringify(mine)); await load(); hook();
+      await load('#' + shared, true); hook();
+      if (!$('#askdlg[open]') || T().state.label !== 'MY OWN RACK') fail('share replaced rack without asking');
+      $('#askdlg').close(''); await wait(100);
+      if (T().state.label !== 'MY OWN RACK') fail('cancel changed rack');
+      await load('#' + shared, true); hook(); $('#askdlg').close('open'); await wait(150);
+      if (T().state.label === mine.label) fail('accepted link did not open incoming rack');
+      await load(); hook();
+      const restore = $('[data-act="previous-rack"]'); if (!restore) fail('previous rack missing after reload'); restore.click();
+      if (!$('#askdlg[open]')) fail('restore did not protect current rack'); $('#askdlg').close('open'); await wait(150);
+      if (T().state.label !== mine.label || JSON.stringify(T().state.items) !== JSON.stringify(mine.items)) fail('previous rack differs');
+      const before = JSON.stringify(T().state), opening = T().openRackFile(new W.File([T().rackFile()], 'test.rack.json'));
+      await wait(100); if (!$('#askdlg[open]')) fail('file did not ask'); $('#askdlg').close(''); await opening; await wait(50);
+      if (JSON.stringify(T().state) !== before) fail('cancel file changed rack');
+      return 'cancel preserved own rack; accepted link backed it up; restore after reload; file asks';
     });
   } catch (e) { log(false, 'Self-test stopped', e.message); }
   finally { KEYS.forEach((k, i) => saved[i] == null ? localStorage.removeItem(k) : localStorage.setItem(k, saved[i])); }
