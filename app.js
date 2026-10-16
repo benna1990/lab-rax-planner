@@ -361,10 +361,10 @@ function clashes(it) {
 /* Parts on the same side whose panels overlap: a ½U Lab Rax panel is 22.6 mm high, more than half a U, and sits on the U's outer
    hole, so it reaches past the middle of its U into the other half (shapes.js). Two ½U parts in one U then overlap: 3.6 mm for two
    Lab Rax panels, 1.4 mm next to an EIA one. Returns [{ o, mm }]. */
-function overlaps(it) {
+function overlaps(it, others = placed()) {
   if (it.pos2 == null) return [];
   const span = o => { const [py, ph] = plateBox(o, info(o)), t = o.pos2 * P.U / 2 + py; return [t, t + ph]; }, [a0, a1] = span(it);
-  return placed().filter(o => o.id !== it.id && sideOf(o) === sideOf(it) && Math.abs(o.pos2 - it.pos2) <= 2)
+  return others.filter(o => o.id !== it.id && sideOf(o) === sideOf(it) && Math.abs(o.pos2 - it.pos2) <= 2)
     .map(o => { const [b0, b1] = span(o); return { o, mm: Math.min(a1, b1) - Math.max(a0, b0) }; }).filter(x => x.mm > .05);
 }
 // would a ½U part fit in slot p, without overlapping the part in the other half of its U? (for filling open slots)
@@ -1497,7 +1497,7 @@ function renderSteps() {
 }
 // jump to where a step's work happens, with a short flash so the eye finds it
 function goStep(n) {
-  const at = el => { if (!el) return; el.scrollIntoView({ behavior: 'smooth', block: 'start' }); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); };
+  const at = el => { if (!el) return; el.style.scrollMarginTop = (Math.max(0, $('header.top').getBoundingClientRect().bottom) + 8) + 'px'; el.scrollIntoView({ behavior: 'smooth', block: 'start' }); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); };
   if (n === 1) return at($('#settings'));
   if (n === 2) { if (where() !== 'front' && where() !== 'back') setWhere('front'); at($('.lib')); setTimeout(() => { const q = $('#q'); if (q) q.focus({ preventScroll: true }); }, 400); return; }
   const id = { 3: 'connect', 5: 'print' }[n];
@@ -1858,14 +1858,19 @@ function planLayout(w) {
   if (w.power && LIB.mw2010724) list.push({ key: 'mw2010724', role: 9 });
   list.sort((a, b) => a.role - b.role);
   let p = 0, id = 1, prevHot = false;
-  const put = (key, at) => items.push({ id: id++, key, pos2: at });
+  const put = (key, at) => {
+    const it = { id: id++, key, pos2: at }, h2 = LIB[key].h2;
+    // Use the editor's alignment and physical panel-overlap rules, including protruding Lab Rax half-U panels.
+    while (!LY.aligned(it.pos2, h2) || overlaps(it, items).length) it.pos2++;
+    items.push(it); return it.pos2;
+  };
   list.forEach(x => {
     const h2 = LIB[x.key].h2, hot = heatOf({ key: x.key }).w >= 15;
     let gap = prevHot && hot ? 1 : 0;                                  // let two warm parts breathe
     if (h2 > 1 && (p + gap) % 2) gap++;                                // whole-U parts start on a U boundary
-    if (gap === 2 && !(p % 2)) { put('vent1', p); p += 2; }            // one 1U vent rather than two halves
-    else for (let i = 0; i < gap; i++) { put(prevHot && hot ? 'vent05' : half, p); p += 1; }
-    put(x.key, p); p += h2; prevHot = hot;
+    if (gap === 2 && !(p % 2)) { p = put('vent1', p) + 2; }            // one 1U vent rather than two halves
+    else for (let i = 0; i < gap; i++) { p = put(prevHot && hot ? 'vent05' : half, p) + 1; }
+    p = put(x.key, p) + h2; prevHot = hot;
   });
   const cand = Object.assign(defaultState(), { h: Math.min(10, Math.max(1, Math.ceil(p / 2) + w.spare)), version: w.version, sides: w.sides, frame: look[1], panel: look[2], accent: look[3],
     label: (w.label || 'Lab Rax').slice(0, 16), top: w.fans === 'top' && LIB.mw1875867 ? 'mw1875867' : null, extras: [], back: 'open', items, nextId: id, example: false, done: {} });

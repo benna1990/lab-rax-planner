@@ -110,6 +110,23 @@
       const texts = g.filter(e => e.k === 'text'), overlap = texts.some((a, i) => texts.slice(i + 1).some(b => a.page === b.page && Math.min(a.r, b.r) - Math.max(a.l, b.l) > .6 && Math.min(a.b, b.b) - Math.max(a.t, b.t) > .6));
       return pages <= 7 && !bad.length && !boxes.length && !outside.length && !overlap ? pages + ' pages; no content above the header margin; frame and power share the continuation page' : fail(outside.length + ' outside / overlap: ' + overlap + '; ' + pages + ' pages; ' + bad.length + ' text lines / ' + boxes.length + ' boxes cross the content margins');
     });
+    await check('Beginner wizard: UCG-Max with default options creates no physical overlaps', async () => {
+      $('[data-act="wizard"]').click();
+      const pick = [...W.document.querySelectorAll('.wz-dev')].find(b => /^\+\s*UCG-Max$/.test(b.textContent));
+      if (!pick) fail('UCG-Max not offered'); pick.click();
+      for (let step = 0; step < 4; step++) $('[data-act="wz-next"]').click();
+      $('[data-act="wz-create"]').click(); await wait(250);
+      const s = T().ready();
+      return s.warn === 0 && !/parts overlap/.test($('#ready').textContent) ? T().state.h + 'U, no build warnings' : fail($('#ready').textContent);
+    });
+    await check('Step jumps keep Print and Export below the sticky header', async () => {
+      for (const [step, selector] of [[5, '[data-sec="print"]'], [6, '#export']]) {
+        $('[data-act="go-step"][data-step="' + step + '"]').click(); await wait(800);
+        const header = $('header.top').getBoundingClientRect().bottom, target = $(selector).getBoundingClientRect().top;
+        if (target < header) fail('step ' + step + ' starts at ' + target.toFixed(1) + ', header ends at ' + header.toFixed(1));
+      }
+      return 'headings and export controls remain visible';
+    });
   } catch (e) { log(false, 'Self-test stopped', e.message); }
   finally { KEYS.forEach((k, i) => saved[i] == null ? localStorage.removeItem(k) : localStorage.setItem(k, saved[i])); }
   const bad = results.filter(x => !x).length;

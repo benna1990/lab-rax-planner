@@ -210,7 +210,7 @@ async function make(d) {
     stats.forEach(([name,value],i)=>{const x=M+i*45.5;doc.setFillColor(243,246,243);doc.roundedRect(x,y,41.5,24,2,2,'F');doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(...muted);text(name,x+4,y+7);doc.setFontSize(16);doc.setTextColor(...(i===1&&m.maxT>40?[164,78,34]:ink));text(value,x+4,y+17);});
     y+=34;
     const blue=[37,99,235], warm=[196,73,40];
-    const kk=Math.min(60/outerW,118/(m.h*U)), rw=280*kk, bay=dims.clearWidth*kk, rx=M+13, ry=y+20, layerH=U/2*kk, bh=m.h*U*kk, post=(rw-bay)/2;
+    const kk=Math.min(60/outerW,118/(m.h*U)), rw=outerW*kk, bay=dims.clearWidth*kk, rx=M+13, ry=y+20, layerH=U/2*kk, bh=m.h*U*kk, post=(rw-bay)/2;
     doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(...ink);text('Air temperature and airflow',M,y);
     doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(...muted);text('Front view. Blue arrows: air in; orange: air out (m³/h).',M,y+4.5);
     doc.setFillColor(64,70,66);doc.roundedRect(rx,ry-3,rw,bh+6,1,1,'F');doc.setFillColor(250,250,250);doc.rect(rx+post,ry,bay,bh,'F');
