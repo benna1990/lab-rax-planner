@@ -1030,7 +1030,10 @@ Fifth tranche of candidate models from `docs/audit/model-candidates.json` inspec
 - 7 × `Standard Digital File License`
 - 6 × `CC BY-NC-SA`
 - 2 × `MakerWorld Exclusive License`
-- 2 × `BY` (Creative Commons Attribution)
+- 2 × `CC BY`
 
 **Running total for T-13:** 105 new rack parts documented in `model-pages.json`, 27 models skipped (132 candidates checked). Total records in `model-pages.json` is now 184 (75 frame-extras + 109 candidates). All test suites and catalog validation pass.
+
+*Antigravity, 16 October 2026:* `mw3395354` and `mw2695637` licences updated from `"BY"` to `"CC BY"` in `docs/audit/model-pages.json`.
+
 
