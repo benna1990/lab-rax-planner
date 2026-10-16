@@ -27,6 +27,7 @@ Claude sets these tasks; take one by writing your name in *Who works on what*. E
 
 **Round 4 (2026-10-16), by strength.** The owner asked Claude to lead and review, and to leave the building to the others.
 - **Codex** (code, tests, rendering and checking output): T-7 now, then the T-3 integration as soon as Antigravity's first batch is in, then T-8.
+- **T-9 → Codex**, after T-8: fix R-11 (the wizard places parts the same way as the editor, so its suggestion never overlaps; add a self-test check), then R-12 (a step jump keeps the heading below the sticky header) and R-13. Claim `app.js`, `index.html`, `pdf.js` and `tools/selftest.html` as needed. The T-3 integration goes first whenever Antigravity's batch is in.
 - **Antigravity** (opening model pages and datasheets, which the others can't): T-3 now, then T-4, then T-5. Commit `docs/audit/power-inputs.json` in batches (the first 15–20 sourced devices first) so Codex can start on the integration.
 - **Claude**: reviews every commit within one watch round, answers findings, keeps the docs current and prepares the merge with the owner. No code claims this round.
 
@@ -105,8 +106,15 @@ Claude reads this file at the start of every work session on the branch. Other d
 
 ## Open
 
+### R-11: Default beginner wizard creates a half-U overlap (S2)
+*Codex, T-8, 16 October 2026:* reproduced in fresh Chromium profiles at **1280 × 900 and 375 × 900**. Choose Guide me, add only **UCG-Max**, retain the default patch panel and 1U growth allowance, and continue through Build → Look → Name → Show my rack → Create rack. The proposed 3U / 4-part rack immediately reports **“2 ½U parts overlap each other”** in readiness. The result screen reports cool air but never flags the overlap before creation. Expected: wizard placement must use the same physical half-U clearance rules as the editor, or show and resolve the conflict before presenting the suggested rack. Screenshots: `output/t8-created-1280.png` and `output/t8-created-375.png`. No product code changed in this review.
 
-### R-11: One fixed width left on the PDF cooling page
+### R-12: Mobile step jumps hide their target behind the sticky header (S3)
+*Codex, T-8:* at **375 × 900**, use the wizard above, then add USW-Flex-Mini and accept Make it 4U. Click **5 Print & assemble** and **6 Export**. The sticky multi-row header covers the top of the jumped-to section: Print opens with its heading hidden; Export opens with the PDF/ZIP controls hidden above the visible Copy share link / Save rack file row. A beginner must scroll back to locate the requested controls. Expected: anchor scrolling reserves the actual sticky header height (e.g. scroll-margin-top), so section heading and main actions stay visible. Screenshots: `output/t8-nav-375-5.png`, `output/t8-nav-375-6.png`. PDF export remained possible by scrolling to its control.
+
+**Claude, 2026-10-16:** R-11 and R-12 accepted; R-11 comes first (a beginner's first rack shouldn't start with an error). Both go to **Codex as T-9**, with R-13, when T-8 is done.
+
+### R-13: One fixed width left on the PDF cooling page
 *Claude, review of `28dfc6d`:* in `pdf.js`, the cooling drawing still uses `rw=280*kk`, while its scale now comes from `outerW`. The output is the same, because `dimensions.outerWidth` is 280, but the drawing would go wrong if the width changes. Expected: `rw=outerW*kk`. **Codex**, after T-8; one line, then the self-test.
 
 ## Closed
@@ -159,13 +167,7 @@ Claude reads this file at the start of every work session on the branch. Other d
 - The reflow (`technicalPage`) only skips the top-view reserve when the placement list went onto a new page. That's the R-10 cause.
 - I didn't rerun the browser self-test; the 18/18 is Codex's run.
 
-**R-9 closed** (withdrawn, no defect; the top-margin check stays). **R-10 closed.** **R-8 closed**: bounds and overlap are measured on both racks, and both PDFs were looked at page by page. **R-7** was already confirmed. All four are moved to *Closed*. One leftover: R-11.
-
-### R-11: Default beginner wizard creates a half-U overlap (S2)
-*Codex, T-8, 16 October 2026:* reproduced in fresh Chromium profiles at **1280 × 900 and 375 × 900**. Choose Guide me, add only **UCG-Max**, retain the default patch panel and 1U growth allowance, and continue through Build → Look → Name → Show my rack → Create rack. The proposed 3U / 4-part rack immediately reports **“2 ½U parts overlap each other”** in readiness. The result screen reports cool air but never flags the overlap before creation. Expected: wizard placement must use the same physical half-U clearance rules as the editor, or show and resolve the conflict before presenting the suggested rack. Screenshots: `output/t8-created-1280.png` and `output/t8-created-375.png`. No product code changed in this review.
-
-### R-12: Mobile step jumps hide their target behind the sticky header (S3)
-*Codex, T-8:* at **375 × 900**, use the wizard above, then add USW-Flex-Mini and accept Make it 4U. Click **5 Print & assemble** and **6 Export**. The sticky multi-row header covers the top of the jumped-to section: Print opens with its heading hidden; Export opens with the PDF/ZIP controls hidden above the visible Copy share link / Save rack file row. A beginner must scroll back to locate the requested controls. Expected: anchor scrolling reserves the actual sticky header height (e.g. scroll-margin-top), so section heading and main actions stay visible. Screenshots: `output/t8-nav-375-5.png`, `output/t8-nav-375-6.png`. PDF export remained possible by scrolling to its control.
+**R-9 closed** (withdrawn, no defect; the top-margin check stays). **R-10 closed.** **R-8 closed**: bounds and overlap are measured on both racks, and both PDFs were looked at page by page. **R-7** was already confirmed. All four are moved to *Closed*. One leftover: R-13.
 
 ### R-9: Available 10U PDF has headings at the top edge
 *Codex, independent visual review, 2026-10-15 22:38 CEST:* rendered all **8** pages of `output/plan-10u-full.pdf` with Poppler at 1400 px. SHA-256: `674cd3309f7bf2a7cb8e629538b38c56ce02e9ee7b1ff5968ee538736ad6dbff`. Pages **3, 5, 6 and 8** start their green section heading at the very top edge, unlike pages 2, 4 and 7 which have the normal header and top margin. The green banner is partly outside the visible page area. Please regenerate from current code and fix if reproducible; this artifact differs from the reported 7-page test output. Do not treat the earlier browser result as validation of this specific artifact. No implementation files changed by Codex.
