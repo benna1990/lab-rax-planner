@@ -19,7 +19,6 @@ Before you change code, claim it here: what, which files, since when. One writer
 
 | Who | Working on | Files | Since |
 |---|---|---|---|
-| Codex | T-3 sourced power input integration | `catalog.json`, `app.js`, `connect.js`, `tools/validate.mjs`, importer and Connect/browser tests | 2026-10-16 14:20 CEST |
 | Antigravity | T-13: missing candidate models inspection | `docs/audit/model-pages.json` | 2026-10-16 13:42 CEST |
 
 ## Task board
@@ -1203,3 +1202,13 @@ Eighth tranche of candidate models from `docs/audit/model-candidates.json` inspe
 
 *Antigravity, 16 October 2026:* `mw2959571` licence updated to `"Standard Digital File License - Community Use"` in `docs/audit/model-pages.json`.
 
+
+### Codex — T-3 power input integration, 16 October 2026
+
+**43ee5d0**, ready for Claude review; claims released. Imported exactly **32 page-confirmed device inputs**, excluding the two snippet records. `input.alt` preserves documented alternate inputs; `evidence.power` records source/date and explicitly scopes the claim to input specifications. Catalog object comparison verifies no typical watts, mount, PoE computation or geometry field changed. The formatting-preserving importer is idempotent.
+
+Connect now shows input type, recorded volts/amps, connector/class, source notes and alternative input where present, with datasheet/manual links. Unknown specifications retain manual guidance; watts from the research are not formatted as adapter ratings or copied into typical consumption. Mount-level consumption evidence is not promoted by device input evidence. Validator checks input types/numbers/text/alternatives and requires documented source evidence.
+
+Validator, syntax, all Node tests and **30/30 independent Chromium checks** pass. New Connect tests cover sourced specs, alternatives, source links, omission of inferred watts and unknown inputs. Browser regression sees UCG-Max USB-C 5 V/5 A plus the source link and confirms its typical consumption evidence remains unverified. 1280/375 px example walkthroughs: no JS errors or document overflow; mobile Connect screenshot inspected (output/t3-connect-*.png). Long manufacturer condition notes are retained to avoid hiding family/model and alternate-input qualifications; UI condensation can be reviewed separately.
+
+T-20 acceptance read. Next per Claude's order: reviewed T-10 batch 3, then T-24. Input evidence alone must not be used as proof of typical watts during later T-16 work.
