@@ -9885,6 +9885,386 @@
    "look": "ok",
    "lookNote": "2U faceplate holding dual ham radio digital hotspot stacks with twin 3.5-inch color LCD touchscreens.",
    "confidence": "page"
+  },
+  {
+   "id": "mw2890969",
+   "new": true,
+   "what": "1U recessed bracket for GL.iNet Beryl 7 (GL-MT3600BE) router in 10-inch rack",
+   "url": "https://makerworld.com/en/models/2890969",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "Beryl 7 1U bracket"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "1U bracket to mount GL.iNet Beryl 7 in a 10 inch rack.",
+   "look": "ok",
+   "lookNote": "1U recessed cradle designed for rear or top mounting with upright antenna clearance.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2047053",
+   "new": true,
+   "what": "1U front panel mounting an inline AC power rocker switch for Lab Rax",
+   "url": "https://makerworld.com/en/models/2047053",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "1U power switch panel"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "1U panel for Lab Rax 10\" rack mounting an inline cable switch.",
+   "look": "ok",
+   "lookNote": "1U panel face with center rectangular cutout snapping around a standard inline cord switch.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2851206",
+   "new": true,
+   "what": "10-inch rack mount for Raspberry Pi 2B/3B/4B/5B with HDMI pass-through cutouts",
+   "url": "https://makerworld.com/en/models/2851206",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Raspberry Pi 2B/3B/4B/5B 10-inch Rack Mount (Mauker)"
+   ],
+   "profiles": [],
+   "profilesNote": "the page has no print profiles",
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "10-inch rack mount with HDMI extension cutouts and knockout covers.",
+   "look": "ok",
+   "lookNote": "1U faceplate framing a Raspberry Pi with port cutouts and front HDMI extension bracket.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3255405",
+   "new": true,
+   "what": "Extra-wide 1U rack shelf for Zyxel GS1900-8 switch fitting with Lab Rax side panels",
+   "url": "https://makerworld.com/en/models/3255405",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [],
+   "profilesNote": "the page has no print profiles",
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Basic shelf for the Lab Rax 10\" rack system, fits even with side panels installed.",
+   "look": "ok",
+   "lookNote": "1U cantilevered shelf tray sized specifically for the wide 8-port Zyxel switch chassis.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2507502",
+   "new": true,
+   "what": "1U dual switch holder for TP-Link TL-SG705 and centered TL-SG108 in Lab Rax",
+   "url": "https://makerworld.com/en/models/2507502",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-ND",
+   "remixOf": [],
+   "profiles": [],
+   "profilesNote": "the page has no print profiles",
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Holds a TP-Link TL-SG705 on left side alongside a centered TL-SG108 in Lab Rax 10\".",
+   "look": "ok",
+   "lookNote": "1U dual faceplate cradle retaining both compact TP-Link desktop switches flush with the front.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2555182",
+   "new": true,
+   "what": "Lab Rax split horizontal top frame edge printable on 170x170mm small beds",
+   "url": "https://makerworld.com/en/models/2555182",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - 5U (mklements)"
+   ],
+   "profiles": [],
+   "profilesNote": "the page has no print profiles",
+   "choices": [],
+   "attaches": "top",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Edit making Lab Rax top frame edge printable on a 170x170mm printer bed.",
+   "look": "ok",
+   "lookNote": "Two interlocking half-pieces replacing the single long horizontal front beam.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2085126",
+   "new": true,
+   "what": "Modular 1U SBC tray for Raspberry Pi Zero / 3 / 4 in Lab Rax 10\" rack",
+   "url": "https://makerworld.com/en/models/2085126",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [],
+   "profilesNote": "the page has no print profiles",
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [
+    {
+     "part": "M2.5 heated insert",
+     "qty": 4
+    },
+    {
+     "part": "M3 heated insert",
+     "qty": 4
+    }
+   ],
+   "hardwareNote": "M2.5 inserts for Pi Zero; M3 inserts for tray and Pi 3/4.",
+   "fitsLabRax": "stated",
+   "fitNote": "Designed to fit the Lab Rax or any 10\" server rack.",
+   "look": "ok",
+   "lookNote": "1U horizontal tray with swappable internal carrier inserts for different Raspberry Pi generations.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2577196",
+   "new": true,
+   "what": "10-inch single-piece rack mount radio cage for TYT MD-9600 mobile radio",
+   "url": "https://makerworld.com/en/models/2577196",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY",
+   "remixOf": [],
+   "profiles": [],
+   "profilesNote": "the page has no print profiles",
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "10-inch rack mount radio cage designed for mobile transceivers.",
+   "look": "ok",
+   "lookNote": "Sturdy single-piece cradle housing a mobile ham radio with side ventilation grills.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2825943",
+   "new": true,
+   "what": "Right-angle horizontal edge piece with bolt recesses for bolted Lab Rax",
+   "url": "https://makerworld.com/en/models/2825943",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack Right Angle Edge for 1/2U (AlwaysFun)"
+   ],
+   "profiles": [],
+   "profilesNote": "the page has no print profiles",
+   "choices": [],
+   "attaches": "top",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Remix adding recesses for the bolt-together style of Lab Rax.",
+   "look": "ok",
+   "lookNote": "Horizontal right-angle transition bracket featuring counterbored holes for M6 bolt heads.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1560522",
+   "new": true,
+   "what": "1U 10-inch mounting panel for LattePanda Sigma single-board computer in Lab Rax",
+   "url": "https://makerworld.com/en/models/1560522",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [],
+   "profilesNote": "the page has no print profiles",
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "10-inch mounting panel for LattePanda Sigma, compatible with Lab Rax.",
+   "look": "ok",
+   "lookNote": "1U faceplate framing the high-performance LattePanda Sigma board with power button access.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2178502",
+   "new": true,
+   "what": "5-channel clip-on cable manager for Lab Rax bolted vertical rack posts",
+   "url": "https://makerworld.com/en/models/2178502",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [],
+   "profilesNote": "the page has no print profiles",
+   "choices": [],
+   "attaches": "posts",
+   "sides": "both",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Practical add-on for Lab Rax bolted rack posts with 5 cable slots.",
+   "look": "ok",
+   "lookNote": "Vertical column clip snapping to corner post profile to organize network patch cables.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2084247",
+   "new": true,
+   "what": "Clip-on device identification labels for Lab Rax 10\" server rack",
+   "url": "https://makerworld.com/en/models/2084247",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [],
+   "profilesNote": "the page has no print profiles",
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Simple labels for 10\" home lab server (printed Lab Rax).",
+   "look": "ok",
+   "lookNote": "Thin dual-color nameplate strips snapping across front rack ears to label smart home hubs.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2417794",
+   "new": true,
+   "what": "Honeycomb storage wall side panel (222mm) with rounded corners for Kiwiworks connector",
+   "url": "https://makerworld.com/en/models/2417794",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "lab rax honeycomb storage wall panels (custom) (Jeffrey)"
+   ],
+   "profiles": [],
+   "profilesNote": "the page has no print profiles",
+   "choices": [],
+   "attaches": "side-panel",
+   "sides": "both",
+   "sizes": {
+    "u": 5,
+    "lengthMm": 222,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Modified Jeffrey's HSW panel (shortened to 222mm) with round corners to fit Kiwiworks post joiner.",
+   "look": "ok",
+   "lookNote": "5U side panel with standard hexagonal Honeycomb Storage Wall cell matrix and filleted corners.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2520045",
+   "new": true,
+   "what": "Parametric OpenSCAD rack ear generator for 10\" (and 19\") equipment mounting",
+   "url": "https://makerworld.com/en/models/2520045",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [],
+   "profilesNote": "the page has no print profiles",
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Accommodates 10\" racks with customizable rack size, U height, ear thickness, and mounting holes.",
+   "look": "ok",
+   "lookNote": "Customizable L-shaped mounting brackets bridging third-party hardware enclosures to 10-inch rails.",
+   "confidence": "page"
   }
  ]
 }

@@ -1320,3 +1320,46 @@ Tenth tranche of candidate models from `docs/audit/model-candidates.json` inspec
 
 **Running total for T-13:** 218 new rack parts documented in `model-pages.json`, 48 models skipped (266 candidates checked). Total records in `model-pages.json` is now 293 (75 frame-extras + 218 candidates). All test suites and catalog validation pass.
 
+### Antigravity — T-13 Batch 11: 26 Candidate Models Inspected (14 Added, 12 Skipped), 16 October 2026
+
+Eleventh tranche of candidate models from `docs/audit/model-candidates.json` inspected (covering ranks 397 through 424):
+
+**14 Rack parts documented in `docs/audit/model-pages.json` (`new: true`, `confidence: "page"`):**
+1. `mw2890969` (Rank 401): 1U recessed bracket for GL.iNet Beryl 7 (GL-MT3600BE) router in 10-inch rack (`CC BY-NC-SA`).
+2. `mw2047053` (Rank 402): 1U front panel mounting an inline AC power rocker switch for Lab Rax (`Standard Digital File License`).
+3. `mw2851206` (Rank 403): 10-inch rack mount for Raspberry Pi 2B/3B/4B/5B with HDMI pass-through cutouts (`CC BY-NC-SA`). Confirmed zero-profile model (`profiles: []`, `profilesNote` added).
+4. `mw3255405` (Rank 404): Extra-wide 1U rack shelf for Zyxel GS1900-8 switch fitting with Lab Rax side panels (`CC BY-NC-SA`). Confirmed zero-profile model (`profiles: []`, `profilesNote` added).
+5. `mw2507502` (Rank 405): 1U dual switch holder for TP-Link TL-SG705 and centered TL-SG108 in Lab Rax (`CC BY-NC-ND`). Confirmed zero-profile model (`profiles: []`, `profilesNote` added).
+6. `mw2555182` (Rank 406): Lab Rax split horizontal top frame edge printable on 170x170mm small beds (`CC BY-NC-SA`). Confirmed zero-profile model (`profiles: []`, `profilesNote` added).
+7. `mw2085126` (Rank 407): Modular 1U SBC tray for Raspberry Pi Zero / 3 / 4 in Lab Rax 10" rack (`CC BY-NC-SA`). Uses M2.5 and M3 brass inserts. Confirmed zero-profile model (`profiles: []`, `profilesNote` added).
+8. `mw2577196` (Rank 408): 10-inch single-piece rack mount radio cage for TYT MD-9600 mobile radio (`CC BY`). Confirmed zero-profile model (`profiles: []`, `profilesNote` added).
+9. `mw2825943` (Rank 409): Right-angle horizontal edge piece with bolt recesses for bolted Lab Rax (`CC BY-NC-SA`). Confirmed zero-profile model (`profiles: []`, `profilesNote` added).
+10. `mw1560522` (Rank 410): 1U 10-inch mounting panel for LattePanda Sigma single-board computer in Lab Rax (`CC BY-NC-SA`). Confirmed zero-profile model (`profiles: []`, `profilesNote` added).
+11. `mw2178502` (Rank 411): 5-channel clip-on cable manager for Lab Rax bolted vertical rack posts (`CC BY-NC-SA`). Confirmed zero-profile model (`profiles: []`, `profilesNote` added).
+12. `mw2084247` (Rank 418): Clip-on device identification labels for Lab Rax 10" server rack (`CC BY-NC-SA`). Confirmed zero-profile model (`profiles: []`, `profilesNote` added).
+13. `mw2417794` (Rank 420): Honeycomb storage wall side panel (222mm) with rounded corners for Kiwiworks connector (`CC BY-NC-SA`). Confirmed zero-profile model (`profiles: []`, `profilesNote` added).
+14. `mw2520045` (Rank 421): Parametric OpenSCAD rack ear generator for 10" (and 19") equipment mounting (`CC BY-NC-SA`). Confirmed zero-profile model (`profiles: []`, `profilesNote` added).
+
+**12 Non-rack / incompatible models skipped (with reasons):**
+- `mw1486714` (Rank 397): "Petri Dish Rack / Holder" by 3D Print Guy — Skipped: biology laboratory petri dish organizer, not a computer server rack part.
+- `mw2456551` (Rank 398): "lab_box" by user_3473489814 — Skipped: generic test box for work, not a server rack part.
+- `mw992663` (Rank 399): "Acceleration Lab" by 3D Printing in Physics — Skipped: physics class educational demonstration apparatus.
+- `mw3310998` (Rank 400): "Lab Tool" by javier.artavia — Skipped: laboratory dental/chemical tool test print.
+- `mw1920740` (Rank 412): "My Lab Rax Server Design" by Terrabey — Skipped: repackaged print bundle composed of existing third-party Lab Rax files without original parts.
+- `mw2756972` (Rank 413): "Black Lab" by Turtle — Skipped: Labrador retriever dog memorial figurine.
+- `mw1173824` (Rank 414): "Labtop holder" by Teo Fann — Skipped: generic desk laptop riser stand.
+- `mw3117892` (Rank 415): "Lab Bane" by Smash34 — Skipped: Labrador dog figurine with a Bane mask.
+- `mw3144813` (Rank 417): "lab thing" by user_146409305 — Skipped: non-rack personal print for Keith.
+- `mw3055387` (Rank 419): "Homelab" by The TKT Works — Skipped: video/blog post placeholder without 3D models.
+- `mw2013652` (Rank 422): "LabSled" by goat — Skipped: sled component for "The staddy", not a server rack part.
+- `mw2734382` (Rank 424): "Lab Labrador" by user_3996471021 — Skipped: Labrador retriever dog figurine.
+
+**License breakdown across Batch 11 (14 records):**
+- 11 × `CC BY-NC-SA`
+- 1 × `Standard Digital File License`
+- 1 × `CC BY`
+- 1 × `CC BY-NC-ND`
+
+**Running total for T-13:** 232 new rack parts documented in `model-pages.json`, 60 models skipped (292 candidates checked). Total records in `model-pages.json` is now 307 (75 frame-extras + 232 candidates). All test suites and catalog validation pass.
+
+
