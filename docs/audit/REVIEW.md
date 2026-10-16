@@ -923,3 +923,46 @@ Third tranche of candidate models from `docs/audit/model-candidates.json` inspec
 - add a self-test check that puts one new extra (casters) in the 3D view without console errors.
 
 Claude's claims on T-3 and T-23 are released.
+
+### Antigravity — T-13 Batch 4: 26 Candidate Models Inspected (22 Added, 4 Skipped), 16 October 2026
+
+Fourth tranche of candidate models from `docs/audit/model-candidates.json` inspected (covering ranks 160 through 197):
+
+**22 Rack parts documented in `docs/audit/model-pages.json` (`new: true`, `confidence: "page"`):**
+1. `mw3420704` (Rank 160): 1U front-facing rack mount tray for UGREEN 5-port 2.5GbE switch (`MakerWorld Exclusive License`).
+2. `mw1678541` (Rank 162): 3U side panel extension with IKEA Skadis pegboard pattern (`Standard Digital File License`).
+3. `mw3021125` (Rank 164): 10-inch rack blank panels in 7 decorative pattern styles (`CC BY-NC-SA`).
+4. `mw1602592` (Rank 167): Dual mount holding a Raspberry Pi and Tado Internet Bridge side by side (`Standard Digital File License`).
+5. `mw2970634` (Rank 168): Longest single-piece vertical corner posts printable on A1 Mini bed (`CC BY-SA`).
+6. `mw3420074` (Rank 169): 10-inch rack mounting panel for Somfy TaHoma Mini bridge (`Standard Digital File License`).
+7. `mw1352784` (Rank 170): 10-inch rack shelf with enclosed front panel to conceal power blocks at rack bottom (`CC BY-NC-SA`).
+8. `mw2055908` (Rank 171): Replaceable customizable sign plate insert for top vent edge (`CC BY-NC-SA`).
+9. `mw2991095` (Rank 173): Rack mount cradle for TP-Link Omada OC200 hardware controller (`CC BY-NC-SA`).
+10. `mw2068460` (Rank 177): Top-corner mounted vertical or angled 10-inch tablet holder for Home Assistant (`CC BY-NC-SA`).
+11. `mw2690017` (Rank 178): Horizontal cross-brace stabilization rod for tall Lab Rax builds (`CC BY-NC-SA`).
+12. `mw2381616` (Rank 179): Hexagonal mesh ventilated top panel for 10-inch rack (`MakerWorld Exclusive License`).
+13. `mw1974460` (Rank 180): 2U and 3U expansion side panels with matching hex pattern (`CC BY-NC-SA`).
+14. `mw2300868` (Rank 181): Anti-tip flat horizontal edge corner pieces for top and bottom (`MakerWorld Exclusive License`).
+15. `mw2301362` (Rank 182): 3U rack mount faceplate for official Raspberry Pi 7-inch touchscreen (`Standard Digital File License`).
+16. `mw1361708` (Rank 183): 10-inch shelf for TP-Link SG108 switch with integrated keystone uplink (`CC BY-NC-SA`).
+17. `mw2375798` (Rank 184): Modular magnetic quick-access backplate for brass insert frame (`MakerWorld Exclusive License`).
+18. `mw3429918` (Rank 187): Gavin Belson Signature Box parody 1U decorative ventilation panel (`Standard Digital File License`).
+19. `mw2333317` (Rank 189): Extended TPU forward/backward stabilizer feet for tall frames (`CC BY-NC-SA`).
+20. `mw2567959` (Rank 191): 2U hexagonal perforated blanking plate for 7 SBC cluster (`CC BY-NC-SA`).
+21. `mw2574690` (Rank 193): 1U 11-port keystone patch panel with cable passthrough opening (`Standard Digital File License`).
+22. `mw3016665` (Rank 195): 3U adapter plate mounting two 5-inch Mini Lab Rax mounts in 10-inch rack (`CC BY-NC-SA`).
+
+**4 Non-rack / incompatible models skipped (with reasons):**
+- `mw2936642` (Rank 163): "Lab Rax DELL Wyse 3040 Mount (for Mini Lab Rax 5\")" by Yvesglezer08 — Skipped: for 5-inch Mini Lab Rax.
+- `mw2507518` (Rank 166): "Mini Lab Rax 5\" 1U Pi 5 Rack" by mklements — Skipped: for 5-inch Mini Lab Rax.
+- `mw2771488` (Rank 185): "Mini Lab Rax Patch Panels" by Technology&Toys — Skipped: for 5-inch Mini Lab Rax.
+- `mw2835850` (Rank 197): "DFROBOT CM4/4 Router" by Tommy_S — Skipped: for 5-inch Mini Lab Rax.
+
+**License breakdown across Batch 4 (22 records):**
+- 10 × `CC BY-NC-SA`
+- 7 × `Standard Digital File License`
+- 4 × `MakerWorld Exclusive License`
+- 1 × `CC BY-SA`
+
+**Running total for T-13:** 88 new rack parts documented in `model-pages.json`, 16 models skipped (104 candidates checked). Total records in `model-pages.json` is now 163 (75 frame-extras + 88 new candidates). All test suites and catalog validation pass.
+

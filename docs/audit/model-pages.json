@@ -5081,6 +5081,721 @@
    "look": "ok",
    "lookNote": "Chamfered top handle shape designed to print cleanly without bottom droop.",
    "confidence": "page"
+  },
+  {
+   "id": "mw3420704",
+   "new": true,
+   "what": "1U front-facing rack mount tray for UGREEN 5-port 2.5GbE switch",
+   "url": "https://makerworld.com/en/models/3420704",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.16mm layer, 2 walls, 8% infill",
+     "plates": null,
+     "prints": "1U UGREEN switch mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Fits standard 10\" mini rack.",
+   "look": "ok",
+   "lookNote": "1U faceplate cradle holding a UGREEN 5-port 2.5GbE desktop switch with front-facing ports.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1678541",
+   "new": true,
+   "what": "3U side panel extension with IKEA Skadis pegboard pattern",
+   "url": "https://makerworld.com/en/models/1678541",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "3U Skadis side panel extension"
+    }
+   ],
+   "choices": [],
+   "attaches": "side-panel",
+   "sides": "both",
+   "sizes": {
+    "u": 3,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for Lab Rax 10\" rack system in tandem with Skadis panels.",
+   "look": "ok",
+   "lookNote": "3U side panel with lip overlapping existing Skadis panels.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3021125",
+   "new": true,
+   "what": "10-inch rack blank panels in 7 decorative pattern styles",
+   "url": "https://makerworld.com/en/models/3021125",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "Solid Blanks",
+     "plates": null,
+     "prints": "solid blank panels"
+    },
+    {
+     "name": "Checkered Dots Blanks",
+     "plates": null,
+     "prints": "checkered dots pattern"
+    },
+    {
+     "name": "Diamonds Blanks",
+     "plates": null,
+     "prints": "diamonds pattern"
+    },
+    {
+     "name": "Dots Blanks",
+     "plates": null,
+     "prints": "dots pattern"
+    },
+    {
+     "name": "Horizontal Lines Blanks",
+     "plates": null,
+     "prints": "horizontal lines pattern"
+    },
+    {
+     "name": "Vertical Lines Blanks",
+     "plates": null,
+     "prints": "vertical lines pattern"
+    },
+    {
+     "name": "Triangles Blanks",
+     "plates": null,
+     "prints": "triangles pattern"
+    }
+   ],
+   "choices": [
+    "pattern style: Solid, Checkered Dots, Diamonds, Dots, Horizontal Lines, Vertical Lines, Triangles"
+   ],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for 10 inch racks.",
+   "look": "ok",
+   "lookNote": "Collection of 1U faceplates featuring varied geometric ventilation and solid patterns.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1602592",
+   "new": true,
+   "what": "Dual mount holding a Raspberry Pi and Tado Internet Bridge",
+   "url": "https://makerworld.com/en/models/1602592",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 13% infill",
+     "plates": null,
+     "prints": "dual Pi and Tado mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Tested with Lab Rax 3D printed 10\" rack.",
+   "look": "ok",
+   "lookNote": "1U faceplate holding a Raspberry Pi on the left and a Tado smart bridge on the right.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2970634",
+   "new": true,
+   "what": "Longest single-piece vertical corner posts printable on A1 Mini",
+   "url": "https://makerworld.com/en/models/2970634",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.16mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "A1 mini vertical uprights"
+    }
+   ],
+   "choices": [],
+   "attaches": "posts",
+   "sizes": {
+    "u": null,
+    "lengthMm": 180,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Vertical supports for the Lab Rax system.",
+   "look": "ok",
+   "lookNote": "Single-piece upright post optimized for 180x180mm print bed height limits.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3420074",
+   "new": true,
+   "what": "10-inch rack mounting panel for Somfy TaHoma Mini bridge",
+   "url": "https://makerworld.com/en/models/3420074",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 10% infill",
+     "plates": null,
+     "prints": "Somfy TaHoma Mini rack panel"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Fits Somfy TaHoma Mini into a 10-inch network rack.",
+   "look": "ok",
+   "lookNote": "1U faceplate with recessed center pocket holding the compact Somfy bridge.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1352784",
+   "new": true,
+   "what": "10-inch rack shelf with enclosed front panel to conceal power blocks",
+   "url": "https://makerworld.com/en/models/1352784",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "10-inch Rack Mount Shelf (Mauker)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "closed front rack shelf"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Used for bottom of Lab Rax 10 Server Rack.",
+   "look": "ok",
+   "lookNote": "Deep cantilevered shelf with a solid front wall hiding internal power cables.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2055908",
+   "new": true,
+   "what": "Replaceable customizable sign plate insert for top vent edge",
+   "url": "https://makerworld.com/en/models/2055908",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 10% gyroid infill",
+     "plates": null,
+     "prints": "sign plate insert"
+    }
+   ],
+   "choices": [],
+   "attaches": "top",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for Lab Rax 10 inch rack top vent piece.",
+   "look": "ok",
+   "lookNote": "Rectangular nameplate plate sliding into the horizontal front top edge.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2991095",
+   "new": true,
+   "what": "Rack mount cradle for TP-Link Omada OC200 hardware controller",
+   "url": "https://makerworld.com/en/models/2991095",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "OC200 controller rack mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed exclusively for Lab Rax 10\" brass inserts.",
+   "look": "ok",
+   "lookNote": "1U faceplate holding the Omada OC200 controller with front port access.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2068460",
+   "new": true,
+   "what": "Top-corner mounted vertical or angled 10-inch tablet holder",
+   "url": "https://makerworld.com/en/models/2068460",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 0.5U / 1/2U Top Corner (Blind Badger)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 6 walls, 25% infill",
+     "plates": null,
+     "prints": "tablet holder brackets"
+    }
+   ],
+   "choices": [
+    "angle: vertical or angled mount"
+   ],
+   "attaches": "top",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Mounts to Blind Badger's Lab Rax Top Corner.",
+   "look": "ok",
+   "lookNote": "Two top corner brackets supporting a 10\" Android tablet for Home Assistant.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2690017",
+   "new": true,
+   "what": "Horizontal cross-brace stabilization rod for tall Lab Rax builds",
+   "url": "https://makerworld.com/en/models/2690017",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - 5U (mklements)"
+   ],
+   "profiles": [],
+   "choices": [],
+   "attaches": "posts",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Remix of mklements 10\" Lab Rax for tall (23U) builds.",
+   "look": "ok",
+   "lookNote": "Cross-tie bar bracing rear or middle posts to stop sideways flex.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2381616",
+   "new": true,
+   "what": "Hexagonal mesh ventilated top panel",
+   "url": "https://makerworld.com/en/models/2381616",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "hex top panel"
+    }
+   ],
+   "choices": [],
+   "attaches": "top",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Hex top for Lab Rax mini 10\" Server Rack.",
+   "look": "ok",
+   "lookNote": "Full top frame plate with matching hexagonal ventilation perforations.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1974460",
+   "new": true,
+   "what": "2U and 3U expansion side panels with matching hex pattern",
+   "url": "https://makerworld.com/en/models/1974460",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "5U/4U Sidepanels with hex pattern ventilation (AlanMG)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 4 walls, 20% infill PETG",
+     "plates": null,
+     "prints": "2U and 3U hex sidepanels"
+    }
+   ],
+   "choices": [
+    "height: 2U or 3U expansion"
+   ],
+   "attaches": "side-panel",
+   "sides": "both",
+   "sizes": {
+    "u": 3,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Expansion sidepanel 2U and 3U for Lab Rax.",
+   "look": "ok",
+   "lookNote": "Hex-patterned side panels for frame extension heights.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2300868",
+   "new": true,
+   "what": "Anti-tip flat horizontal edge corner pieces for top and bottom",
+   "url": "https://makerworld.com/en/models/2300868",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - 5U (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 4 walls, 15% infill",
+     "plates": null,
+     "prints": "flat horizontal edge corners"
+    }
+   ],
+   "choices": [],
+   "attaches": "top",
+   "sides": "both",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Remix of original Lab Rax vertical corner to improve stability.",
+   "look": "ok",
+   "lookNote": "Wider base/top corners preventing forward tipping with heavy switches or drives.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2301362",
+   "new": true,
+   "what": "3U rack mount faceplate for official Raspberry Pi 7-inch touchscreen",
+   "url": "https://makerworld.com/en/models/2301362",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "3U Pi 7\" screen bezel"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 3,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for Lab Rax system (3U size).",
+   "look": "ok",
+   "lookNote": "3U panel with rectangular bezel holding the Raspberry Pi Foundation 7\" touchscreen.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1361708",
+   "new": true,
+   "what": "10-inch shelf for TP-Link SG108 switch with integrated keystone uplink",
+   "url": "https://makerworld.com/en/models/1361708",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Remix of TP-Link SG108PE v2 Rack Mount (unknown_one)",
+    "Keystone for Other Models (EODelf)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "SG108 shelf with keystone"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Mounts in 10-inch Lab Rax rack.",
+   "look": "ok",
+   "lookNote": "1U shelf holding a TP-Link switch with a side keystone jack for clean patching.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2375798",
+   "new": true,
+   "what": "Modular magnetic quick-access backplate for brass insert frame",
+   "url": "https://makerworld.com/en/models/2375798",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 3 walls, 15% infill",
+     "plates": null,
+     "prints": "magnetic backplate panel"
+    }
+   ],
+   "choices": [],
+   "attaches": "side-panel",
+   "sides": "both",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "Uses embedded neodymium magnets for snap-on mounting.",
+   "fitsLabRax": "stated",
+   "fitNote": "Compatible with Lab Rax 10\" rack brass threaded inserts version.",
+   "look": "ok",
+   "lookNote": "Removable rear cover attaching via embedded corner magnets.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3429918",
+   "new": true,
+   "what": "Gavin Belson Signature Box parody 1U decorative ventilation panel",
+   "url": "https://makerworld.com/en/models/3429918",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "Gavin Belson signature box panel"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "10-inch rack panel for homelabs.",
+   "look": "ok",
+   "lookNote": "1U faceplate featuring signature logo styling.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2333317",
+   "new": true,
+   "what": "Extended TPU forward/backward stabilizer feet for tall frames",
+   "url": "https://makerworld.com/en/models/2333317",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - 5U (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "extended TPU stability feet"
+    }
+   ],
+   "choices": [],
+   "attaches": "feet",
+   "sides": "both",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "Recommended to print in TPU.",
+   "fitsLabRax": "stated",
+   "fitNote": "Stability feet for Lab Rax 10\" builds taller than 10U.",
+   "look": "ok",
+   "lookNote": "Elongated outrigger feet bolted to frame bottom corners to increase base footprint.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2567959",
+   "new": true,
+   "what": "2U hexagonal perforated blanking plate for 7 SBC cluster",
+   "url": "https://makerworld.com/en/models/2567959",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "2U 7 SBC Holder for 10\" Rack (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "2U SBC vent plate"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for mklements 2U 7 SBC holder for Lab Rax.",
+   "look": "ok",
+   "lookNote": "2U cover plate with hex cutouts aligned between single-board computers.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2574690",
+   "new": true,
+   "what": "1U 11-port keystone patch panel with cable passthrough opening",
+   "url": "https://makerworld.com/en/models/2574690",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 4 walls, 20% infill",
+     "plates": null,
+     "prints": "11-port keystone with passthrough"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Made for Lab Rax with internal ThinkCentre power supply.",
+   "look": "ok",
+   "lookNote": "1U panel combining 11 keystone coupler sockets with a side grommet cutout.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3016665",
+   "new": true,
+   "what": "3U adapter plate mounting two 5-inch Mini Lab Rax mounts in 10-inch rack",
+   "url": "https://makerworld.com/en/models/3016665",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "5\" to 10\" adapter plate"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 3,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "Uses M3 brass inserts or M3 nuts to secure 5-inch mounts.",
+   "fitsLabRax": "stated",
+   "fitNote": "Adapts 5\" Mini Lab Rax form factor into standard 10\" rack footprint.",
+   "look": "ok",
+   "lookNote": "3U front plate with center mounting rails accepting 5-inch modular trays.",
+   "confidence": "page"
   }
  ]
 }

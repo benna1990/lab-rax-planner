@@ -467,6 +467,19 @@ De derde tranche van de kandidaat-modellen (rang 128 t/m 159) is volledig gescan
 - **Licenties batch 3:** 12 × `Standard Digital File License`, 7 × `CC BY-NC-SA`, 2 × `CC BY-NC`, 1 × `MakerWorld Exclusive License`, 1 × `CC BY-SA`, 1 × `CC0`.
 - **Totaaloverzicht T-13:** 66 nieuwe rack-modellen vastgelegd, 12 overgeslagen (78 kandidaten gecontroleerd). Totaal in `model-pages.json`: 141 records. Alle 11 Node-tests en catalogus-validatie slagen foutloos.
 
+### 2026-10-16 14:02 CEST — Antigravity → Claude en Codex: T-13 Batch 4 afgerond (26 kandidaten: 22 toegevoegd, 4 overgeslagen)
+
+De vierde tranche van de kandidaat-modellen (rang 160 t/m 197) is volledig gescand en gedocumenteerd:
+- **22 nieuwe rack-modellen toegevoegd aan `docs/audit/model-pages.json` (`new: true`, `confidence: "page"`):**
+  - **Netwerk, controllers & apparaten:** `mw3420704` (UGREEN 5-poorts 2.5GbE switch 1U mount), `mw1602592` (Pi & Tado Internet Bridge dual mount), `mw3420074` (Somfy TaHoma Mini rack paneel), `mw2991095` (TP-Link Omada OC200 controller tray), `mw1361708` (TP-Link SG108 tray met geïntegreerde keystone), `mw2574690` (1U 11-poorts keystone patchpaneel met kabeldoorvoer), `mw3016665` (3U adapterplaat voor twee 5" Mini Lab Rax mounts in 10" rack).
+  - **Displays, panelen & planken:** `mw2301362` (3U mount voor officiële Raspberry Pi 7" touchscreen), `mw2068460` (bovenhoek-tablethouder voor Home Assistant), `mw3021125` (10" blindpanelen in 7 grafische stijlen), `mw1352784` (10" plank met gesloten frontpaneel voor voedingen), `mw2567959` (2U geperforeerde blindplaat voor 7 SBC cluster), `mw3429918` (Gavin Belson Signature Box 1U paneel).
+  - **Frame-onderdelen, stabiliteit & zijpanelen:** `mw1678541` (3U Skadis zijpaneel extensie), `mw1974460` (2U/3U hex zijpanelen), `mw2381616` (hex geventileerd bovenpaneel), `mw2970634` (doorlopende staanders geoptimaliseerd voor A1 Mini bedhoogte), `mw2690017` (horizontale dwarsbalk tegen frame-flexing bij hoge racks), `mw2300868` (vlakke brede hoekstukken tegen kantelen), `mw2333317` (verlengde TPU stabiliteitsvoeten voor 10U+ racks), `mw2375798` (modulaire magnetische achterplaat voor brass-frame), `mw2055908` (vervangbaar naamplaatje voor bovenrand).
+- **4 modellen overgeslagen (met reden):**
+  - `mw2936642`, `mw2507518`, `mw2771488`, `mw2835850`: ontworpen voor het 5" Mini Lab Rax systeem.
+- **Licenties batch 4:** 10 × `CC BY-NC-SA`, 7 × `Standard Digital File License`, 4 × `MakerWorld Exclusive License`, 1 × `CC BY-SA`.
+- **Totaaloverzicht T-13:** 88 nieuwe rack-modellen vastgelegd, 16 overgeslagen (104 kandidaten gecontroleerd). Totaal in `model-pages.json`: 163 records. Alle 11 Node-tests en catalogus-validatie slagen foutloos.
+
+
 
 
 
