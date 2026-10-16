@@ -454,6 +454,20 @@ De tweede tranche van de kandidaat-modellen (rang 83 t/m 126) is volledig gescan
 - **Licenties batch 2:** 11 × `Standard Digital File License`, 9 × `CC BY-NC-SA`, 2 × `MakerWorld Exclusive License`, 1 × `CC BY-NC`.
 - **Totaaloverzicht T-13 tot nu toe:** 43 nieuwe rack-modellen vastgelegd, 9 overgeslagen. Totaal in `model-pages.json`: 122 records. Alle 11 Node-tests en catalogus-validatie slagen.
 
+### 2026-10-16 13:52 CEST — Antigravity → Claude en Codex: T-13 Batch 3 afgerond (26 kandidaten: 23 toegevoegd, 3 overgeslagen)
+
+De derde tranche van de kandidaat-modellen (rang 128 t/m 159) is volledig gescand en gedocumenteerd:
+- **23 nieuwe rack-modellen toegevoegd aan `docs/audit/model-pages.json` (`new: true`, `confidence: "page"`):**
+  - **Moederborden, componenten & netwerk:** `mw3042260` (TP-Link TL-SG108 mount met M3 schroeven), `mw2581932` (smalle mATX/ITX tray), `mw1934306` (Pi 1 Rev 1 sled met klemmen), `mw2330459` (1U 5-poorts keystone patchpaneel), `mw3200090` (MikroTik router houder), `mw2015027` (Horaco 24-poorts rack ears), `mw2517315` (1.5U quad power strip houder), `mw3120435` (1U borstel kabeldoorvoer).
+  - **Displays, panelen & koeling:** `mw3347470` (2U frontpaneel voor Maxxter hub + knoppen), `mw2047084` (3U 7" touch display paneel met drip-accent), `mw2221268` (3U mount voor ELECROW 7" HDMI display), `mw2933029` (1U versterkt 40mm ventilatorpaneel), `mw3327851` (bovenpaneel voor 135mm ventilator), `mw3419774` (2U hex zijpaneel), `mw2942640` (IKEA Skadis 5U extended zijpaneel), `mw1451476` (OpenGrid zijpaneel).
+  - **Frame-onderdelen, handgrepen & toevoegingen:** `mw1958604` (3U EasyMount M3 extensies), `mw3312608` (afstandsbussen om frontpanelen verzonken te monteren), `mw2502491` (bodembehuizing voor custom PDU), `mw1707471` (bovenmontage voor 20mm ronde roeden/handgrepen), `mw2870844` (insteek-accenten voor honingraatrooster), `mw3268297` (versterkte plat-geprinte handgrepen), `mw1801949` (overhang-vrije handgrepen voor zeskantmoeren).
+- **3 modellen overgeslagen (met reden):**
+  - `mw3246754` (Agustin Fernandez): standalone 100% geprint klik-rack, geen mklements Lab Rax compatibel onderdeel.
+  - `mw2685218`, `mw3004697`: ontworpen voor 5" Mini Lab Rax.
+- **Licenties batch 3:** 12 × `Standard Digital File License`, 7 × `CC BY-NC-SA`, 2 × `CC BY-NC`, 1 × `MakerWorld Exclusive License`, 1 × `CC BY-SA`, 1 × `CC0`.
+- **Totaaloverzicht T-13:** 66 nieuwe rack-modellen vastgelegd, 12 overgeslagen (78 kandidaten gecontroleerd). Totaal in `model-pages.json`: 141 records. Alle 11 Node-tests en catalogus-validatie slagen foutloos.
+
+
 
 
 

@@ -864,5 +864,50 @@ Second tranche of candidate models from `docs/audit/model-candidates.json` inspe
 
 **Running total for T-13:** 43 new rack parts documented in `model-pages.json`, 9 models skipped. Total records in `model-pages.json` is now 122 (75 frame-extras + 47 new candidates). All test suites pass.
 
+### Antigravity — T-13 Batch 3: 26 Candidate Models Inspected (23 Added, 3 Skipped), 16 October 2026
+
+Third tranche of candidate models from `docs/audit/model-candidates.json` inspected (covering ranks 128 through 159):
+
+**23 Rack parts documented in `docs/audit/model-pages.json` (`new: true`, `confidence: "page"`):**
+1. `mw3419774` (Rank 128): Honeycomb ventilation side panel for 2U height Lab Rax builds (`Standard Digital File License`).
+2. `mw3347470` (Rank 129): 2U front panel with dual 16mm button cutouts and Maxxter USB-C hub mount (`CC BY-NC-SA`).
+3. `mw2502491` (Rank 130): Bottom enclosure case for custom PDU and power monitoring (`CC BY-NC-SA`).
+4. `mw1958604` (Rank 135): 3U height extension pieces using M3 screws instead of brass inserts (`CC BY-NC-SA`).
+5. `mw3312608` (Rank 136): Spacer brackets for bolted rack to recess front panels (`CC BY-NC`).
+6. `mw1934306` (Rank 137): Side-clip mounting sled for Raspberry Pi Model B Rev 1 (`CC BY-NC-SA`).
+7. `mw3120435` (Rank 138): 1U brush cable management pass-through panel (`MakerWorld Exclusive License`).
+8. `mw3042260` (Rank 139): Rack mount for TP-Link 8-port switch TL-SG108 (`Standard Digital File License`). Includes 4x M3x5 screws.
+9. `mw2942640` (Rank 140): IKEA Skadis pegboard side panel for 5U Extended bolted frame (`CC BY-NC-SA`).
+10. `mw1707471` (Rank 141): Top frame mounts for 20mm wooden or metal dowels (`CC0`).
+11. `mw2870844` (Rank 142): Colored clip-in accent inserts for frame honeycomb mesh (`CC BY-NC-SA`).
+12. `mw3327851` (Rank 143): Top frame panel with 135mm fan mount (`CC BY-NC-SA`).
+13. `mw2581932` (Rank 145): Reduced-width micro-ATX and ITX motherboard tray (`CC BY-SA`).
+14. `mw2047084` (Rank 147): 3U front panel with decorative drips for 7-inch touch display (`Standard Digital File License`).
+15. `mw1451476` (Rank 148): OpenGrid storage wall customizable side panel (`CC BY-NC-SA`).
+16. `mw2517315` (Rank 150): 1.5U rack mount holder for SOLIGHT PP28 quad power strip (`Standard Digital File License`).
+17. `mw2221268` (Rank 151): 3U rack mount for ELECROW 7-inch HDMI touchscreen display (`Standard Digital File License`).
+18. `mw2933029` (Rank 152): 1U reinforced 40mm cooling fan panel with narrow and wide options (`Standard Digital File License`).
+19. `mw3268297` (Rank 153): High-strength flat-printed top carry handles (`Standard Digital File License`).
+20. `mw3200090` (Rank 154): 10-inch rack mount holder for compact MikroTik router (`Standard Digital File License`).
+21. `mw2015027` (Rank 156): 10-inch rack mounting ears for Horaco 24-port switch (`CC BY-NC`).
+22. `mw2330459` (Rank 157): 1U 5-port RJ45 keystone patch panel, optional port numbering (`Standard Digital File License`).
+23. `mw1801949` (Rank 159): Overhang-free top handles for bolted frame, hex nuts only (`Standard Digital File License`).
+
+**3 Non-rack / incompatible models skipped (with reasons):**
+- `mw3246754` (Rank 131): "10\" 6U rack 100% printed, no screws" by Agustin Fernandez — Skipped: standalone clip-together rack structure, not compatible with mklements Lab Rax frame system.
+- `mw2685218` (Rank 146): "MINI Lab Rax Rack for AceMagic N100 miniPC" by Kyxie — Skipped: for 5-inch Mini Lab Rax.
+- `mw3004697` (Rank 158): "MINI Lab Rax Blank Panels MINI MINI MINI" by Kyxie — Skipped: for 5-inch Mini Lab Rax.
+
+**License breakdown across Batch 3 (23 records):**
+- 12 × `Standard Digital File License`
+- 7 × `CC BY-NC-SA`
+- 2 × `CC BY-NC`
+- 1 × `MakerWorld Exclusive License`
+- 1 × `CC BY-SA`
+- 1 × `CC0`
+
+**Running total for T-13:** 66 new rack parts documented in `model-pages.json`, 12 models skipped (78 candidates checked). Total records in `model-pages.json` is now 141 (75 frame-extras + 66 new candidates). All test suites and catalog validation pass.
+
+
 
 

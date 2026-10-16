@@ -4350,6 +4350,737 @@
    "look": "ok",
    "lookNote": "Top horizontal frame edge with built-in keystone sockets.",
    "confidence": "page"
+  },
+  {
+   "id": "mw3419774",
+   "new": true,
+   "what": "Honeycomb ventilation side panel for 2U height Lab Rax builds",
+   "url": "https://makerworld.com/en/models/3419774",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [
+    "Lab Rax Edge Rack 2U with improved NUT holders (Piotrek)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "2U honeycomb side panel"
+    }
+   ],
+   "choices": [],
+   "attaches": "side-panel",
+   "sides": "both",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed specifically for 2U version of Lab Rax system.",
+   "look": "ok",
+   "lookNote": "Compact 2U side panel with hexagonal mesh cutouts.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3347470",
+   "new": true,
+   "what": "2U front panel with dual 16mm button cutouts and Maxxter USB-C hub mount",
+   "url": "https://makerworld.com/en/models/3347470",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "2U hub and button front panel"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "Features two 16mm button holes and mount for Maxxter USB-C Hub (USB 3.1).",
+   "fitsLabRax": "stated",
+   "fitNote": "Custom-designed 2U rack panel specifically made for Lab Rax systems.",
+   "look": "ok",
+   "lookNote": "2U faceplate with circular cutouts for switches and rectangular slot for USB-C hub ports.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2502491",
+   "new": true,
+   "what": "Bottom enclosure case for custom PDU and power monitoring",
+   "url": "https://makerworld.com/en/models/2502491",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "bottom enclosure box"
+    }
+   ],
+   "choices": [],
+   "attaches": "bottom",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed to use extra space at the bottom of Lab Rax build.",
+   "look": "ok",
+   "lookNote": "Enclosed housing mounting under the rack bottom panel for electrical distribution.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1958604",
+   "new": true,
+   "what": "3U height extension pieces using M3 screws instead of brass inserts",
+   "url": "https://makerworld.com/en/models/1958604",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "EasyMount Edition - Lab RAX 10″ Server Rack (Srigger)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 6 walls, 25% infill",
+     "plates": null,
+     "prints": "3U EasyMount extension pieces"
+    }
+   ],
+   "choices": [],
+   "attaches": "posts",
+   "sizes": {
+    "u": 3,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "Uses M3 screws directly into plastic.",
+   "fitsLabRax": "stated",
+   "fitNote": "Adapts 3U extension for 5U EasyMount Lab Rax.",
+   "look": "ok",
+   "lookNote": "Vertical corner post extensions with M3 screw holes.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3312608",
+   "new": true,
+   "what": "Spacer brackets for bolted rack to recess front panels",
+   "url": "https://makerworld.com/en/models/3312608",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 10% infill",
+     "plates": null,
+     "prints": "front panel spacer blocks"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Spacer for Lab Rax bolted version.",
+   "look": "ok",
+   "lookNote": "Offset spacer blocks allowing panels to mount recessed behind the frame front plane.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1934306",
+   "new": true,
+   "what": "Side-clip mounting sled for Raspberry Pi Model B Rev 1",
+   "url": "https://makerworld.com/en/models/1934306",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "Pi 1 Rev 1 tray sled"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "Uses snap clips on the sides for PCBs without mounting holes.",
+   "fitsLabRax": "stated",
+   "fitNote": "Sled for 10-inch rack.",
+   "look": "ok",
+   "lookNote": "Tray sled holding early Raspberry Pi boards securely using peripheral retention clips.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3120435",
+   "new": true,
+   "what": "1U brush cable management pass-through panel",
+   "url": "https://makerworld.com/en/models/3120435",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "1U brush panel frame"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed specifically for Lab Rax 10-inch racks.",
+   "look": "ok",
+   "lookNote": "1U frame holding a bristle strip across the central slot for cable passthrough.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3042260",
+   "new": true,
+   "what": "Rack mount for TP-Link 8-port switch TL-SG108",
+   "url": "https://makerworld.com/en/models/3042260",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.28mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "TL-SG108 switch rack mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [
+    {
+     "part": "M3x5 bolt",
+     "qty": 4
+    }
+   ],
+   "hardwareNote": "Uses 4 M3x5 screws to lock the switch in place.",
+   "fitsLabRax": "stated",
+   "fitNote": "Made for the 10\" Lab Rax.",
+   "look": "ok",
+   "lookNote": "Custom 1U faceplate cradle enclosing a TP-Link TL-SG108 8-port gigabit switch.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2942640",
+   "new": true,
+   "what": "IKEA Skadis pegboard side panel for 5U Extended bolted frame",
+   "url": "https://makerworld.com/en/models/2942640",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "5U extended Skadis side panel"
+    }
+   ],
+   "choices": [],
+   "attaches": "side-panel",
+   "sides": "both",
+   "sizes": {
+    "u": 5,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Derived from Lab Rax Bolted Version 5U Extended side panel.",
+   "look": "ok",
+   "lookNote": "Extended-depth side panel covered with standard IKEA Skadis slot pattern.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1707471",
+   "new": true,
+   "what": "Top frame mounts for 20mm wooden or metal dowels",
+   "url": "https://makerworld.com/en/models/1707471",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC0",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 6 walls, 25% infill",
+     "plates": null,
+     "prints": "20mm dowel top brackets"
+    }
+   ],
+   "choices": [],
+   "attaches": "top",
+   "sides": "both",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Uses same screws as the Lab Rax.",
+   "look": "ok",
+   "lookNote": "Top horizontal corner brackets with circular sockets for 20mm cylindrical dowels.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2870844",
+   "new": true,
+   "what": "Colored clip-in accent inserts for frame honeycomb mesh",
+   "url": "https://makerworld.com/en/models/2870844",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - Bolted Version - 5U (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "no AMS single color",
+     "plates": null,
+     "prints": "honeycomb accent inserts"
+    }
+   ],
+   "choices": [],
+   "attaches": "inside",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for Lab Rax honeycomb mesh.",
+   "look": "ok",
+   "lookNote": "Small hexagonal plastic plugs that snap into the ventilation holes to create two-tone patterns.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3327851",
+   "new": true,
+   "what": "Top frame panel with 135mm fan mount",
+   "url": "https://makerworld.com/en/models/3327851",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "135mm fan top panel"
+    }
+   ],
+   "choices": [],
+   "attaches": "top",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Top panel for the Lab Rax with 135mm Fan support.",
+   "look": "ok",
+   "lookNote": "Top cover plate with central circular hole and screw pattern for a large 135mm fan.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2581932",
+   "new": true,
+   "what": "Reduced-width micro-ATX and ITX motherboard tray",
+   "url": "https://makerworld.com/en/models/2581932",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 4 walls, 20% infill",
+     "plates": null,
+     "prints": "reduced-width mATX tray"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Reduced-width mATX motherboard tray for use in 10\" rack.",
+   "look": "ok",
+   "lookNote": "Horizontal open tray fitted for narrow 2-slot RAM micro-ATX and ITX motherboards.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2047084",
+   "new": true,
+   "what": "3U front panel with decorative drips for 7-inch touch display",
+   "url": "https://makerworld.com/en/models/2047084",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "3U screen panel with drips"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 3,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "Display bolts to 4 rear pegs with screws included with screen.",
+   "fitsLabRax": "stated",
+   "fitNote": "3U Panel for a 7\" Touch Screen for Lab Rax build.",
+   "look": "ok",
+   "lookNote": "3U front plate framing a 7-inch LCD with stylized dripping accent edge.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1451476",
+   "new": true,
+   "what": "OpenGrid storage wall customizable side panel",
+   "url": "https://makerworld.com/en/models/1451476",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "OpenGrid side panel"
+    }
+   ],
+   "choices": [],
+   "attaches": "side-panel",
+   "sides": "both",
+   "sizes": {
+    "u": 5,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Replaces side panel of Lab Rax with OpenGrid storage wall compatible panel.",
+   "look": "ok",
+   "lookNote": "Side panel incorporating OpenGrid interlocking modular storage grid geometry.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2517315",
+   "new": true,
+   "what": "1.5U rack mount holder for SOLIGHT PP28 quad power strip",
+   "url": "https://makerworld.com/en/models/2517315",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.6mm nozzle, 0.18mm layer, 4 walls, 20% infill",
+     "plates": null,
+     "prints": "1.5U quad power strip holder"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1.5,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for SOLIGHT PP28 extension cable in Lab Rax rack.",
+   "look": "ok",
+   "lookNote": "1.5U bracket holding a 4-outlet European mains extension strip.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2221268",
+   "new": true,
+   "what": "3U rack mount for ELECROW 7-inch HDMI touchscreen display",
+   "url": "https://makerworld.com/en/models/2221268",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [
+    "ELECROW 7 Inch 1024*600 HDMI LCD Display with Touch Screen Case (3d_droide)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 4 walls, 20% infill",
+     "plates": null,
+     "prints": "3U ELECROW 7\" display bezel and bracket"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 3,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Rack mounted in Lab Rax build.",
+   "look": "ok",
+   "lookNote": "3U front panel cutout holding an Elecrow 7-inch 1024x600 display securely.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2933029",
+   "new": true,
+   "what": "1U reinforced 40mm cooling fan panel (narrow and wide screw options)",
+   "url": "https://makerworld.com/en/models/2933029",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "Narrow mounting holes",
+     "plates": null,
+     "prints": "narrow mounting hole spacing"
+    },
+    {
+     "name": "Wide mounting holes",
+     "plates": null,
+     "prints": "wide mounting hole spacing"
+    }
+   ],
+   "choices": [
+    "mounting holes: narrow or wide"
+   ],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Reinforced 40mm fan panel for 10-inch rack.",
+   "look": "ok",
+   "lookNote": "1U panel holding 40mm fans with chamfered screw holes allowing flush screw heads.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3268297",
+   "new": true,
+   "what": "High-strength flat-printed top carry handles",
+   "url": "https://makerworld.com/en/models/3268297",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - 5U (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "strong flat-print handles"
+    }
+   ],
+   "choices": [],
+   "attaches": "top",
+   "sides": "both",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Strength upgrade handles for Lab Rax setup.",
+   "look": "ok",
+   "lookNote": "Redesigned top handles oriented horizontally during printing to eliminate layer line shearing.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3200090",
+   "new": true,
+   "what": "10-inch rack mount holder for compact MikroTik router",
+   "url": "https://makerworld.com/en/models/3200090",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "MikroTik router holder"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "MikroTik router holder for Lab Rax 10 inch.",
+   "look": "ok",
+   "lookNote": "1U faceplate cradle holding a desktop MikroTik router securely.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2015027",
+   "new": true,
+   "what": "10-inch rack mounting ears for Horaco 24-port switch",
+   "url": "https://makerworld.com/en/models/2015027",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "pair of Horaco 10\" rack ears"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sides": "both",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Adapts 24-port Horaco switch to 10\" Lab Rax rack.",
+   "look": "ok",
+   "lookNote": "Left and right mounting brackets bolting to switch side chassis holes.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2330459",
+   "new": true,
+   "what": "1U 5-port RJ45 keystone patch panel (optional numbered ports)",
+   "url": "https://makerworld.com/en/models/2330459",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "10\" Rack 1U 5-Port network panel",
+     "plates": null,
+     "prints": "5-port keystone panel plain"
+    },
+    {
+     "name": "Numbers Added to Ports",
+     "plates": null,
+     "prints": "5-port keystone panel with 1-5 numbers"
+    }
+   ],
+   "choices": [
+    "port markings: plain or numbered (1 to 5)"
+   ],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Made for Lab Rax 10 rack (254 x 44.5 x 3 mm).",
+   "look": "ok",
+   "lookNote": "1U panel holding 5 keystone couplers with embossed port numbers.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1801949",
+   "new": true,
+   "what": "Overhang-free top handles for bolted frame (hex nuts only)",
+   "url": "https://makerworld.com/en/models/1801949",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "nut-only overhang-free handles"
+    }
+   ],
+   "choices": [],
+   "attaches": "top",
+   "sides": "both",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Custom Lab Rax handles eliminating overhangs.",
+   "look": "ok",
+   "lookNote": "Chamfered top handle shape designed to print cleanly without bottom droop.",
+   "confidence": "page"
   }
  ]
 }
