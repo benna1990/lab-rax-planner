@@ -25,17 +25,27 @@ const r1 = x => Math.round(x * 10) / 10;
      logo: null | 'neopixel' | 'hexbar' | 'matrix',
      ups: null | { size, unit }
    } */
+function inputText(i) {
+  const types = { 'usb-c': 'USB-C', usb: 'USB', dc: 'DC', ac: 'AC', poe: 'PoE' };
+  return [types[i.type] || i.type, i.volts != null ? i.volts + ' V' : '', i.amps != null ? i.amps + ' A' : '', i.plug || '', i.poeClass || ''].filter(Boolean).join(', ');
+}
+function devicePowerText(d) {
+  const use = d.note || (d.poe ? 'PoE from ' + d.poe : d.own === false ? 'to buy: check what is included in the box; confirm its power input in the manual' : 'have it: use the adapter it came with; check its manual for the voltage and the plug');
+  if (!d.input || d.inputEvidence?.state !== 'documented' || !/^https:\/\//.test(d.inputEvidence.source || '')) return d.name + ': ' + use;
+  const input = d.input, alt = input.alt;
+  return d.name + ': ' + use + '. Documented input: ' + inputText(input) + (input.notes ? '. Source note: ' + input.notes : '') + (alt ? '. Alternative: ' + inputText(alt) + (alt.notes ? '. ' + alt.notes : '') : '');
+}
 function cards(f) {
   const out = [];
   if ((f.devices || []).length) {
     const own = f.devices.filter(d => !d.poe && !d.note), onPoe = f.devices.filter(d => d.poe), other = f.devices.length - own.length - onPoe.length;
     out.push({ id: 'power', title: 'Power supplies and mains',
       lead: [own.length ? own.length + (own.length > 1 ? ' devices use their own adapter' : ' device uses its own adapter') : '', onPoe.length ? onPoe.length + ' run' + (onPoe.length > 1 ? '' : 's') + ' on PoE' : '', other ? other + ' more as noted' : ''].filter(Boolean).join('; ') + '.',
-      items: f.devices.map(d => d.name + ': ' + (d.note || (d.poe ? 'PoE from ' + d.poe : d.own === false ? 'to buy: check what is included in the box; confirm its power input in the manual' : 'have it: use the adapter it came with; check its manual for the voltage and the plug'))),
+      items: f.devices.map(devicePowerText),
       steps: ['Use the adapter that came with each device, or a certified replacement with the same voltage, polarity and plug.',
         'Plug everything into one commercially made power strip or PDU, so one switch turns the rack off.',
         'Don’t open, splice or extend mains cables, and don’t build mains wiring into printed parts.'],
-      sources: [] });
+      sources: [...new Map(f.devices.filter(d => d.input && d.inputEvidence?.state === 'documented' && /^https:\/\//.test(d.inputEvidence.source || '')).map(d => [d.inputEvidence.source, [d.name + ' datasheet / manual', d.inputEvidence.source]])).values()] });
   }
   if (f.pi5) out.push({ id: 'pi5', title: 'Raspberry Pi 5 power',
     lead: f.pi5 + (f.pi5 > 1 ? ' Pi 5 boards need' : ' Pi 5 needs') + ' ' + f.pi5 + (f.pi5 > 1 ? ' supplies' : ' supply') + ' of 5.1 V, 5 A (USB-C), or PoE through a PoE HAT.',

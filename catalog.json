@@ -1789,7 +1789,24 @@
        "author": "Mauker",
        "url": "https://makerworld.com/en/models/783611"
       }
-     ]
+     ],
+     "input": {
+      "type": "usb-c",
+      "volts": 5,
+      "amps": 5,
+      "watts": 16.1,
+      "plug": "USB type C",
+      "poeClass": null,
+      "notes": "Max. Power Consumption 16.1W. Power Supply: 'USB type C (5V DC/5A) (Adapter included)'. Supported voltage range 100-240V AC (adapter input). No PoE input listed."
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://techspecs.ui.com/unifi/cloud-gateways/ucg-max",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "UCG-Ultra",
@@ -1838,7 +1855,24 @@
        "url": "https://makerworld.com/en/models/815547-ucg-ultra-ucg-max-uxg-max-10-inch-1u-rack-mount",
        "note": "Also fits UCG-Max and UXG-Max; use the vented version for the Max."
       }
-     ]
+     ],
+     "input": {
+      "type": "usb-c",
+      "volts": 5,
+      "amps": 3,
+      "watts": 6.2,
+      "plug": "USB type C",
+      "poeClass": null,
+      "notes": "Max. Power Consumption 6.2W. Power Supply: 'USB type C (5V DC/3A) (Adapter included)'. Supported voltage range 100-240V AC (adapter input). No PoE input listed."
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://techspecs.ui.com/unifi/cloud-gateways/ucg-ultra",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "UXG-Max",
@@ -1869,7 +1903,24 @@
        "url": "https://makerworld.com/en/models/499929-rack-mount-unifi-uxg-max-ucg-ultra-ucg-max-19-10",
        "note": "Same size as UCG-Ultra and UCG-Max (display not visible); print the 10″ file."
       }
-     ]
+     ],
+     "input": {
+      "type": "usb-c",
+      "volts": 5,
+      "amps": 3,
+      "watts": 9.6,
+      "plug": "USB type C",
+      "poeClass": null,
+      "notes": "Max. Power Consumption 9.6W. Power Supply: 'USB type C (5V DC/3A) (Adapter included)'. Supported voltage range 100-240V AC (adapter input). No PoE input listed."
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://techspecs.ui.com/unifi/cloud-gateways/uxg-max",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "UXG Lite",
@@ -1888,7 +1939,24 @@
        "author": "463n7",
        "url": "https://makerworld.com/en/models/2732600"
       }
-     ]
+     ],
+     "input": {
+      "type": "usb-c",
+      "volts": 5,
+      "amps": 3,
+      "watts": 3.83,
+      "plug": "USB type C",
+      "poeClass": null,
+      "notes": "Max. Power Consumption 3.83W. Power Supply: 'USB type C (5V DC/3A) (Adapter included)'. Supported voltage range 100-240V AC (adapter input). No PoE input listed."
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://techspecs.ui.com/unifi/cloud-gateways/uxg-lite",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "UCG-Fiber",
@@ -1959,7 +2027,24 @@
        "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/1170234-rack-10-pouces-cloud-gateway-fiber-unifi"
       }
-     ]
+     ],
+     "input": {
+      "type": "dc",
+      "volts": 54,
+      "amps": 1.1,
+      "watts": 29.4,
+      "plug": "DC jack",
+      "poeClass": null,
+      "notes": "Max. Power Consumption '29.4W (Excluding PoE output)'; PoE Budget 30W. Power Supply: '54V DC/1.1A (Adapter included)'. Supported voltage range 100-240V AC (adapter input). Jack size and polarity not stated."
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://techspecs.ui.com/unifi/cloud-gateways/ucg-fiber",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "UCG-Fiber power supply",
@@ -2021,7 +2106,24 @@
        "author": "Ignite",
        "url": "https://makerworld.com/en/models/1259297-unifi-express-7-10-inch-rack-shelf-mount"
       }
-     ]
+     ],
+     "input": {
+      "type": "usb-c",
+      "volts": 5,
+      "amps": 5,
+      "watts": 22,
+      "plug": "USB type C",
+      "poeClass": null,
+      "notes": "Max. Power Consumption 22W. Power Supply: 'USB type C (5V DC/5A) (Adapter included)'. Supported voltage range 100-240V AC (adapter input). No PoE input listed."
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://techspecs.ui.com/unifi/cloud-gateways/ux7",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "USG-3P",
@@ -2050,7 +2152,24 @@
        "author": "DWN3D",
        "url": "https://makerworld.com/en/models/1867689"
       }
-     ]
+     ],
+     "input": {
+      "type": "dc",
+      "volts": 12,
+      "amps": 1,
+      "watts": 7,
+      "plug": null,
+      "poeClass": null,
+      "notes": "Quick start guide is for model 'USG' and does not mention USG-3P. Power Supply: '12VDC, 1A Power Adapter (Included)'; Max. Power Consumption 7W; Supported Voltage Range '9 to 24VDC'. Jack size and polarity not stated. USG-3P is sold as the UniFi Security Gateway, model 'USG', which this guide covers."
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://dl.ui.com/qsg/USG/USG_EN.html",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "Cloud Key Gen2 / Gen2 Plus",
@@ -2103,7 +2222,33 @@
        "url": "https://makerworld.com/en/models/2135770-unifi-cloud-key-gen2-10-inch-rack-mount",
        "note": "Gen2 Plus has the same housing."
       }
-     ]
+     ],
+     "input": {
+      "type": "poe",
+      "volts": null,
+      "amps": null,
+      "watts": 5,
+      "plug": null,
+      "poeClass": "802.3af",
+      "notes": "Records UCK-G2 (first model). Power Supply: '802.3af PoE or USB-C 5VDC, Minimum 1A'; Max. Power Consumption 5W. Gen2 Plus (https://dl.ui.com/qsg/UCK-G2-PLUS/UCK-G2-PLUS_EN.html): 'Standard 802.3af PoE; Quick Charge 2.0/3.0 power adapter (9VDC, 2A)', Max. Power Consumption '12.95W (PoE) USB-C Power'.",
+      "alt": {
+       "type": "usb-c",
+       "volts": 5,
+       "amps": 1,
+       "watts": 5,
+       "plug": "USB Type C",
+       "poeClass": null,
+       "notes": "'Used for power if PoE is not available.' Page says minimum 1A; a Quick Charge 2.0 or 3.0-compliant USB power adapter is required. Gen2 Plus: 9VDC, 2A."
+      }
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://dl.ui.com/qsg/UCK-G2/UCK-G2_EN.html",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "UniFi Express",
@@ -2144,7 +2289,24 @@
        "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/3083590"
       }
-     ]
+     ],
+     "input": {
+      "type": "usb-c",
+      "volts": 5,
+      "amps": 3,
+      "watts": 10,
+      "plug": "USB type C",
+      "poeClass": null,
+      "notes": "Max. Power Consumption 10W. Power Supply: 'USB type C (5V DC/3A) (Adapter included)'. Supported voltage range 100-240V AC (adapter input). No PoE input listed."
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://techspecs.ui.com/unifi/cloud-gateways/ux",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     }
    ]
   },
@@ -2191,7 +2353,33 @@
        "author": "BlackCatPeanut",
        "url": "https://makerworld.com/en/models/1013999-unifi-ultra-switch-10-rack-mount"
       }
-     ]
+     ],
+     "input": {
+      "type": "dc",
+      "volts": null,
+      "amps": null,
+      "watts": 8,
+      "plug": null,
+      "poeClass": null,
+      "notes": "Power Method '(1) AC/DC adapter (Excluded) (1) PoE++'; adapter not included on this model (the -60W and -210W variants list one included). Supported voltage range 50-57V DC/PoE. 8W excl. PoE output with adapter input; 210W incl. PoE output with 210W AC adapter input.",
+      "alt": {
+       "type": "poe",
+       "volts": null,
+       "amps": null,
+       "watts": 9,
+       "plug": null,
+       "poeClass": "PoE++",
+       "notes": "9W excl. PoE output with PoE input. With PoE++ input the page gives 42W total PoE availability, PoE+ input 16W."
+      }
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://techspecs.ui.com/unifi/switching/usw-ultra",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "USW-Ultra 210W power supply",
@@ -2252,7 +2440,24 @@
        "author": "Nautilus Forge",
        "url": "https://www.printables.com/model/1202332"
       }
-     ]
+     ],
+     "input": {
+      "type": "dc",
+      "volts": null,
+      "amps": null,
+      "watts": 8,
+      "plug": null,
+      "poeClass": null,
+      "notes": "Power Method 'AC/DC Adapter (included)'; Power Supply 'AC/DC, external, 60W'; supported voltage range 50-57V DC. 8W excl. PoE output, 60W incl. PoE output. PoE budget 52W (4 PoE+ ports). No PoE input listed."
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://techspecs.ui.com/unifi/switching/usw-lite-8-poe",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "USW-Lite-16-PoE",
@@ -2293,7 +2498,24 @@
        "author": "Mauker",
        "url": "https://makerworld.com/en/models/1174099-usw-lite-16-poe-10-inch-rack-mount"
       }
-     ]
+     ],
+     "input": {
+      "type": "ac",
+      "volts": null,
+      "amps": null,
+      "watts": 15,
+      "plug": null,
+      "poeClass": null,
+      "notes": "Power Method 'Universal input, 100-240V AC, 50/60 Hz'; Power Supply 'AC/DC, internal, 60W'. 15W excl. PoE output, 60W incl. PoE output. PoE budget 45W. Inlet/plug type not stated."
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://techspecs.ui.com/unifi/switching/usw-lite-16-poe",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "USW-Flex",
@@ -2313,7 +2535,24 @@
        "author": "Mauker",
        "url": "https://makerworld.com/en/models/2521345"
       }
-     ]
+     ],
+     "input": {
+      "type": "poe",
+      "volts": null,
+      "amps": null,
+      "watts": 5,
+      "plug": null,
+      "poeClass": "PoE++",
+      "notes": "Power Method 'PoE++'; supported voltage range 50-57V PoE. 5W excl. PoE output, 51W incl. PoE output. Total PoE availability: PoE++/60W PoE adapter input 46W, PoE+ input 20W, PoE input 8W. 60W PoE adapter sold separately."
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://techspecs.ui.com/unifi/switching/usw-flex",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "USW-Flex-Mini",
@@ -2393,7 +2632,33 @@
        "shape": {"row": [{"dev": true}], "shelf": true},
        "url": "https://makerworld.com/en/models/775179-ubiquiti-unifi-usw-flex-mini-10-inch-rack-mount"
       }
-     ]
+     ],
+     "input": {
+      "type": "usb-c",
+      "volts": 5,
+      "amps": 1,
+      "watts": 2.5,
+      "plug": "USB Type-C",
+      "poeClass": null,
+      "notes": "Max. Power Consumption 2.5W. Power Supply 'AC/DC, external, 5W'. Supported voltage range '4.8-5.2V DC/USB'.",
+      "alt": {
+       "type": "poe",
+       "volts": null,
+       "amps": null,
+       "watts": 2.5,
+       "plug": null,
+       "poeClass": null,
+       "notes": "Power Method lists '(1) PoE'; supported voltage range 44V-57V PoE. PoE class not stated."
+      }
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://techspecs.ui.com/unifi/switching/usw-flex-mini",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "USW-Flex-2.5G-5",
@@ -2455,7 +2720,33 @@
        "url": "https://makerworld.com/en/models/1411355-10-inch-mini-rack-jetkvm-usw-flex-mini-2-5g-1u",
        "note": "Holds a JetKVM beside the switch."
       }
-     ]
+     ],
+     "input": {
+      "type": "usb-c",
+      "volts": 5,
+      "amps": 1,
+      "watts": 5,
+      "plug": "USB Type-C",
+      "poeClass": null,
+      "notes": "Page title 'UniFi Flex Mini 2.5G'. Max. Power Consumption '5W (AC/DC input)'. Power Supply 'AC/DC, external, 5W'. Supported voltage range '4.8-5.2V DC/USB'.",
+      "alt": {
+       "type": "poe",
+       "volts": null,
+       "amps": null,
+       "watts": 6.4,
+       "plug": null,
+       "poeClass": null,
+       "notes": "'6.4W (PoE input)'; supported voltage range 44V-57V PoE. PoE class not stated."
+      }
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://techspecs.ui.com/unifi/switching/usw-flex-2-5g-5",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "USW-Flex-2.5G-8",
@@ -2474,7 +2765,33 @@
        "author": "Mauker",
        "url": "https://makerworld.com/en/models/1024889"
       }
-     ]
+     ],
+     "input": {
+      "type": "usb-c",
+      "volts": 5,
+      "amps": 3,
+      "watts": 14,
+      "plug": "USB Type-C",
+      "poeClass": null,
+      "notes": "Page title 'UniFi Flex 2.5G'. Max. Power Consumption '14W with AC adapter input'. Power Supply 'AC/DC, external, 15W'. Supported voltage range '4.8-5.2V DC/USB'.",
+      "alt": {
+       "type": "poe",
+       "volts": null,
+       "amps": null,
+       "watts": 14,
+       "plug": null,
+       "poeClass": "PoE+",
+       "notes": "'14W with PoE input'; supported voltage range 44V-57V PoE."
+      }
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://techspecs.ui.com/unifi/switching/usw-flex-2-5g-8",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "USW-Flex-2.5G-8-PoE",
@@ -2505,7 +2822,33 @@
        "author": "mr4lexndr",
        "url": "https://makerworld.com/en/models/2000285"
       }
-     ]
+     ],
+     "input": {
+      "type": "dc",
+      "volts": null,
+      "amps": null,
+      "watts": 17,
+      "plug": null,
+      "poeClass": null,
+      "notes": "Power Method '(1) AC/DC adapter (Excluded)'; page notes AC power adapter sold separately. Supported voltage range 50-57V DC/PoE. 17W excl. PoE output with AC adapter input; 210W incl. PoE output; with the 210W adapter 196W PoE availability.",
+      "alt": {
+       "type": "poe",
+       "volts": null,
+       "amps": null,
+       "watts": 14,
+       "plug": null,
+       "poeClass": "PoE+++",
+       "notes": "14W excl. PoE output with PoE input. PoE availability by input: PoE+++ 76W, PoE++ 46W, PoE+ 16W."
+      }
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://techspecs.ui.com/unifi/switching/usw-flex-2-5g-8-poe",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "USW-Pro-XG-8-PoE",
@@ -2524,7 +2867,24 @@
        "author": "DToX",
        "url": "https://makerworld.com/en/models/1490785"
       }
-     ]
+     ],
+     "input": {
+      "type": "dc",
+      "volts": null,
+      "amps": null,
+      "watts": 61,
+      "plug": null,
+      "poeClass": null,
+      "notes": "Power Method 'AC/DC Adapter (included)'; Power Supply 'AC/DC, external, 210W'; supported voltage range 50-57V DC. 61W excl. PoE output, 210W incl. PoE output. PoE budget 155W. No PoE input listed."
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://techspecs.ui.com/unifi/switching/usw-pro-xg-8-poe",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "UACC-PoE++ injector",
@@ -2567,7 +2927,24 @@
        "url": "https://makerworld.com/en/models/1393047-unifi-switch-us-8-60w-10-inch-rackmount",
        "note": "Gen 1 US-8-60W, not the USW-Lite-8."
       }
-     ]
+     ],
+     "input": {
+      "type": "dc",
+      "volts": null,
+      "amps": null,
+      "watts": 12,
+      "plug": null,
+      "poeClass": null,
+      "notes": "Power Method '(1) AC/DC adapter (Included)'; Supported Voltage Range '44-57V DC/PoE', so the switch itself takes DC from its included adapter (the page's 'AC input' is the adapter's side). Adapter output not stated. 12W excl. PoE output; PoE budget 48W. Reviewed by Claude against the page, 2026-10-16."
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://techspecs.ui.com/unifi/switching/us-8-60w",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "UniFi PoE injector",
@@ -4453,7 +4830,24 @@
        "author": "sightlessace",
        "url": "https://makerworld.com/en/models/483912"
       }
-     ]
+     ],
+     "input": {
+      "type": "dc",
+      "volts": 19,
+      "amps": null,
+      "watts": null,
+      "plug": null,
+      "poeClass": null,
+      "notes": "Records MS-01 (first model). Specs: 'Power supply DC 19V (including power adapter)'. Adapter wattage, current and DC jack size not on this page."
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://ca.minisforum.com/products/minisforum-ms-01",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "Minisforum UN305C",
@@ -4505,7 +4899,24 @@
        "author": "Ratler",
        "url": "https://makerworld.com/en/models/1248370"
       }
-     ]
+     ],
+     "input": {
+      "type": "dc",
+      "volts": 19,
+      "amps": 6.32,
+      "watts": null,
+      "plug": null,
+      "poeClass": null,
+      "notes": "Records NucBox K6 (first model). Page: 'Power Adapter DC 19V / 6.32A 120W Adapter'; CPU TDP 65W; '1 x DC Power Input' (size not stated). USB4 port 'Supports PD Power Delivery up to 100W' (role as input not stated)."
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://www.gmktec.com/products/amd-ryzen-7-7840hs-mini-pc-nucbox-k6",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "GMKtec G3 Plus",
@@ -4522,7 +4933,24 @@
        "author": "Jacob Lindquist",
        "url": "https://makerworld.com/en/models/1900594"
       }
-     ]
+     ],
+     "input": {
+      "type": "dc",
+      "volts": 12,
+      "amps": 3,
+      "watts": null,
+      "plug": null,
+      "poeClass": null,
+      "notes": "Page: 'DC Power Adapter 12V / 3A'; CPU TDP 6W. Adapter wattage and DC connector size not on this page."
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://www.gmktec.com/products/nucbox-g3-plus-enhanced-performance-mini-pc-with-intel-n150-processor",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "GMKtec NucBox K10",
@@ -4539,7 +4967,24 @@
        "wattsEstimated": true,
        "url": "https://makerworld.com/en/models/1545533"
       }
-     ]
+     ],
+     "input": {
+      "type": "dc",
+      "volts": 19,
+      "amps": 6.32,
+      "watts": null,
+      "plug": "1 x DC IN (2.5 x 5.5mm)",
+      "poeClass": null,
+      "notes": "Page: 'DC Power Adapter 19V / 6.32A'; CPU TDP 45W. USB-C port is video/data only: 'It does not support PD charging.'"
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://www.gmktec.com/products/gmktec-k10-intel-13th-core-i9-13900hk-mini-pc",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "Acemagic Vista V1",
@@ -4558,7 +5003,24 @@
        "author": "clemon8",
        "url": "https://makerworld.com/en/models/1601792"
       }
-     ]
+     ],
+     "input": {
+      "type": "dc",
+      "volts": 12,
+      "amps": 2.5,
+      "watts": null,
+      "plug": "DC Header 5.5*2.1mm",
+      "poeClass": null,
+      "notes": "Page title 'ACEMAGIC V1 Intel Twin Lake N150/N95 Vista Mini PC'; spec: 'Power DC 12V/2.5A, DC Header 5.5*2.1mm'. Polarity not stated."
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://acemagic.com/products/acemagic-v1-minipc",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "Fujitsu ESPRIMO G9012",
@@ -5074,7 +5536,33 @@
        "url": "https://makerworld.com/en/models/1444002",
        "note": "Holds a Pi 5 (PoE HAT with M.2 NVMe) next to a Linksys LGS105 5-port switch held by printed twist locks."
       }
-     ]
+     ],
+     "input": {
+      "type": "usb-c",
+      "volts": 5,
+      "amps": 5,
+      "watts": null,
+      "plug": "USB-C",
+      "poeClass": null,
+      "notes": "Spec list: '5V/5A DC power via USB-C, with Power Delivery support'. FAQ recommends the Raspberry Pi 27W USB-C Power Supply. Max consumption not stated.",
+      "alt": {
+       "type": "poe",
+       "volts": null,
+       "amps": null,
+       "watts": null,
+       "plug": null,
+       "poeClass": "PoE+",
+       "notes": "'Gigabit Ethernet, with PoE+ support (requires separate PoE+ HAT)'."
+      }
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://www.raspberrypi.com/products/raspberry-pi-5/",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "Raspberry Pi (any)",
@@ -5332,7 +5820,24 @@
        "author": "DesignBot",
        "url": "https://makerworld.com/en/models/1927437"
       }
-     ]
+     ],
+     "input": {
+      "type": "dc",
+      "volts": 12,
+      "amps": 5,
+      "watts": null,
+      "plug": null,
+      "poeClass": null,
+      "notes": "Spec table: 'Power 12V 5A Power Supply'; package has '12V/5A Power Adapter'. CPU TDP 10W; page says 'just 6W at idle'. DC connector size not stated."
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://shop.zimaspace.com/products/zimaboard2-single-board-server",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "ZimaBoard (v1)",
@@ -5349,7 +5854,24 @@
        "author": "MartinRowan",
        "url": "https://www.printables.com/model/211338"
       }
-     ]
+     ],
+     "input": {
+      "type": "dc",
+      "volts": 12,
+      "amps": 3,
+      "watts": null,
+      "plug": null,
+      "poeClass": null,
+      "notes": "FAQ: 'it comes with a 12V 3A power adapter included'. TDP 6W. DC connector size not stated."
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://shop.zimaspace.com/products/zimaboard-single-board-server",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "Radxa Rock 5B / 5B+",
@@ -5377,7 +5899,33 @@
        "author": "ottk3",
        "url": "https://www.printables.com/model/1274281"
       }
-     ]
+     ],
+     "input": {
+      "type": "usb-c",
+      "volts": null,
+      "amps": null,
+      "watts": null,
+      "plug": "USB Type-C",
+      "poeClass": null,
+      "notes": "Records ROCK 5B first; page covers both. 'USB Type-C PD Version 2.0 with 9V/2A, 12V/2A, 15V/2A and 20V/2A'; or fixed 5V-20V with power rating over 30W (5B) / 40W (5B+); example 12V/4A adapter. PoE not mentioned.",
+      "alt": {
+       "type": "dc",
+       "volts": 5,
+       "amps": null,
+       "watts": null,
+       "plug": "GPIO PINs 2 and 4",
+       "poeClass": null,
+       "notes": "Page lists '5V power supply for GPIO PINs 2 and 4'; current not stated."
+      }
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://docs.radxa.com/en/rock5/rock5b/getting-started/power-supply",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "Home Assistant Yellow",
@@ -5395,7 +5943,33 @@
        "author": "Syvel Engineering",
        "url": "https://makerworld.com/en/models/2430201"
       }
-     ]
+     ],
+     "input": {
+      "type": "dc",
+      "volts": 12,
+      "amps": 2,
+      "watts": null,
+      "plug": "barrel DC power jack (5.5 mm x 2.1 mm)",
+      "poeClass": null,
+      "notes": "Page: '12 V / 2 A through barrel DC power jack (5.5 mm x 2.1 mm)'. Typical power usage: idle ~1.5 W, idle with NVMe ~2.5 W, load ~5-9 W (typical, not a stated maximum). Polarity not stated.",
+      "alt": {
+       "type": "poe",
+       "volts": null,
+       "amps": null,
+       "watts": null,
+       "plug": null,
+       "poeClass": "PoE+ IEEE 802.3at-2009 Class 3 or 4 (selectable via jumper)",
+       "notes": "Page: 'Ethernet: PoE+ IEEE 802.3at-2009 Class 3 or 4 (selectable via jumper)'."
+      }
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://www.home-assistant.io/yellow/",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "Raspberry Pi Zero",
@@ -5414,7 +5988,24 @@
        "url": "https://makerworld.com/en/models/982725",
        "note": "Fits Pi Zero, Zero W and Zero 2 W."
       }
-     ]
+     ],
+     "input": {
+      "type": "usb",
+      "volts": null,
+      "amps": null,
+      "watts": null,
+      "plug": "Micro USB",
+      "poeClass": null,
+      "notes": "Specifications list 'Micro USB power'. Voltage, current and max consumption not stated on the page."
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://www.raspberrypi.com/products/raspberry-pi-zero/",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "ZimaBlade",
@@ -5433,7 +6024,24 @@
        "url": "https://makerworld.com/en/models/1358611-10-inch-rack-for-zimablade-with-pcie-2-5g-ports",
        "note": "ZimaBlades stand vertically on one 1U bracket, with room for a PCIe 2.5G NIC."
       }
-     ]
+     ],
+     "input": {
+      "type": "usb-c",
+      "volts": 12,
+      "amps": null,
+      "watts": null,
+      "plug": "USB-C",
+      "poeClass": null,
+      "notes": "FAQ: 'ZimaBlade uses a 12V USB-C power adapter'. Current and power consumption not stated on the page."
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://shop.zimaspace.com/products/zimablade-single-board-server-for-cyber-native",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     },
     {
      "device": "Arduino Uno",
@@ -5451,7 +6059,33 @@
        "shape": {"row": [{"sbc": 3, "board": "uno", "orient": "v"}], "shelf": true},
        "url": "https://makerworld.com/en/models/1011789"
       }
-     ]
+     ],
+     "input": {
+      "type": "dc",
+      "volts": null,
+      "amps": null,
+      "watts": null,
+      "plug": "Power jack 2.1x5.5mm",
+      "poeClass": null,
+      "notes": "Arduino UNO R3 manual (A000066). 'VINMax Maximum input voltage from VIN pad': min 6, max 20 V. Polarity not stated; max power consumption is a placeholder ('xx mA') in the manual.",
+      "alt": {
+       "type": "usb",
+       "volts": null,
+       "amps": null,
+       "watts": null,
+       "plug": "USB B Connector",
+       "poeClass": null,
+       "notes": "'This also provides power to the board'. VUSBMax (max input voltage from USB connector) 5.5 V."
+      }
+     },
+     "evidence": {
+      "power": {
+       "state": "documented",
+       "source": "https://docs.arduino.cc/resources/datasheets/A000066-datasheet.pdf",
+       "date": "2026-10-16",
+       "note": "Power input specification only; typical consumption and mount compatibility are not verified by this record."
+      }
+     }
     }
    ]
   },

@@ -45,3 +45,12 @@ console.log('Connect checks passed: cards only when needed, build numbers, sourc
 const ownership = win.LRConnect.cards({ devices: [{ name: 'Owned gateway', own: true }, { name: 'New switch', own: false }] }).find(c => c.id === 'power');
 assert.match(ownership.items[0], /adapter it came with/);
 assert.match(ownership.items[1], /included in the box/);
+
+// Input ratings are shown with their source; maximum consumption is not an adapter rating.
+const sourced = C.cards({ devices: [{ name: 'UCG-Max', own: true, input: { type: 'usb-c', volts: 5, amps: 5, watts: 16.1, notes: 'Adapter included', alt: { type: 'poe', poeClass: 'PoE+' } }, inputEvidence: { state: 'documented', source: 'https://example.com/spec' } }] }).find(c => c.id === 'power');
+assert.match(sourced.items[0], /USB-C, 5 V, 5 A/);
+assert.match(sourced.items[0], /Alternative: PoE, PoE\+/);
+assert.ok(!sourced.items[0].includes('16.1 W'));
+assert.equal(sourced.sources[0][1], 'https://example.com/spec');
+const unsourced = C.cards({ devices: [{ name: 'Unknown', input: { type: 'dc', volts: 99 } }] }).find(c => c.id === 'power');
+assert.ok(!unsourced.items[0].includes('99 V')); assert.equal(unsourced.sources.length, 0);

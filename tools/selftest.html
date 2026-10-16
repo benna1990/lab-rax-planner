@@ -278,6 +278,15 @@
       if (buys.filter(r => r.name === 'Orange Pi Zero 3').reduce((n, r) => n + r.qty, 0) !== 2 || buys.filter(r => r.name === 'Raspberry Pi 5').reduce((n, r) => n + r.qty, 0) !== 1) fail('mixed boards were bought as the same device');
       return '0/3/2 devices; unpriced; file/share preserved; missing supplies requested; Pi/Orange Pi counts separate';
     });
+    await check('Connect shows sourced device inputs without promoting typical consumption estimates', async () => {
+      T().setHeight(10); if (!T().addItem({ key: 'ucgmax1' })) fail('input fixture did not fit');
+      const text = W.document.body.textContent;
+      if (!text.includes('Documented input: USB-C, 5 V, 5 A')) fail('sourced UCG-Max input missing');
+      const source = [...W.document.querySelectorAll('#build a')].find(a => a.href === 'https://techspecs.ui.com/unifi/cloud-gateways/ucg-max');
+      if (!source) fail('input source link missing');
+      const row = T().powerModel().rows.find(r => r.it?.key === 'ucgmax1'); if (['documented', 'verified'].includes(row.d.ev.power.state)) fail('typical consumption became verified');
+      return 'sourced 5 V/5 A USB-C input and source link; typical draw evidence stays unverified';
+    });
   } catch (e) { log(false, 'Self-test stopped', e.message); }
   finally { KEYS.forEach((k, i) => saved[i] == null ? localStorage.removeItem(k) : localStorage.setItem(k, saved[i])); }
   const bad = results.filter(x => !x).length;

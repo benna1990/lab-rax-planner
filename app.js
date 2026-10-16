@@ -54,7 +54,7 @@ function buildCatalog(c) {
   (c.devices || []).forEach(g => g.items.forEach(d => {
     const dev = d.size ? { device: d.device, size: d.size, color: d.color, io: d.io } : null;
     if (dev) SIZES[d.device] = dev;
-    const pwDev = PWDEV[d.device] = Object.assign({ name: d.device, group: g.group, io: d.io || [] }, pwOf(d));
+    const pwDev = PWDEV[d.device] = Object.assign({ name: d.device, group: g.group, io: d.io || [], input: d.input, inputEvidence: d.evidence?.power }, pwOf(d));
     d.mounts.forEach(m => {
       if (m.ref) { m.key = m.ref; return; }
       m.key = m.id;
@@ -1495,7 +1495,7 @@ function connectFacts() {
   let pi5 = 0, boards = 0; const devices = [];
   byPos().forEach(it => {
     const d = info(it), sbc = modsOf(d).filter(m => m.sbc).reduce((n, m) => { const k = typeof m.sbc === 'number' ? (m.fill != null ? m.fill : m.sbc) : 1; if ((m.board || 'pi5') === 'pi5') pi5 += k; boards += k; return n + k; }, 0);
-    if (heatOf(it).w > 0 || sbc) devices.push({ own: haveDevice(it), name: it.label || shortName(d), poe: srcOf('i' + it.id), note: sbc ? (haveDevice(it) ? 'Have it: use the power supply you already have. ' : 'To buy: check what is in the box. ') + sbc + (sbc > 1 ? ' boards, each on its own supply or PoE HAT (see below)' : ' board on its own supply or PoE HAT (see below)') : null });
+    if (heatOf(it).w > 0 || sbc) devices.push({ input: d.pwDev?.input, inputEvidence: d.pwDev?.inputEvidence, own: haveDevice(it), name: it.label || shortName(d), poe: srcOf('i' + it.id), note: sbc ? (haveDevice(it) ? 'Have it: use the power supply you already have. ' : 'To buy: check what is in the box. ') + sbc + (sbc > 1 ? ' boards, each on its own supply or PoE HAT (see below)' : ' board on its own supply or PoE HAT (see below)') : null });
   });
   const fans = [];
   fanParts().forEach(f => (f.d.hardware || []).forEach(h => { const hw = CAT.hardware[h.part]; if (hw && hw.cfm) fans.push({ name: f.name, qty: h.qty, mm: hw.mm, volt: hw.volt, amp: hw.amp }); }));

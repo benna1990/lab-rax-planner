@@ -46,6 +46,13 @@ function evidence(o, where) {
     if ((e.state === 'documented' || e.state === 'community') && !(okUrl(e.source) || okUrl(o.url))) errors.push(`${where}: evidence.${k} is ${e.state}, so it needs a source link`);
   }
 }
+function powerInput(i, where) {
+  if (!i || typeof i !== 'object' || Array.isArray(i)) { errors.push(`${where}: input must be an object`); return; }
+  if (!['dc', 'usb-c', 'usb', 'poe', 'ac'].includes(i.type)) errors.push(`${where}: unknown input type`);
+  for (const key of ['volts', 'amps', 'watts']) if (i[key] != null && !(typeof i[key] === 'number' && Number.isFinite(i[key]) && i[key] >= 0)) errors.push(`${where}: input.${key} must be a nonnegative number or null`);
+  for (const key of ['plug', 'poeClass', 'notes']) if (i[key] != null && typeof i[key] !== 'string') errors.push(`${where}: input.${key} must be text or null`);
+  if (i.alt != null) { if (i.alt.alt != null) errors.push(`${where}: nested alternative inputs are not supported`); else powerInput(i.alt, where + ' alternative'); }
+}
 function air(o, where, needWatts) {
   if (o.watts == null) { if (needWatts) errors.push(`${where}: needs watts, the typical heat in W (add "wattsEstimated": true when it's a guess)`); }
   else if (!(typeof o.watts === 'number' && o.watts >= 0 && o.watts <= 500)) errors.push(`${where}: watts must be a number from 0 to 500`);
@@ -119,6 +126,7 @@ for (const g of cat.panels || []) {
 for (const g of cat.devices || []) {
   if (!text(g.group)) errors.push('devices: every group needs a name');
   for (const d of g.items || []) {
+    if (d.input != null) { powerInput(d.input, d.device); if (d.evidence?.power?.state !== 'documented' || !okUrl(d.evidence.power.source)) errors.push(`${d.device}: input needs documented power source evidence`); }
     if (!text(d.device)) errors.push('devices: every item needs a device name');
     if (!Array.isArray(d.mounts) || !d.mounts.length) errors.push(`${d.device}: needs at least one mount`);
     LS.checkDevice(d, d.device).forEach(e => errors.push(e));
