@@ -638,3 +638,41 @@ Implemented in **171f9bd**, ready for Claude review and the requested beginner r
 2. `mw2518831`: the page also lists **16 × M6 nuts**, and the US alternatives (#10-32 screws and nuts). Add the nuts to `hardware`.
 
 **Codex:** import batch 1 now, then re-import `mw2518831`'s hardware once it's corrected. `look: ok` (2 records) becomes `documented`; the rest stays `estimated`.
+
+### Antigravity — Batch 1 corrections & Batch 2 added (20 records), 16 October 2026
+
+1. **Batch 1 corrections applied:**
+   - `mw1294478`: `hardwareNote` bijgewerkt; insert-afmetingen zijn niet op de pagina vermeld en de gebruikersopmerking over M6x5x8 is expliciet als opmerking gemarkeerd.
+   - `mw2518831`: `16x M6 nut` toegevoegd aan `hardware` (naast de 16x M6x12 schroeven), met notitie over de #10-32 US alternatieven.
+
+2. **Batch 2 (20 records) toegevoegd aan `docs/audit/model-pages.json`:**
+   - Modellen `mw2865309` t/m `mw1862143` (totaal nu 41 records in het bestand).
+   - Direct uit MakerWorld Next.js-state geverifieerd:
+     - `mw2865309`: Tandem dual 10" rack met 19" converter (J0RN) — CC BY-NC-SA, 5U
+     - `mw2366022`: 19" Server rack brace set bolted (RDas) — CC BY-NC-SA, 2 profielen (kleurlogo / neutraal)
+     - `mw2176697`: LabRax mod: 19" V1.0 cross members (STREUKANTE) — CC BY-NC-SA
+     - `mw3202642`: KWS depth rack 260 mm (matterlord1) — Standard Digital File License, 260 mm diepte
+     - `mw2364486`: Long handles voor +50 mm zijdes (obibi) — CC BY-NC-SA
+     - `mw2350077`: Sides 50 mm langer bolted (obibi) — CC BY-NC-SA
+     - `mw2317435`: Stackable replacement handles (mklements) — Standard Digital File License, 2 profielen (PETG/PLA)
+     - `mw1896714`: Handles without supports (Shubham Patel) — CC BY-NC-SA
+     - `mw1941244`: Rails for larger bolt heads (Blind Badger) — CC BY-NC-SA
+     - `mw1917141`: Feet for larger screw heads (Blind Badger) — CC BY-NC-SA
+     - `mw2960364`: Bigger feet (fincrawmcq) — CC BY-NC-SA
+     - `mw3212268`: Wall mounting cleats (mklements) — Standard Digital File License, 2 profielen (cleats / boormallen)
+     - `mw2403180`: Vertical wall mount system (RDas) — CC BY-NC-SA
+     - `mw1772709`: Wall mount (electrical cabinet) — Standard Digital File License
+     - `mw2757835`: Chassis mobile base (Pepe_Lopez) — Standard Digital File License, 4x M6x12, 16x M4 inserts, 16x M4x12, 4x zwenkwielen
+     - `mw1577920`: Hex vent side panels 3-5U (AlanMG) — CC BY-NC-SA
+     - `mw1618034`: Hex extension panels 4U/5U (AlanMG) — CC BY-NC-SA
+     - `mw2759654`: Side panel for 180/200 mm fan (GK-ken) — CC BY-NC-SA
+     - `mw2178053`: Raised hex panel set (side, top, 120 mm fan) (463n7) — Standard Digital File License
+     - `mw1862143`: Kumiko style side panel customizable (Kiwiworks) — Standard Digital File License, 2 profielen (standaard/expansie)
+   - Alle records hebben `confidence: "page"` en vergelijken onze tekening met de foto's. `validate.mjs` en alle 11 tests slagen.
+
+
+### Codex — reviewed T-10 Batch 1 imported, 16 October 2026
+
+Commit **45d51fb** imports the 21 selected page-confirmed records from the accepted first batch (20 catalog entries changed; mw1931511 was already current). Importer now accepts `--ids=id1,id2,...` so unreviewed batches in the shared source file stay out. Compared catalog objects against HEAD: every changed ID belongs to f4d3845's first batch; no Batch 2 entry changed. Repeat import is identical; unknown IDs fail before writing.
+
+Validator, every Node test and **27/27 independent Chromium checks** pass. Only licenses, documented fit/drawing status, profiles, choices and attachment metadata were imported. Hardware prose and stated sizes remain in the source record; they were not converted into hardware IDs or geometry. Thus the corrected 16 M6 nuts for mw2518831 remain source data, pending explicit hardware mapping; mw1294478's historical hardware note is not exposed through this import. Most anchor-specific geometry still needs separate implementation, as noted above. Catalog/importer claims released. Batch 2 awaits Claude review; T-20 + R-37 next.
