@@ -72,7 +72,7 @@
       const n = T().printPack().filter(x => x.name === 'Panel').length; return n === 2 || fail(n + ' rows'); });
     await check('Shopping list: a mount without its own hardware list shows unknown hardware', () => { const r = T().orderList().find(x => x.key === 'parthardware'); return !!r && r.qty == null ? r.spec.slice(0, 60) + '…' : false; });
     await check('No errors while building', () => errors.length ? fail(errors.join('; ')) : true);
-    await check('PDF at 10U, full: every text line inside the page', async () => { T().setHeight(10); for (const key of ['tiny1', 'fan40', 'keystone']) T().addItem({ key }); await wait(300); // fills the last 2½U
+    await check('PDF at 10U, full: every text line inside the page', async () => { T().setHeight(10); for (const key of ['tiny1', 'fan40', 'keystone']) if (!T().addItem({ key }, 0)) fail('PDF stress fixture could not place ' + key); await wait(300); // explicit placement also exercises PDF output for builds with warnings
       W.document.querySelector('#finalize-build').close && W.document.querySelector('#finalize-build').close();
       const f = await download('pdf', /download pdf/i); window.__lighterFixturePDF = Array.from(f.buf);
       const s = new TextDecoder('latin1').decode(f.buf), pages = (s.match(/\/Type \/Page\b/g) || []).length; const bad = []; let n = 0;
@@ -118,6 +118,18 @@
       $('[data-act="wz-create"]').click(); await wait(250);
       const s = T().ready();
       return s.warn === 0 && !/parts overlap/.test($('#ready').textContent) ? T().state.h + 'U, no build warnings' : fail($('#ready').textContent);
+    });
+    await check('Automatic placement asks before growing instead of overlapping a half-U panel', async () => {
+      const before = JSON.stringify(T().state), count = T().state.items.length;
+      if (T().addItem({ key: 'flexmini05' })) fail('overlapping placement was accepted');
+      await wait(100);
+      if (T().state.items.length !== count || !$('#askdlg').open) fail('build changed before a growth choice');
+      $('#askdlg button[value=""]').click(); await wait(100);
+      if (JSON.stringify(T().state) !== before) fail('cancel changed the build');
+      T().addItem({ key: 'flexmini05' }); await wait(100);
+      const grow = $('#askdlg button[value="grow"]'); if (!grow) fail('no physical growth proposal');
+      grow.click(); await wait(200);
+      return T().state.items.length === count + 1 && T().state.h > 4 && T().ready().warn === 0 ? T().state.h + 'U, added without overlaps; cancel preserves the build' : fail($('#ready').textContent);
     });
     await check('Step jumps keep Print and Export below the sticky header', async () => {
       for (const [step, selector] of [[5, '[data-sec="print"]'], [6, '#export']]) {

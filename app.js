@@ -260,7 +260,7 @@ function addItem(obj, pos) {
   const sd = obj.side === 'back' || (obj.side == null && rackSide === 'back') ? 'back' : 'front';
   if (sd === 'back') obj.side = 'back'; else delete obj.side;
   const d = info(obj), p = pos == null ? firstClear(obj, d.h2, sd) : nearest(pos, d.h2, undefined, sd);
-  if (p == null) { noRoom(d, sd, () => addItem(obj), () => addItem(Object.assign(obj, { side: sd === 'back' ? 'front' : 'back' }))); return false; }
+  if (p == null) { noRoom(d, sd, () => addItem(obj), () => addItem(Object.assign(obj, { side: sd === 'back' ? 'front' : 'back' })), obj); return false; }
   obj.id = state.nextId++; obj.pos2 = p; state.items.push(obj); sel = obj.id; touch(); render();
   say(fullName(d) + ' (' + uTxt(d) + ') placed at ' + uRange(p, d.h2) + atBack(obj) + '.' + clashText(obj));
   return true;
@@ -268,11 +268,16 @@ function addItem(obj, pos) {
 // the lowest rack height, up to 10U, with a free slot of h2 half-units on a side; null when even 10U has none
 const heightFor = (h2, side) => LY.heightFor(rackCtx(), h2, side || rackSide, 10);
 const freeSlots = side => LY.freeSlots(rackCtx(), side);
-// the first free slot where the part doesn't run into a part on the other side (depth) or overlap its neighbour, else the first free slot
+// the first free slot where the part fits physically; otherwise ask before changing the build
 function firstClear(obj, h2, sd) {
-  let first = null;
-  for (let p = 0; p + h2 <= slots(); p++) if (isFree(p, h2, undefined, sd)) { if (first == null) first = p; const o = Object.assign({ id: -1 }, obj, { pos2: p }); if (!clashes(o).length && !overlaps(o).length) return p; }
-  return first;
+  for (let p = 0; p + h2 <= slots(); p++) if (isFree(p, h2, undefined, sd)) { const o = Object.assign({ id: -1 }, obj, { pos2: p, side: sd }); if (!clashes(o).length && !overlaps(o).length) return p; }
+  return null;
+}
+// Find a growth proposal using the same physical checks as automatic placement, without rendering or saving trial heights.
+function heightForPhysical(obj, side) {
+  const h = state.h;
+  try { for (let u = h + 1; u <= 10; u++) { state.h = u; if (firstClear(obj, H(obj), side) != null) return u; } return null; }
+  finally { state.h = h; }
 }
 // slide the parts on a side up against each other, so their free space is one gap at the bottom; whole-U parts stay on a U
 function packSide(side) {
@@ -303,10 +308,10 @@ function askUser(title, text, buttons) {
 }
 /* No slot for a part on side sd: offer the lowest rack height that makes room, or say why it can't go in and offer the other
    side when it fits there. place() puts the part in and returns true when it did; placeOther() tries the other side. */
-async function noRoom(d, sd, place, placeOther) {
+async function noRoom(d, sd, place, placeOther, probe) {
   const name = fullName(d) + ' (' + fmtU(d.h2) + ')', free = freeSlots(sd), other = sd === 'back' ? 'front' : 'back';
-  const grow = heightFor(d.h2, sd), spread = free >= d.h2; // enough room in total, but not in one piece
-  const where = 'The ' + sd + ' of this ' + state.h + 'U rack has ' + (free ? fmtU(free) + ' free' + (spread ? ', but not in one piece' : '') : 'no free slots') + '.';
+  const grow = probe ? heightForPhysical(probe, sd) : heightFor(d.h2, sd), spread = !probe && free >= d.h2; // enough room in total, but not in one piece
+  const where = probe && firstFree(d.h2, sd) != null ? 'The available slots overlap neighbouring panels or run into parts on the other side.' : 'The ' + sd + ' of this ' + state.h + 'U rack has ' + (free ? fmtU(free) + ' free' + (spread ? ', but not in one piece' : '') : 'no free slots') + '.';
   say('No room for ' + name + ' at the ' + sd + '.');
   if (spread && packHelps(d.h2, sd)) {
     const v = await askUser('Move parts together?', name + ' doesn’t fit in one gap. ' + where + ' Sliding the parts at the ' + sd + ' up against each other makes one gap at the bottom.', [['', 'Cancel']].concat(grow ? [['grow', 'Make it ' + grow + 'U']] : [], [['pack', 'Move parts together', 'primary']]));
@@ -325,7 +330,7 @@ async function noRoom(d, sd, place, placeOther) {
     if (place()) { undo = before; say($('#status').textContent + ' The rack is now ' + grow + 'U.', true); } else { state = JSON.parse(before); render(); }
     return;
   }
-  const otherOk = placeOther && d.h2 <= 20 && (firstFree(d.h2, other) != null || heightFor(d.h2, other) != null);
+  const otherOk = placeOther && d.h2 <= 20 && (probe ? firstClear(probe, d.h2, other) != null || heightForPhysical(probe, other) != null : firstFree(d.h2, other) != null || heightFor(d.h2, other) != null);
   const why = d.h2 > 20 ? name + ' is taller than the largest rack (10U).'
     : name + ' doesn’t fit, even at 10U, the largest rack. ' + where + (spread ? ' Move parts together to make one gap, or remove some.' : ' Remove or move parts to make room.');
   const v = await askUser('No room for this part', why, otherOk ? [['', 'OK'], ['other', 'Place it at the ' + other, 'primary']] : [['', 'OK', 'primary']]);
