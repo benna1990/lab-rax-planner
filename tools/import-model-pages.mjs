@@ -3,9 +3,12 @@ import { readFileSync, writeFileSync } from 'node:fs';
 const catPath = new URL('../catalog.json', import.meta.url), original = readFileSync(catPath, 'utf8'), cat = JSON.parse(original);
 const source = JSON.parse(readFileSync(new URL('../docs/audit/model-pages.json', import.meta.url), 'utf8'));
 const entries = [...cat.panels.flatMap(g => g.items), ...cat.devices.flatMap(g => g.items.flatMap(d => d.mounts)), ...cat.extras.flatMap(g => g.items)];
+const selectionArg = process.argv.slice(2).find(a => a.startsWith('--ids='));
+const selected = selectionArg ? new Set(selectionArg.slice(6).split(',').filter(Boolean)) : null;
+if (selected && (!selected.size || [...selected].some(id => !(source.pages || []).some(p => p.id === id && p.confidence === 'page')))) throw new Error('Selection contains an unknown or unconfirmed model');
 const changed = [];
 for (const page of source.pages || []) {
-  if (page.confidence !== 'page') continue;
+  if (page.confidence !== 'page' || selected && !selected.has(page.id)) continue;
   const part = entries.find(p => p.id === page.id); if (!part) throw new Error('Unknown model id ' + page.id);
   if (!/^https:\/\//.test(page.url || '') || !/^\d{4}-\d{2}-\d{2}$/.test(page.date || '')) throw new Error('Missing source/date for ' + page.id);
   if (page.license) part.license = page.license;

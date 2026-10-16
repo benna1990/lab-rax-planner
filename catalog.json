@@ -6338,102 +6338,630 @@
     {
      "id": "mw1294478",
      "name": "Posts & side panels 1–5U",
-     "shape": {"u": 5},
+     "shape": {
+      "u": 5,
+      "at": "posts"
+     },
      "author": "mklements",
-     "url": "https://makerworld.com/en/models/1294478-lab-rax-1-5u-posts-panels"
+     "url": "https://makerworld.com/en/models/1294478-lab-rax-1-5u-posts-panels",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1294478-lab-rax-1-5u-posts-panels",
+       "date": "2026-10-16",
+       "note": "official Lab Rax component set by creator mklements"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1294478-lab-rax-1-5u-posts-panels",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "brass-insert-version-petg-0-2mm-layer-2-walls-15-infill",
+       "name": "Brass Insert Version PETG - 0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "Posts and side panels for original brass insert version of Lab Rax"
+      },
+      {
+       "id": "bolted-version-petg-0-2mm-layer-2-walls-15-infill",
+       "name": "Bolted Version PETG - 0.2mm layer, 2 walls, 15% infill",
+       "frame": "bolted",
+       "shape": {},
+       "note": "Posts and side panels for Lab Rax bolted version"
+      }
+     ],
+     "profileChoices": [
+      "height: 1U, 2U, 3U, 4U, or 5U posts and side panels",
+      "frame: brass insert or bolted version"
+     ]
     },
     {
      "id": "mw1304384",
      "name": "Extension side panels & post joiners",
-     "shape": {"u": 6, "hl": "posts"},
+     "shape": {
+      "u": 6,
+      "hl": "posts",
+      "at": "posts"
+     },
      "author": "mklements",
-     "url": "https://makerworld.com/en/models/1304384-lab-rax-extension-side-panels-post-joiner"
+     "url": "https://makerworld.com/en/models/1304384-lab-rax-extension-side-panels-post-joiner",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1304384-lab-rax-extension-side-panels-post-joiner",
+       "date": "2026-10-16",
+       "note": "official Lab Rax expansion by creator mklements"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1304384-lab-rax-extension-side-panels-post-joiner",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "brass-insert-version-petg-0-2mm-layer-2-walls-15-infill",
+       "name": "Brass Insert Version PETG - 0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "Joiners and side panels for brass insert version"
+      },
+      {
+       "id": "bolted-version-petg-0-2mm-layer-2-walls-15-infill",
+       "name": "Bolted Version PETG - 0.2mm layer, 2 walls, 15% infill",
+       "frame": "bolted",
+       "shape": {},
+       "note": "Joiners and side panels for bolted version"
+      }
+     ],
+     "profileChoices": [
+      "frame: brass insert or bolted post joiners"
+     ]
     },
     {
      "id": "mw3211714",
      "name": "Upgraded 1U extension module",
-     "shape": {"u": 4, "hl": "posts"},
+     "shape": {
+      "u": 4,
+      "hl": "posts",
+      "at": "posts"
+     },
      "author": "mklements",
-     "url": "https://makerworld.com/en/models/3211714"
+     "url": "https://makerworld.com/en/models/3211714",
+     "license": "Standard Digital File License",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/3211714",
+       "date": "2026-10-16",
+       "note": "official Lab Rax 1U extension module by mklements"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/3211714",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "petg-with-coloured-logo",
+       "name": "PETG With Coloured Logo",
+       "shape": {},
+       "note": "PETG with coloured logo"
+      },
+      {
+       "id": "bolted-version-petg-with-colour-logo",
+       "name": "Bolted Version PETG With Colour Logo",
+       "frame": "bolted",
+       "shape": {},
+       "note": "Bolted version PETG with colour logo"
+      }
+     ],
+     "profileChoices": [
+      "frame: brass insert or bolted version"
+     ]
     },
     {
      "id": "mw2452007",
      "name": "5U for A1 mini (split parts)",
      "label": "For 180 mm beds",
-     "shape": {"u": 5},
+     "shape": {
+      "u": 5,
+      "at": "posts"
+     },
      "author": "cwlsmith",
-     "url": "https://makerworld.com/en/models/2452007"
+     "url": "https://makerworld.com/en/models/2452007",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2452007",
+       "date": "2026-10-16",
+       "note": "remix of mklements Lab Rax Bolted Version 5U for small 3D printer beds (180x180 mm)"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/2452007",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "Split parts to fit within 180x180 mm build volume of A1 mini"
+      }
+     ]
     },
     {
      "id": "mw1585859",
      "name": "6U bolted",
-     "shape": {"u": 6},
+     "shape": {
+      "u": 6,
+      "at": "posts"
+     },
      "author": "Cowasaur",
-     "url": "https://makerworld.com/en/models/1585859"
+     "url": "https://makerworld.com/en/models/1585859",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1585859",
+       "date": "2026-10-16",
+       "note": "remix of mklements Lab Rax 10\" Server Rack Bolted Version 5U to add 1U (6U total)"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1585859",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "No support needed"
+      },
+      {
+       "id": "petg-necessary-supports-handle-rotation",
+       "name": "PETG, necessary supports, handle rotation",
+       "shape": {},
+       "note": "Restored supports on bolt holes and edge pieces; rotated handles"
+      },
+      {
+       "id": "0-2mm-layer-4-walls-15-infill-with-added-support-and-seam",
+       "name": "0.2mm layer, 4 walls, 15% infill with added Support and seam",
+       "shape": {},
+       "note": "Optimized for H2C/X1C, 4 wall loops, moved handle seams"
+      }
+     ],
+     "profileChoices": [
+      "print profile: standard, with supports/rotated handles, or 4-wall strengthened"
+     ]
     },
     {
      "id": "mw2518831",
      "name": "6U bolted, complete",
-     "shape": {"u": 6},
+     "shape": {
+      "u": 6,
+      "at": "posts"
+     },
      "author": "Shiv",
-     "url": "https://makerworld.com/en/models/2518831"
+     "url": "https://makerworld.com/en/models/2518831",
+     "license": "Standard Digital File License",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2518831",
+       "date": "2026-10-16",
+       "note": "complete 6U remix of Lab Rax Bolted Version"
+      },
+      "look": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2518831",
+       "date": "2026-10-16",
+       "note": "Drawing compared with the model page; dimensions are not independently measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "Consolidated and labelled 6U bolted version"
+      }
+     ]
     },
     {
      "id": "mw2791796",
      "name": "4U, brass insert edition",
-     "shape": {"u": 4},
+     "shape": {
+      "u": 4,
+      "at": "posts"
+     },
      "author": "Frostyy",
-     "url": "https://makerworld.com/en/models/2791796-4u-lab-rax"
+     "url": "https://makerworld.com/en/models/2791796-4u-lab-rax",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2791796-4u-lab-rax",
+       "date": "2026-10-16",
+       "note": "clean rebuild of Lab Rax concept as a true 4U system from the ground up"
+      },
+      "look": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2791796-4u-lab-rax",
+       "date": "2026-10-16",
+       "note": "Drawing compared with the model page; dimensions are not independently measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "Rebuilt 4U brass insert system"
+      }
+     ]
     },
     {
      "id": "mw3286521",
      "name": "3U / 4U with improved nut holders",
-     "shape": {"u": 4},
+     "shape": {
+      "u": 4,
+      "at": "posts"
+     },
      "author": "Piotrek",
-     "url": "https://makerworld.com/en/models/3286521"
+     "url": "https://makerworld.com/en/models/3286521",
+     "license": "Standard Digital File License",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/3286521",
+       "date": "2026-10-16",
+       "note": "remix of original Lab Rax design with improved nut holders for 3U and 4U"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/3286521",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "3U and 4U versions with improved nut holders"
+      }
+     ],
+     "profileChoices": [
+      "height: 3U or 4U"
+     ]
     },
     {
      "id": "mw1787687",
      "name": "LowProfile frame",
-     "shape": {"frame": "lowprofile"},
+     "shape": {
+      "frame": "lowprofile",
+      "at": "top"
+     },
      "author": "keineantwort",
-     "url": "https://makerworld.com/en/models/1787687"
+     "url": "https://makerworld.com/en/models/1787687",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1787687",
+       "date": "2026-10-16",
+       "note": "entworfen, dass es genau in die Maße von LabRax passt und viel flacher ist"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1787687",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "Flacherer oberer und unterer Rahmen für LabRax Maße"
+      }
+     ]
     },
     {
      "id": "mw1893186",
      "name": "LowProfile frame, bolted (280 × 240 mm)",
-     "shape": {"frame": "lowprofile"},
+     "shape": {
+      "frame": "lowprofile",
+      "at": "top"
+     },
      "author": "iGoX",
-     "url": "https://makerworld.com/en/models/1893186"
+     "url": "https://makerworld.com/en/models/1893186",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1893186",
+       "date": "2026-10-16",
+       "note": "remix of Lab Rax 5U bolted version and keineantwort low profile frame"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1893186",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "Bolted version with M6 screws and hexagonal nuts"
+      }
+     ]
     },
     {
      "id": "mw3039779",
      "name": "Top & bottom mod frame (+2U, handle styles)",
-     "shape": {"u": 5, "handles": "stackable"},
+     "shape": {
+      "u": 5,
+      "handles": "stackable",
+      "at": "top"
+     },
      "author": "RULERULAS",
-     "url": "https://makerworld.com/en/models/3039779"
+     "url": "https://makerworld.com/en/models/3039779",
+     "license": "Standard Digital File License",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/3039779",
+       "date": "2026-10-16",
+       "note": "redesign of the top and bottom frame for the Labrax rack adding 2U usable opening"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/3039779",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "heated-insert",
+       "name": "Heated Insert",
+       "shape": {},
+       "note": "Top and bottom frame parts with heated brass insert pockets"
+      },
+      {
+       "id": "bolted-version",
+       "name": "Bolted Version",
+       "frame": "bolted",
+       "shape": {},
+       "note": "Top and bottom frame parts with nut pockets"
+      },
+      {
+       "id": "extended-pieces",
+       "name": "Extended pieces",
+       "shape": {},
+       "note": "Extended depth pieces"
+      },
+      {
+       "id": "vertical-pillars-heated-insert",
+       "name": "Vertical Pillars Heated insert",
+       "shape": {},
+       "note": "Vertical pillars for heat inserts"
+      },
+      {
+       "id": "big-handle-heat-insert",
+       "name": "big handle heat insert",
+       "shape": {},
+       "note": "Big handles for heat inserts"
+      },
+      {
+       "id": "top-and-bottom-hex-pattern",
+       "name": "Top and bottom Hex pattern",
+       "shape": {},
+       "note": "Hex pattern lids"
+      },
+      {
+       "id": "vertical-pillars-bolted-version",
+       "name": "Vertical Pillars Bolted version",
+       "frame": "bolted",
+       "shape": {},
+       "note": "Vertical pillars for bolted version"
+      },
+      {
+       "id": "big-handle-bolted-version",
+       "name": "big handle bolted version",
+       "frame": "bolted",
+       "shape": {},
+       "note": "Big handles for bolted version"
+      },
+      {
+       "id": "tops-with-gridfinity",
+       "name": "Tops with gridfinity",
+       "shape": {},
+       "note": "Top plates with Gridfinity base"
+      },
+      {
+       "id": "tpu-foot",
+       "name": "tpu foot",
+       "shape": {},
+       "note": "Flexible TPU foot"
+      },
+      {
+       "id": "split-tops-extended-version",
+       "name": "Split tops Extended version",
+       "shape": {},
+       "note": "Split top plates for extended version"
+      },
+      {
+       "id": "top-and-bottom-full-cover-hex",
+       "name": "top and bottom full cover hex",
+       "shape": {},
+       "note": "Full cover hex pattern plates"
+      }
+     ],
+     "profileChoices": [
+      "frame: heat-set inserts or bolted version",
+      "top style: hex pattern, gridfinity top, or full cover hex",
+      "handles: standard or big handles",
+      "feet: rigid or TPU foot"
+     ]
     },
     {
      "id": "mw1398316",
      "name": "Base parts with nut pockets",
-     "shape": {"hl": "base"},
+     "shape": {
+      "hl": "base",
+      "at": "bottom"
+     },
      "author": "CyberGWJ",
-     "url": "https://makerworld.com/en/models/1398316"
+     "url": "https://makerworld.com/en/models/1398316",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1398316",
+       "date": "2026-10-16",
+       "note": "remix of Lab Rax 5U base parts to eliminate brass heat-set inserts"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1398316",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-6-walls-25-infill",
+       "name": "0.2mm layer, 6 walls, 25% infill",
+       "shape": {},
+       "note": "Nut pocket modifications for base parts"
+      }
+     ]
     },
     {
      "id": "mw3050275",
      "name": "Full mATX frame (244 × 244 mm)",
-     "shape": {"frame": "matx", "u": 5},
+     "shape": {
+      "frame": "matx",
+      "u": 5,
+      "at": "posts"
+     },
      "author": "Xtian85",
-     "url": "https://makerworld.com/en/models/3050275"
+     "url": "https://makerworld.com/en/models/3050275",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/3050275",
+       "date": "2026-10-16",
+       "note": "adattare build mATX (244x244mm) ad un rack 10\" Lab Rax"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/3050275",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "3u-bolted-3-5-walls-6-to-10-infill",
+       "name": "3U Bolted - 3/5 walls, 6 to 10% infill",
+       "frame": "bolted",
+       "shape": {},
+       "note": "M6 nuts and M6x12 bolts, 3/5 walls"
+      },
+      {
+       "id": "3u-brass-inserts-3-5-walls-6-to-10-infill",
+       "name": "3U Brass Inserts - 3/5 walls, 6 to 10% infill",
+       "shape": {},
+       "note": "M6 brass inserts, 3/5 walls"
+      },
+      {
+       "id": "pcie-caps",
+       "name": "PCIE Caps",
+       "shape": {},
+       "note": "Full Height or Low Profile Caps"
+      },
+      {
+       "id": "2u-bolted-3-5-walls-6-to-10-infill",
+       "name": "2U Bolted - 3/5 walls, 6 to 10% infill",
+       "frame": "bolted",
+       "shape": {},
+       "note": "2U for Low Profile PCIe, M6 nuts and M6x12 bolts"
+      },
+      {
+       "id": "2u-brass-inserts-3-5-walls-6-to-10-infill",
+       "name": "2U Brass Inserts - 3-5 walls, 6 to 10% infill",
+       "shape": {},
+       "note": "2U for Low Profile PCIe, M6 brass inserts"
+      },
+      {
+       "id": "front-panel-for-220-mm-edges",
+       "name": "Front Panel for 220 mm Edges",
+       "shape": {},
+       "note": "1U front panel for extended Lab Rax with 220mm edges"
+      }
+     ],
+     "profileChoices": [
+      "height: 2U (Low Profile PCIe) or 3U (Full Height PCIe)",
+      "frame: bolted (M6 nuts and M6x12 bolts) or brass inserts (M6 inserts)"
+     ]
     },
     {
      "id": "mw1351551",
      "name": "EasyMount Edition",
      "label": "Standard M3 screws",
-     "shape": {"u": 3},
+     "shape": {
+      "u": 3,
+      "at": "posts"
+     },
      "author": "Srigger",
-     "url": "https://makerworld.com/en/models/1351551-easymount-edition-lab-rax-10-server-rack"
+     "url": "https://makerworld.com/en/models/1351551-easymount-edition-lab-rax-10-server-rack",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1351551-easymount-edition-lab-rax-10-server-rack",
+       "date": "2026-10-16",
+       "note": "remixed and slightly modified version of the Lab RAX 10\" Server Rack 5U"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1351551-easymount-edition-lab-rax-10-server-rack",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "EasyMount modified parts"
+      }
+     ]
     }
    ]
   },
@@ -6444,44 +6972,236 @@
     {
      "id": "mw2086724",
      "name": "Deeper sides (+50 mm)",
-     "shape": {"depth": 50},
+     "shape": {
+      "depth": 50,
+      "at": "side-panel"
+     },
      "author": "Caraful",
-     "url": "https://makerworld.com/en/models/2086724"
+     "url": "https://makerworld.com/en/models/2086724",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2086724",
+       "date": "2026-10-16",
+       "note": "50mm deeper edge pieces, making the LabRax 50mm deeper (original 170mm, this is 220mm)"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/2086724",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "50mm deeper edge pieces (220mm vs original 170mm)"
+      }
+     ]
     },
     {
      "id": "mw2467685",
      "name": "Bolted 5U extended (+50 mm)",
-     "shape": {"depth": 50, "u": 5},
+     "shape": {
+      "depth": 50,
+      "u": 5,
+      "at": "side-panel"
+     },
      "author": "malves257",
-     "url": "https://makerworld.com/en/models/2467685"
+     "url": "https://makerworld.com/en/models/2467685",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2467685",
+       "date": "2026-10-16",
+       "note": "adds an extra 50mm of depth to original side rails of mklements Lab Rax Bolted Version"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/2467685",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "petg-0-2mm-layer-2-walls-15-infill",
+       "name": "PETG 0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "Extended side rails, panels, and handles (+50mm depth)"
+      },
+      {
+       "id": "1-4u-side-panel-height-expansions",
+       "name": "1-4U Side Panel Height Expansions",
+       "shape": {},
+       "note": "Side panel expansions for 1U to 4U heights"
+      }
+     ],
+     "profileChoices": [
+      "profile: 5U extended set or 1-4U side panel expansions"
+     ]
     },
     {
      "id": "mw2657818",
      "name": "Braces & handles for 330 mm depth",
-     "shape": {"depth": 90, "handles": "long"},
+     "shape": {
+      "depth": 90,
+      "handles": "long",
+      "at": "top"
+     },
      "author": "RDas",
-     "url": "https://makerworld.com/en/models/2657818"
+     "url": "https://makerworld.com/en/models/2657818",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/2657818",
+       "date": "2026-10-16",
+       "note": "deeper variant of mklements Lab Rax bolted version with total depth extended to 330mm"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/2657818",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-2mm-layer-2-walls-15-infill",
+       "name": "0.2mm layer, 2 walls, 15% infill",
+       "shape": {},
+       "note": "Handles (2 walls, 20% infill) and Braces (2 walls, 15% infill)"
+      }
+     ]
     },
     {
      "id": "mw1321019",
      "name": "Customisable depth spacers (OpenSCAD)",
-     "shape": {"depth": 40},
+     "shape": {
+      "depth": 40,
+      "at": "side-panel"
+     },
      "author": "Jeffrey",
-     "url": "https://makerworld.com/en/models/1321019"
+     "url": "https://makerworld.com/en/models/1321019",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1321019",
+       "date": "2026-10-16",
+       "note": "customisable side post in SCAD for Lab Rax to accommodate deeper cases (e.g. Compute Blade)"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1321019",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "0-24mm-layer-3-walls-15-infill",
+       "name": "0.24mm layer, 3 walls, 15% infill",
+       "shape": {},
+       "note": "0.24mm layer, 3 walls, 15% gyroid infill"
+      }
+     ],
+     "profileChoices": [
+      "customisable depth via OpenSCAD script parameters"
+     ]
     },
     {
      "id": "mw1839684",
      "name": "Sturdy long post joiner",
-     "shape": {"u": 6, "hl": "posts"},
+     "shape": {
+      "u": 6,
+      "hl": "posts",
+      "at": "posts"
+     },
      "author": "Kiwiworks",
-     "url": "https://makerworld.com/en/models/1839684"
+     "url": "https://makerworld.com/en/models/1839684",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1839684",
+       "date": "2026-10-16",
+       "note": "designed to connect front and rear posts when building expanded Lab Rax (>5U)"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1839684",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "brass-insert-version-petg-gyroid-10-infill",
+       "name": "Brass insert version PETG - Gyroid 10% infill",
+       "shape": {},
+       "note": "Joiners for Lab Rax brass insert version"
+      },
+      {
+       "id": "bolted-version-petg-gyroid-10-infill",
+       "name": "Bolted version PETG - Gyroid 10% infill",
+       "frame": "bolted",
+       "shape": {},
+       "note": "Joiners for Lab Rax bolted version"
+      }
+     ],
+     "profileChoices": [
+      "frame: brass insert version or bolted version"
+     ]
     },
     {
      "id": "mw1862122",
      "name": "Side panel connector & post joiner V2",
-     "shape": {"u": 6, "hl": "posts"},
+     "shape": {
+      "u": 6,
+      "hl": "posts",
+      "at": "posts"
+     },
      "author": "Kiwiworks",
-     "url": "https://makerworld.com/en/models/1862122"
+     "url": "https://makerworld.com/en/models/1862122",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1862122",
+       "date": "2026-10-16",
+       "note": "connects lower and upper panels and posts when stacking Lab Rax beyond 5U"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1862122",
+       "date": "2026-10-16",
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
+      }
+     },
+     "options": [
+      {
+       "id": "brass-insert-version-petg-gyroid-10-infill",
+       "name": "Brass insert version PETG - Gyroid 10% infill",
+       "shape": {},
+       "note": "Connectors for Lab Rax brass insert version"
+      },
+      {
+       "id": "bolted-version-petg-gyroid-10-infill",
+       "name": "Bolted version PETG - Gyroid 10% infill",
+       "frame": "bolted",
+       "shape": {},
+       "note": "Connectors for Lab Rax bolted version"
+      }
+     ],
+     "profileChoices": [
+      "frame: brass insert version or bolted version"
+     ]
     },
     {
      "id": "mw2865309",
