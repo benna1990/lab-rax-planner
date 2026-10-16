@@ -31,7 +31,7 @@ function cards(f) {
     const own = f.devices.filter(d => !d.poe && !d.note), onPoe = f.devices.filter(d => d.poe), other = f.devices.length - own.length - onPoe.length;
     out.push({ id: 'power', title: 'Power supplies and mains',
       lead: [own.length ? own.length + (own.length > 1 ? ' devices use their own adapter' : ' device uses its own adapter') : '', onPoe.length ? onPoe.length + ' run' + (onPoe.length > 1 ? '' : 's') + ' on PoE' : '', other ? other + ' more as noted' : ''].filter(Boolean).join('; ') + '.',
-      items: f.devices.map(d => d.name + ': ' + (d.note || (d.poe ? 'PoE from ' + d.poe : 'its own adapter; check its manual for the voltage and the plug'))),
+      items: f.devices.map(d => d.name + ': ' + (d.note || (d.poe ? 'PoE from ' + d.poe : d.own === false ? 'to buy: check what is included in the box; confirm its power input in the manual' : 'have it: use the adapter it came with; check its manual for the voltage and the plug'))),
       steps: ['Use the adapter that came with each device, or a certified replacement with the same voltage, polarity and plug.',
         'Plug everything into one commercially made power strip or PDU, so one switch turns the rack off.',
         'Don’t open, splice or extend mains cables, and don’t build mains wiring into printed parts.'],

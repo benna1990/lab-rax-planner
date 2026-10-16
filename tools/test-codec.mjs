@@ -57,3 +57,10 @@ const optionFile = C.readFile(C.fileText(optionLayout), defaults(), KEYS);
 assert.equal(optionFile.state.items[0].opt, 'normal');
 assert.deepEqual(optionFile.state.optionChoices, optionState.optionChoices);
 assert.deepEqual(C.expand(...C.fromB64(C.toB64(optionLayout)), defaults(), KEYS).optionChoices, optionState.optionChoices);
+
+// Ownership is optional in version 1; missing means already owned in the app.
+const buying = Object.assign(defaults(), { items: [{ id: 1, key: 'ucgmax1', pos2: 0, own: false, needPower: true, needCable: true }] });
+const buyingLayout = C.compact(buying, defaults(), KEYS);
+for (const r of [C.expand(...C.fromB64(C.toB64(buyingLayout)), defaults(), KEYS), C.readFile(C.fileText(buyingLayout), defaults(), KEYS).state]) { assert.equal(r.items[0].own, false); assert.equal(r.items[0].needPower, true); assert.equal(r.items[0].needCable, true); }
+assert.equal(C.VERSION, 1);
+assert.notEqual(C.expand({}, [['ucgmax1', 0]], defaults(), KEYS).items[0].own, false);

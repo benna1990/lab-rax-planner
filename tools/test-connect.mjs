@@ -41,3 +41,7 @@ assert.deepEqual(g.map(x => x.id), ['power', 'pi5', 'fans', 'poe', 'logo', 'ups'
 assert.ok(g.every(x => !/a device|a fan panel/.test(x.lead + x.items.join(' '))), 'no placeholder names');
 
 console.log('Connect checks passed: cards only when needed, build numbers, sources, no guessed wiring.');
+
+const ownership = win.LRConnect.cards({ devices: [{ name: 'Owned gateway', own: true }, { name: 'New switch', own: false }] }).find(c => c.id === 'power');
+assert.match(ownership.items[0], /adapter it came with/);
+assert.match(ownership.items[1], /included in the box/);

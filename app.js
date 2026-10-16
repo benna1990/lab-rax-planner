@@ -144,6 +144,7 @@ function sanitize() {
     if (i.color != null && !HEX.test(i.color)) delete i.color;
     if (i.key === 'custom') { i.name = String(i.name || 'Own device').slice(0, 40); if (typeof i.url !== 'string' || !/^https:\/\//.test(i.url)) delete i.url; }
     if (i.label != null && typeof i.label !== 'string') delete i.label;
+    for (const k of ['own', 'needPower', 'needCable']) if (i[k] != null && typeof i[k] !== 'boolean') delete i[k];
     if (i.opt != null && !(LIB[i.key]?.options || []).some(o => o.id === i.opt)) delete i.opt;
     if (i.watts != null && !(typeof i.watts === 'number' && i.watts >= 0 && i.watts <= 500)) delete i.watts;
     if (i.fill != null && !(Number.isInteger(i.fill) && i.fill >= 0 && i.fill <= 48)) delete i.fill;
@@ -189,6 +190,12 @@ function lookHint(d) {
   if (!d || d.gen || d.custom) return '';
   const checked = d.ev?.look && ['verified', 'documented'].includes(d.ev.look.state);
   return '<span class="hint drawing-status">' + (checked ? 'Drawing compared with the model page' : 'Approximate drawing, see the model page') + '</span>';
+}
+const devicePart = d => d && (d.tab === 'devices' || d.custom || modsOf(d).some(m => m.sbc));
+const haveDevice = it => it.own !== false;
+function ownershipPicker(it) {
+  const d = info(it); if (!devicePart(d)) return '';
+  return '<div class="extra-options" style="flex-basis:100%;order:6"><label class="hint">' + esc(d.name) + ' <select class="field" data-own-item="' + it.id + '" aria-label="Ownership of ' + esc(d.name) + '"><option value="have"' + (haveDevice(it) ? ' selected' : '') + '>Have it</option><option value="buy"' + (!haveDevice(it) ? ' selected' : '') + '>To buy</option></select></label>' + ['needPower', 'needCable'].map(k => '<label class="hint"><input type="checkbox" data-missing-item="' + it.id + '" data-missing="' + k + '"' + (it[k] ? ' checked' : '') + '> ' + (k === 'needPower' ? 'Missing its power supply' : 'Missing its network cable') + '</label>').join('') + '</div>';
 }
 const profileChoiceText = d => (d.profileChoices || []).length ? 'Within the model profile, choose: ' + d.profileChoices.join('; ') + '.' : '';
 const profileChoiceHint = d => profileChoiceText(d) ? '<small class="hint">' + esc(profileChoiceText(d)) + '</small>' : '';
@@ -542,11 +549,11 @@ function rowHTML(key, name, sub, extra) {
   const badge = d.top ? (on ? '✓ on top' : 'Top') : d.extra ? (on ? '✓ added' : 'Add') : uTxt(d);
   const hw = heatOf({ key }), kind = d.top ? 'top' : d.extra ? 'extra' : 'item', fan = cfmOf(d) ? fanChip(d, dirFor(d, null, fanPlace(d, kind), kind)) : '';
   if (cfmOf(d)) sub = (sub ? sub + ' · ' : '') + fanLine(d);
-  return '<div class="lrow-wrap' + ((d.extra || d.top) && on ? ' has-options' : '') + '"><button type="button" class="lrow' + (on || n ? ' on' : '') + '" draggable="' + !(d.top || d.extra) + '" data-act="lib" data-key="' + key + '" title="' + esc(fullName(d)) + (d.author ? ' · by ' + esc(d.author) : '') + '">' +
+  return '<div class="lrow-wrap' + (((d.extra || d.top) && on) || (n && devicePart(d)) ? ' has-options' : '') + '"><button type="button" class="lrow' + (on || n ? ' on' : '') + '" draggable="' + !(d.top || d.extra) + '" data-act="lib" data-key="' + key + '" title="' + esc(fullName(d)) + (d.author ? ' · by ' + esc(d.author) : '') + '">' +
     '<span class="lthumb">' + miniThumb(d) + '</span><span class="ltx"><b>' + esc(name) + '</b><span class="lmeta"><span class="lchips">' + // the name gets the whole first line
     (n ? '<span class="inrack" title="In your rack">' + n + '×</span>' : '') + '<span class="badge' + (d.est ? ' est' : '') + '"' + (d.est ? ' title="≈: the height is estimated, not yet checked against the model"' : d.ev && d.ev.height.state === 'verified' ? ' title="Height verified: ' + esc(evNote(d.ev.height)) + '"' : '') + '>' + badge + (d.ev && d.ev.height.state === 'verified' && !d.top && !d.extra ? ' ✓' : '') + '</span>' + wChip(hw.w, hw.est) + fan + '</span>' +
     (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span></span></button>' +
-    (extra || '') + ((d.extra || d.top) && on ? '<div class="extra-options">' + optionPicker(d) + lookHint(d) + '</div>' : '') + (d.url ? '<a class="lext" href="' + esc(d.url) + '" target="_blank" rel="noopener" aria-label="Open model page for ' + esc(fullName(d)) + '" title="Open model page">↗</a>' : '') + '</div>';
+    (extra || '') + state.items.filter(it => it.key === key).map(ownershipPicker).join('') + ((d.extra || d.top) && on ? '<div class="extra-options">' + optionPicker(d) + lookHint(d) + '</div>' : '') + (d.url ? '<a class="lext" href="' + esc(d.url) + '" target="_blank" rel="noopener" aria-label="Open model page for ' + esc(fullName(d)) + '" title="Open model page">↗</a>' : '') + '</div>';
 }
 const mountSub = m => 'Mount: ' + m.label + (m.labrax && !/lab ?rax/i.test(m.label) ? ' · Lab Rax' : '') + (m.author ? ' · ' + m.author : '');
 const groupOpen = id => !!query || !!ui.open[id];
@@ -768,7 +775,7 @@ function renderSel() {
   if (!it || it.pos2 == null) { bar.innerHTML = '<span class="hint">Click a part in the rack to move, label or remove it. Drag it, or use the arrow keys to move by ½U.</span>'; return; }
   const d = info(it), auto = heatOf(Object.assign({}, it, { watts: undefined }));
   bar.innerHTML = '<div class="who"><b>' + esc(fullName(d)) + '</b><span class="hint">' + uTxt(d) + ' · ' + uRange(it.pos2, d.h2) + ' · ' + sideOf(it) + (d.author ? ' · by ' + esc(d.author) : '') + '</span>' + warnHTML(it) + '' + (evShort(d) ? '<span class="hint evs">' + esc(evShort(d)) + qm('verification') + '</span>' : '') + '</div>' +
-    lookHint(d) + optionPicker(d, it) + '<input class="field" id="sel-label" type="text" maxlength="24" aria-label="Label on the panel" placeholder="Label, e.g. Pi 5" value="' + esc(it.label || '') + '">' +
+    lookHint(d) + optionPicker(d, it) + ownershipPicker(it) + '<input class="field" id="sel-label" type="text" maxlength="24" aria-label="Label on the panel" placeholder="Label, e.g. Pi 5" value="' + esc(it.label || '') + '">' +
     '<label class="watts" title="Heat this part gives off, for the cooling estimate. Empty: ' + (auto.w ? (auto.est ? 'about ' : '') + fmtW(auto.w) + ', its typical draw' : 'no heat') + '">Heat <input class="field" id="sel-watts" type="number" min="0" max="500" step="1" inputmode="numeric" placeholder="' + (auto.w ? (auto.est ? '≈' : '') + auto.w : '0') + '" value="' + (typeof it.watts === 'number' ? it.watts : '') + '"> W</label>' +
     (cfmOf(d) ? '<span class="watts" title="' + esc(fanLine(d)) + '">Fans ' + dirSeg({ ref: 'i' + it.id, d, place: fanPlace(d, 'item', it), kind: 'item', dir: dirFor(d, it.dir, fanPlace(d, 'item', it), 'item'), name: fullName(d) }) + '</span>' : '') +
     '<button type="button" class="btn small" data-act="up" aria-label="Move up">↑</button><button type="button" class="btn small" data-act="down" aria-label="Move down">↓</button>' +
@@ -933,7 +940,7 @@ function printPack() {
    fans with safe 5 V power, network, power supplies, acrylic and handy extras (tips.json). Shop links come from
    catalog.json "shops", with the maintainer's affiliate tag or deep-link template when one is set. */
 let TIPS = null; // tips.json: { items, tips }, loaded after the catalog when it exists
-const SHOP_GROUPS = [['print', 'Printing'], ['fasteners', 'Screws and inserts'], ['tools', 'Tools'], ['cooling', 'Fans and fan power'], ['power', 'Power'], ['network', 'Network'], ['acrylic', 'Acrylic'], ['other', 'Handy extras']];
+const SHOP_GROUPS = [['devices', 'Devices to buy'], ['print', 'Printing'], ['fasteners', 'Screws and inserts'], ['tools', 'Tools'], ['cooling', 'Fans and fan power'], ['power', 'Power'], ['network', 'Network'], ['acrylic', 'Acrylic'], ['other', 'Handy extras']];
 function shopLinks(q) { return q ? window.LRMarket.links(q,state.market,(CAT && CAT.shops)||{}) : []; }
 const shopUrl = q => (shopLinks(q)[0] || {}).url || null;
 const affiliate = () => { const S = (CAT && CAT.shops) || {}; return Object.keys(S).some(k => S[k] && (S[k].tag || S[k].wrap)); };
@@ -955,12 +962,12 @@ function estimateHTML(includeSummary = true) {
   const field=(key,label,value,step='1')=>'<label style="display:flex;flex-direction:column;gap:3px">'+esc(label)+'<input class="field" data-cost="'+esc(key)+'" type="number" min="'+(key==='gramsHour'?'0.1':'0')+'" step="'+step+'" value="'+(value==null?'':value)+'" placeholder="Estimate"></label>';
   return (includeSummary ? '<p><b>≈ '+e.grams.toFixed(0)+' g · '+e.hours.toFixed(1)+' machine hours · '+money(e.printing)+' print use</b></p><p>Remaining purchase budget: '+(e.unknown.length?'known subtotal ':'≈ ')+money(e.total)+(e.unknown.length?' + '+e.unknown.length+' unpriced items':'')+'</p>' : '')+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+field('kgPrice','Filament / kg ('+s.currency+')',s.kgPrice,'.01')+field('kwhPrice','Electricity / kWh ('+s.currency+')',s.kwhPrice,'.01')+field('watts','Average printer power (W)',s.watts)+field('gramsHour','Rough throughput (g/h)',s.gramsHour,'.1')+field('slicedGrams','Slicer total (g), optional',s.slicedGrams)+field('slicedHours','Slicer total (hours), optional',s.slicedHours,'.1')+'</div>'+
-    '<p class="hint">Editable prices in '+s.currency+'; no currency conversion or live quotes. Budget accounts for owned stock, then buys whole spools and hardware packs. Excludes devices, tools and delivery. Blank slicer fields use rough estimates.</p>'+
+    '<p class="hint">Editable prices in '+s.currency+'; no currency conversion or live quotes. Budget accounts for owned stock, then buys whole spools and hardware packs. Device prices stay unpriced until entered. Excludes tools and delivery. Blank slicer fields use rough estimates.</p>'+
     '<details><summary>Edit hardware allowances (per pack / item)</summary>'+e.supplies.map(r=>field('price:'+r.key,r.name+(r.pack>1?' / '+r.pack+' pack':''),r.price,'.01')).join('')+'</details>';
 }
 const modsOf = d => { const s = d && d.shape; return s ? [].concat(...(s.rows || [s.row || []])).filter(m => m && typeof m === 'object') : []; };
 function facts() { // what the layout holds, for the shopping list and the guide
-  const f = { ks: 0, pi5: 0, pi4: 0, poePi5: 0, poePi4: 0, boards: 0, eth: 0, mains: 0, drives: 0, strip: false, gateway: false, fanParts: [], fans: new Map(), amps: 0 };
+  const f = { ks: 0, pi5: 0, pi4: 0, poePi5: 0, poePi4: 0, boards: 0, eth: 0, mains: 0, buyPi5: 0, buyPi4: 0, buyPoePi5: 0, buyPoePi4: 0, buyEth: 0, buyMains: 0, drives: 0, strip: false, gateway: false, fanParts: [], fans: new Map(), amps: 0 };
   const fanPart = d => { let n = 0; (d.hardware || []).forEach(x => { const hw = CAT.hardware[x.part]; if (hw && hw.mm) { n += x.qty; f.fans.set(x.part, (f.fans.get(x.part) || 0) + x.qty); f.amps += x.qty * (hw.amp || .15); } }); if (n) f.fanParts.push({ name: fullName(d), n }); };
   placed().forEach(i => {
     const d = info(i), mods = modsOf(d), name = fullName(d);
@@ -969,6 +976,9 @@ function facts() { // what the layout holds, for the shopping list and the guide
     let boards = 0, pi5 = 0, pi4 = 0; mods.forEach(m => { if (m.sbc) { const n = typeof m.sbc === 'number' ? (m.fill != null ? m.fill : m.sbc) : 1; boards += n; if (/pi4/.test(m.board || '')) pi4 += n; else if (/pi/.test(m.board || 'pi5')) pi5 += n; } });
     if (!mods.some(m => m.sbc) && !boards && d.tab === 'devices' && /raspberry|\bpi ?[345]\b/i.test(name)) { boards = 1; if (/pi ?4/i.test(name)) pi4++; else pi5++; }
     f.boards += boards; f.pi5 += pi5; f.pi4 += pi4;
+    const on = onPoe(i, powerOf(d, i)), powerNeeded = !haveDevice(i) || i.needPower, cableNeeded = !haveDevice(i) || i.needCable;
+    if (powerNeeded) { if (on) { f.buyPoePi5 += pi5; f.buyPoePi4 += pi4; } else { f.buyPi5 += pi5; f.buyPi4 += pi4; if (!boards && devicePart(d)) f.buyMains++; } }
+    if (cableNeeded && devicePart(d)) f.buyEth += mods.some(m => m.sbc) ? boards : 1;
     if (onPoe(i, powerOf(d, i))) { f.poePi5 += pi5; f.poePi4 += pi4; } // Pis on PoE get a PoE+ HAT instead of a USB-C supply
     if (mods.some(m => m.bay)) f.drives += mods.reduce((n, m) => n + (m.bay ? (m.fill != null ? m.fill : typeof m.bay === 'number' ? m.bay : 1) : 0), 0);
     else if (/drv/.test(d.face || '')) f.drives++;
@@ -1001,15 +1011,15 @@ function orderList() {
   if (f.boards) add('m25kit', 1);
   // fans: each fan part gets a USB-to-fan cable, a splitter when it holds more than one fan, and a USB port
   if (f.fanParts.length) { add('fanusb', f.fanParts.length); add('fansplit', f.fanParts.filter(p => p.n > 1).length); add('usbpower', Math.ceil(f.fanParts.length / 2)); add('fanspeed', 1); }
-  if (f.pi5 > f.poePi5) { add('pi5psu', f.pi5 - f.poePi5); add('usbc', f.pi5 - f.poePi5); }
-  if (f.pi4 > f.poePi4) { add('pi4psu', f.pi4 - f.poePi4); add('usbc', f.pi4 - f.poePi4); }
-  add('poehat5', f.poePi5); add('poehat4', f.poePi4);
+  if (f.buyPi5) { add('pi5psu', f.buyPi5); add('usbc', f.buyPi5); }
+  if (f.buyPi4) { add('pi4psu', f.buyPi4); add('usbc', f.buyPi4); }
+  add('poehat5', f.buyPoePi5); add('poehat4', f.buyPoePi4);
   // PoE devices that no switch in the rack can power: an injector each (the Power section also suggests a bigger switch)
-  const off = powerModel().poe.unpowered, bt = off.filter(p => p.need === 'bt').length;
+  const off = powerModel().poe.unpowered.filter(p => { const it = p.ref?.startsWith('i') ? find(+p.ref.slice(1)) : null; return !it || !haveDevice(it) || it.needPower; }), bt = off.filter(p => p.need === 'bt').length;
   add('poeinj', off.length - bt); add('poeinjbt', bt);
-  if (f.mains && !f.strip) add('powerstrip', Math.ceil((f.mains + (f.fanParts.length ? 1 : 0)) / 6));
+  if (f.buyMains && !f.strip) add('powerstrip', Math.ceil((f.buyMains + (f.fanParts.length ? 1 : 0)) / 6));
   if (f.ks) add('keystone', f.ks);
-  if (f.eth) add('patch', f.eth + Math.min(f.ks, f.eth));
+  if (f.buyEth) add('patch', f.buyEth + Math.min(f.ks, f.buyEth));
   add('ties', 1);
   const out = [...m].map(([p, q]) => { const hw = CAT.hardware[p], q2 = hw.search || hw.name, packs = hw.pack > 1 ? Math.ceil(q / hw.pack) : null;
     return { key: p, group: hw.group || 'other', name: hw.name, spec: hw.spec || '', qty: q, pack: hw.pack || null, packs, links: shopLinks(q2), buy: hw.buy || shopUrl(q2),
@@ -1038,11 +1048,31 @@ function orderList() {
     const key = d.key + ':' + (d.opt || ''); if (seenProfiles.has(key)) continue; seenProfiles.add(key);
     out.push({ key: 'profile-' + key, group: 'print', name: 'Print profile: ' + d.name, spec: d.optionName ? d.optionName + (d.optionNote ? '. ' + d.optionNote : '') + (profileChoiceText(d) ? '. ' + profileChoiceText(d) : '') : 'Choose a print profile on the part before downloading its model.', qty: null, links: d.url ? [{ shop: 'Model profiles', url: d.url }] : [], buy: null });
   }
+  const boardNames = { pi5: 'Raspberry Pi 5', pi4: 'Raspberry Pi 4', pi3: 'Raspberry Pi 3', zero: 'Raspberry Pi Zero', opiz3: 'Orange Pi Zero 3', rock5b: 'Radxa ROCK 5B', uno: 'Arduino Uno', generic: 'Single-board computer (check model)' };
+  for (const it of placed().filter(it => !haveDevice(it) && devicePart(info(it)))) {
+    const d = info(it), modules = modsOf(d).filter(m => m.sbc);
+    const devices = modules.length ? modules.map(m => ({ id: m.board || 'pi5', name: boardNames[m.board || 'pi5'] || m.board, qty: m.fill != null ? m.fill : typeof m.sbc === 'number' ? m.sbc : 1 })) : [{ id: 'device', name: d.name, qty: 1 }];
+    for (const device of devices.filter(x => x.qty > 0)) {
+      const key = 'device-' + d.key + '-' + device.id, existing = out.find(r => r.key === key);
+      if (existing) { existing.qty += device.qty; continue; }
+      out.push({ key, group: 'devices', name: device.name, spec: 'Device, not the printed mount. Check what is included in the box; power supplies and cables listed separately need checking before purchase.', qty: device.qty, links: shopLinks(device.name), buy: shopUrl(device.name), price: null });
+    }
+  }
+  for (const it of placed()) {
+    const d = info(it); if (!devicePart(d) || haveDevice(it) && !it.needPower || onPoe(it, powerOf(d, it))) continue;
+    const boards = modsOf(d).filter(m => m.sbc);
+    if (boards.length ? boards.every(m => ['pi4', 'pi5'].includes(m.board || 'pi5')) : /raspberry|\bpi ?[45]\b/i.test(d.name)) continue;
+    out.push({ key: 'device-supply-' + it.id, group: 'power', name: 'Check power supply: ' + d.name, spec: haveDevice(it) ? 'Marked missing. Confirm the required input and compatible supply in the device manual.' : 'Check what is included in the device box before buying a separate power supply.', qty: null, links: [], buy: null });
+  }
   const order = SHOP_GROUPS.map(g => g[0]);
   return out.sort((a, b) => order.indexOf(a.group) - order.indexOf(b.group));
 }
 const qtyText = r => r.qty == null ? 'check' : r.unit === 'spool' ? r.qty + (r.qty > 1 ? ' spools' : ' spool') : r.packs ? r.qty + ' · ' + r.packs + (r.packs > 1 ? ' packs' : ' pack') + ' of ' + r.pack : r.qty + '×';
 const linksHTML = ls => ls && ls.length ? '<span class="slinks">' + ls.map(l => '<a href="' + esc(l.url) + '" target="_blank" rel="noopener' + (l.aff ? ' sponsored' : '') + '">' + esc(l.shop) + '</a>').join('') + '</span>' : '';
+function inventoryHTML() {
+  const e = buildEstimate(), field = (k, n, label) => '<input class="field mini" type="number" min="0" step="1" data-cost="' + esc(k) + '" aria-label="' + esc(label) + '" value="' + n + '">';
+  return '<details class="abd" data-sec="inventory"' + (ui.sec.inventory ? ' open' : '') + '><summary>What I already have — supplies and filament</summary><p class="hint">Enter pieces, not packs. These quantities reduce the purchase budget; device ownership is set on each device.</p>' + e.colours.map(r => '<label class="owned-row"><span>' + esc(colorName(r.c)) + '</span><span>≈ ' + Math.round(r.grams) + ' g needed</span>' + field('stock:' + r.c, r.owned, 'Owned filament grams') + '</label>').join('') + e.supplies.filter(r => r.group !== 'devices').map(r => '<label class="owned-row"><span>' + esc(r.name) + '</span><span>' + (r.qty == null ? 'Check model' : r.qty + ' needed') + '</span>' + field('owned:' + r.key, r.owned, 'Owned ' + r.name) + '</label>').join('') + '</details>';
+}
 function shopHTML(rows) {
   return SHOP_GROUPS.map(([g, title]) => { const rs = rows.filter(r => r.group === g); if (!rs.length) return '';
     return '<p class="sgroup">' + title + '</p><ul class="slist">' + rs.map(r => '<li class="srow">' +
@@ -1051,7 +1081,7 @@ function shopHTML(rows) {
       (r.models || []).map(mo => '<small class="smodel">' + esc(mo.label) + ': ' + esc(mo.name) + linksHTML(mo.links) + '</small>').join('') +
       (r.cutters || []).map(c => '<small class="smodel"><a href="' + esc(c.url) + '" target="_blank" rel="noopener">' + esc(c.name) + '</a> · ' + esc(c.note || '') + '</small>').join('') +
       (r.check ? '<small><a href="' + esc(r.check) + '" target="_blank" rel="noopener">Check the model page</a></small>' : '') +
-      '</div><span class="sqty">' + qtyText(r) + '</span>' + (r.models && r.models.length ? '' : linksHTML(r.links)) + '</li>').join('') + '</ul>'; }).join('');
+      '</div><span class="sqty">' + qtyText(r) + '</span>' + (r.models && r.models.length ? '' : linksHTML(r.links)) + '</li>').join('') + '</ul>'; }).join('') + inventoryHTML();
 }
 function guide() {
   const f = facts(), br = state.version === 'brass', acr = state.sides === 'acrylic', fp = frameParts(), screw = br ? 'M6×10 screw' : 'M6×12 screw and nut', S = [];
@@ -1465,7 +1495,7 @@ function connectFacts() {
   let pi5 = 0, boards = 0; const devices = [];
   byPos().forEach(it => {
     const d = info(it), sbc = modsOf(d).filter(m => m.sbc).reduce((n, m) => { const k = typeof m.sbc === 'number' ? (m.fill != null ? m.fill : m.sbc) : 1; if ((m.board || 'pi5') === 'pi5') pi5 += k; boards += k; return n + k; }, 0);
-    if (heatOf(it).w > 0 || sbc) devices.push({ name: it.label || shortName(d), poe: srcOf('i' + it.id), note: sbc ? sbc + (sbc > 1 ? ' boards, each on its own supply or PoE HAT (see below)' : ' board on its own supply or PoE HAT (see below)') : null });
+    if (heatOf(it).w > 0 || sbc) devices.push({ own: haveDevice(it), name: it.label || shortName(d), poe: srcOf('i' + it.id), note: sbc ? (haveDevice(it) ? 'Have it: use the power supply you already have. ' : 'To buy: check what is in the box. ') + sbc + (sbc > 1 ? ' boards, each on its own supply or PoE HAT (see below)' : ' board on its own supply or PoE HAT (see below)') : null });
   });
   const fans = [];
   fanParts().forEach(f => (f.d.hardware || []).forEach(h => { const hw = CAT.hardware[h.part]; if (hw && hw.cfm) fans.push({ name: f.name, qty: h.qty, mm: hw.mm, volt: hw.volt, amp: hw.amp }); }));
@@ -1770,11 +1800,10 @@ function updateFinalize() {
 function openFinalize(format) {
   let dialog=$('#finalize-build');
   if(!dialog){dialog=document.createElement('dialog');dialog.id='finalize-build';dialog.className='finalize-build';document.body.appendChild(dialog);}
-  const e=buildEstimate(),input=(key,v,max)=>'<input class="field" type="number" min="0"'+(max?' max="'+max+'"':'')+' step="1" data-cost="'+key+'" aria-label="Already owned quantity" value="'+v+'">';
+  const e=buildEstimate();
   dialog.dataset.format=format;
-  dialog.innerHTML='<div class="finalize-head"><div><h2>Ready to build?</h2><p>Check what you already have. Your download will show what is still needed.</p></div><button class="btn small" data-act="final-close">Close</button></div><p id="finalize-total" class="finalize-total"></p>'+
-    '<div style="display:flex;gap:16px;flex-wrap:wrap"><label>Ship to <select class="field" id="final-market">'+Object.entries(window.LRMarket.regions).map(([k,r])=>'<option value="'+k+'"'+(state.market===k?' selected':'')+'>'+r.name+'</option>').join('')+'</select></label><label>Currency <select class="field" id="final-currency">'+['EUR','USD','GBP','CAD','AUD'].map(k=>'<option'+(e.s.currency===k?' selected':'')+'>'+k+'</option>').join('')+'</select></label></div><p class="hint">Shop links follow your destination. No automatic currency conversion. Enter local prices in Print time &amp; budget; unpriced items stay visible.</p><h3>Filament</h3><div class="owned-row owned-label"><span>Colour</span><span>Needed</span><span>Have (g)</span></div>'+e.colours.map(r=>'<label class="owned-row"><span><i class="swatchdot" style="--c:'+r.c+'"></i>'+esc(colorName(r.c))+'</span><span>≈ '+Math.round(r.grams)+' g</span>'+input('stock:'+r.c,r.owned)+'</label>').join('')+
-    '<h3>Essential supplies</h3><div class="owned-row owned-label"><span>Item</span><span>Needed</span><span>Have (pieces)</span></div>'+e.supplies.map(r=>'<label class="owned-row"><span>'+esc(r.name)+'</span><span>'+(r.qty==null?'Check model':r.qty+'×')+'</span>'+input('owned:'+r.key,r.owned)+'</label>').join('')+
+  dialog.innerHTML='<div class="finalize-head"><div><h2>Ready to build?</h2><p>Review ownership and supplies in the Shopping list. Your download shows what is still needed.</p></div><button class="btn small" data-act="final-close">Close</button></div><p id="finalize-total" class="finalize-total"></p>'+
+    '<div style="display:flex;gap:16px;flex-wrap:wrap"><label>Ship to <select class="field" id="final-market">'+Object.entries(window.LRMarket.regions).map(([k,r])=>'<option value="'+k+'"'+(state.market===k?' selected':'')+'>'+r.name+'</option>').join('')+'</select></label><label>Currency <select class="field" id="final-currency">'+['EUR','USD','GBP','CAD','AUD'].map(k=>'<option'+(e.s.currency===k?' selected':'')+'>'+k+'</option>').join('')+'</select></label></div><p class="hint">Shop links follow your destination. No automatic currency conversion. Enter local prices in Print time &amp; budget; unpriced items stay visible.</p>'+
     '<details class="finalize-prices"><summary>Print time and local price settings</summary>'+estimateHTML(false)+'</details><p class="hint">Enter pieces, not packs. Unknown bracket or joiner quantities still need checking. Print time and cost assumptions can be changed in Print time & budget.</p><div class="finalize-actions"><button class="btn primary" data-act="final-download">Download '+(format==='pack'?'build pack':'PDF')+'</button></div>';
   updateFinalize();dialog.showModal();
 }
@@ -1782,7 +1811,7 @@ function pdfData() {
   const pk = printPack();
   return { title: (state.label || 'Lab Rax') + ' · ' + state.h + 'U', h: state.h, version: state.version === 'brass' ? 'Heat-set inserts' : 'Bolted', frame: state.frame, panel: state.panel, accent: state.accent, label: state.label || 'Lab Rax',
     top: state.top ? fullName(catalogPart(state.top)) : null, topLook: state.top ? LS.topFor(catalogPart(state.top), colorsFor()) : null, // the top mount as drawn above the frame
-    items: byPos().map(i => { const d = info(i); return { pos: uRange(i.pos2, d.h2) + atBack(i), pos2: i.pos2, h2: d.h2, name: fullName(d), label: i.label || '', u: uTxt(d), url: d.url || '', author: d.author || '', color: colorOf(i), face: faceSVG(d, colorOf(i), upperHalf(i)), plate: plateBox(i, d), depth: partDepth(i), back: sideOf(i) === 'back' }; }),
+    items: byPos().map(i => { const d = info(i); return { pos: uRange(i.pos2, d.h2) + atBack(i), pos2: i.pos2, h2: d.h2, name: fullName(d) + (devicePart(d) ? (haveDevice(i) ? ' [Have it]' : ' [To buy]') : ''), label: i.label || '', u: uTxt(d), url: d.url || '', author: d.author || '', color: colorOf(i), face: faceSVG(d, colorOf(i), upperHalf(i)), plate: plateBox(i, d), depth: partDepth(i), back: sideOf(i) === 'back' }; }),
     print: pk.map(x => ({ qty: x.qty, name: x.name, sub: x.subs.join(', '), vars: x.variants, url: x.url, bed: bedText(x.bed, true), bad: !!(x.bed && x.bed.bad.length) })),
     printer: pk.printer ? { name: bedName(pk.printer), smallBed: window.LRPrinters.fitRect(254, DIMS.u, pk.printer.w, pk.printer.d) === 0, bad: bedBad(pk).length, turned: pk.some(x => x.bed && x.bed.turned.length), est: pk.some(x => x.bed && [...x.bed.bad, ...x.bed.turned].some(q => q.est)) } : null, shop: orderList(), guide: guide(), estimate: buildEstimate(), market: state.market, wallMounts: state.extras.filter(k => catalogPart(k).shape && catalogPart(k).shape.wall).map(k => ({ name: fullName(catalogPart(k)), url: catalogPart(k).url })), sides: state.sides, dimensions: DIMS, shareUrl: TOP_WIN ? shareLink() + '&s=shop' : null, frameParts: frameParts(), notes: state.h > 5 ? [JOINER_NOTE] : [],
     cooling: pdfCooling(), power: pdfPower(), shareUrl: TOP_WIN ? shareLink() + '&s=shop' : null }; // the QR code opens this layout with its shopping list
@@ -1914,17 +1943,17 @@ function lowestFree(h2, side) { for (let p = slots() - h2; p >= 0; p--) if (isFr
 function planLayout(w) {
   const look = PRESETS[w.preset], list = [], items = [];
   if (w.patch && LIB.keystone) list.push({ key: 'keystone', role: 0 });
-  w.picks.forEach(p => { for (let i = 0; i < p.qty; i++) list.push({ key: p.mount, role: roleOf(p.group) }); });
+  w.picks.forEach(p => { for (let i = 0; i < p.qty; i++) list.push({ key: p.mount, own: p.own !== false, role: roleOf(p.group) }); });
   if (w.power && LIB.mw2010724) list.push({ key: 'mw2010724', role: 9 });
   list.sort((a, b) => a.role - b.role);
   let p = 0, id = 1;
-  const put = (key, at) => {
-    const it = { id: id++, key, pos2: at }, h2 = LIB[key].h2;
+  const put = (key, at, own) => {
+    const it = { id: id++, key, pos2: at, ...(own === false ? { own: false } : {}) }, h2 = LIB[key].h2;
     // Use the editor's alignment and physical panel-overlap rules, including protruding Lab Rax half-U panels.
     while (!LY.aligned(it.pos2, h2) || overlaps(it, items).length) it.pos2++;
     items.push(it); return it.pos2;
   };
-  list.forEach(x => { p = put(x.key, p) + LIB[x.key].h2; });
+  list.forEach(x => { p = put(x.key, p, x.own) + LIB[x.key].h2; });
   const cand = Object.assign(defaultState(), { h: Math.min(10, Math.max(1, Math.ceil(p / 2))), version: w.version, sides: w.sides, frame: look[1], panel: look[2], accent: look[3],
     label: (w.label || 'Lab Rax').slice(0, 16), top: w.fans === 'top' && LIB.mw1875867 ? 'mw1875867' : null, extras: [], back: 'open', items, nextId: id, example: false, done: {} });
   const keep = state; state = cand;
@@ -1955,7 +1984,7 @@ function openWizard() {
   if (!CAT) return;
   if (!wz) {
     const pi = PRESETS.findIndex(p => p[1] === state.frame && p[2] === state.panel && p[3] === state.accent);
-    wz = { step: 0, preset: Math.max(0, pi), version: state.version, sides: state.sides, fans: 'auto', label: state.label || 'Lab Rax', q: '', picks: [], patch: true, power: false, spare: 1 };
+    wz = { step: 0, preset: Math.max(0, pi), version: state.version, sides: state.sides, fans: 'auto', label: state.label || 'Lab Rax', q: '', picks: [], patch: true, power: false, spare: 1, intent: 'have' };
   }
   wz.step = 0; renderWizard();
   const dlg = $('#wizard'); if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
@@ -1983,7 +2012,7 @@ function wzPicked() {
   if (!wz.picks.length) return '<p class="hint">Nothing picked yet. Search below and add your devices.</p>';
   return wz.picks.map((p, i) => { const dev = wzDevices().find(d => d.id === p.dev);
     return '<div class="wz-pick"><b>' + esc(dev.device) + '</b><select data-i="' + i + '" class="wz-mount" aria-label="Mount for ' + esc(dev.device) + '">' +
-      dev.mounts.map(m => '<option value="' + m.id + '"' + (m.id === p.mount ? ' selected' : '') + '>' + esc(m.label) + ' · ' + uTxt(LIB[m.id]) + (m.labrax && !/lab ?rax/i.test(m.label) ? ' · Lab Rax' : '') + '</option>').join('') + '</select>' +
+      dev.mounts.map(m => '<option value="' + m.id + '"' + (m.id === p.mount ? ' selected' : '') + '>' + esc(m.label) + ' · ' + uTxt(LIB[m.id]) + (m.labrax && !/lab ?rax/i.test(m.label) ? ' · Lab Rax' : '') + '</option>').join('') + '</select><label class="hint">Hardware <select class="field" data-wz-own="' + i + '"><option value="have"' + (p.own !== false ? ' selected' : '') + '>Have it</option><option value="buy"' + (p.own === false ? ' selected' : '') + '>To buy</option></select></label>' +
       '<span class="stepper small"><button type="button" data-act="wz-qty" data-i="' + i + '" data-d="-1" aria-label="One less">−</button><output>' + p.qty + '</output><button type="button" data-act="wz-qty" data-i="' + i + '" data-d="1" aria-label="One more">+</button></span></div>'; }).join('');
 }
 function renderWizard() {
@@ -1999,7 +2028,7 @@ function renderWizard() {
   else if (st === 2) body = '<h3 class="wz-h">Give it a name</h3><p class="hint">It goes on the front of the rack, like the Lab Rax logo.</p>' +
     '<input class="field wz-name" id="wz-name" type="text" maxlength="16" value="' + esc(wz.label) + '" placeholder="Lab Rax" aria-label="Rack name">' +
     '<div class="wz-logo" style="--f:' + look[1] + ';--a:' + look[3] + '"><span id="wz-logo">' + esc(wz.label || 'Lab Rax') + '</span></div>';
-  else if (st === 3) body = '<h3 class="wz-h">What goes in it?</h3><p class="hint">Add your devices. For each one the planner picks a mount, preferring ones made for Lab Rax; you can change it.</p>' +
+  else if (st === 3) body = wzOption('intent', 'What are you building?', [['have', 'Print mounts for hardware I have', 'Devices default to Have it; only missing supplies need buying.'], ['buy', 'A complete build, devices included', 'Devices default to To buy. Check what each box includes.'], ['mix', 'Some of each', 'Set Have it or To buy per device below. The first starts as owned; later devices start as To buy.']]) + '<h3 class="wz-h">What goes in it?</h3><p class="hint">Add your devices. For each one the planner picks a mount, preferring ones made for Lab Rax; you can change it.</p>' +
     '<div id="wz-picked" class="wz-picked">' + wzPicked() + '</div>' +
     '<label class="search" for="wz-q"><input id="wz-q" type="search" placeholder="Search devices, e.g. UCG-Max, Pi 5, Mac mini" autocomplete="off" value="' + esc(wz.q) + '"></label>' +
     '<div id="wz-results" class="wz-results">' + wzResults() + '</div>' +
@@ -2103,8 +2132,8 @@ document.addEventListener('click', async e => {
     case 'wz-next': wz.step = Math.min(4, wz.step + 1); renderWizard(); break;
     case 'wz-back': wz.step = Math.max(0, wz.step - 1); renderWizard(); break;
     case 'wz-preset': wz.preset = +a.dataset.i; renderWizard(); break;
-    case 'wz-set': wz[a.dataset.k] = a.dataset.v; renderWizard(); break;
-    case 'wz-add': { const dev = wzDevices().find(d => d.id === a.dataset.dev); if (dev) wz.picks.push({ dev: dev.id, group: dev.group, mount: bestMount(dev), qty: 1 }); $('#wz-picked').innerHTML = wzPicked(); $('#wz-results').innerHTML = wzResults(); break; }
+    case 'wz-set': wz[a.dataset.k] = a.dataset.v; if (a.dataset.k === 'intent') wz.picks.forEach((p, i) => { p.own = a.dataset.v === 'have' || a.dataset.v === 'mix' && i === 0; }); renderWizard(); break;
+    case 'wz-add': { const dev = wzDevices().find(d => d.id === a.dataset.dev); if (dev) wz.picks.push({ dev: dev.id, group: dev.group, mount: bestMount(dev), qty: 1, own: wz.intent !== 'buy' && (wz.intent !== 'mix' || wz.picks.length === 0) }); $('#wz-picked').innerHTML = wzPicked(); $('#wz-results').innerHTML = wzResults(); break; }
     case 'wz-qty': { const i = +a.dataset.i, p = wz.picks[i]; p.qty = Math.min(8, p.qty + +a.dataset.d); if (p.qty < 1) wz.picks.splice(i, 1); $('#wz-picked').innerHTML = wzPicked(); $('#wz-results').innerHTML = wzResults(); break; }
     case 'wz-result-spare': wz.spare = +a.dataset.v === 0 ? 0 : 1; renderWizard(); break;
     case 'wz-create': wzCreate(); break;
@@ -2199,6 +2228,8 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('change', e => {
   const t = e.target;
+  if (t.dataset.wzOwn != null) { wz.picks[+t.dataset.wzOwn].own = t.value !== 'buy'; return; }
+  if (t.dataset.ownItem || t.dataset.missingItem) { const it = find(+(t.dataset.ownItem || t.dataset.missingItem)); if (!it) return; undo = JSON.stringify(state); if (t.dataset.ownItem) it.own = t.value !== 'buy'; else it[t.dataset.missing] = t.checked; touch(); render(); return; }
   if (t.id === 'wz-patch' || t.id === 'wz-power') { wz[t.id.slice(3)] = t.checked; return; }
   if (t.id === 'wz-spare') { wz.spare = +t.value; return; }
   if (t.classList.contains('pr-sel')) { setPrinter(t.value || null); return; }

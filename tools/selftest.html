@@ -50,15 +50,17 @@
     await load(); hook();
     await check('First visit shows the start screen', () => !$('#startcard').hidden);
     await check('The example passes its checks, apart from picking a printer', () => { const s = T().ready(); return s.warn === 0 && s.todo === 1 ? 'ready apart from 1 to do' : false; });
-    await check('Filled modular slots set supplies, cables, Connect and network counts', () => {
-      const f = T().facts(), shop = T().orderList();
-      if (f.pi5 !== 4 || f.boards !== 4 || shop.find(x => x.key === 'pi5psu')?.qty !== 4 || shop.find(x => x.key === 'usbc')?.qty !== 4) fail('example supplies or boards not four');
-      if (!W.document.body.textContent.includes('4 Pi 5 boards need')) fail('Connect count not four');
-      const cluster = T().powerModel().rows.find(r => r.it?.key === 'sbc7');
-      if (cluster.p.eth !== 4) fail('cluster network ports not four');
+    await check('Filled modular slots set needed supplies, Connect and network counts without rebuying owned supplies', () => {
       const item = T().state.items.find(i => i.key === 'sbc7'), fill = item.fill;
-      try { for (const n of [0, 1, 7]) { item.fill = n; const f = T().facts(), rows = T().orderList(); if (f.boards !== n || (rows.find(x => x.key === 'pi5psu')?.qty || 0) !== n || T().powerModel().rows.find(r => r.it?.key === 'sbc7').p.eth !== n) fail('filled count ' + n + ' differs'); } } finally { item.fill = fill; }
-      return '4 boards/supplies/cables/ports; also checked 0, 1 and 7 filled slots';
+      if (T().orderList().some(r => r.key === 'pi5psu' || r.key === 'usbc')) fail('owned example rebuys Pi supplies');
+      item.needPower = true;
+      try {
+        const f = T().facts(), shop = T().orderList();
+        if (f.pi5 !== 4 || f.boards !== 4 || shop.find(x => x.key === 'pi5psu')?.qty !== 4 || shop.find(x => x.key === 'usbc')?.qty !== 4) fail('missing supplies not four');
+        if (!W.document.body.textContent.includes('4 Pi 5 boards need')) fail('Connect count not four');
+        for (const n of [0, 1, 7]) { item.fill = n; const f = T().facts(), rows = T().orderList(); if (f.boards !== n || (rows.find(x => x.key === 'pi5psu')?.qty || 0) !== n || T().powerModel().rows.find(r => r.it?.key === 'sbc7').p.eth !== n) fail('filled count ' + n + ' differs'); }
+      } finally { item.fill = fill; delete item.needPower; }
+      return 'owned supplies omitted; missing supplies follow 4/7 and 0/1/7 occupied slots';
     });
     await check('Start empty gives an empty rack', async () => { $('.sc-opt[data-v="empty"]').click(); await wait(500); return T().state.items.length === 0 && $('#startcard').hidden; });
     await check('Parts go to the first free slot', async () => { ['ucgmax1', 'mw2117690', 'sbc7'].forEach(key => T().addItem({ key })); await wait(200);
@@ -247,6 +249,34 @@
       $('[data-act="wz-create"]').click(); await wait(150);
       if (T().state.h !== 5 || T().ready().warn) fail('compact build has warnings: ' + $('#ready').textContent);
       return '5U base frame, no spare, no build warnings; 6U remains available before creating';
+    });
+    await check('Have, buy and mixed wizard choices change shopping lists and survive files and sharing', async () => {
+      const counts = [];
+      for (const mode of ['have', 'buy', 'mix']) {
+        $('[data-act="wizard"]').click(); $('[data-act="wz-set"][data-k="intent"][data-v="' + mode + '"]').click();
+        for (let i = 0; i < 4; i++) $('[data-act="wz-next"]').click();
+        $('[data-act="wz-create"]').click(); await wait(100);
+        counts.push(T().orderList().filter(r => r.group === 'devices').length);
+      }
+      if (counts.join() !== '0,3,2') fail('same rack mode lists: ' + counts);
+      if (T().orderList().filter(r => r.group === 'devices').some(r => r.price != null)) fail('device prices guessed');
+      if (T().readRackFile(T().rackFile()).state.items.filter(i => i.own === false).length !== 2) fail('file lost ownership');
+      const link = T().shareLink(); await load(link.slice(link.indexOf('#'))); hook();
+      if (T().state.items.filter(i => i.own === false).length !== 2) fail('share lost ownership');
+      const pi = T().state.items.find(i => /Raspberry Pi 5/.test(T().powerModel().rows.find(r => r.it?.id === i.id)?.name || ''));
+      if (!pi) fail('Pi fixture missing'); W.LRApp.select(pi.id);
+      const picker = $('[data-own-item="' + pi.id + '"]'); if (!picker) fail('ownership panel missing'); picker.value = 'have'; picker.dispatchEvent(new W.Event('change', { bubbles: true }));
+      if (T().orderList().some(r => r.key === 'pi5psu')) fail('owned Pi supply was rebought');
+      const missing = $('[data-missing-item="' + pi.id + '"][data-missing="needPower"]'); missing.checked = true; missing.dispatchEvent(new W.Event('change', { bubbles: true }));
+      if (T().orderList().find(r => r.key === 'pi5psu')?.qty !== 1) fail('missing Pi supply not added');
+      if (!$('#build [data-cost^="owned:"]')) fail('Have quantities missing from shopping list');
+      $('[data-sec="inventory"]').open = true; await wait(50);
+      const stock = $('#build [data-cost="owned:pi5psu"]'); stock.value = '1'; stock.dispatchEvent(new W.Event('change', { bubbles: true })); await wait(50);
+      if (!$('[data-sec="inventory"]').open || T().state.costs.owned.pi5psu !== 1) fail('inventory edit collapsed or was lost');
+      T().setHeight(10); if (!T().addItem({ key: 'mw1646434', own: false })) fail('mixed-board fixture did not fit');
+      const buys = T().orderList().filter(r => r.group === 'devices');
+      if (buys.filter(r => r.name === 'Orange Pi Zero 3').reduce((n, r) => n + r.qty, 0) !== 2 || buys.filter(r => r.name === 'Raspberry Pi 5').reduce((n, r) => n + r.qty, 0) !== 1) fail('mixed boards were bought as the same device');
+      return '0/3/2 devices; unpriced; file/share preserved; missing supplies requested; Pi/Orange Pi counts separate';
     });
   } catch (e) { log(false, 'Self-test stopped', e.message); }
   finally { KEYS.forEach((k, i) => saved[i] == null ? localStorage.removeItem(k) : localStorage.setItem(k, saved[i])); }

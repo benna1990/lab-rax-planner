@@ -287,7 +287,7 @@ async function make(d) {
   d.print.forEach(p=>tableRow(p.name,p.qty+'×',p.url,p.vars?'Variant: '+p.vars:'',null,p.bed?{text:p.bed,bad:p.bad}:null));
   y=fit(y+8,25);y=head('To buy / essential supplies',y);
   doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(...muted);
-  const buyNote=wrap('Total need per item; what you already own is deducted from what to buy and the costs. Filament is on page 1; tools, optional extras and devices are left out.',W-2*M);text(buyNote,M,y-2);y+=buyNote.length*3.2+3;
+  const buyNote=wrap('Total need per item; what you already own is deducted from what to buy and the costs. Filament is on page 1; tools and optional extras are left out. Devices to buy stay unpriced unless you enter a price.',W-2*M);text(buyNote,M,y-2);y+=buyNote.length*3.2+3;
   const supplies=e?e.supplies:window.LREstimate.essential(d.shop);
   supplies.forEach(r=>tableRow(r.name,r.qty==null?'check':String(r.qty)+'×',r.buy,r.qty==null?'Quantity needs checking':'Own '+r.owned+' / buy '+r.toBuy+(r.pack>1?' ('+r.packs+(r.packs===1?' pack':' packs')+' of '+r.pack+')':''),r.cost==null?'unpriced':money(r.cost)));
   if(d.wallMounts&&d.wallMounts.length){y=fit(y+18,32);y=head('Wall mounting / before drilling',y);doc.setFontSize(8);text(wrap('No verified hole coordinates are available for the selected bracket. Download the bracket model and measure or use the printed bracket as a template. No inferred drilling pattern is provided.',W-2*M),M,y);y+=15;for(const wall of d.wallMounts){doc.setTextColor(...green);doc.textWithLink(clean(wall.name),M,y,{url:wall.url});y+=6;}}
