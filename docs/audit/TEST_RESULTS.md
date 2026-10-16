@@ -132,3 +132,7 @@ Commit 45d51fb. Selected the 21 IDs from reviewed f4d3845 while reading the curr
 ## R-37 — base frame versus growth extensions (Codex, 16 October 2026)
 
 12de151: independent Chromium **28/28**, validator and all Node tests pass. Wizard result offers 5U/no spare and 6U/1U spare; switching updates the result and creates a 5U rack with no warnings. The preceding regression still proves an extra 1U fits at 6U. Desktop/mobile 1280/375 px checks pass, no document overflow; output/r37-choice-*.png. Source-license correction separately compared catalog objects: only three license fields changed; validator passes. No new geometry, power or physical-fit verification claimed.
+
+## T-10 Batch 2 catalog integration (Codex, 16 October 2026)
+
+f59c5e2: the explicit selection uses the 41 reviewed IDs from 17ff17e. Catalog object comparison shows exactly the 20 Batch 2 entries changed, with no Batch 1 or unreviewed-entry changes. Validator, every Node test and independent Chromium **28/28** pass. Profiles/license/evidence/attachment metadata imported; source sizes, hardware quantities and outstanding source-specific geometries remain unimplemented.

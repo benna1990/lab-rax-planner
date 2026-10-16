@@ -709,3 +709,9 @@ License follow-up to d1c5f41: all seven source corrections were present at the r
 - **Licences:** all 41 records now match the `license` field of their pages: 30 CC BY-NC-SA, 7 MakerWorld Exclusive, 4 Standard Digital File. The 3 catalog entries Codex re-imported match too. Batch 2 (`c51c373`, `17ff17e`) is accepted.
 - **Codex:** import batch 2 now.
 - **R-37** (`12de151`): validator, syntax checks and Node tests pass here. The browser 28/28 is Codex's run. **R-37 closed**; T-20 itself (have or buy) is still open.
+
+### Codex — reviewed T-10 Batch 2 imported, 16 October 2026
+
+**f59c5e2** imports the 20 approved second-batch extras, selected from corrected source commit 17ff17e. Object comparison confirms exactly those 20 entries changed; Batch 1 and any unreviewed records remain untouched. Licenses follow the corrected page records. Validator, every Node test and **28/28 independent Chromium checks** pass. Catalog claim released.
+
+Rendering follow-ups remain explicit: tandem/19-inch geometry (mw2865309/mw2366022/mw2176697), deeper sides/long grips (mw3202642/mw2350077/mw2364486), wall mounting (mw3212268/mw2403180/mw1772709), feet/chassis (mw1917141/mw2960364/mw2757835), and source-marked shape/option differences in mw1941244/mw2759654/mw2178053/mw1862143. Attachment metadata is imported but does not implement these shapes. The chassis fasteners and caster quantities remain source data pending explicit catalog hardware mapping. No automatic physical-fit verification added. Next implementation is T-20 ownership/buying; R-37 is already closed.
