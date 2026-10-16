@@ -158,6 +158,192 @@ Claude reads this file at the start of every work session on the branch. Other d
 
 ## Open
 
+### UX audit, 16 October 2026: R-17 to R-34
+*Claude, as lead product designer.* Tested at 1280 × 800 and 375 × 812, in a fresh origin, at commit `06f36a1`. Method, limits, the visual review and the plan are in [UX_AUDIT.md](UX_AUDIT.md). Screenshots are in `output/ux/` (local, not committed).
+
+**Severity:**
+- **S1:** wrong output or lost work.
+- **S2:** leads to a wrong choice, or misleads.
+- **S3:** makes understanding, navigation or recovery harder.
+- **S4:** polish.
+
+**Kind:** *demonstrated* means seen in the app; *preference* means a design judgement.
+
+### R-17: The shopping list buys a supply for every slot, not every Pi (S1, demonstrated)
+- **Route and width:** Explore the example → Shopping list, or Download build pack; 1280.
+- **Actual:** the example's cluster holds 4 of 7 Pis (`fill: 4`). The list, the "Ready to build?" total (≈ €347), `shopping-list.csv` and `README.txt` all say **7×** Raspberry Pi 27 W supply and **7×** USB-C cable.
+- **Cause:** `app.js` ~954 counts `modsOf(d)` slots and ignores `it.fill`. Cables, Connect's "Pi 5 power" card and the network ports probably use the same count.
+- **Expected:** 4 of each; every count follows the boards actually fitted.
+- **Impact:** a beginner buys 3 supplies and 3 cables too many; the budget is wrong.
+- **Fix:** scale every `sbc`, `bay` and `ks` count by `it.fill` when it's set.
+- **Accept:** the example gives 4 supplies, 4 cables, and patch cables and ports for 4 boards; a self-test check covers it. → **T-14**
+
+### R-18: Opening a share link silently replaces your own saved rack (S1, demonstrated)
+- **Route and width:** have a saved rack ("MY OWN RACK"), open a share link; 1280.
+- **Actual:** the shared layout replaces it at once. The only way back is a small "Undo" in the status line. It's held in memory, so it's gone after a reload or the next action. After loading, no copy of the own rack was left in localStorage. Opening a rack file does the same (`applyLayout()`, `app.js` ~2321). File errors themselves are clear: broken, unknown parts and newer version were each handled well.
+- **Expected:** ask before replacing a rack that isn't the example and isn't empty: "Open the shared rack? Yours (n parts) is kept as Previous rack." The previous rack survives a reload.
+- **Impact:** hours of planning lost by clicking a link a friend sent.
+- **Accept:** a share link over an own rack asks first; after Open and a reload, Previous rack restores the own rack; self-test check. → **T-14**
+
+### R-19: The wizard picks a PoE-HAT tray for a plain Pi 5, then reports the problem it made (S2, demonstrated)
+- **Route and width:** Guide me → add Raspberry Pi 5 (with or without others) → defaults → Create rack; 1280 and 375.
+- **Actual:** the default mount is "1.5U tray & slide frames (NVMe PoE HAT)". The new rack opens with "Raspberry Pi 5 runs on PoE, but nothing in the rack gives PoE. Add 1 PoE+ injector (30 W), or a PoE switch…". The wizard's result screen doesn't mention it. The simplest fix, the Pi's own adapter (an Adapter/PoE toggle exists under Power & network), isn't offered. On 375 px the mount name is cut off in the picker, so "PoE HAT" can't be read.
+- **Expected:** the default mount needs no add-on the user didn't choose. If PoE is the case, the first fix offered is "Use its own USB-C supply".
+- **Impact:** a beginner thinks they must buy PoE hardware, or a PoE HAT, that they never wanted.
+- **Accept:** a wizard with Pi 5 and defaults has no PoE problem; the PoE problem's first button switches the Pi to its adapter. → **T-15** (data: **T-19**)
+
+### R-20: The wizard builds racks twice the size needed, and its room to grow can't be used (S2, demonstrated)
+- **Route and width:** Guide me → UCG-Ultra, USW-Flex-Mini, Raspberry Pi 5 → defaults (patch panel, 1U room to grow, fans "only if needed") → Create; 375 (8U), and with a Lenovo Tiny added, 1280 (9U).
+- **Actual:**
+  - 3½U of parts (including the patch panel) gives **8U**: `keystone@0, blank@2, UCG@4, Flex@6, blank@8, Pi@10, vent05@13, vent1@14` (half-U positions).
+  - The ½U filler blanks collide with the half-U overlap rule in `put()` (`app.js` ~1898) and push the next part a whole U down.
+  - The 1U room to grow is then closed with vent panels, although the forecast says "cool".
+  - Adding a 1U Lenovo Tiny afterwards: "The front of this 8U rack has 2U free. At 9U it fits."
+  - Going above 5U also changes the frame (extension side panels and joiners) without saying so.
+- **Expected:** for these three devices, ≤ 6U (with 1U open); room to grow stays open and takes the next device; the result screen explains the height and warns when it crosses 5U.
+- **Impact:** more printing, more filament and a taller frame than needed, and the first device added afterwards forces another resize.
+- **Evidence:** `output/ux/02-wizard-summary-1280.jpg`, `05-wizard-flat-front-1280.jpg`.
+- **Accept:** this wizard case gives ≤ 6U; adding a 1U device then fits without growing; the result screen shows "3½U parts + 1U spare + ½U gaps = …"; self-test check. → **T-15**
+
+### R-21: "Free" space counts half-U slivers no panel can use (S2, demonstrated)
+- **Route and width:** Start empty → Flex Mini, UCG-Max, Pi 5, Lenovo Tiny (5U is full) → add USW-Lite-8-PoE; 1280. Also: shrink 6U → 5U, then Place.
+- **Actual:**
+  - The header says "1U open" and the dialog "has 1U free", yet a 1U part doesn't fit.
+  - The second route says "1U free, but not in one piece". The same situation gets two different texts.
+  - No "move parts together" is offered, and nothing says why: the slivers sit beside ½U Lab Rax panels, which are a little taller than ½U.
+- **Expected:** count only usable space ("1U open as two ½U gaps; only parts that don't overlap fit there"); one wording; the Flat view hatches unusable slivers.
+- **Accept:** "n U open" never appears next to a "doesn't fit" for a part of that height or less, unless the gap type is named. → **T-15** (same cause as R-20)
+
+### R-22: The printer is asked for, then ignored until the end (S2, demonstrated)
+- **Route and width:** Guide me → step 2 Printer: Bambu Lab A1 mini (180 × 180) → Create; 1280.
+- **Actual:**
+  - The wizard's result says "10 prints have parts too big"; the rack opens with "10 prints are too big… Use a variant made for smaller beds, split the part, or print it elsewhere".
+  - Every 10-inch panel is 254 mm wide, so nothing but the joiners fits, even diagonally.
+  - The split-frame hint sits at the bottom of the print list and covers only the frame.
+- **Expected:** at the moment the printer is picked: "10-inch panels are 254 mm wide; a 180 mm bed can't print them, not even diagonally. You need a 256 mm bed, a print service, or split models." Then the plan adapts (the split frame where it exists) or the user decides there.
+- **Impact:** a beginner with the most common small printer plans a rack they can't print, and learns it at the end.
+- **Accept:** the A1 mini shows the limit in wizard step 2; readiness gives one root message instead of ten rows. → **T-15** (variants: **T-19**)
+
+### R-23: Green checks for power and cooling rest on numbers nobody sourced (S2, demonstrated)
+- **Route and width:** any rack; select a device; 1280.
+- **Actual:**
+  - The part panel says "Height unknown · fit unknown · power unknown".
+  - At the same time the library shows "1U · 5 W" without "≈" (≈ is explained for height only), and readiness shows "✓ Power, PoE and network ports add up" and "✓ Cooling: about 33 °C inside".
+  - In `catalog.json`, 0 entries have `evidence.power` and 5 have `evidence.height`.
+- **Expected:** a ✓ only for checks whose inputs are sourced. Otherwise "≈ adds up, from estimated wattages (0 of 5 sourced)", with the dashed "≈" style; watt chips marked "≈" when unsourced.
+- **Impact:** goal 4 of the product (tell checked from assumed) fails exactly where safety and money are involved: power supplies, PoE budgets.
+- **Accept:** no green ✓ on power, PoE or cooling while any input is unsourced; the count of sourced inputs is shown; `test-ready.mjs` covers it. → **T-16** (data: **T-3**)
+
+### R-24: On the first visit, the example poses as "Your build", and the four ways in vanish for good (S2, demonstrated)
+- **Route and width:** first visit; 1280 and 375.
+- **Actual:**
+  - The start card covers only the 3D area. The build column next to it says "Your build · 5U · 4 parts", "✓ Power, PoE and network ports add up", "Shopping list 40 items".
+  - The brightest button on screen is "Download build pack".
+  - After choosing any way in, nothing brings back the start card or the example: there is no "New rack" or "Load example". Only "Clear rack" at the very bottom, or clearing site data.
+- **Expected:** while the example shows, the build column is labelled "Example" (or dimmed with "Start to see your own"); a *New rack ▾* menu (Guide me, Start empty, Example, Open file) stays in the header; Export is secondary until readiness is clean.
+- **Evidence:** `01-first-visit-1280.jpg`, `10-first-visit-375.jpg`.
+- **Accept:** a first visit shows no ✓ for a rack the user didn't make; New rack is reachable at any time. → **T-17 B**
+
+### R-25: On a phone, problems are out of sight and the sticky header holds exports (S2, demonstrated)
+- **Route and width:** Guide me on 375 px → Create rack.
+- **Actual:**
+  - The screen shows a finished-looking rack. The problem ("Pi 5 runs on PoE…") sits at y ≈ 2,510 px; the library at y ≈ 1,430 px.
+  - The 149 px sticky header (18 % of the screen) holds Guides, Set up a rack, Build plan PDF and Download build pack. The step bar scrolls away and is cut off ("4 Ch…").
+  - After adding from the library, the confirmation is off screen (status top −357 px).
+- **Expected:** a header of ≤ 60 px with the current step and its state; a status strip under the rack; a bottom bar with "+ Add part" and "Next"; the library as a sheet with the confirmation in it.
+- **Evidence:** `13-visual-ready-375.jpg`, `14-visual-library-375.jpg`, mock-up `21-proposal-mobile.jpg`.
+- **Accept:** after the wizard on 375 px, the problem count and its fix button are visible without scrolling; the header is ≤ 60 px. → **T-17 C**
+
+### R-26: Step states say "Done" when nothing is done, and only in colour (S3, demonstrated)
+- **Route and width:** after the wizard; 375 (`title`s read from the DOM).
+- **Actual:**
+  - "5 Print & assemble: Done" before a printer is chosen and with nothing printed.
+  - "1 Rack: To do" right after creating the rack, because no printer is chosen.
+  - The states exist only as colour and a `title` tooltip.
+- **Expected:** a short text state under each step ("printer?", "PoE missing", "4 parts"). Rack is done when frame and height are set; the printer belongs to Print; Print is "Ready", not "Done", until parts are ticked.
+- **Accept:** every state is readable without colour and without hovering; no "Done" without a user action behind it. → **T-16**
+
+### R-27: The search term sticks across the Where tabs, and an empty result says nothing (S3, demonstrated)
+- **Route and width:** search "lite 8" in Front → Top; then search "handles" in Top; 1280.
+- **Actual:**
+  - Top shows only its intro sentence and "Make a custom part", with no "no results" message.
+  - "handles" in Top finds only the stackable handles. The Side handles are under Sides, in "Patterned, fan and deeper side panels".
+- **Expected:** "No 'lite 8' at the top. 1 match at the front →", and matches in other tabs named with a link; Side handles grouped as handles.
+- **Accept:** a search with no hits in the current tab always says so and names where the hits are. → **T-18**
+
+### R-28: The Where bar names views the Flat drawing doesn't show (S3, demonstrated)
+- **Route and width:** Flat view → Top, Bottom, Sides, Inside; 1280.
+- **Actual:** the drawing stays on the front or the back ("Seen from the back"), while the library switches to top or side parts. 3D does turn the camera.
+- **Expected:** in Flat, these positions switch to 3D with that camera, or the drawing says "Flat shows the front and back; switch to 3D to see the top".
+- **Accept:** picking Top never shows a front or back drawing without saying so. → **T-18**
+
+### R-29: A placed device can't change its mount (S3, demonstrated)
+- **Route and width:** select the placed Pi 5 or the Pi cluster; 1280.
+- **Actual:** the part panel offers ↑ ↓, Move to the back, Model, Duplicate, Remove and Colour, but no mount choice. The wizard says "you can change it" and "swap", but that swap means position. To fix R-19 by hand, the user must remove the part and find the other mount behind the ▾ in the library.
+- **Expected:** "Mount: [select]" in the part panel, keeping the position when the new mount fits.
+- **Accept:** the Pi 5 can switch from the PoE-HAT tray to a USB-C tray from its panel, in place. → **T-18**
+
+### R-30: The shopping list mixes what you need with nice-to-haves, and the exports drop "optional" (S3, demonstrated)
+- **Route and width:** example → Shopping list, build pack; 1280.
+- **Actual:**
+  - "40 items" counts about 12 optional tools and extras (label maker, cable tester, punch-down tool, USB power meter…), mixed in with the screws.
+  - In `shopping-list.csv` and `README.txt`, "optional" appears once; the items read as "1× TPU filament", "1× Glue stick"….
+- **Expected:** "Needed" and "Nice to have" as separate groups; the summary counts what's needed ("9 needed · 6 optional"); the CSV gets an Optional column and the README a separate list.
+- **Accept:** every optional item is marked as optional in the screen, the CSV, the README and the PDF. → **T-14** (exports), **T-17** (screen)
+
+### R-31: Keyboard and touch gaps (S3, demonstrated)
+- **Width:** 1280 and 375.
+- **Actual:**
+  - In 3D view (the default), the rack's parts aren't reachable by keyboard: the elements are hidden and the canvas has `tabIndex -1`. The hint under the rack still says "use the arrow keys".
+  - After Remove, focus falls to `<body>`.
+  - On 375 px, 145 of 248 visible controls are under 24 px in one dimension: ½U parts in Flat are 18 px high, 106 "Open" and "↗" links 19 px, the search field 22 px, "?" buttons 17 px.
+  - Contrast is fine (dark ≥ 6.3 : 1, light muted 4.59 : 1).
+- **Expected:**
+  - parts reachable by keyboard in every view (an accessible list of parts beside the 3D view will do);
+  - after Remove, focus moves to the next part or to the status line;
+  - targets of 24 px at least, and 44 px for primary actions on phones.
+- **Accept:** Tab reaches the parts in 3D view; there is no control under 24 × 24 px on 375 px, except inline text links. → **T-18**
+
+### R-32: Wording and small inconsistencies (S4)
+- **Side handles:** the profile names are MakerWorld's raw names ("Only Normal Bolted Parts (Handles and corners)", "All Options Together"). Suggest "Bolted frame · normal bolt heads", "Bolted frame · large (XL) bolt heads", "Heat-set frame", "Everything (all variants)", with the source name in small print.
+- **In-profile choices:** a single semicolon chain. Write them as a short list.
+- **Wizard search:** "Pi 5" also lists HDHomeRun.
+- **After "Make it 6U":** the dialog says "the parts already in stay where they are", but every U number shifts by +1. Say "everything moves up one U-number; nothing moves physically".
+- **The library row:** shows a maker handle ("· 463n7") where the mount name is expected.
+
+→ **T-18**
+
+### R-33: One green means four things, and buttons look like status chips (S3, demonstrated)
+- **Width:** 1280 and 375.
+- **Actual:**
+  - The accent green fills the primary action, outlines the selected card, marks ✓ status and marks done steps.
+  - 103 controls are pills, so "Choose" (a button) and "✓ chosen" (a state) look alike, side by side.
+  - Orange-brown is both "problem" and the heat palette.
+- **Expected:** the colour roles and shapes in UX_AUDIT.md ("Visual proposal"):
+  - green fills only actions;
+  - selection is a neutral 2 px outline;
+  - problem red-orange, decision amber, estimate dashed grey;
+  - buttons are 8 px rectangles, pills only for chips and segmented controls.
+- **Evidence:** `11-visual-top-1280.jpg`, `14-visual-library-375.jpg`.
+- **Accept:** on any screen, exactly one green-filled element; no status chip shares a button's shape. → **T-17 A**
+
+### R-34: Layout and type make the build column hard to read (S3 demonstrated, partly preference)
+- **Width:** 1280.
+- **Demonstrated:** each problem's button sits beside its text, leaving about 230 px. "Print profile does not match the frame" wraps to 8 lines.
+- **Preference:**
+  - 13 font sizes (10.5–30 px), with most text at 11.5–13.5 px, and 5 weights;
+  - rack settings sit under the stage, away from step 1;
+  - five equal pills cover the 3D view;
+  - paddings of 8, 9, 10, 12, 14 and 16 px sit side by side.
+- **Expected:**
+  - problems with the text first and the button below;
+  - a six-size scale with 14 px body text, and weights 400, 600 and 700;
+  - rack settings in the build column;
+  - three icon tools on the stage;
+  - a 4 px spacing grid.
+- **Evidence:** `12-visual-light-mid-1280.jpg`, mock-up `20-proposal-desktop.jpg`.
+- **Accept:** no problem row is taller than 4 lines at 1280; the type scale has at most 6 sizes. → **T-17 A and B**
+
 ### R-14: Adding a half-U mount can use a physically overlapping fallback (S3)
 *Codex, T-9 verification:* after the corrected UCG-Max/default wizard creates a clean 4U rack, add **USW-Flex-Mini → ½U mount** from the library. The editor places it next to the keystone panel and explicitly reports **1.4 mm overlap**, rather than offering a taller rack or another physical fit. Reproduced at 1280 and 375 px; `firstClear()` intentionally returns its first nominally free slot if all physical placements clash/overlap. This is separate from the now-fixed wizard layout. Expected improvement: offer growth or explain the conflict before committing the overlapping placement. Evidence: `output/t9-added-375.png` and status text recorded in the walkthrough. Claude to prioritize; no extra editor changes included in T-9.
 

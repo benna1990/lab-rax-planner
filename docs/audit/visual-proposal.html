@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Visual Proposal</title>
+<!-- Claude, UX audit 16 October 2026. A static mock-up of the proposed layout, not app code. See UX_AUDIT.md. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Audiowide&family=Geist+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap">
+<style>
+:root{
+  --bg:#141517;--panel:#1B1C1F;--card:#202226;--sunk:#17181A;--line:#2C2E33;
+  --ink:#EDEEF0;--ink-2:#C2C5CA;--muted:#9A9EA4;
+  --act:#5FD08A;--act-ink:#0E2416;            /* action only: primary button, links */
+  --sel:#EDEEF0;                               /* selection: neutral outline */
+  --ok:#5FD08A;--warn:#E5A23A;--prob:#F07A4A;  /* status: icon + text, never fills a button */
+  --f:"Plus Jakarta Sans",system-ui,sans-serif;--m:"Geist Mono",ui-monospace,monospace;
+  --t12:12px;--t13:13px;--t14:14px;--t16:16px;--t20:20px;--t28:28px;
+  --r-btn:8px;--r-card:12px;--r-pill:999px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#0C0D0E;color:var(--ink);font:400 var(--t14)/1.45 var(--f);padding:24px 16px}
+h1{font-size:var(--t20);margin:0 0 4px}
+.lead{color:var(--muted);margin:0 0 20px;max-width:900px}
+.frame{background:var(--bg);border:1px solid var(--line);border-radius:14px;overflow:hidden;position:relative}
+.cap{font:600 var(--t12)/1 var(--m);color:var(--muted);margin:28px 0 8px;text-transform:uppercase;letter-spacing:.06em}
+/* desktop */
+.d{width:1280px;height:800px;display:grid;grid-template-rows:56px 1fr}
+.top{display:flex;align-items:center;gap:16px;padding:0 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+.logo{font:700 var(--t16)/1 var(--f);display:flex;gap:8px;align-items:center;width:288px}
+.logo i{width:24px;height:24px;border-radius:6px;background:#2a3b22;display:inline-block}
+.steps{display:flex;gap:4px;flex:1;justify-content:center}
+.st{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:var(--r-btn);font-size:var(--t13);color:var(--ink-2)}
+.st b{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font:600 11px/1 var(--m);border:1.5px solid var(--line)}
+.st small{display:block;font-size:11px;color:var(--muted)}
+.st.ok b{background:var(--ok);border-color:var(--ok);color:var(--act-ink)}
+.st.warn b{border-color:var(--warn);color:var(--warn)}
+.st.now{background:var(--card);color:var(--ink);box-shadow:inset 0 -2px 0 var(--sel)}
+.btn{font:600 var(--t13)/1 var(--f);height:36px;padding:0 14px;border-radius:var(--r-btn);border:1px solid var(--line);background:var(--card);color:var(--ink);display:inline-flex;align-items:center;gap:6px}
+.btn.pri{background:var(--act);border-color:var(--act);color:var(--act-ink)}
+.btn.ghost{background:none;border-color:transparent;color:var(--ink-2)}
+.cols{display:grid;grid-template-columns:320px 1fr 360px;min-height:0}
+.col{border-right:1px solid var(--line);padding:16px;overflow:hidden;min-height:0}
+.col:last-child{border-right:0;background:var(--panel)}
+.seg{display:flex;background:var(--sunk);border:1px solid var(--line);border-radius:var(--r-pill);padding:3px;gap:2px}
+.seg span{flex:1;text-align:center;font:600 var(--t12)/1 var(--f);padding:8px 0;border-radius:var(--r-pill);color:var(--muted)}
+.seg span.on{background:var(--card);color:var(--ink);box-shadow:0 0 0 1px var(--line)}
+.search{margin:12px 0;height:36px;border-radius:var(--r-btn);background:var(--sunk);border:1px solid var(--line);display:flex;align-items:center;padding:0 12px;color:var(--muted);font-size:var(--t13)}
+.grp{font:600 var(--t12)/1 var(--f);color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:16px 0 8px}
+.row{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;padding:8px;border-radius:var(--r-btn)}
+.row+.row{border-top:1px solid var(--line)}
+.th{height:28px;border-radius:4px;background:#2b2d31;border:1px solid #3a3d42}
+.nm{font-weight:600}.sub{font-size:var(--t12);color:var(--muted)}
+.chip{font:500 11px/1 var(--m);padding:4px 7px;border-radius:var(--r-pill);border:1px solid var(--line);color:var(--ink-2);margin-right:4px;white-space:nowrap}
+.chip.est{border-style:dashed;color:var(--muted)}
+.add{width:32px;height:32px;border-radius:var(--r-btn);border:1px solid var(--line);display:grid;place-items:center;font-weight:700;color:var(--act)}
+.stage{display:grid;grid-template-rows:auto 1fr auto;padding:16px;gap:12px;background:var(--bg)}
+.bar{display:flex;justify-content:space-between;align-items:center}
+.canvas{border-radius:var(--r-card);background:radial-gradient(ellipse at 50% 30%,#2b2d31,#1a1b1e);border:1px solid var(--line);display:grid;place-items:center;position:relative}
+.rack{width:250px;background:#222428;border:6px solid #2e3035;border-radius:6px;padding:8px 10px}
+.rack .lbl{font:400 16px/1 "Audiowide";color:#B5CF2A;text-align:center;margin-bottom:6px}
+.u{height:30px;border-radius:3px;background:#2a2c31;margin:3px 0;display:flex;align-items:center;justify-content:center;font:500 10px/1 var(--m);color:var(--muted)}
+.u.dev{background:#d9dbde;color:#222}.u.h{height:14px}.u.sel{outline:2px solid var(--sel);outline-offset:2px}
+.u.gap{background:repeating-linear-gradient(45deg,#26282c 0 6px,#1e2023 6px 12px);color:#777}
+.tools{position:absolute;right:12px;bottom:12px;display:flex;gap:6px}
+.ib{width:36px;height:36px;border-radius:var(--r-btn);background:rgba(20,21,23,.8);border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-2);font-size:14px}
+.strip{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-left:3px solid var(--prob);border-radius:var(--r-card);padding:10px 12px}
+.strip .t{flex:1}.strip .t b{display:block}
+.next{background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);padding:16px;margin-bottom:16px}
+.next h3{font-size:var(--t16);margin:0 0 4px}
+.k{font:600 var(--t12)/1 var(--f);color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:0 0 8px}
+.prob{display:grid;grid-template-columns:20px 1fr;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+.ic{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font:700 12px/1 var(--f)}
+.ic.p{background:var(--prob);color:#2a1206}.ic.w{border:1.5px solid var(--warn);color:var(--warn)}.ic.o{background:var(--ok);color:var(--act-ink)}.ic.e{border:1.5px dashed var(--muted);color:var(--muted)}
+.prob p{margin:2px 0 8px;color:var(--ink-2);font-size:var(--t13)}
+.sec{display:flex;justify-content:space-between;padding:12px 0;border-top:1px solid var(--line);font-weight:600}
+.sec span{font:500 var(--t12)/1.4 var(--m);color:var(--muted)}
+.call{position:absolute;width:22px;height:22px;border-radius:50%;background:#B5CF2A;color:#111;font:700 12px/22px var(--f);text-align:center;box-shadow:0 0 0 3px #0C0D0E}
+/* mobile */
+.mrow{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
+.m{width:375px;height:812px;display:grid;grid-template-rows:auto 1fr auto}
+.mtop{background:var(--panel);border-bottom:1px solid var(--line);padding:10px 16px 8px}
+.mtop .r{display:flex;align-items:center;gap:10px}
+.mtop .r .s{flex:1;font-weight:700}.mtop .r .s small{display:block;font:500 var(--t12)/1.2 var(--f);color:var(--muted)}
+.prog{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-top:8px}
+.prog i{height:4px;border-radius:2px;background:var(--line)}.prog i.ok{background:var(--ok)}.prog i.warn{background:var(--warn)}.prog i.now{background:var(--sel)}
+.mbody{padding:12px 16px;overflow:hidden;display:flex;flex-direction:column;gap:12px}
+.mcanvas{height:330px}
+.mbot{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 16px 18px;background:var(--panel);border-top:1px solid var(--line)}
+.mbot .btn{height:44px;justify-content:center}
+.sheet{position:absolute;left:0;right:0;bottom:0;height:560px;background:var(--panel);border-top:1px solid var(--line);border-radius:16px 16px 0 0;padding:8px 16px}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 12px}
+.m .row{grid-template-columns:44px 1fr 44px;padding:10px 0}.m .add{width:44px;height:44px}
+.notes{max-width:1280px;columns:2;column-gap:32px;color:var(--ink-2);font-size:var(--t13)}
+.notes p{margin:0 0 10px;break-inside:avoid}.notes b{color:var(--ink)}
+@media (max-width:1320px){.wrap{overflow-x:auto}}
+</style>
+</head>
+<body>
+<h1>Visual proposal: one workbench, one next step</h1>
+<p class="lead">Static mock-up for the UX audit of 16 October 2026 (Claude). Same fonts, dark stage and segmented controls as today; what changes is where things sit, which colour means what, and which shape is a button. Numbers refer to the notes below and to UX_AUDIT.md.</p>
+
+<div class="cap">Desktop · 1280 × 800 · after the wizard</div>
+<div class="wrap"><div class="frame d">
+  <div class="top">
+    <div class="logo"><i></i>Mini Rack Planner</div>
+    <nav class="steps">
+      <span class="st ok"><b>✓</b><span>Rack<small>6U · heat-set</small></span></span>
+      <span class="st ok now"><b>✓</b><span>Hardware<small>4 parts</small></span></span>
+      <span class="st warn"><b>!</b><span>Connect<small>PoE missing</small></span></span>
+      <span class="st"><b>4</b><span>Check<small>1 problem</small></span></span>
+      <span class="st"><b>5</b><span>Print<small>printer?</small></span></span>
+      <span class="st"><b>6</b><span>Export</span></span>
+    </nav>
+    <span class="btn ghost">Guides</span><span class="btn">New rack ▾</span><span class="btn">Export ▾</span>
+  </div>
+  <div class="cols">
+    <div class="col">
+      <div class="seg"><span class="on">Front</span><span>Back</span><span>Top</span><span>Bottom</span><span>Sides</span><span>Inside</span></div>
+      <div class="search">⌕ &nbsp;Search devices, mounts, panels</div>
+      <div class="grp">UniFi gateways</div>
+      <div class="row"><span class="th"></span><span><span class="nm">UCG-Max</span><br><span class="chip">1U</span><span class="chip est">≈10 W</span></span><span class="add">+</span></div>
+      <div class="row"><span class="th"></span><span><span class="nm">UCG-Ultra</span><br><span class="chip">1U</span><span class="chip est">≈4 W</span></span><span class="add">+</span></div>
+      <div class="grp">Raspberry Pi</div>
+      <div class="row"><span class="th"></span><span><span class="nm">Raspberry Pi 5</span><br><span class="sub">1U tray · USB-C power</span></span><span class="add">+</span></div>
+      <div class="row"><span class="th"></span><span><span class="nm">Raspberry Pi 5 + PoE HAT</span><br><span class="sub">1½U tray · needs PoE</span></span><span class="add">+</span></div>
+      <div class="grp">No results in Top?</div>
+      <div class="sub">“handles”: 2 matches in Sides →</div>
+    </div>
+    <div class="stage">
+      <div class="bar"><div class="seg" style="width:280px"><span class="on">3D</span><span>Flat</span><span>Airflow</span></div>
+        <span class="btn">Height &nbsp;<b style="font-family:var(--m)">− 6U +</b></span></div>
+      <div class="canvas">
+        <div class="rack"><div class="lbl">Lab Rax</div>
+          <div class="u h">keystone ½U</div><div class="u h gap">½U gap · only ½U-free parts</div>
+          <div class="u dev sel">UCG-Ultra · 1U</div><div class="u h dev">Flex Mini ½U</div><div class="u h gap">½U gap</div>
+          <div class="u dev" style="height:46px">Raspberry Pi 5 · 1½U</div><div class="u">1U open · room to grow</div></div>
+        <div class="tools"><span class="ib">⟲</span><span class="ib">⇆</span><span class="ib">◐</span></div>
+      </div>
+      <div class="strip"><span class="ic p">!</span><span class="t"><b>Raspberry Pi 5 needs PoE, and nothing gives it</b><span class="sub">Power it with its own USB-C supply, or add a PoE switch.</span></span><span class="btn pri">Use USB-C supply</span><span class="btn">More options</span></div>
+    </div>
+    <div class="col">
+      <div class="next"><div class="k">Next step · Connect</div><h3>Decide how the Pi gets power</h3><p class="sub" style="margin:0 0 12px">Then pick your printer so the planner can check every print.</p><span class="btn pri">Go to Connect</span></div>
+      <div class="k">Before you build</div>
+      <div class="prob"><span class="ic p">!</span><div><b>Pi 5 needs PoE</b><p>Nothing in the rack gives PoE.</p><span class="btn">Use USB-C supply</span></div></div>
+      <div class="prob"><span class="ic w">?</span><div><b>Pick your 3D printer</b><p>10-inch panels are 254 mm wide; a 180 mm bed is too small.</p><span class="btn">Pick printer</span></div></div>
+      <div class="prob"><span class="ic e">≈</span><div><b>Power and cooling are estimates</b><p>0 of 4 devices have a sourced wattage.</p></div></div>
+      <div class="sec">Print list<span>0 of 6 · printer?</span></div>
+      <div class="sec">Shopping list<span>9 needed · 6 optional</span></div>
+      <div class="sec">Power &amp; network<span>≈25 W · PoE 0/0 W</span></div>
+      <div class="sec">Rack settings<span>frame · sides · colours</span></div>
+    </div>
+  </div>
+  <span class="call" style="left:300px;top:17px">1</span><span class="call" style="left:1252px;top:44px">2</span>
+  <span class="call" style="left:4px;top:122px">3</span><span class="call" style="left:470px;top:300px">4</span>
+  <span class="call" style="left:323px;top:700px">5</span><span class="call" style="left:930px;top:80px">6</span>
+  <span class="call" style="left:930px;top:395px">7</span>
+</div></div>
+
+<div class="cap">Mobile · 375 × 812 · rack screen and library sheet</div>
+<div class="mrow">
+  <div class="frame m">
+    <div class="mtop"><div class="r"><span class="s">2 · Hardware<small>4 parts · 1 problem</small></span><span class="btn">Steps ▾</span><span class="btn">Export</span></div>
+      <div class="prog"><i class="ok"></i><i class="now"></i><i class="warn"></i><i></i><i></i><i></i></div></div>
+    <div class="mbody">
+      <div class="seg"><span class="on">3D</span><span>Flat</span><span>Airflow</span></div>
+      <div class="canvas mcanvas"><div class="rack" style="transform:scale(.8)"><div class="lbl">Lab Rax</div><div class="u h">keystone ½U</div><div class="u dev">UCG-Ultra</div><div class="u h dev">Flex Mini</div><div class="u dev" style="height:46px">Pi 5</div><div class="u">1U open</div></div></div>
+      <div class="strip"><span class="ic p">!</span><span class="t"><b>Pi 5 needs PoE</b><span class="sub">Tap to fix</span></span><span class="btn">Fix</span></div>
+    </div>
+    <div class="mbot"><span class="btn">+ Add part</span><span class="btn pri">Next: Connect</span></div>
+    <span class="call" style="left:338px;top:62px">8</span><span class="call" style="left:4px;top:752px">9</span>
+  </div>
+  <div class="frame m">
+    <div class="mtop"><div class="r"><span class="s">2 · Hardware<small>Add a part</small></span><span class="btn">Done</span></div>
+      <div class="prog"><i class="ok"></i><i class="now"></i><i class="warn"></i><i></i><i></i><i></i></div></div>
+    <div class="mbody"><div class="canvas" style="height:180px;opacity:.5"></div></div>
+    <div></div>
+    <div class="sheet"><div class="grab"></div>
+      <div class="seg"><span class="on">Front</span><span>Back</span><span>Top</span><span>Btm</span><span>Sides</span><span>In</span></div>
+      <div class="search">⌕ &nbsp;Search</div>
+      <div class="row"><span class="th"></span><span><span class="nm">USW-Flex-Mini</span><br><span class="chip">½U</span><span class="chip est">≈2 W</span></span><span class="add">+</span></div>
+      <div class="row"><span class="th"></span><span><span class="nm">USW-Lite-8-PoE</span><br><span class="chip">1U</span><span class="chip est">≈5 W</span></span><span class="add">+</span></div>
+      <div class="row"><span class="th"></span><span><span class="nm">Lenovo Tiny</span><br><span class="chip est">≈1U</span><span class="chip est">≈12 W</span></span><span class="add">+</span></div>
+      <p class="sub">Added: Flex Mini at U4 · Undo</p>
+    </div>
+    <span class="call" style="left:4px;top:262px">10</span>
+  </div>
+</div>
+
+<div class="cap">Notes</div>
+<div class="notes">
+<p><b>1 · Steps are the navigation, with words.</b> The step bar moves into the 56 px top bar and each step says its state in text (“PoE missing”, “printer?”), not only as a colour. Today the states are colour plus a title tooltip.</p>
+<p><b>2 · Export is secondary until the plan is ready.</b> Today the brightest element on screen, from the first second and on an empty rack, is “Download build pack”. Here Export is an ordinary button; it turns primary only when Check has no problems.</p>
+<p><b>3 · Library rows: one add target, honest chips.</b> A 32 px “+” on the right (44 px on phones), height and watts as mono chips, a dashed chip for anything not sourced. Mount choice that changes power (PoE HAT) is a visible variant, not a hidden default.</p>
+<p><b>4 · The rack shows usable space.</b> Half-U slivers next to a ½U panel are hatched and labelled; open space says “1U open · room to grow”. Selection is a neutral 2 px outline, never the green.</p>
+<p><b>5 · A status strip under the stage.</b> The most important open problem, with its simplest fix as the button. It is the same item as in the build column, so fixing it in either place clears both.</p>
+<p><b>6 · One “Next step” card on top of the build column.</b> One sentence, one button. Today the column starts with a list of mixed problems, to-dos and info rows of equal weight.</p>
+<p><b>7 · Problems: text first, button below.</b> In a 360 px column, a button beside the text squeezes it to 7–8 lines. Icons separate kinds: filled ! = problem, amber ring = decision to make, dashed ≈ = estimate. Rack settings move into a section here; the centre column holds only the rack.</p>
+<p><b>8 · Phone header: 60 px instead of 149 px.</b> The current step and its state, a Steps sheet and Export. The six-segment bar shows progress without scrolling sideways.</p>
+<p><b>9 · Phone actions at the thumb.</b> A bottom bar with “Add part” and “Next: …”, 44 px high. The library is 1,400 px and readiness 2,500 px below the rack today.</p>
+<p><b>10 · The library is a sheet over the rack.</b> You see where the part lands while you add it; the confirmation appears in the sheet, next to your finger.</p>
+<p><b>Colour roles.</b> Green fills only actions (and the ✓ icon of a done step). Selection is neutral white/ink. Problems are red-orange, decisions amber, estimates dashed grey. The heat palette stays only in the Airflow view and heat chips.</p>
+<p><b>Shapes.</b> Buttons are 8 px rectangles (36 px desktop, 44 px phone). Pills are only for chips and segmented controls. Cards 12 px. So “Choose” (a button) no longer looks like “✓ chosen” (a status).</p>
+<p><b>Type.</b> Six sizes (12 / 13 / 14 / 16 / 20 / 28), weights 400 / 600 / 700, body 14 px at 1.45. Geist Mono for every measurement: U, mm, W, °C.</p>
+<p><b>Rhythm.</b> A 4 px grid: 4 / 8 / 12 / 16 / 24. Card padding 16, gaps between groups 24, rows 8.</p>
+</div>
+</body>
+</html>
