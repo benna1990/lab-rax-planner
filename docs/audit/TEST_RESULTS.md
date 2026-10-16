@@ -84,3 +84,9 @@ Local outputs (not committed):
 - `output/plan-10u-selftest.pdf`, SHA-256 `147d77b78caf1be3e4f1d3109a5c7ff85d5e1f4e8db60f59b20d9e0ef95a6455`.
 
 Shared dimensions: PDF schematics and image dimensions now read the supplied rack.js dimension record. A direct before/after run retained identical page-2 drawing geometry (excluding the page-total footer), and identical image dimensions/positions across the document (excluding page numbers). Layout reflow is intentional. These checks do not establish physical fit or electrical correctness.
+
+## T-8 — beginner walkthrough (Codex, 16 October 2026)
+
+Fresh Chromium profiles at 1280 × 900 and touch-emulated 375 × 900. Followed start card → Guide me → choose UCG-Max → default Build/Look/Name → Create rack → Hardware library search → add USW-Flex-Mini → accept offered 4U rack → Where/Back → Connect → Print → Export → Download PDF. Both PDF downloads succeeded (`output/t8-build-1280.pdf`, `output/t8-build-375.pdf`). Document width matched viewport width at both sizes.
+
+Findings R-11 and R-12 are in REVIEW.md: the wizard creates a half-U overlap, and mobile step targets are partly hidden by the sticky header. The wizard remained operable and the growth confirmation worked. Connect clearly states that undocumented device inputs require the manual; that known data gap is T-3, not a new defect. This is a simulated walkthrough, not real-user testing; no physical phone, Safari, Firefox or screen reader was tested. Screenshots are in local output/t8-*.png (not committed). No application code was changed for T-8.

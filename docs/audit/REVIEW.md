@@ -20,7 +20,6 @@ Before you change code, claim it here: what, which files, since when. One writer
 | Who | Working on | Files | Since |
 |---|---|---|---|
 | Antigravity | T-3 (power input per device research) | `docs/audit/power-inputs.json` | 2026-10-15 |
-| Codex | T-8 beginner walkthrough (review only) | local screenshots in `output/`, review documentation; no implementation claims | 2026-10-16 |
 
 ## Task board
 
@@ -106,29 +105,9 @@ Claude reads this file at the start of every work session on the branch. Other d
 
 ## Open
 
-### R-9: Available 10U PDF has headings at the top edge
-*Codex, independent visual review, 2026-10-15 22:38 CEST:* rendered all **8** pages of `output/plan-10u-full.pdf` with Poppler at 1400 px. SHA-256: `674cd3309f7bf2a7cb8e629538b38c56ce02e9ee7b1ff5968ee538736ad6dbff`. Pages **3, 5, 6 and 8** start their green section heading at the very top edge, unlike pages 2, 4 and 7 which have the normal header and top margin. The green banner is partly outside the visible page area. Please regenerate from current code and fix if reproducible; this artifact differs from the reported 7-page test output. Do not treat the earlier browser result as validation of this specific artifact. No implementation files changed by Codex.
 
-### R-10: Sparse pages in the available 10U PDF
-*Codex:* page **6** contains only the power summary at the top, with most of the page empty. Page **3** carries a single remaining placement row and the frame table, separated by a large blank area. Prefer reflowing these blocks while retaining legibility. The checklist (page 4) and illustrated cards (pages 7–8) otherwise look legible; no obvious table or image/text collision seen in this artifact.
-
-*Codex, T-6 follow-up:* current independent headless Chromium self-test passes **17/17**, generates 7 pages and measures 348 text lines / 2,837 images and boxes within bounds. R-9/R-10 concern the hashed 8-page artifact, not a proven defect in the current generator. Claude: please regenerate the sample for visual recheck. T-6 independent rerun is complete; T-1 inspection is complete with approval pending a current sample. Codex releases the documentation claim after this entry; T-2 is next and has no implementation file claim yet.
-
-**Claude, 2026-10-16:** R-9 and R-10 are real for the fuller rack (front and rear parts, 8 pages), and the 17 checks don't cover that rack. Both go to Codex as **T-7**, with that rack as a new self-test check. Status: open.
-
-### R-7: Lab Rax fit is "Documented" from the old `labrax` flag alone
-*Reviewer, round 2:* the `labrax: true` field doesn't prove anyone checked the model page. Require an explicit source, otherwise Unknown.
-
-**Claude:** fixed in `2757446`. `evidenceOf()` in `app.js` gives fit **Unknown** unless the entry has an `evidence.fit` record. The note now reads "marked as made for Lab Rax, but the source isn't recorded". The flag still drives the "Lab Rax only" filter. `CATALOG_VERIFICATION.md` and `CONTRIBUTING.md` say this now. Open: no entry has a fit source recorded yet, so every fit shows Unknown until someone records one.
-
-*Codex, 2026-10-15:* independently confirmed in current `evidenceOf()`: no legacy `labrax` promotion remains. R-7 is resolved; legacy filter behaviour remains as described. Catalog validation and every Node test pass in this round.
-
-### R-8: The PDF test checks text start positions, not full text bounds
-*Reviewer, round 2:* a line can start inside the page and end outside it on the right. A visual check of the 10U PDF stays necessary (tables, images, overlap).
-
-**Claude:** partly fixed in `027c5b9`. Self-test check 15 now records every text line's real width, plus images and boxes, and checks text against text. At 10U: 348 lines and 2,819 images and boxes, all inside, with no overlap. The visual check is T-1 (Codex). Original plan:
-- the self-test records every text line's real width (from jsPDF), every image and every box, then checks them against the page and checks text against text for overlap;
-- a visual check of each page of the 10U PDF, written down in `TEST_RESULTS.md` with what was and wasn't seen.
+### R-11: One fixed width left on the PDF cooling page
+*Claude, review of `28dfc6d`:* in `pdf.js`, the cooling drawing still uses `rw=280*kk`, while its scale now comes from `outerW`. The output is the same, because `dimensions.outerWidth` is 280, but the drawing would go wrong if the width changes. Expected: `rw=outerW*kk`. **Codex**, after T-8; one line, then the self-test.
 
 ## Closed
 
@@ -173,3 +152,41 @@ Claude reads this file at the start of every work session on the branch. Other d
 **R-10 fixed in `28dfc6d`:** after placement moves to a new page, the frame table no longer reserves room for the top-view drawing on the previous page. Power fits beneath the table. Pre-change fuller fixture: 8 pages; fixed: 7. No text size reduction. Shared rack dimensions now feed the PDF too.
 
 **Evidence:** 18/18 independent Chromium checks pass, including the fuller rack's exact placements, bounds, top margins and text overlap. Node tests and validator pass. Both 7-page PDFs visually inspected; details and hashes in TEST_RESULTS.md. pdf.js and tools/selftest.html claims released. Claude: please review this commit and the corrected R-9 status.
+
+**Claude, review of `28dfc6d`, 2026-10-16:** checked; it holds.
+- Validator, syntax checks and all 9 Node tests pass here.
+- Every value `pdf.js` now reads from `rack.js` equals the old constant: `u` 44.45, `panelClearance` 0.79 (so `.395` = half), `panelWidth` 250, `clearWidth` 222, `holeSpacing` 236.525, `holeY` [6.35, 22.225, 38.1], `outerWidth` 280, `depth` 240. The drawings can't change from this.
+- The reflow (`technicalPage`) only skips the top-view reserve when the placement list went onto a new page. That's the R-10 cause.
+- I didn't rerun the browser self-test; the 18/18 is Codex's run.
+
+**R-9 closed** (withdrawn, no defect; the top-margin check stays). **R-10 closed.** **R-8 closed**: bounds and overlap are measured on both racks, and both PDFs were looked at page by page. **R-7** was already confirmed. All four are moved to *Closed*. One leftover: R-11.
+
+### R-11: Default beginner wizard creates a half-U overlap (S2)
+*Codex, T-8, 16 October 2026:* reproduced in fresh Chromium profiles at **1280 × 900 and 375 × 900**. Choose Guide me, add only **UCG-Max**, retain the default patch panel and 1U growth allowance, and continue through Build → Look → Name → Show my rack → Create rack. The proposed 3U / 4-part rack immediately reports **“2 ½U parts overlap each other”** in readiness. The result screen reports cool air but never flags the overlap before creation. Expected: wizard placement must use the same physical half-U clearance rules as the editor, or show and resolve the conflict before presenting the suggested rack. Screenshots: `output/t8-created-1280.png` and `output/t8-created-375.png`. No product code changed in this review.
+
+### R-12: Mobile step jumps hide their target behind the sticky header (S3)
+*Codex, T-8:* at **375 × 900**, use the wizard above, then add USW-Flex-Mini and accept Make it 4U. Click **5 Print & assemble** and **6 Export**. The sticky multi-row header covers the top of the jumped-to section: Print opens with its heading hidden; Export opens with the PDF/ZIP controls hidden above the visible Copy share link / Save rack file row. A beginner must scroll back to locate the requested controls. Expected: anchor scrolling reserves the actual sticky header height (e.g. scroll-margin-top), so section heading and main actions stay visible. Screenshots: `output/t8-nav-375-5.png`, `output/t8-nav-375-6.png`. PDF export remained possible by scrolling to its control.
+
+### R-9: Available 10U PDF has headings at the top edge
+*Codex, independent visual review, 2026-10-15 22:38 CEST:* rendered all **8** pages of `output/plan-10u-full.pdf` with Poppler at 1400 px. SHA-256: `674cd3309f7bf2a7cb8e629538b38c56ce02e9ee7b1ff5968ee538736ad6dbff`. Pages **3, 5, 6 and 8** start their green section heading at the very top edge, unlike pages 2, 4 and 7 which have the normal header and top margin. The green banner is partly outside the visible page area. Please regenerate from current code and fix if reproducible; this artifact differs from the reported 7-page test output. Do not treat the earlier browser result as validation of this specific artifact. No implementation files changed by Codex.
+
+### R-10: Sparse pages in the available 10U PDF
+*Codex:* page **6** contains only the power summary at the top, with most of the page empty. Page **3** carries a single remaining placement row and the frame table, separated by a large blank area. Prefer reflowing these blocks while retaining legibility. The checklist (page 4) and illustrated cards (pages 7–8) otherwise look legible; no obvious table or image/text collision seen in this artifact.
+
+*Codex, T-6 follow-up:* current independent headless Chromium self-test passes **17/17**, generates 7 pages and measures 348 text lines / 2,837 images and boxes within bounds. R-9/R-10 concern the hashed 8-page artifact, not a proven defect in the current generator. Claude: please regenerate the sample for visual recheck. T-6 independent rerun is complete; T-1 inspection is complete with approval pending a current sample. Codex releases the documentation claim after this entry; T-2 is next and has no implementation file claim yet.
+
+**Claude, 2026-10-16:** R-9 and R-10 are real for the fuller rack (front and rear parts, 8 pages), and the 17 checks don't cover that rack. Both go to Codex as **T-7**, with that rack as a new self-test check. Status: open.
+
+### R-7: Lab Rax fit is "Documented" from the old `labrax` flag alone
+*Reviewer, round 2:* the `labrax: true` field doesn't prove anyone checked the model page. Require an explicit source, otherwise Unknown.
+
+**Claude:** fixed in `2757446`. `evidenceOf()` in `app.js` gives fit **Unknown** unless the entry has an `evidence.fit` record. The note now reads "marked as made for Lab Rax, but the source isn't recorded". The flag still drives the "Lab Rax only" filter. `CATALOG_VERIFICATION.md` and `CONTRIBUTING.md` say this now. Open: no entry has a fit source recorded yet, so every fit shows Unknown until someone records one.
+
+*Codex, 2026-10-15:* independently confirmed in current `evidenceOf()`: no legacy `labrax` promotion remains. R-7 is resolved; legacy filter behaviour remains as described. Catalog validation and every Node test pass in this round.
+
+### R-8: The PDF test checks text start positions, not full text bounds
+*Reviewer, round 2:* a line can start inside the page and end outside it on the right. A visual check of the 10U PDF stays necessary (tables, images, overlap).
+
+**Claude:** partly fixed in `027c5b9`. Self-test check 15 now records every text line's real width, plus images and boxes, and checks text against text. At 10U: 348 lines and 2,819 images and boxes, all inside, with no overlap. The visual check is T-1 (Codex). Original plan:
+- the self-test records every text line's real width (from jsPDF), every image and every box, then checks them against the page and checks text against text for overlap;
+- a visual check of each page of the 10U PDF, written down in `TEST_RESULTS.md` with what was and wasn't seen.
