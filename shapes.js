@@ -861,8 +861,9 @@ function compileTop(d, opts) {
    sharing the middle posts, { joiner: 'post' | 'depth' | 'outer', u: 6 } how a build taller than 5U is joined at the seam: plates on the posts, a bar
    between front and rear posts, or a bar across the outside of the side panels. frameMods() merges the extras in a build for the front and 3D views; extraScene() draws one for its card. */
 function frameMods(list) {
-  // feet stays plain | big | casters for the views that only know those; foot, chassis, wallStyle and sideMount say more
-  const m = { side: null, sideFan: 0, sideMount: null, handles: 'plain', handlesAt: null, feet: 'plain', foot: null, chassis: null, drawer: false, logo: null, corner: 0, depthAdd: 0, wall: false, wallStyle: null, edgeSwitch: false, width: 0, tandem: 0 };
+  // feet stays plain | big | casters for the views that only know those; foot, chassis, wallStyle, sideMount, hl, rails, joiner, bar,
+  // sidesOpen, width and tandem say more (the planner's 3D view draws them; see view3d.js buildRack)
+  const m = { side: null, sideFan: 0, sideMount: null, handles: 'plain', handlesAt: null, feet: 'plain', foot: null, chassis: null, drawer: false, logo: null, corner: 0, depthAdd: 0, wall: false, wallStyle: null, edgeSwitch: false, width: 0, tandem: 0, hl: [], rails: null, joiner: null, bar: null, sidesOpen: false };
   (list || []).forEach(d => {
     const s = d && d.shape || {};
     if (s.side || s.fan) { m.side = s.side || m.side || 'plain'; if (s.fan) m.sideFan = num(s.fan, 80); }
@@ -877,6 +878,11 @@ function frameMods(list) {
     if (s.edge === 'switch') m.edgeSwitch = true;
     if (s.width) m.width = num(s.width, 0);
     if (s.tandem) m.tandem = num(s.tandem, 0);
+    if (s.hl) [].concat(s.hl).forEach(k => { if (!m.hl.includes(k)) m.hl.push(k); }); // what to colour: base, top, posts, handles, edges, sides, braces
+    if (s.rails) m.rails = s.rails;
+    if (s.joiner) m.joiner = s.joiner;
+    if (s.bar) m.bar = s.bar;
+    if (s.sides === 'open') m.sidesOpen = true;
   });
   return m;
 }
@@ -955,10 +961,67 @@ function tandemScene(sp, o) {
   const n = clamp(Math.floor(num(sp.tandem, 2)), 2, 3), one = Object.assign({}, sp, { tandem: 0 }), dx = FRAME.outer - 2 * 3 - FRAME.post;
   const out = { rack: true, objs: [], w: FRAME.outer + (n - 1) * dx, h: 0 };
   for (let k = 0; k < n; k++) {
-    const sc = rackScene(k < n - 1 ? Object.assign({}, one, { sides: 'open' }) : one, o);
+    const sc = rackScene(Object.assign({}, one, { shared: [k > 0 ? -1 : 0, k < n - 1 ? 1 : 0] }), o);
     shiftScene(sc, k * dx - (n - 1) * dx / 2); out.objs.push(...sc.objs); out.h = sc.h;
   }
   return out;
+}
+/* ---------- what extras add to the frame, shared by the extras' cards (rackScene) and the planner's 3D view (frameExtras) ----------
+   Each one adds primitives to a scene S for the spec sp (a shape, or the merged mods turned into one) in the frame described by c:
+   W and D the outside width and depth, y0 the bottom of the bottom ring, bot and top the ring heights, yT the top of the inner height,
+   ih the inner height, u its height in U, post the post width, frame and accent the colours. The extra's own parts are drawn in the accent. */
+function holeXOf(c) { return HOLE_X + (c.W - FRAME.outer) / 2; } // the post holes sit 7.26 mm from the inner edge of the post
+// rails with larger bolt heads: a column of counterbored holes (three per U, EIA spacing) in the front face of each post
+function xRails(S, sp, c) {
+  if (!sp.rails) return;
+  const R = S.obj(2), hx = holeXOf(c);
+  for (const sx of [-1, 1]) for (const z of [0, -c.D + 20]) for (let k = 0; k < c.u; k++) for (const off of DIMS.holeY) { const hy = c.yT - k * U - off; R.push(cyl(sx * hx, hy, z + .12, 6.4, .1, shade(c.frame, -.4)), cyl(sx * hx, hy, z + .24, 3.4, .1, C.hole)); }
+}
+// the seam of a build taller than 5U: plates over the post joints, a bar from front to rear post, or a bar across the outside of the side panels
+function xJoiner(S, sp, c) {
+  if (!sp.joiner) return;
+  const jy = c.y0 + c.bot + Math.min(5, c.u - 1) * U, J = S.obj(2), W = c.W, D = c.D, post = c.post;
+  if (sp.joiner === 'post') for (const sx of [-1, 1]) for (const z of [0, -D + 20]) J.push(box(sx < 0 ? -W / 2 + 3 : W / 2 - 3 - post, jy - 18, z + .6, post, 36, 2.4, c.accent));
+  else if (sp.joiner === 'depth') for (const sx of [-1, 1]) J.push(flat('x', rectP(10, jy - 8, D - 20, 16, 2), [], sx < 0 ? -W / 2 + 3 : W / 2 - 7, 4, c.accent));
+  else if (sp.joiner === 'outer') { J.push(flat('x', rectP(10, jy - 9, D - 20, 18, 2), [], W / 2, 3, c.accent)); for (const b of [18, D - 18]) J.push(flat('x', circP(b, jy, 4.5), [], W / 2 + 3, 1.6, C.steel)); }
+}
+// a flat bar along the middle of the top, front brace to back brace
+function xBar(S, sp, c, colour) { if (sp.bar === 'center') S.obj(1).push(box(-10, c.yT + c.top - 5, 0, 20, 5, c.D, colour || c.frame)); }
+// feet, casters on corner blocks, round feet or the adapter feet of a wall dock: four under the frame corners
+function xFeet(S, sp, c) {
+  const ft = sp.feet || 'plain', W = c.W, D = c.D, y0 = c.y0, accent = c.accent;
+  const dock = sp.wall === 'dock';
+  for (const sx of [-1, 1]) for (const z of [-8, -(D - 30)]) {
+    const fx = sx < 0 ? -W / 2 + 6 : W / 2 - 34, cx = fx + 14, cz = z - 11, F0 = S.obj(0);
+    if (ft === 'casters' && sp.chassis === 'blocks') { // a base block under the frame corner, the caster's swivel plate, its fork, and a wheel rolling front to back
+      F0.push(flat('x', circP(-cz, 15, 15), [], cx - 5, 10, '#25272B'), flat('x', circP(-cz, 15, 8), [], cx - 5.2, 10.4, C.steel), flat('x', circP(-cz, 15, 2.6, 12), [], cx - 7.2, 14.4, C.metal)); // tyre, hub, axle
+      for (const k of [cx - 7.2, cx + 5]) F0.push(flat('x', rectP(-cz - 9, 7, 18, y0 - 14.5 - 7, 4), [], k, 2.2, C.steel));
+      F0.push(box(fx - 3, y0 - 14.5, z + 3, 34, 2.5, 28, C.steel), box(fx, y0 - 12, z, 28, 12, 22, accent)); // painted bottom to top: the block rests on the plate
+    }
+    else if (ft === 'casters') { F0.push(box(fx, y0 - 10, z, 28, 10, 22, '#3A3D42'), cyl(fx + 14, y0 - 28, z + 4, 16, 6, '#1A1B1E'), cyl(fx + 14, y0 - 28, z + 4.2, 6, .4, C.metal)); }
+    else if (sp.foot) F0.push({ t: 'disc', x: cx, y: y0 - 14, z: cz, r: sp.foot === 'cone' ? 11.5 : 14, r2: 14, d: 14, tilt: 0, c: accent }); // a round foot (a cone: narrower at the floor)
+    else if (dock) F0.push(box(cx - 12, 6, z, 24, 6, 22, accent), box(cx - 7, 12, z, 14, y0 - 12, 22, accent)); // adapter foot: a flange that slides into the bracket, and a neck
+    else F0.push(box(fx, y0 - (ft === 'big' ? 14 : 8), z, 28, ft === 'big' ? 14 : 8, 22, ft === 'big' ? accent : '#1A1B1E'));
+  }
+}
+// wall mounts: true is a plain plate behind; the others show the brackets (the wall's half darker) against a light wall (c.noWall leaves the wall out)
+function xWall(S, sp, c) {
+  const style = typeof sp.wall === 'string' ? sp.wall : sp.wall ? 'plain' : null;
+  if (!style) return;
+  const W = c.W, D = c.D, y0 = c.y0, yT = c.yT, top = c.top, post = c.post, accent = c.accent;
+  if (style === 'plain') { S.obj(0).push(box(-W / 2 - 30, -10, -D - 2, W + 60, yT + top + 30, 6, '#D9DCDF')); return; }
+  const wallC = '#D9DCDF', dark = shade(accent, -.4), W0 = S.obj(0), rearX = sx => sx < 0 ? -W / 2 + 3 : W / 2 - 3 - post;
+  if (style === 'cleat') { // pairs of interlocking cleats on the rear posts and the wall, a spacer at the foot of each rear post
+    if (!c.noWall) W0.push(box(-W / 2 - 60, -30, -D - 12, W + 120, yT + top + 90, 4, wallC));
+    for (const sx of [-1, 1]) W0.push(box(rearX(sx), yT - 28, -D - 6, post, 78, 6, dark), box(rearX(sx), yT - 36, -D, post, 44, 6, accent), box(rearX(sx), y0 + c.bot + 4, -D, post, 18, 12, accent));
+  } else if (style === 'plate') { // a plate on the wall, a slotted slide mount on each rear post, bolts at the foot of the rear as spacers
+    if (!c.noWall) W0.push(box(-W / 2 - 60, -30, -D - 12, W + 120, yT + top + 90, 4, wallC));
+    W0.push(box(-80, yT - 110, -D - 8, 160, 180, 4, dark));
+    for (const sx of [-1, 1]) { const x = rearX(sx); W0.push(ext(rectP(x, yT - 70, post, 80, 2), [slotP(x + post / 2, yT - 30, 6, 40)], -D, 8, accent), cyl(x + post / 2, y0 + c.bot + 14, -D, 5.5, 12, C.steel)); }
+  } else if (style === 'dock') { // the rack on its side on the wall: the brackets that take the adapter feet, seen here under the feet
+    if (!c.noWall) W0.push(box(-W / 2 - 50, -6, 40, W + 100, 6, D + 90, wallC));
+    for (const sx of [-1, 1]) { const bx = (sx < 0 ? -W / 2 + 20 : W / 2 - 20) - 17; W0.push(box(bx, 0, -4, 34, 5, D - 4, dark), box(bx, 5, -4, 4, 8, D - 4, dark), box(bx + 30, 5, -4, 4, 8, D - 4, dark)); }
+  }
 }
 /* A small Lab Rax for the extras' cards and anything else that needs the frame as primitives (3D side panels use sideHoles). */
 function rackScene(spec, o) {
@@ -976,15 +1039,15 @@ function rackScene(spec, o) {
   const hlOn = k => [].concat(sp.hl || []).includes(k), hl = k => hlOn(k) ? accent : frame, edgeC = k => hlOn('edges') || hlOn(k) ? accent : frame, brC = k => hlOn('braces') || hlOn(k) ? accent : frame;
   B(-W / 2, y0, 0, ring, bot, D, edgeC('base')); B(W / 2 - ring, y0, 0, ring, bot, D, edgeC('base')); B(-W / 2 + ring, y0, 0, W - 2 * ring, bot, ring, brC('')); B(-W / 2 + ring, y0, -D + ring, W - 2 * ring, bot, ring, brC(''));
   for (const sx of [-1, 1]) for (const z of [0, -D + 20]) B(sx < 0 ? -W / 2 + 3 : W / 2 - 3 - post, y0 + bot, z, post, ih, 20, hl('posts'));
-  // rails with larger bolt heads: the posts bare, a column of counterbored holes (three per U, EIA spacing) in the front face of each
-  if (sp.rails) { const R = S.obj(2); for (const sx of [-1, 1]) for (const z of [0, -D + 20]) for (let k = 0; k < u; k++) for (const off of DIMS.holeY) { const hy = yT - k * U - off; R.push(cyl(sx * HOLE_X, hy, z + .12, 6.4, .1, shade(frame, -.4)), cyl(sx * HOLE_X, hy, z + .24, 3.4, .1, C.hole)); } }
+  const xc = { W, D, y0, bot, top, yT, ih, u, post, frame, accent };
+  xRails(S, sp, xc); // rails with larger bolt heads: the posts bare (the front panels are left out below), counterbored holes in the front face of each
   // front: a few panels so it reads as a rack
   const PW = sp.width ? W - 30 : 250, ns = sp.width ? Math.round(PW / 50) : 5; // panel width and number of slots in the bottom one: a wider frame has wider panels
   if (!sp.rails) for (let i = 0; i < u; i++) { const P = S.obj(1); P.push(box(-PW / 2, y0 + bot + i * U + .4, 2.6, PW, U - .8, 3, shade(frame, .05), 1)); if (i === u - 1) ventHoles('hex', -PW / 2 + 25, y0 + bot + i * U + 7, PW - 50, U - 14, {}).forEach(h => P.push(ext(h, [], 2.7, .1, C.hole))); else if (i === 0) { for (let k = 0; k < ns; k++) P.push(box(-(ns * 40 - 10) / 2 + k * 40, y0 + bot + i * U + 8, 2.7, 30, U - 17, .1, C.hole, 2)); } }
   // top ring with the hex grille and logo, or the keystone corner
   B(-W / 2, yT, 0, ring, top, D, edgeC('top'), 1); B(W / 2 - ring, yT, 0, ring, top, D, edgeC('top'), 1); B(-W / 2 + ring, yT, -D + ring, W - 2 * ring, top, ring, brC('top'), 1);
   const F = S.obj(1); F.push(box(-W / 2 + ring, yT, 0, W - 2 * ring, top, ring, brC('top')));
-  if (sp.bar === 'center') B(-10, yT + top - 5, 0, 20, 5, D, brC(''), 1); // a flat bar along the middle of the top, front brace to back brace
+  xBar(S, sp, xc, brC(''));
   const G = S.obj(2);
   if (sp.corner) { const n = Math.min(num(sp.corner, 11), 12); for (let i = 0; i < n; i++) G.push(box(-((n - 1) * 17.6) / 2 + i * 17.6 - 7.45, yT + top / 2 - 8.2, .1, 14.9, 16.4, .1, '#18191C'), box(-((n - 1) * 17.6) / 2 + i * 17.6 - 5.85, yT + top / 2 - 5.8, .2, 11.7, 9.8, .1, C.hole)); }
   else {
@@ -995,7 +1058,7 @@ function rackScene(spec, o) {
   // right side panel with its pattern (the left one is hidden)
   const sh = sideHoles(sp.side, sp.fan, D - 40, ih + 8, { mount: sp.mount }), SP = S.obj(2), side = hlOn('sides') ? accent : sp.side || sp.fan ? frame : sp.sides === 'acrylic' ? '#2A3038' : frame;
   const sx0 = 20, sy0 = y0 + bot - 4, sw = D - 40, shh = ih + 8;
-  if (sp.sides !== 'open') { // open: no printed side panel, the frame shows
+  if (sp.sides !== 'open' && !(sp.shared && sp.shared.includes(1))) { // open: no printed side panel, the frame shows; shared: a neighbouring rack stands on that side
     if (sh.back) SP.push(flat('x', rectP(sx0 + sh.rim, sy0 + sh.rim, sw - 2 * sh.rim, shh - 2 * sh.rim, 1), [], W / 2 - 4.2, 1.2, shade(accent, -.25))); // the second colour, seen through the cut-outs
     if (sp.joiner && u > 1) { // a build taller than 5U has two side panels with a seam at the joint (the upper one an extension)
       const h1 = Math.min(5, u - 1) * U + 4;
@@ -1006,13 +1069,7 @@ function rackScene(spec, o) {
     if (sh.fan) { const fx = 20 + sh.fan.cx, fy = y0 + bot - 4 + sh.fan.cy, r = sh.fan.d / 2 - 2; for (let k = 1; k <= 3; k++) SP.push(flat('x', circP(fx, fy, r * k / 3.2 + .8), [circP(fx, fy, r * k / 3.2 - .4)], W / 2 + .5, 1, C.metal)); SP.push(flat('x', circP(fx, fy, r * .36), [], W / 2 - 2, 1, '#2A2C30')); }
     (sh.studs || []).forEach(([a, b]) => SP.push(flat('x', circP(a + 20, b + y0 + bot - 4, 4.8, 14), [], W / 2, 1.8, shade(frame, .08))));
   }
-  // joiners at the seam of a tall build (see the header): plates over the post joints, a bar from front to rear post, a bar across the outside of the side panels
-  if (sp.joiner) {
-    const jy = y0 + bot + Math.min(5, u - 1) * U, J = S.obj(2);
-    if (sp.joiner === 'post') for (const sx of [-1, 1]) for (const z of [0, -D + 20]) J.push(box(postX(sx), jy - 18, z + .6, post, 36, 2.4, accent));
-    else if (sp.joiner === 'depth') for (const sx of [-1, 1]) J.push(flat('x', rectP(10, jy - 8, D - 20, 16, 2), [], sx < 0 ? -W / 2 + 3 : W / 2 - 7, 4, accent));
-    else if (sp.joiner === 'outer') { J.push(flat('x', rectP(10, jy - 9, D - 20, 18, 2), [], W / 2, 3, accent)); for (const b of [18, D - 18]) J.push(flat('x', circP(b, jy, 4.5), [], W / 2 + 3, 1.6, C.steel)); }
-  }
+  xJoiner(S, sp, xc); // joiners at the seam of a tall build (see the header)
   // handles on top, feet or casters below, a drawer in the base
   const hs = sp.handles || 'plain';
   if (hs === 'side') { // attachment is documented; the grip outline and size remain approximate
@@ -1020,38 +1077,14 @@ function rackScene(spec, o) {
     const gy = at === 'top-corners' ? yT + top / 2 - 13 : at === 'bottom-corners' ? y0 + bot / 2 - 13 : y0 + bot + ih * .62;
     for (const sx of [-1, 1]) S.obj(2).push(flat('x', rectP(gz, gy, gl, 26, 10), [rectP(gz + 12, gy + 7, gl - 24, 12, 6)], sx < 0 ? -W / 2 - 12 : W / 2, 12, accent));
   } else if (hs !== 'none') for (const sx of [-1, 1]) {
+    if (sp.shared && sp.shared.includes(sx)) continue; // no handle between two racks
     const L = hs === 'long' && sp.depth ? FRAME.depth * FRAME.handleLen + num(sp.depth, 0) : (D) * (hs === 'long' ? .7 : .53), H = hs === 'stackable' ? 26 : 34, z0 = -(D - L) / 2, leg = 14, sl = hs === 'stackable' ? 0 : .35, bar = 10;
     const pts = [[-z0, 0], [-z0 + leg, 0], [-z0 + leg + (H - bar) * sl, H - bar], [-z0 + L - leg - (H - bar) * sl, H - bar], [-z0 + L - leg, 0], [-z0 + L, 0], [-z0 + L - H * sl, H], [-z0 + H * sl, H]];
     S.obj(2).push(flat('x', hs === 'stackable' ? [[-z0, 0], [-z0 + L, 0], [-z0 + L, H], [-z0, H]].map(([a, b]) => [a, b + yT + top]) : pts.map(([a, b]) => [a, b + yT + top]), hs === 'stackable' ? [rectP(-z0 + 14, 6 + yT + top, L - 28, H - 14, 4)] : [], sx * (W / 2 - 23) - 6, 12, hs === 'side' || hlOn('handles') || sp.handles && sp.handles !== 'plain' ? accent : frame));
   }
-  const ft = sp.feet || 'plain';
-  for (const sx of [-1, 1]) for (const z of [-8, -(D - 30)]) {
-    const fx = sx < 0 ? -W / 2 + 6 : W / 2 - 34, cx = fx + 14, cz = z - 11, F0 = S.obj(0);
-    if (ft === 'casters' && sp.chassis === 'blocks') { // a base block under the frame corner, the caster's swivel plate, its fork, and a wheel rolling front to back
-      F0.push(flat('x', circP(-cz, 15, 15), [], cx - 5, 10, '#25272B'), flat('x', circP(-cz, 15, 8), [], cx - 5.2, 10.4, C.steel), flat('x', circP(-cz, 15, 2.6, 12), [], cx - 7.2, 14.4, C.metal)); // tyre, hub, axle
-      for (const k of [cx - 7.2, cx + 5]) F0.push(flat('x', rectP(-cz - 9, 7, 18, y0 - 14.5 - 7, 4), [], k, 2.2, C.steel));
-      F0.push(box(fx - 3, y0 - 14.5, z + 3, 34, 2.5, 28, C.steel), box(fx, y0 - 12, z, 28, 12, 22, accent)); // painted bottom to top: the block rests on the plate
-    }
-    else if (ft === 'casters') { F0.push(box(fx, y0 - 10, z, 28, 10, 22, '#3A3D42'), cyl(fx + 14, y0 - 28, z + 4, 16, 6, '#1A1B1E'), cyl(fx + 14, y0 - 28, z + 4.2, 6, .4, C.metal)); }
-    else if (sp.foot) F0.push({ t: 'disc', x: cx, y: y0 - 14, z: cz, r: sp.foot === 'cone' ? 11.5 : 14, r2: 14, d: 14, tilt: 0, c: accent }); // a round foot (a cone: narrower at the floor)
-    else if (wallStyle === 'dock') F0.push(box(cx - 12, 6, z, 24, 6, 22, accent), box(cx - 7, 12, z, 14, y0 - 12, 22, accent)); // adapter foot: a flange that slides into the bracket, and a neck
-    else F0.push(box(fx, y0 - (ft === 'big' ? 14 : 8), z, 28, ft === 'big' ? 14 : 8, 22, ft === 'big' ? accent : '#1A1B1E'));
-  }
+  xFeet(S, sp, xc);
   if (sp.drawer) { S.obj(0).push(box(-W / 2 + 6, y0 - 30, 0, W - 12, 28, D - 20, frame, 2)); S.obj(2).push(box(-30, y0 - 19, 6, 60, 7, 6, accent, 3)); }
-  if (wallStyle === 'plain') { S.obj(0).push(box(-W / 2 - 30, -10, -D - 2, W + 60, yT + top + 30, 6, '#D9DCDF')); }
-  else if (wallStyle) { // brackets: the part in the accent colour (the wall's half darker), the wall light
-    const wallC = '#D9DCDF', dark = shade(accent, -.4), W0 = S.obj(0), rearX = postX;
-    if (wallStyle === 'cleat') { // pairs of interlocking cleats on the rear posts and the wall, a spacer at the foot of each rear post
-      W0.push(box(-W / 2 - 60, -30, -D - 12, W + 120, yT + top + 90, 4, wallC));
-      for (const sx of [-1, 1]) W0.push(box(rearX(sx), yT - 28, -D - 6, post, 78, 6, dark), box(rearX(sx), yT - 36, -D, post, 44, 6, accent), box(rearX(sx), y0 + bot + 4, -D, post, 18, 12, accent));
-    } else if (wallStyle === 'plate') { // a plate on the wall, a slotted slide mount on each rear post, bolts at the foot of the rear as spacers
-      W0.push(box(-W / 2 - 60, -30, -D - 12, W + 120, yT + top + 90, 4, wallC), box(-80, yT - 110, -D - 8, 160, 180, 4, dark));
-      for (const sx of [-1, 1]) { const x = rearX(sx); W0.push(ext(rectP(x, yT - 70, post, 80, 2), [slotP(x + post / 2, yT - 30, 6, 40)], -D, 8, accent), cyl(x + post / 2, y0 + bot + 14, -D, 5.5, 12, C.steel)); }
-    } else if (wallStyle === 'dock') { // the rack on its side on the wall: the brackets that take the adapter feet, seen here under the feet
-      W0.push(box(-W / 2 - 50, -6, 40, W + 100, 6, D + 90, wallC));
-      for (const sx of [-1, 1]) { const bx = (sx < 0 ? -W / 2 + 20 : W / 2 - 20) - 17; W0.push(box(bx, 0, -4, 34, 5, D - 4, dark), box(bx, 5, -4, 4, 8, D - 4, dark), box(bx + 30, 5, -4, 4, 8, D - 4, dark)); }
-    }
-  }
+  xWall(S, sp, xc);
   if (sp.inside) {
     const P = S.obj(2), k = sp.inside;
     if (k === 'comb' || k === 'guide') for (let i = 0; i < 6; i++) P.push(box(-W / 2 + 40 + i * 9, y0 + bot + 10, 10, 4, ih - 20, 14, accent, 1.5));
@@ -1363,6 +1396,14 @@ window.LRShapes = {
   // how a part's panel sits in its slot: { h, lift, mid, slots, screws, notches } in mm; upper: a ½U part in the upper half of a U
   fit: (d, upper) => plateFit(lookOf(d), upper),
   part: compilePart, top: compileTop, rack: rackScene, frameMods, sideHoles, ventHoles,
+  /* What the chosen extras add to the frame in the planner's 3D view, as meshes (see xRails, xJoiner, xFeet, xWall, xBar): c describes the
+     frame as in those functions (W, D, y0, bot, top, yT, ih, u, post, frame, accent). Feet are drawn only when an extra changes their look. */
+  frameExtras(T, mods, c, mat) {
+    const sp = { feet: mods.feet, foot: mods.foot, chassis: mods.chassis, wall: mods.wallStyle && mods.wallStyle !== 'plain' ? mods.wallStyle : null, rails: mods.rails, joiner: c.u > 5 ? mods.joiner : null, bar: mods.bar }, S = scene();
+    xRails(S, sp, c); xJoiner(S, sp, c); xBar(S, sp, c, (mods.hl || []).includes('braces') ? c.accent : c.frame); xWall(S, sp, c);
+    if (sp.foot || sp.chassis || sp.wall === 'dock') xFeet(S, sp, c);
+    return meshes(T, S, mat, 'fx' + JSON.stringify([sp, c])); // cached per extra and frame, like the other parts
+  },
   svg, geoms, meshes, defaultShape, genShape, check, checkDevice,
   // network ports in a device's io (RJ45 and SFP), for the power and network budget
   netPorts: io => (io || []).map(parseTok).filter(t => t && (t.k === 'rj45' || t.k === 'sfp')).reduce((n, t) => n + t.n, 0),

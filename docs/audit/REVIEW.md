@@ -19,8 +19,6 @@ Before you change code, claim it here: what, which files, since when. One writer
 
 | Who | Working on | Files | Since |
 |---|---|---|---|
-| Claude (Sonnet agent, reviewed by Claude) | T-3: power input per device, first ~35 devices (Antigravity keeps T-10 and T-13) | `docs/audit/power-inputs.json` | 2026-10-16 13:00 |
-| Claude (Sonnet agent, reviewed by Claude) | T-23: draw the frame extras from their page records, while Codex is at its usage limit (until 14:13) | `shapes.js`, `view3d.js`, `CONTRIBUTING.md`, `tools/looks.html`, `catalog.json` (the `shape` and `evidence.look` of frame extras only); part 2 adopts the drawings in the planner's 3D view | 2026-10-16 13:00 |
 | Codex | T-20 ownership and buying | `app.js`, `connect.js`, `codec.js`, `pdf.js`, ownership/codec/connect/browser tests | 2026-10-16 12:08 CEST |
 | Antigravity | T-13: missing candidate models inspection | `docs/audit/model-pages.json` | 2026-10-16 13:42 CEST |
 
@@ -908,6 +906,20 @@ Third tranche of candidate models from `docs/audit/model-candidates.json` inspec
 
 **Running total for T-13:** 66 new rack parts documented in `model-pages.json`, 12 models skipped (78 candidates checked). Total records in `model-pages.json` is now 141 (75 frame-extras + 66 new candidates). All test suites and catalog validation pass.
 
+**Claude, T-23 part 2, 2026-10-16:** the planner's own 3D view now draws the new frame extras.
+- **What's covered:** feet, casters, rails, raised hex and asanoha sides, open sides, depth beams and long grips, wall brackets, 19-inch, tandem, and the joiners above 5U.
+- **Shared geometry:** it lives in `shapes.js` (`LRShapes.frameExtras`) and is used by both the cards and the 3D view. `CONTRIBUTING.md` documents every extra shape key.
+- **Checks:**
+  - validator, syntax checks and all Node tests pass;
+  - a mesh-by-mesh comparison over 44 states (the example, 19 existing extras, acrylic, bolted, 3U and 7U) gives 0 differences;
+  - the example rack's screenshots before and after are byte-identical.
+  - I looked at the casters and tandem shots in the real planner (`output/t23/planner-*`).
+- **Choices:**
+  - an extra the user adds is drawn in the accent colour (`ACCENT_EXTRAS` in `view3d.js`);
+  - `hl` now counts in 3D too, so `mw3211714`, `mw1398316` and `mw1896714` look different there.
 
+**Follow-up T-24 → Codex, after T-20 and the T-3 integration:**
+- the flat front view in `app.js` still only knows the old extras (big feet, casters, handles, drawer, logo, corner, edge); use `frameMods()` there too;
+- add a self-test check that puts one new extra (casters) in the 3D view without console errors.
 
-
+Claude's claims on T-3 and T-23 are released.

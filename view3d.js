@@ -33,12 +33,13 @@ function boxMesh(w, h, d, x, y, z, m) { const g = new T.BoxGeometry(w, h, d); co
 
 /* A closed rectangular ring with one cross-section all the way round and 45° mitred corners, like the printed horizontal and edge pieces.
    profile: [[out, up], …] in mm; out is measured outward from the hw × hd rectangle, up from the ring's bottom. */
-function ringGeom(profile, hw, hd) {
+function ringGeom(profile, hw, hd, only) { // only: which sides to build (0 right, 1 back, 2 left, 3 front), all by default
   const corners = [[1, 1], [1, -1], [-1, -1], [-1, 1]], pos = [];
   const at = (c, p) => [c[0] * (hw + p[0]), p[1], c[1] * (hd + p[0])];
   for (let i = 0; i < profile.length; i++) {
     const a = profile[i], b = profile[(i + 1) % profile.length];
     for (let k = 0; k < 4; k++) {
+      if (only && !only.includes(k)) continue;
       const c0 = corners[k], c1 = corners[(k + 1) % 4], q = [at(c0, a), at(c1, a), at(c1, b), at(c0, b)];
       pos.push(...q[0], ...q[1], ...q[2], ...q[0], ...q[2], ...q[3]);
     }
@@ -98,22 +99,36 @@ function postHoles(g, snap, y0, inner, F) {
   const m = new T.Matrix4(), one = new T.Vector3(1, 1, 1), front = new T.Quaternion(), back = new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), Math.PI);
   let k = 0;
   for (const sx of [-1, 1]) for (const isFront of [true, false]) for (let u = 0; u < snap.h; u++) for (const off of HOLE_Y) {
-    m.compose(new T.Vector3(sx * HOLE_X, y0 + inner - u * P.U - off, isFront ? .15 : -F.depth - .15), isFront ? front : back, one);
+    m.compose(new T.Vector3(sx * (HOLE_X + (F.outer - FRAME.outer) / 2), y0 + inner - u * P.U - off, isFront ? .15 : -F.depth - .15), isFront ? front : back, one);
     holes.setMatrixAt(k, m); if (brass) brass.setMatrixAt(k, m); k++;
   }
   g.add(holes); if (brass) g.add(brass);
 }
-async function buildRack(snap) {
-  // frame extras: deeper sides, other handles, bigger feet or casters, a drawer under the base (see shapes.js frameMods)
-  const mods = snap.mods || {}, F = Object.assign({}, FRAME, { depth: FRAME.depth + (mods.depthAdd || 0), foot: mods.feet === 'casters' ? 46 : mods.feet === 'big' ? 14 : FRAME.foot, handleLen: mods.handles === 'long' ? .7 : FRAME.handleLen });
-  const g = new T.Group(), inner = snap.h * P.U, hw = F.outer / 2, hd = F.depth / 2, t = F.ring, drawerH = mods.drawer ? 30 : 0;
-  const frameM = mat(snap.frame, { side: T.DoubleSide }), postM = mat(snap.frame);
-  const y0 = F.foot + drawerH + F.bottom, yTop = y0 + inner, topY = yTop + F.top;
+/* The frame extras change the model in these ways (see shapes.js frameMods): width and tandem (a wider frame, racks side by side), depth
+   (depthAdd), side panel patterns, open sides, bigger and round feet, casters on corner blocks, rails, joiners, a bar across the top,
+   wall brackets, and hl: what to colour in the accent (base, top, posts, handles, edges = the side beams, braces = the front and back
+   braces, sides = the side panels). With none of them chosen the frame is the same as ever. */
+const ACCENT_EXTRAS = true; // colour the parts an extra adds or changes in the accent colour, as its card does (false: all in the frame colour)
+function frameDims(snap, mods) {
+  const outer = mods.width ? Math.max(FRAME.outer, Math.min(600, mods.width)) : FRAME.outer;
+  const F = Object.assign({}, FRAME, { outer, clear: outer - (FRAME.outer - FRAME.clear), depth: FRAME.depth + (mods.depthAdd || 0), foot: mods.feet === 'casters' ? 46 : mods.feet === 'big' ? 14 : mods.wallStyle === 'dock' ? 28 : FRAME.foot,
+    handleLen: mods.handles === 'long' ? (mods.depthAdd ? (FRAME.depth * FRAME.handleLen + mods.depthAdd) / (FRAME.depth + mods.depthAdd) : .7) : FRAME.handleLen });
+  const inner = snap.h * P.U, drawerH = mods.drawer ? 30 : 0, y0 = F.foot + drawerH + F.bottom, yTop = y0 + inner, topY = yTop + F.top;
+  return { F, inner, drawerH, y0, yTop, topY };
+}
+// one frame: rings, posts, panels, sides, handles, feet and what the extras add. main: the frame that carries the equipment and the top mount;
+// skip: the sides (-1 left, 1 right) that get no panel or handle because another rack stands there
+function frameGroup(snap, mods, d, main, skip) {
+  const { F, inner, drawerH, y0, yTop, topY } = d, hl = ACCENT_EXTRAS ? mods.hl || [] : [], hlOn = k => hl.includes(k);
+  const g = new T.Group(), hw = F.outer / 2, hd = F.depth / 2, t = F.ring, accentM = () => mat(snap.accent, { side: T.DoubleSide });
+  const frameM = mat(snap.frame, { side: T.DoubleSide }), postM = mat(hlOn('posts') ? snap.accent : snap.frame);
   // bottom and top rings: front and back horizontal pieces plus the side edge pieces, bevelled and mitred at the corners
-  const bottom = new T.Mesh(ringGeom([[0, F.bottom], [0, F.bottomBevel], [-F.bottomBevel, 0], [-t, 0], [-t, F.bottom]], hw, hd), frameM);
-  bottom.position.set(0, F.foot + drawerH, -hd); g.add(bottom);
-  const top = new T.Mesh(ringGeom([[0, 0], [0, F.top - F.topBevel], [-F.topBevel, F.top], [-t, F.top], [-t, 0]], hw, hd), frameM);
-  top.position.set(0, yTop, -hd); g.add(top);
+  const ring = (profile, y, sideOn, braceOn) => { // the sides and the braces in their own colour when an extra colours them
+    if (sideOn === braceOn) { const m = new T.Mesh(ringGeom(profile, hw, hd), sideOn ? accentM() : frameM); m.position.set(0, y, -hd); g.add(m); return; }
+    for (const [only, on] of [[[0, 2], sideOn], [[1, 3], braceOn]]) { const m = new T.Mesh(ringGeom(profile, hw, hd, only), on ? accentM() : frameM); m.position.set(0, y, -hd); g.add(m); }
+  };
+  ring([[0, F.bottom], [0, F.bottomBevel], [-F.bottomBevel, 0], [-t, 0], [-t, F.bottom]], F.foot + drawerH, hlOn('edges') || hlOn('base'), hlOn('braces'));
+  ring([[0, 0], [0, F.top - F.topBevel], [-F.topBevel, F.top], [-t, F.top], [-t, 0]], yTop, hlOn('edges') || hlOn('top'), hlOn('braces') || hlOn('top'));
   // hex grille on the front and back bevels, with the rack's name at the front
   for (const isFront of [true, false]) {
     const c = F.topBevel, n = .25 / Math.SQRT2;
@@ -127,27 +142,35 @@ async function buildRack(snap) {
   for (const sx of [-1, 1]) for (const z of [0, -(F.depth - F.postDepth)]) g.add(boxMesh(F.post, inner, F.postDepth, sx < 0 ? -F.clear / 2 - F.post : F.clear / 2, y0, z, postM));
   postHoles(g, snap, y0, inner, F);
   // top and bottom panels sit in a rebate inside the rings
-  const pw = F.outer - 2 * t + 6, pd = F.depth - 2 * t + 6, pz = -(F.depth - pd) / 2;
-  if (!snap.topPart) g.add(boxMesh(pw, F.side, pd, -pw / 2, topY - 6, pz, mat(snap.accent)));
+  const pw = F.outer - 2 * t + 6, pd = F.depth - 2 * t + 6, pz = -(F.depth - pd) / 2, topPart = main ? snap.topPart : null, bottomPart = main ? snap.bottomPart : null;
+  if (!topPart) g.add(boxMesh(pw, F.side, pd, -pw / 2, topY - 6, pz, mat(snap.accent)));
   else { // the top mount as drawn by shapes.js: access point on its arms, a fan or mesh top, Gridfinity
-    const top = LS.topMeshes(T, snap.topPart, { color: snap.panel, frame: snap.frame, accent: snap.accent, depth: F.depth }, cmat);
+    const top = LS.topMeshes(T, topPart, { color: snap.panel, frame: snap.frame, accent: snap.accent, depth: F.depth }, cmat);
     top.position.set(0, topY - 3, 0); g.add(top);
   }
   // the bottom: printed, 3 mm acrylic, or a top/bottom panel from the catalog turned over (mesh, a fan)
-  if (snap.bottomPart) { const b = LS.topMeshes(T, snap.bottomPart, { color: snap.panel, frame: snap.frame, accent: snap.accent, depth: F.depth }, cmat); b.rotation.x = Math.PI; b.position.set(0, y0 - 1, -F.depth); g.add(b); }
+  if (bottomPart) { const b = LS.topMeshes(T, bottomPart, { color: snap.panel, frame: snap.frame, accent: snap.accent, depth: F.depth }, cmat); b.rotation.x = Math.PI; b.position.set(0, y0 - 1, -F.depth); g.add(b); }
   else g.add(boxMesh(pw, F.side, pd, -pw / 2, y0 - 4, pz, snap.bottom === 'acrylic' ? mat('#1C2127', { transparent: true, opacity: .4, roughness: .12, metalness: .1, depthWrite: false }) : mat(snap.frame)));
   // side panels: printed in the frame colour, or tinted acrylic you can see through
-  // patterned side panels (hex, Kumiko, SKÅDIS, a fan…) come from the extras; otherwise printed or acrylic
+  // patterned side panels (hex, Kumiko, SKÅDIS, a fan…) come from the extras; otherwise printed or acrylic; open sides have none
+  // a build taller than 5U with a joiner has two panels with a seam at the joint, the upper one an extension
   const sideM = snap.sides === 'acrylic' ? mat('#1C2127', { transparent: true, opacity: .4, roughness: .12, metalness: .1, depthWrite: false }) : mat(snap.frame);
-  const sd = F.depth - 2 * F.postDepth + 8, sh = inner + 8;
-  if (mods.side || mods.sideFan) for (const sx of [-1, 1]) { const sp = LS.sideMeshes(T, mods, sd, sh, snap.frame, sx, cmat); sp.position.set(sx < 0 ? -hw : hw - F.side, y0 - 4, -F.postDepth + 4); g.add(sp); }
-  else for (const sx of [-1, 1]) g.add(boxMesh(F.side, sh, sd, sx < 0 ? -hw : hw - F.side, y0 - 4, -F.postDepth + 4, sideM));
+  const sd = F.depth - 2 * F.postDepth + 8, sh = inner + 8, seam = mods.joiner && snap.h > 5 ? Math.min(5, snap.h - 1) * P.U + 4 : 0;
+  for (const sx of [-1, 1]) {
+    if (mods.sidesOpen || skip && skip.includes(sx)) continue;
+    const inset = hlOn('edges') || hlOn('top') || hlOn('base') || hlOn('sides') ? .3 : 0, x = sx < 0 ? -hw + inset : hw - F.side - inset; // a panel in another colour than the edge pieces: its outer face a hair inside theirs, so the two don't flicker
+    if (mods.side || mods.sideFan) { const sp = LS.sideMeshes(T, mods, sd, sh, hlOn('sides') ? snap.accent : snap.frame, sx, cmat); sp.position.set(x, y0 - 4, -F.postDepth + 4); g.add(sp); }
+    else if (seam) { g.add(boxMesh(F.side, seam - .6, sd, x, y0 - 4, -F.postDepth + 4, sideM)); g.add(boxMesh(F.side, sh - seam - .6, sd, x, y0 - 4 + seam + .6, -F.postDepth + 4, hlOn('sides') ? mat(snap.accent) : sideM)); }
+    else g.add(boxMesh(F.side, sh, sd, x, y0 - 4, -F.postDepth + 4, hlOn('sides') ? mat(snap.accent) : sideM));
+  }
   // handles on the flat strip of the side edges, feet under the bottom edges
-  const hx = hw - (t + F.topBevel) / 2 - F.handleW / 2;
+  const hx = hw - (t + F.topBevel) / 2 - F.handleW / 2, handleM = hlOn('handles') ? accentM() : frameM;
   if (mods.handles === 'side') for (const sx of [-1, 1]) { // documented attachment; grip dimensions remain approximate
-    const gl = F.depth * .45, grip = new T.Mesh(new T.BoxGeometry(12, 26, gl), frameM); grip.position.set(sx * (hw + 6), mods.handlesAt === 'top-corners' ? topY + F.top / 2 : mods.handlesAt === 'bottom-corners' ? y0 - F.bottom / 2 : y0 + inner * .62, -F.depth / 2); g.add(grip);
-  } else for (const sx of [-1, 1]) { const hm = handleMesh(frameM, F, mods.handles); hm.position.set(sx < 0 ? -hx - F.handleW : hx, topY, -F.depth * (1 - F.handleLen) / 2); g.add(hm); }
-  for (const sx of [-1, 1]) for (const z of [-8, -(F.depth - 30)]) {
+    if (skip && skip.includes(sx)) continue;
+    const gl = F.depth * .45, grip = new T.Mesh(new T.BoxGeometry(12, 26, gl), handleM); grip.position.set(sx * (hw + 6), mods.handlesAt === 'top-corners' ? topY + F.top / 2 : mods.handlesAt === 'bottom-corners' ? y0 - F.bottom / 2 : y0 + inner * .62, -F.depth / 2); g.add(grip);
+  } else for (const sx of [-1, 1]) { if (skip && skip.includes(sx)) continue; const hm = handleMesh(handleM, F, mods.handles); hm.position.set(sx < 0 ? -hx - F.handleW : hx, topY, -F.depth * (1 - F.handleLen) / 2); g.add(hm); }
+  const ownFeet = mods.foot || mods.chassis || mods.wallStyle === 'dock'; // an extra with its own feet (round, casters on blocks, adapter feet) draws them in shapes.js
+  if (!ownFeet) for (const sx of [-1, 1]) for (const z of [-8, -(F.depth - 30)]) {
     const fx = sx < 0 ? -hw + 4 : hw - 32;
     if (mods.feet === 'casters') { // a caster: plate, fork and wheel
       g.add(boxMesh(28, 6, 22, fx, F.foot - 6, z, mat('#3A3D42')));
@@ -159,7 +182,19 @@ async function buildRack(snap) {
     g.add(boxMesh(F.outer - 12, drawerH - 2, F.depth - 20, -F.outer / 2 + 6, F.foot + 1, -2, frameM));
     g.add(boxMesh(60, 7, 6, -30, F.foot + drawerH / 2 - 3.5, 4, mat(snap.accent)));
   }
-  if (mods.wall) g.add(boxMesh(F.outer - 40, 40, 10, -F.outer / 2 + 20, y0 + inner / 2 - 20, -F.depth - 1, mat(snap.frame))); // wall cleat behind
+  if (mods.wall && (!mods.wallStyle || mods.wallStyle === 'plain')) g.add(boxMesh(F.outer - 40, 40, 10, -F.outer / 2 + 20, y0 + inner / 2 - 20, -F.depth - 1, mat(snap.frame))); // wall cleat behind
+  // rails, joiners, the bar across the top, round feet and casters on blocks, wall brackets: shapes.js draws them as the extra's cards do
+  const needs = mods.rails || mods.joiner && snap.h > 5 || mods.bar || mods.foot || mods.chassis || mods.wallStyle && mods.wallStyle !== 'plain';
+  if (needs) g.add(LS.frameExtras(T, Object.assign({}, mods, { hl }), { W: F.outer, D: F.depth, y0: F.foot + drawerH, bot: F.bottom, top: F.top, yT: yTop, ih: inner, u: snap.h, post: F.post, frame: snap.frame, accent: snap.accent, noWall: true }, cmat)); // (no wall: it would hide the back of the rack)
+  return g;
+}
+async function buildRack(snap) {
+  // frame extras: deeper sides, other handles, bigger feet or casters, a drawer under the base, a wider frame, racks side by side (see shapes.js frameMods)
+  const mods = snap.mods || {}, d = frameDims(snap, mods), { F, inner, y0 } = d;
+  const n = mods.tandem > 1 ? Math.min(3, Math.floor(mods.tandem)) : 1, dx = F.outer - 2 * F.side - F.post; // neighbours share a pair of posts
+  const g = frameGroup(snap, mods, d, true, n > 1 ? [1] : null);
+  for (let k = 1; k < n; k++) { const f = frameGroup(snap, mods, d, false, k < n - 1 ? [-1, 1] : [-1]); f.position.x = k * dx; g.add(f); }
+  if (n > 1) g.position.x = -(n - 1) * dx / 2; // the whole build stays centred
   // equipment, screwed to the front of the posts
   for (const it of snap.items) {
     // the panel's own height and place in its slot (shapes.js): Lab Rax panels are lower than EIA ones, so a seam shows between them
