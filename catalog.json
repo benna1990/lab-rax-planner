@@ -6548,9 +6548,53 @@
     {
      "id": "mw1931511",
      "name": "Side handles",
-     "shape": {"handles": "side"},
+     "shape": {
+      "handles": "side",
+      "at": "top-corners"
+     },
      "author": "Blind Badger",
-     "url": "https://makerworld.com/en/models/1931511"
+     "url": "https://makerworld.com/en/models/1931511",
+     "license": "CC BY-NC-SA",
+     "evidence": {
+      "fit": {
+       "state": "documented",
+       "source": "https://makerworld.com/en/models/1931511",
+       "date": "2026-10-16",
+       "note": "a remix of both Lab Rax 5U frames (heat-set and bolted)"
+      },
+      "look": {
+       "state": "estimated",
+       "source": "https://makerworld.com/en/models/1931511",
+       "date": "2026-10-16",
+       "note": "The photos show a horizontal handle bolted to the side of each top corner piece, sticking out sideways, on both sides. We draw one flat grip in the middle of the side panel (shapes.js, handles: 'side'). There's no choice of profile, handle type or blank corners."
+      }
+     },
+     "options": [
+      {
+       "id": "only-normal-bolted-parts-handles-and-corners",
+       "name": "Only Normal Bolted Parts (Handles and corners)",
+       "shape": {},
+       "note": "handles and side corner pieces for the bolted frame, normal bolt heads. 4 plates in this profile"
+      },
+      {
+       "id": "only-xl-bolted-parts-handles-and-corners",
+       "name": "Only XL Bolted Parts (Handles and corners)",
+       "shape": {},
+       "note": "handles and side corner pieces for the bolted frame, for larger M6 bolt heads. 4 plates in this profile"
+      },
+      {
+       "id": "only-heatset-parts-handles-and-corners",
+       "name": "Only Heatset Parts (Handles and Corners)",
+       "shape": {},
+       "note": "handles and side corner pieces for the heat-set insert frame"
+      },
+      {
+       "id": "all-options-together",
+       "name": "All Options Together",
+       "shape": {},
+       "note": "every variant. 9 plates in this profile. Bundle of alternatives: print only the variant matching your build."
+      }
+     ]
     },
     {
      "id": "mw1941244",

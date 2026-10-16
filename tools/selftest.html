@@ -139,6 +139,24 @@
       }
       return 'headings and export controls remain visible';
     });
+    await check('A sourced extra profile survives files and sharing and names the print variant', async () => {
+      $('[data-act="where"][data-v="sides"]').click();
+      $('#q').value = 'Side handles'; $('#q').dispatchEvent(new W.Event('input', { bubbles: true }));
+      const row = $('[data-act="lib"][data-key="mw1931511"]'); if (!row) fail('side handles not found'); row.click();
+      const picker = $('[data-part-opt][data-key="mw1931511"]'), opt = 'only-xl-bolted-parts-handles-and-corners';
+      if (!picker || picker.options.length !== 5) fail('four source profiles not offered');
+      picker.value = opt; picker.dispatchEvent(new W.Event('change', { bubbles: true }));
+      const print = T().printPack().find(p => /1931511/.test(p.url || ''));
+      if (!print || !/Only XL Bolted Parts/.test(print.name)) fail('print list lost the selected profile');
+      if (!T().orderList().some(r => r.key.startsWith('profile-') && /Only XL Bolted Parts/.test(r.spec))) fail('shopping list lost the selected profile');
+      const file = T().readRackFile(T().rackFile());
+      if (file.state.optionChoices.mw1931511 !== opt) fail('rack file lost the profile');
+      const shared = T().shareLink(); await load(shared.slice(shared.indexOf('#'))); hook();
+      if (T().state.optionChoices.mw1931511 !== opt) fail('share link lost the profile');
+      const mods = W.LRApp.snapshot().mods;
+      if (mods.handlesAt !== 'top-corners') fail('attachment point lost');
+      return 'four source profiles, selected XL persisted, approximate drawing at top corners';
+    });
   } catch (e) { log(false, 'Self-test stopped', e.message); }
   finally { KEYS.forEach((k, i) => saved[i] == null ? localStorage.removeItem(k) : localStorage.setItem(k, saved[i])); }
   const bad = results.filter(x => !x).length;

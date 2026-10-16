@@ -144,8 +144,8 @@ async function buildRack(snap) {
   else for (const sx of [-1, 1]) g.add(boxMesh(F.side, sh, sd, sx < 0 ? -hw : hw - F.side, y0 - 4, -F.postDepth + 4, sideM));
   // handles on the flat strip of the side edges, feet under the bottom edges
   const hx = hw - (t + F.topBevel) / 2 - F.handleW / 2;
-  if (mods.handles === 'side') for (const sx of [-1, 1]) { // grips on the side panels instead of handles on top
-    const gl = F.depth * .45, grip = new T.Mesh(new T.BoxGeometry(12, 26, gl), frameM); grip.position.set(sx * (hw + 6), y0 + inner * .62, -F.depth / 2); g.add(grip);
+  if (mods.handles === 'side') for (const sx of [-1, 1]) { // documented attachment; grip dimensions remain approximate
+    const gl = F.depth * .45, grip = new T.Mesh(new T.BoxGeometry(12, 26, gl), frameM); grip.position.set(sx * (hw + 6), mods.handlesAt === 'top-corners' ? topY + F.top / 2 : mods.handlesAt === 'bottom-corners' ? y0 - F.bottom / 2 : y0 + inner * .62, -F.depth / 2); g.add(grip);
   } else for (const sx of [-1, 1]) { const hm = handleMesh(frameM, F, mods.handles); hm.position.set(sx < 0 ? -hx - F.handleW : hx, topY, -F.depth * (1 - F.handleLen) / 2); g.add(hm); }
   for (const sx of [-1, 1]) for (const z of [-8, -(F.depth - 30)]) {
     const fx = sx < 0 ? -hw + 4 : hw - 32;

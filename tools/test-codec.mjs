@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 const win = {};
 new Function('window', readFileSync(new URL('../codec.js', import.meta.url), 'utf8'))(win);
 const C = win.LRCodec;
-const KEYS = ['h', 'version', 'frame', 'panel', 'accent', 'label', 'top', 'topDir', 'extras', 'xdir', 'market', 'costs', 'back', 'sides', 'room', 'power', 'bottom', 'bottomDir'];
+const KEYS = ['h', 'version', 'frame', 'panel', 'accent', 'label', 'top', 'topDir', 'extras', 'xdir', 'market', 'costs', 'back', 'sides', 'room', 'power', 'bottom', 'bottomDir', 'optionChoices'];
 const defaults = () => ({ h: 5, version: 'brass', frame: '#26282B', panel: '#26282B', accent: '#B5CF2A', label: 'Lab Rax', top: null, topDir: null, bottom: null, bottomDir: null, extras: [], xdir: {}, back: 'open', room: 25, sides: 'printed', power: { ups: {} }, market: 'NL', items: [], nextId: 1, example: true, done: {} });
 
 // a realistic build: settings off the defaults and parts with every kind of extra field
@@ -49,3 +49,11 @@ assert.equal(odd.notASetting, undefined, 'unknown settings are dropped');
 assert.deepEqual(odd.items.map(i => [i.key, i.pos2]), [['vent1', null], [null, null]], 'odd parts come back for sanitize() to drop');
 
 console.log('Codec checks passed: share links, rack files, defaults, non-ASCII text, bad input.');
+
+// Profile choices are optional version-1 fields; old files remain valid.
+const optionState = Object.assign(defaults(), { optionChoices: { mw1931511: 'only-xl-bolted-parts-handles-and-corners' }, items: [{ id: 1, key: 'future-part', pos2: 0, opt: 'normal' }] });
+const optionLayout = C.compact(optionState, defaults(), KEYS);
+const optionFile = C.readFile(C.fileText(optionLayout), defaults(), KEYS);
+assert.equal(optionFile.state.items[0].opt, 'normal');
+assert.deepEqual(optionFile.state.optionChoices, optionState.optionChoices);
+assert.deepEqual(C.expand(...C.fromB64(C.toB64(optionLayout)), defaults(), KEYS).optionChoices, optionState.optionChoices);

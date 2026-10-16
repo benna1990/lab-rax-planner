@@ -7,7 +7,19 @@ const win = {};
 new Function('window', readFileSync(new URL('../rack.js', import.meta.url), 'utf8'))(win);
 new Function('window', readFileSync(new URL('../shapes.js', import.meta.url), 'utf8'))(win);
 const LS = win.LRShapes, deviceNames = new Set((cat.devices || []).flatMap(g => (g.items || []).map(d => d.device)));
-const look = (kind, o, where) => { if (o.shape != null) LS.check(kind, o.shape, n => deviceNames.has(n)).forEach(e => errors.push(`${where}: ${e}`)); };
+const look = (kind, o, where) => {
+  if (o.shape != null) LS.check(kind, o.shape, n => deviceNames.has(n)).forEach(e => errors.push(`${where}: ${e}`));
+  if (o.options != null) {
+    if (!Array.isArray(o.options) || !o.options.length) { errors.push(`${where}: options must be a nonempty array`); return; }
+    const ids = new Set();
+    for (const opt of o.options) {
+      if (!opt || typeof opt.id !== 'string' || !/^[a-z0-9-]+$/.test(opt.id) || ids.has(opt.id) || typeof opt.name !== 'string' || !opt.name.trim()) { errors.push(`${where}: each option needs a unique id and name`); continue; }
+      ids.add(opt.id);
+      if (opt.note != null && typeof opt.note !== 'string') errors.push(`${where}: option note must be text`);
+      if (opt.shape != null) LS.check(kind, Object.assign({}, o.shape, opt.shape), n => deviceNames.has(n)).forEach(e => errors.push(`${where} option ${opt.id}: ${e}`));
+    }
+  }
+};
 const errors = [], ids = new Set(), urls = new Map();
 const FACES = new Set(['shelf', 'switch', 'vent', 'fan', 'ks', 'd', 'sbc', 'drv2', 'drv4', 'blank', 'cut']);
 const text = v => typeof v === 'string' && v.trim() !== '';
@@ -26,7 +38,7 @@ function evidence(o, where) {
   if (o.evidence == null) return;
   if (typeof o.evidence !== 'object' || Array.isArray(o.evidence)) return errors.push(`${where}: evidence must be an object`);
   for (const [k, e] of Object.entries(o.evidence)) {
-    if (!['height', 'fit', 'power', 'depth'].includes(k)) errors.push(`${where}: evidence.${k} is not a known claim (height, fit, power, depth)`);
+    if (!['height', 'fit', 'power', 'depth', 'look'].includes(k)) errors.push(`${where}: evidence.${k} is not a known claim (height, fit, power, depth, look)`);
     if (!e || !EV.has(e.state)) { errors.push(`${where}: evidence.${k}.state must be one of ${[...EV].join(', ')}`); continue; }
     if (e.state === 'verified' && !(text(e.method) && /^\d{4}-\d{2}-\d{2}$/.test(e.date || ''))) errors.push(`${where}: evidence.${k} is verified, so it needs a method and a date (YYYY-MM-DD)`);
     if ((e.state === 'documented' || e.state === 'community') && !(okUrl(e.source) || okUrl(o.url))) errors.push(`${where}: evidence.${k} is ${e.state}, so it needs a source link`);

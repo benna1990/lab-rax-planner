@@ -46,6 +46,8 @@ input{font:inherit;padding:6px 10px;border-radius:999px;border:1px solid var(--l
     { type: 'dtype', u: 1, ports: 6 }, { type: 'dtype', u: 2, ports: 7 }, { type: 'pass', u: 0.5, width: 160, style: 'brush' }, { type: 'pass', u: 1, width: 120, style: 'slot' },
     { type: 'vent', u: 1, pattern: 'hex' }, { type: 'keystone', u: 0.5, ports: 12, rows: 1 }, { type: 'shelf', u: 1, dw: 120, dh: 30, dd: 120, open: true }, { type: 'label', u: 0.5, text: 'LAB RAX' }]
     .forEach((params, i) => parts.push({ key: 'gen-' + params.type + '-' + i, name: 'Custom ' + params.type, label: 'Custom part · ' + JSON.stringify(params), gen: true, params, u: params.u, h2: params.u * 2 }));
+  const models = [...cat.panels.flatMap(g => g.items), ...cat.devices.flatMap(g => g.items.flatMap(d => d.mounts)), ...cat.extras.flatMap(g => g.items)];
+  for (const part of parts.slice()) for (const opt of models.find(m => m.id === part.key)?.options || []) parts.push(Object.assign({}, part, { name: part.name + ' · ' + opt.name, label: opt.note || part.label, shape: Object.assign({}, part.shape, opt.shape), variant: opt.id }));
   L.devices(n => sizes[n] || null);
   const host = document.getElementById('g');
   function draw(q) {
@@ -61,9 +63,9 @@ input{font:inherit;padding:6px 10px;border-radius:999px;border:1px solid var(--l
           front = at(false) + (p.fit === 'labrax' && p.u < 1 ? at(true) : '');
         }
       } catch (e) { thumb = '<span style="color:#C8372D">' + e.message + '</span>'; console.error(p.key, e); }
-      el.innerHTML = '<div class="t">' + thumb + '</div>' + (front ? '<div class="f">' + front + '</div>' : '') + '<div class="n">' + p.name + '</div><div class="m">' + (p.label || '') + ' · ' + p.key + (p.u ? ' · ' + p.u + 'U' : '') + (p.author ? ' · ' + p.author : '') + (p.device ? ' · ' + p.device.size.join(' × ') + ' mm' : '') + '</div>' + (want3d && !p.extra ? '<div class="v3"></div>' : '');
+      el.innerHTML = '<div class="t">' + thumb + '</div>' + (front ? '<div class="f">' + front + '</div>' : '') + '<div class="n">' + p.name + '</div><div class="m">' + (p.label || '') + ' · ' + p.key + (p.u ? ' · ' + p.u + 'U' : '') + (p.author ? ' · ' + p.author : '') + (p.device ? ' · ' + p.device.size.join(' × ') + ' mm' : '') + '</div>' + (want3d ? '<div class="v3"></div>' : '');
       host.appendChild(el);
-      if (want3d && !p.extra) show3d(el.querySelector('.v3'), p);
+      if (want3d) show3d(el.querySelector('.v3'), p);
     });
   }
   async function show3d(box, p) {
@@ -74,7 +76,7 @@ input{font:inherit;padding:6px 10px;border-radius:999px;border:1px solid var(--l
     const mat = c => new T.MeshStandardMaterial({ color: new T.Color(c).convertSRGBToLinear(), roughness: .8, metalness: .02 });
     let g;
     if (p.gen) { const part = await window.LRParts.build(p.params); g = new T.Group(); part.geoms.forEach(x => g.add(new T.Mesh(x, mat(colors.color)))); (part.show || []).forEach(s => g.add(new T.Mesh(s.g, mat(s.c)))); }
-    else g = p.top ? L.topMeshes(T, p, colors, mat) : L.partMeshes(T, p, colors, mat);
+    else g = p.extra ? L.rackMeshes(T, p, colors, mat) : p.top ? L.topMeshes(T, p, colors, mat) : L.partMeshes(T, p, colors, mat);
     scene.add(g);
     const b = new T.Box3().setFromObject(g), c = new T.Vector3(), s = new T.Vector3(); b.getCenter(c); b.getSize(s);
     const dist = Math.max(s.x, s.y, s.z) * 1.5 + 40; cam.position.set(c.x + dist * .5, c.y + dist * .35, c.z + dist * .85); cam.lookAt(c);

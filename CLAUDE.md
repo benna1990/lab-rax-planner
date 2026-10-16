@@ -3,6 +3,7 @@
 Static web app for planning 3D-printed 10" homelab racks: Lab Rax and more. Formerly "Lab Rax Planner": the localStorage keys (`labrax-planner-*`) keep their old names so saved layouts survive, and "Lab Rax" stays where it means the frame design. No build step, no framework. UI text is English.
 
 ## Files
+- `tools/import-model-pages.mjs` — imports only page-confirmed model records into existing catalog entries, preserving unrelated JSON formatting. Profile choices are `opt` per mounted item and `optionChoices` for frame extras/top/bottom in version-1 rack files and share links. Drawings remain approximate unless `evidence.look` says a comparison was recorded.
 - `rack.js` — single source for shared Lab Rax geometry: rack units, hole spacing, clear/panel widths, panel clearance, frame envelope and frame shape dimensions. Loaded before parts/shapes/3D; Node tools load it too. Values retain their existing documented/estimated status; centralizing does not verify fit. `catalog.frame` contains model/assembly records, not duplicated dimensions.
 - `index.html` — markup and all CSS (light/dark tokens on `:root`, `data-theme` toggle).
 - `app.js` — state, library, 2D front view, build column, build pack ZIP, part maker dialog. Saves to localStorage (`labrax-planner-v2`); Save as file / Open file and the build pack use `.rack.json` files, the share link's compact layout with `format` and `version`.

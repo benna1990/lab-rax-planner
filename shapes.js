@@ -854,11 +854,11 @@ function compileTop(d, opts) {
    { drawer: true }, { logo: 'neopixel' }, { corner: 11 }, { depth: 50 }, { u: 6 }, { frame: 'lowprofile' }, { wall: true },
    { inside: 'comb' }. frameMods() merges the extras in a build for the front and 3D views; extraScene() draws one for its card. */
 function frameMods(list) {
-  const m = { side: null, sideFan: 0, handles: 'plain', feet: 'plain', drawer: false, logo: null, corner: 0, depthAdd: 0, wall: false, edgeSwitch: false };
+  const m = { side: null, sideFan: 0, handles: 'plain', handlesAt: null, feet: 'plain', drawer: false, logo: null, corner: 0, depthAdd: 0, wall: false, edgeSwitch: false };
   (list || []).forEach(d => {
     const s = d && d.shape || {};
     if (s.side || s.fan) { m.side = s.side || m.side || 'plain'; if (s.fan) m.sideFan = num(s.fan, 80); }
-    if (s.handles) m.handles = s.handles;
+    if (s.handles) { m.handles = s.handles; m.handlesAt = s.at || null; }
     if (s.feet) m.feet = s.feet;
     if (s.drawer) m.drawer = true;
     if (s.logo) m.logo = s.logo;
@@ -913,9 +913,10 @@ function rackScene(spec, o) {
   (sh.studs || []).forEach(([a, b]) => SP.push(flat('x', circP(a + 20, b + y0 + bot - 4, 4.8, 14), [], W / 2, 1.8, shade(frame, .08))));
   // handles on top, feet or casters below, a drawer in the base
   const hs = sp.handles || 'plain';
-  if (hs === 'side') { // grips on the side panels
-    const gz = 40, gl = D - 120, gy = y0 + bot + ih * .62;
-    S.obj(2).push(flat('x', rectP(gz, gy, gl, 26, 10), [rectP(gz + 12, gy + 7, gl - 24, 12, 6)], W / 2, 12, accent));
+  if (hs === 'side') { // attachment is documented; the grip outline and size remain approximate
+    const gz = 40, gl = D - 120, at = sp.at || sp.handlesAt;
+    const gy = at === 'top-corners' ? yT + top / 2 - 13 : at === 'bottom-corners' ? y0 + bot / 2 - 13 : y0 + bot + ih * .62;
+    for (const sx of [-1, 1]) S.obj(2).push(flat('x', rectP(gz, gy, gl, 26, 10), [rectP(gz + 12, gy + 7, gl - 24, 12, 6)], sx < 0 ? -W / 2 - 12 : W / 2, 12, accent));
   } else if (hs !== 'none') for (const sx of [-1, 1]) {
     const L = (D) * (hs === 'long' ? .7 : .53), H = hs === 'stackable' ? 26 : 34, z0 = -(D - L) / 2, leg = 14, sl = hs === 'stackable' ? 0 : .35, bar = 10;
     const pts = [[-z0, 0], [-z0 + leg, 0], [-z0 + leg + (H - bar) * sl, H - bar], [-z0 + L - leg - (H - bar) * sl, H - bar], [-z0 + L - leg, 0], [-z0 + L, 0], [-z0 + L - H * sl, H], [-z0 + H * sl, H]];
@@ -1118,13 +1119,14 @@ function geoms(T, sc) {
 /* ---------- checking catalog entries (used by tools/validate.mjs) ---------- */
 const PART_KEYS = new Set(['row', 'rows', 'plate', 'plateR', 'shelf', 'rails', 'floor', 'depth', 'shelfW', 'gap', 'align', 'trayColor', 'sledColor']);
 const TOP_KEYS = new Set(['ap', 'tilt', 'plate', 'fan', 'n', 'grille']);
-const EXTRA_KEYS = new Set(['side', 'fan', 'handles', 'feet', 'drawer', 'logo', 'corner', 'depth', 'u', 'frame', 'wall', 'inside', 'edge', 'hl']);
+const EXTRA_KEYS = new Set(['side', 'fan', 'handles', 'feet', 'drawer', 'logo', 'corner', 'depth', 'u', 'frame', 'wall', 'inside', 'edge', 'hl', 'at']);
 const PATTERNS = new Set(['hex', 'slots', 'vslots', 'hslots', 'round', 'perf', 'grid', 'diamond', 'y', 'crown', 'solid', 'mesh', 'gridfinity']);
 const isObj = v => v && typeof v === 'object' && !Array.isArray(v);
 function check(kind, shape, devName) {
   const err = [];
   if (!isObj(shape)) return ['shape must be an object'];
   const keys = kind === 'top' ? TOP_KEYS : kind === 'extra' ? EXTRA_KEYS : PART_KEYS;
+  if (shape.at != null && !['front-slot','rear-slot','top','bottom','side-panel','top-corners','bottom-corners','posts','inside','feet','wall','desk'].includes(shape.at)) err.push('shape.at: unknown attachment point');
   Object.keys(shape).forEach(k => { if (!keys.has(k)) err.push('shape: unknown key "' + k + '"'); });
   if (kind === 'top') {
     if (shape.ap != null && !AP[shape.ap]) err.push('shape.ap must be one of ' + Object.keys(AP).join(', '));
@@ -1232,6 +1234,7 @@ window.LRShapes = {
   frontFor(d, o) { o = o || {}; return remember(drawCache, 'fr' + ckey(lookOf(d), o), () => this.front(sceneFor(d, o), { cls: o.cls || 'pf' })); },
   topFor(d, o) { o = o || {}; return remember(drawCache, 'tf' + ckey(d, o), () => this.topFront(sceneFor(d, o), { cls: o.cls || 'pf' })); },
   // 3D: a part's meshes with their geometry cached per part and colours (meshes are marked userData.cached)
+  rackMeshes(T, d, o, mat) { return meshes(T, rackScene(d.shape || {}, o || {}), mat, 'x' + ckey(d, o || {})); },
   partMeshes(T, d, o, mat) { o = o || {}; const look = lookOf(d); return meshes(T, sceneFor(d, o), mat, 'p' + ckey(look, o) + '|' + (o.maxDepth || '')); },
   sideMeshes(T, mods, depth, height, color, out, mat) { return meshes(T, sideScene(mods, depth, height, color, out), mat, 's' + [mods.side, mods.sideFan, Math.round(depth), Math.round(height), color, out].join('|')); },
   topMeshes(T, d, o, mat) { o = o || {}; return meshes(T, compileTop(d, o), mat, 't' + ckey(d, o)); }, TOKENS: Object.keys(TOK).concat(Object.keys(ALIAS)), MODULES: MODS,

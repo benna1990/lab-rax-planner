@@ -325,6 +325,11 @@ details.abd .hint{margin-top:6px}
 .lghead[aria-expanded="true"] .chev,details.sec[open] > summary .chev{transform:rotate(90deg)}
 .lrows{display:flex;flex-direction:column;gap:2px;padding:0 0 10px}
 .lrow-wrap{display:flex;align-items:center;gap:4px}
+.lrow-wrap.has-options{flex-wrap:wrap}
+.extra-options{order:5;flex-basis:100%;min-width:0;display:grid;gap:6px;padding:6px 10px 12px}
+.profile-picker{display:grid;gap:4px;min-width:0;max-width:100%}
+.profile-picker select{width:100%;max-width:100%}
+.drawing-status{display:block}
 /* Guides and Resources */
 dialog.helpdlg{width:min(760px,calc(100vw - 24px));max-height:calc(100vh - 24px);border:1px solid var(--line);border-radius:20px;padding:0;background:var(--panel);color:var(--ink)}
 dialog.helpdlg::backdrop{background:rgba(10,12,14,.55)}
