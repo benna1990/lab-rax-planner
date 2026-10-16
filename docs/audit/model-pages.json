@@ -90,7 +90,7 @@
     "outMm": null
    },
    "hardware": [],
-   "hardwareNote": "uses standard Lab Rax hardware (M6 bolts for bolted version, M3 brass heat-set inserts for brass version); no hardware counts listed on page",
+   "hardwareNote": "uses standard Lab Rax hardware (M6 bolts for bolted version, brass heat-set inserts for brass insert version); the page does not state insert dimensions (a user comment mentions M6x5x8 inserts)",
    "fitsLabRax": "stated",
    "fitNote": "official Lab Rax component set by creator mklements",
    "look": "options",
@@ -281,9 +281,13 @@
     {
      "part": "M6x12 button head screw",
      "qty": 16
+    },
+    {
+     "part": "M6 nut",
+     "qty": 16
     }
    ],
-   "hardwareNote": "Page states: 'M6x12mm Button Head Screws (16 Required For Frame + Additional For Racks)'",
+   "hardwareNote": "Page states: \"M6x12mm Button Head Screws (16 Required For Frame + Additional For Racks)\" and 16x M6 Nuts (or US alternative #10-32 screws and nuts)",
    "fitsLabRax": "stated",
    "fitNote": "complete 6U remix of Lab Rax Bolted Version",
    "look": "ok",
@@ -869,6 +873,714 @@
    "fitNote": "connects lower and upper panels and posts when stacking Lab Rax beyond 5U",
    "look": "shape",
    "lookNote": "External decorative/structural connector bridging side panels and posts on tall racks (>5U). Drawn as 6U rack with highlighted posts.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2865309",
+   "url": "https://makerworld.com/en/models/2865309",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 1-5U Posts & Panels (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 4 walls, 15% infill",
+     "plates": null,
+     "prints": "Dual 10\" side-by-side tandem rack with 19\" mounting support"
+    }
+   ],
+   "choices": [],
+   "attaches": "top",
+   "sides": "both",
+   "replaces": "connects two 10\" Lab Rax side-by-side into a tandem rack with optional 19\" equipment mounting",
+   "sizes": {
+    "u": 5,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "joins two 5U Lab Rax frames together; bolt hardware not quantified on page",
+   "fitsLabRax": "stated",
+   "fitNote": "remix turning original 5U LabRax into a side-by-side tandem rack",
+   "look": "shape",
+   "lookNote": "Side-by-side dual 10\" rack bridge frame supporting 19\" rack hardware. Drawn as a single 4U rack with top highlight.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2366022",
+   "url": "https://makerworld.com/en/models/2366022",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - Bolted Version - 5U (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 3 walls, 15% infill (color logo)",
+     "plates": null,
+     "prints": "Optimized PETG Profile with dual color logo on top brace"
+    },
+    {
+     "name": "0.2mm layer, 3 walls, 15% infill (no logo)",
+     "plates": null,
+     "prints": "Profile without logo on the couplers"
+    }
+   ],
+   "choices": [
+    "top brace: with color logo or without logo"
+   ],
+   "attaches": "posts",
+   "sides": "both",
+   "replaces": "standard 10\" horizontal cross braces with 19\" wide braces to create a full 19\" desktop rack using Lab Rax bolted corner posts",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": 482.6
+   },
+   "hardware": [],
+   "hardwareNote": "uses mklements Lab Rax bolted version hardware",
+   "fitsLabRax": "stated",
+   "fitNote": "19\" remix of the 10\" Lab Rax modular system using bolted posts",
+   "look": "size",
+   "lookNote": "Full 19\" wide desktop frame using Lab Rax corner pillars. Drawn as a standard 10\" 4U frame.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2176697",
+   "url": "https://makerworld.com/en/models/2176697",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - 5U (mklements)",
+    "Lab Rax parts with Nuts (CyberGWJ)"
+   ],
+   "profiles": [
+    {
+     "name": "0.28mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "19 inch cross member mod"
+    }
+   ],
+   "choices": [],
+   "attaches": "posts",
+   "sides": "both",
+   "replaces": "horizontal cross members to extend Lab Rax frame to 19\" standard width",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": 482.6
+   },
+   "hardware": [],
+   "hardwareNote": "all other parts are original mklements / CyberGWJ nut version",
+   "fitsLabRax": "stated",
+   "fitNote": "Ein Mod für die Querteile des Lab Rax Racks in 19\" druckbar",
+   "look": "size",
+   "lookNote": "19\" cross beams connecting original vertical pillars. Drawn as a 10\" rack.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3202642",
+   "url": "https://makerworld.com/en/models/3202642-lab-rax-kws-depth-rack",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - 5U (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "All necessary parts to extend Lab Rax to 260mm depth"
+    }
+   ],
+   "choices": [],
+   "attaches": "side-panel",
+   "sides": "both",
+   "replaces": "side panels and frame depth rails to match KWS ecosystem depth of 260 mm",
+   "sizes": {
+    "u": 5,
+    "lengthMm": 260,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "uses original Lab Rax frame hardware",
+   "fitsLabRax": "stated",
+   "fitNote": "extend a Lab Rax rack to 260mm of depth (KWS rack depth)",
+   "look": "size",
+   "lookNote": "Extended 260 mm depth side panels and frame rails. Drawn with depth: 20.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2364486",
+   "url": "https://makerworld.com/en/models/2364486-long-handles-for-longer-sides-lab-rax",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - Bolted Version - 5U (mklements)",
+    "LabRax Handles (No Supports) (Shubham Patel)",
+    "Lab Rax Sides 50mm Longer - Bolt Together version (obibi)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "Print without supports"
+    }
+   ],
+   "choices": [],
+   "attaches": "top",
+   "sides": "both",
+   "replaces": "standard top handles with longer handles matching the +50 mm deeper sides",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "bolts to top corner pieces; screw hardware not specified",
+   "fitsLabRax": "stated",
+   "fitNote": "longer handles for Deeper Sides for Lab Rax Bolted Version",
+   "look": "shape",
+   "lookNote": "Extended top grab handles spanning +50 mm extra length. Drawn with handles: long, depth: 50.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2350077",
+   "url": "https://makerworld.com/en/models/2350077-lab-rax-sides-50mm-longer-bolt-together-version",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 6U 10\" server rack - Bolted Version (Cowasaur)",
+    "Lab Rax 10\" Server Rack - Bolted Version - 5U (mklements)",
+    "Long Handles for Longer sides - Lab Rax (obibi)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "Printed with Tree-Hybrid supports"
+    }
+   ],
+   "choices": [],
+   "attaches": "side-panel",
+   "sides": "both",
+   "replaces": "standard 5U side panels with 50 mm longer panels for bolted version",
+   "sizes": {
+    "u": 5,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "uses standard Lab Rax bolted hardware",
+   "fitsLabRax": "stated",
+   "fitNote": "deeper sides for Lab Rax Bolt Version, 50mm longer than original",
+   "look": "size",
+   "lookNote": "50 mm longer side panels with ventilation slots. Drawn with depth: 50.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2317435",
+   "url": "https://makerworld.com/en/models/2317435",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "PETG With Supports - 0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "PETG with supports"
+    },
+    {
+     "name": "PLA With Supports - 0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "PLA with supports"
+    }
+   ],
+   "choices": [
+    "material: PETG or PLA"
+   ],
+   "attaches": "top",
+   "sides": "both",
+   "replaces": "original top handles with grooved handles designed to mate with Lab Rax feet from a stacked unit",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "uses existing frame handle bolts; no extra hardware needed",
+   "fitsLabRax": "stated",
+   "fitNote": "official Lab Rax stackable handle replacement by mklements",
+   "look": "ok",
+   "lookNote": "Top handles with recessed pockets to capture feet of another rack. Matches our stackable handle rendering.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1896714",
+   "url": "https://makerworld.com/en/models/1896714",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - 5U (mklements)",
+    "Lab Rax 10\" Server Rack - Bolted Version - 5U (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "Print without any supports"
+    }
+   ],
+   "choices": [],
+   "attaches": "top",
+   "sides": "both",
+   "replaces": "original top handles with support-free printable handles",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "fits perfectly with original mounting holes; compatible with heat-set and bolted versions",
+   "fitsLabRax": "stated",
+   "fitNote": "designed for LabRax case, fits original mounting holes",
+   "look": "ok",
+   "lookNote": "Support-free angled top handle. Matches our plain top handles drawing.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1941244",
+   "url": "https://makerworld.com/en/models/1941244",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 6U 10\" server rack - Bolted Version (Cowasaur)",
+    "Lab Rax 10\" Server Rack - 5U (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "Rails - x4",
+     "plates": null,
+     "prints": "Rails for larger bolt heads"
+    }
+   ],
+   "choices": [],
+   "attaches": "posts",
+   "sides": "both",
+   "replaces": "frame vertical posts/rails with slightly larger counterbore holes for bigger bolt heads",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "designed to accommodate larger M6 bolt heads flush with surface",
+   "fitsLabRax": "stated",
+   "fitNote": "rails used by both bolted and heatset versions of Lab Rax",
+   "look": "shape",
+   "lookNote": "Vertical posts with wider counterbores for non-standard bolt heads. Drawn as standard posts.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1917141",
+   "url": "https://makerworld.com/en/models/1917141",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - 5U (mklements)",
+    "Lab Rax 6U 10\" server rack - Bolted Version (Cowasaur)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 3 walls, 15% infill",
+     "plates": null,
+     "prints": "Enlarged counterbore holes for larger M6 screw heads"
+    }
+   ],
+   "choices": [],
+   "attaches": "feet",
+   "sides": "both",
+   "replaces": "standard bottom rubber/printed feet with larger counterbore feet",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "fits larger M6 screw heads from local hardware stores",
+   "fitsLabRax": "stated",
+   "fitNote": "enlarged foot holes for Lab Rax 10\" and 6U bolted versions",
+   "look": "shape",
+   "lookNote": "Corner feet blocks with wider screw head recesses. Drawn as big feet.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2960364",
+   "url": "https://makerworld.com/en/models/2960364",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - Bolted Version - 5U (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 3 walls, 15% infill",
+     "plates": null,
+     "prints": "Allows bigger screws to fit properly"
+    }
+   ],
+   "choices": [],
+   "attaches": "feet",
+   "sides": "both",
+   "replaces": "original feet to allow larger M6 screw heads",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "designed for M6x12mm Button Head Screws and M6 Nuts",
+   "fitsLabRax": "stated",
+   "fitNote": "remix of Lab Rax 10\" Server Rack Bolted Version 5U feet",
+   "look": "shape",
+   "lookNote": "Enlarged corner foot blocks with deeper counterbores. Drawn as big feet.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3212268",
+   "url": "https://makerworld.com/en/models/3212268",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "PETG Oriented For Strength",
+     "plates": null,
+     "prints": "Interlocking cleats and lower spacers"
+    },
+    {
+     "name": "Wall Mount Templates 1U & 5U",
+     "plates": null,
+     "prints": "Drilling/mounting alignment templates"
+    }
+   ],
+   "choices": [
+    "profile: cleats or mounting templates (1U / 5U)"
+   ],
+   "attaches": "wall",
+   "sides": "both",
+   "replaces": "feet (converts rack to wall-mounted cleat system)",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "uses rear posts of Lab Rax; wall anchors and rack mounting screws not specified on page",
+   "fitsLabRax": "stated",
+   "fitNote": "official Lab Rax wall mounting cleats by creator mklements",
+   "look": "shape",
+   "lookNote": "Interlocking French-cleat style brackets mounted to rear vertical posts and wall, plus bottom standoff spacers. Drawn as wall: true.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2403180",
+   "url": "https://makerworld.com/en/models/2403180",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "Adapter feet and wall receiver brackets in PETG"
+    }
+   ],
+   "choices": [],
+   "attaches": "wall",
+   "sides": "both",
+   "replaces": "standard feet with adapter feet and wall receiver brackets to hang rack vertically",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "includes adapter feet and wall brackets; screws not quantified",
+   "fitsLabRax": "stated",
+   "fitNote": "designed to mount Lab Rax vertically on the wall",
+   "look": "shape",
+   "lookNote": "Wall docking bracket system holding the rack oriented vertically against the wall. Drawn as wall: true.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1772709",
+   "url": "https://makerworld.com/en/models/1772709-lab-rax-wallmount",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 6 walls, 22% infill",
+     "plates": null,
+     "prints": "Wall plate and slide mounts"
+    }
+   ],
+   "choices": [],
+   "attaches": "wall",
+   "sides": "both",
+   "replaces": "surface mounting with wall mount bracket plate and sliding mounts",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "recommends bolts on lower back of Lab Rax as spacers between wall and frame",
+   "fitsLabRax": "stated",
+   "fitNote": "created for Lab Rax to mount in electrical cabinet",
+   "look": "shape",
+   "lookNote": "Rear wall plate bracket onto which the rack slides from top to bottom. Drawn as wall: true.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2757835",
+   "url": "https://makerworld.com/en/models/2757835",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 4 walls, 20% infill",
+     "plates": null,
+     "prints": "Left and right chassis base blocks replacing feet"
+    }
+   ],
+   "choices": [],
+   "attaches": "feet",
+   "sides": "both",
+   "replaces": "original feet, replacing them with corner chassis blocks for caster wheels",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [
+    {
+     "part": "M6x12 screw",
+     "qty": 4
+    },
+    {
+     "part": "M4 brass threaded insert",
+     "qty": 16
+    },
+    {
+     "part": "M4x12 screw",
+     "qty": 16
+    },
+    {
+     "part": "caster wheel",
+     "qty": 4
+    }
+   ],
+   "hardwareNote": "Page states: '4x M6x12 screws, 16x M4 brass threaded inserts, 16x M4x12 screws (max M4x16), 4x caster wheels'",
+   "fitsLabRax": "stated",
+   "fitNote": "simple mobile chassis for 10-inch LabRax rack replacing original feet",
+   "look": "shape",
+   "lookNote": "Four corner base blocks bolted under frame corners with 4 swivel caster wheels. Drawn as feet: casters.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1577920",
+   "url": "https://makerworld.com/en/models/1577920",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - 5U (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "ABS - 0.2mm layer, 2 walls, 15% gyroid infill",
+     "plates": null,
+     "prints": "ABS print profile for hex side panel"
+    }
+   ],
+   "choices": [
+    "height: 3U, 4U, or 5U side panels"
+   ],
+   "attaches": "side-panel",
+   "sides": "both",
+   "replaces": "standard solid or slotted side panels with hexagonal mesh ventilated side panels",
+   "sizes": {
+    "u": 5,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "uses original Lab Rax side panel screws",
+   "fitsLabRax": "stated",
+   "fitNote": "sidepanels for 5U, 4U and 3U versions of Lab Rax 10\" minirack with matching hex pattern",
+   "look": "ok",
+   "lookNote": "Side panels with honeycomb/hexagonal cutout mesh pattern. Matches our side: hex rendering.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1618034",
+   "url": "https://makerworld.com/en/models/1618034",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax Extension Side Panels & Post Joiner (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "Hex pattern version of 4U and 5U extension side panel"
+    }
+   ],
+   "choices": [
+    "height: 4U or 5U extension panel"
+   ],
+   "attaches": "side-panel",
+   "sides": "both",
+   "replaces": "plain extension side panels with hex pattern ventilated extension panels",
+   "sizes": {
+    "u": 5,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "uses standard post joiners and screws",
+   "fitsLabRax": "stated",
+   "fitNote": "hex pattern version of 4U and 5U extension side panel for Lab Rax",
+   "look": "ok",
+   "lookNote": "Extension side panels with honeycomb hex ventilation. Matches our side: hex rendering.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2759654",
+   "url": "https://makerworld.com/en/models/2759654",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "5U/4U Sidepanels with hex pattern ventilation (AlanMG)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 3 walls, 15% infill",
+     "plates": null,
+     "prints": "PETG/ABS print profile with precise mounting holes for 180mm and 200mm fans"
+    }
+   ],
+   "choices": [
+    "fan size: 180mm or 200mm fan mounting holes"
+   ],
+   "attaches": "side-panel",
+   "sides": "both",
+   "replaces": "5U side panel with large intake fan panel accommodating a 180mm or 200mm circular fan",
+   "sizes": {
+    "u": 5,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "uses standard fan mounting screws for 180mm/200mm fans; not specified on page",
+   "fitsLabRax": "stated",
+   "fitNote": "remix of 5U/4U side panels with integrated large fan mounting system for Lab Rax",
+   "look": "shape",
+   "lookNote": "5U side panel with a huge circular cutout and screw hole patterns for 180 mm and 200 mm fans. Drawn with fan: 180.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2178053",
+   "url": "https://makerworld.com/en/models/2178053",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "PETG",
+     "plates": null,
+     "prints": "Modular raised hex panel set (side, top, 120mm fan)"
+    }
+   ],
+   "choices": [
+    "panel type: side panel, top panel, or 120mm fan panel"
+   ],
+   "attaches": "side-panel",
+   "sides": "both",
+   "replaces": "side and top panels with modular raised hex textured panels",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "uses standard Lab Rax mounting screws",
+   "fitsLabRax": "stated",
+   "fitNote": "designed specifically for the Labrax 3D-printed 10\" rack",
+   "look": "options",
+   "lookNote": "Set includes raised dual-tone hex side panels, top panel, and a 120 mm fan mount version. Drawn as a generic side: hex panel.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1862143",
+   "url": "https://makerworld.com/en/models/1862143",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "Expansion type - 10% gyroid",
+     "plates": null,
+     "prints": "For extended builds with side panel connector"
+    },
+    {
+     "name": "Standard type - 10% gyroid",
+     "plates": null,
+     "prints": "For standard 5U or less builds"
+    }
+   ],
+   "choices": [
+    "build type: standard (<=5U) or expansion (for stacked builds)",
+    "customizable patterns: Asanoha, Goma, Sakura, Yotsuba, Shippo"
+   ],
+   "attaches": "side-panel",
+   "sides": "both",
+   "replaces": "standard side panels with Japanese Kumiko wooden lattice geometric decorative panels",
+   "sizes": {
+    "u": 5,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "fits standard Lab Rax mounting screws; supports Jeffrey's depth spacers",
+   "fitsLabRax": "stated",
+   "fitNote": "aesthetic side panel for Lab Rax-10 inch server rack",
+   "look": "shape",
+   "lookNote": "Intricate Kumiko lattice geometric pattern side panel. Drawn as side: kumiko.",
    "confidence": "page"
   }
  ]
