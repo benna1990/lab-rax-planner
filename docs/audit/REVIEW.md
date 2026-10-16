@@ -25,8 +25,13 @@ Before you change code, claim it here: what, which files, since when. One writer
 
 Claude sets these tasks; take one by writing your name in *Who works on what*. Each task says which files it touches and when it's done. Run the checks before you commit: `node tools/validate.mjs`, every `tools/test-*.mjs`, and `/tools/selftest.html` (17 checks) when the app changes.
 
+**Round 4 (2026-10-16), by strength.** The owner asked Claude to lead and review, and to leave the building to the others.
+- **Codex** (code, tests, rendering and checking output): T-7 now, then the T-3 integration as soon as Antigravity's first batch is in, then T-8.
+- **Antigravity** (opening model pages and datasheets, which the others can't): T-3 now, then T-4, then T-5. Commit `docs/audit/power-inputs.json` in batches (the first 15–20 sourced devices first) so Codex can start on the integration.
+- **Claude**: reviews every commit within one watch round, answers findings, keeps the docs current and prepares the merge with the owner. No code claims this round.
+
 ### T-1: Visual check of the 10U PDF (R-8) → **Codex**
-`output/plan-10u-full.pdf` (not committed) is a full 10U rack: UCG-Max, USW-Lite-8-PoE, Pi cluster (4 of 7), two 40 mm fan panels, a keystone panel, a Lenovo Tiny, a vent and a Flex Mini mount at the front; a fan panel and a vent at the back. It has 7 pages. The self-test measured all text, images and boxes inside the page with no text over text, but that measurement uses an estimated line height. Look at every page for clipped or overlapping text, broken tables, images over text, and empty or near-empty pages. Write each problem as R-9, R-10… with the page and where on it. Fix in `pdf.js` if you claim it, or leave the fix to Claude. **Done:** every page checked, and the result is in `TEST_RESULTS.md` ("visual check").
+`output/plan-10u-full.pdf` (not committed) is a full 10U rack: UCG-Max, USW-Lite-8-PoE, Pi cluster (4 of 7), two 40 mm fan panels, a keystone panel, a Lenovo Tiny, a vent and a Flex Mini mount at the front; a fan panel and a vent at the back. It has 8 pages. The self-test measured all text, images and boxes inside the page with no text over text, but that measurement uses an estimated line height. Look at every page for clipped or overlapping text, broken tables, images over text, and empty or near-empty pages. Write each problem as R-9, R-10… with the page and where on it. Fix in `pdf.js` if you claim it, or leave the fix to Claude. **Done:** every page checked, and the result is in `TEST_RESULTS.md` ("visual check").
 
 ### T-2: Rack dimensions in one place (A6) → **Codex**
 U (44.45), the hole spacing (236.525), the clear width (222), the panel width (250) and the frame sizes now live in `catalog.json` `frame.dimensions`, `shapes.js`, `parts.js` and `view3d.js` (`FRAME`, partly estimates). Make one source (suggestion: a small `rack.js` read by all four, or `catalog.frame.dimensions` passed in) without changing any output. **Done:**
@@ -61,6 +66,34 @@ From the same model pages: the screws, nuts, inserts or magnets each part needs 
 ### T-6: Independent rerun → **Codex**
 Rerun the Node tests and open `/tools/selftest.html` yourself (all 17 checks), and say here whether it matches `TEST_RESULTS.md`. Close R-7 and R-8 or reply under them.
 
+*Done by Codex (17/17, see R-10).*
+
+### T-7: Fix R-9 and R-10 in the PDF → **Codex**
+Claude hands `pdf.js` to Codex. Claim `pdf.js` and `tools/selftest.html`.
+1. **Reproduce first.** Add the fuller rack to the self-test as a new check:
+   - at the front: UCG-Max (`ucgmax1`), USW-Lite-8-PoE (`mw2117690`), the Pi cluster `sbc7` with 4 of 7 Pis, two `fan40`, `keystone`, `vent1`, and a Lenovo Tiny mount and a Flex Mini mount (find them in the catalog by name);
+   - at the back: `fan40` and `vent1` (`side: 'back'`).
+
+   It should give the 8 pages of R-9.
+2. **Fix R-9.** Every page that starts a new section gets the normal page header and top margin; no banner at the top edge. A section heading never sits alone at the bottom of a page: it moves with its first block.
+3. **Fix R-10.** When the next block fits on a near-empty page, it moves up. Keep the text size as it is.
+4. **Shared dimensions.** Replace the hardcoded `44.45`, `222`, `236.525` and the frame envelope fallbacks in the drawings with `d.dimensions` from `rack.js`. The drawings must not change: compare before and after.
+5. **Check 15 gets a top-margin rule:** above the header line there's only the page header. It runs on both racks.
+
+**Done:**
+- the self-test passes (18 checks);
+- both PDFs are rendered and looked at page by page, and the result is in `TEST_RESULTS.md`;
+- `output/plan-10u-full.pdf` is made again from the new code (not committed);
+- R-9 and R-10 have your reply with the commit. Claude reviews it.
+
+### T-8: A beginner's walk through the planner → **Codex**, after T-7
+This is review only: no code changes.
+1. Use a fresh browser profile, at 1280 px and at 375 px wide.
+2. Go from an empty rack to the PDF the way a beginner would: start card, wizard, library, Where bar, Connect, Print, Export.
+3. Write each problem as R-n, with the step, the width, a screenshot in `output/` and what you expected.
+
+Claude decides which ones to fix and who fixes them.
+
 ## How it works
 
 1. **Reviewer or Antigravity:** add a finding under *Open* as `### R-n: title` (take the next free number), with what you checked, what's wrong and what you expect. Dutch or English is fine.
@@ -79,6 +112,8 @@ Claude reads this file at the start of every work session on the branch. Other d
 *Codex:* page **6** contains only the power summary at the top, with most of the page empty. Page **3** carries a single remaining placement row and the frame table, separated by a large blank area. Prefer reflowing these blocks while retaining legibility. The checklist (page 4) and illustrated cards (pages 7–8) otherwise look legible; no obvious table or image/text collision seen in this artifact.
 
 *Codex, T-6 follow-up:* current independent headless Chromium self-test passes **17/17**, generates 7 pages and measures 348 text lines / 2,837 images and boxes within bounds. R-9/R-10 concern the hashed 8-page artifact, not a proven defect in the current generator. Claude: please regenerate the sample for visual recheck. T-6 independent rerun is complete; T-1 inspection is complete with approval pending a current sample. Codex releases the documentation claim after this entry; T-2 is next and has no implementation file claim yet.
+
+**Claude, 2026-10-16:** R-9 and R-10 are real for the fuller rack (front and rear parts, 8 pages), and the 17 checks don't cover that rack. Both go to Codex as **T-7**, with that rack as a new self-test check. Status: open.
 
 ### R-7: Lab Rax fit is "Documented" from the old `labrax` flag alone
 *Reviewer, round 2:* the `labrax: true` field doesn't prove anyone checked the model page. Require an explicit source, otherwise Unknown.
