@@ -984,3 +984,53 @@ Fourth tranche of candidate models from `docs/audit/model-candidates.json` inspe
 2. import T-10 batch 3, the last 34 frame extras, with the importer;
 3. T-24, the flat view, for the new extras;
 4. the new T-13 parts as new catalog entries. That's bigger: each needs a group, a `u` and a `shape`, and only `confidence: "page"` records go in. Claude splits it into batches once T-24 is in.
+
+*Antigravity, 16 October 2026:*
+- **Review fixes applied:**
+  - `mw2658069`: `attaches` updated to `"posts"` with depth note added.
+  - `mw1718939`, `mw1994910`, `mw3213318`, `mw2690017`: explicit `"profilesNote": "the page has no print profiles"` added to disambiguate confirmed zero-profile models.
+
+### Antigravity — T-13 Batch 5: 28 Candidate Models Inspected (17 Added, 11 Skipped), 16 October 2026
+
+Fifth tranche of candidate models from `docs/audit/model-candidates.json` inspected (covering ranks 199 through 232):
+
+**17 Rack parts documented in `docs/audit/model-pages.json` (`new: true`, `confidence: "page"`):**
+1. `mw2494015` (Rank 199): Top or bottom frame replacement plate for 180mm PC cooling fan (`CC BY-NC-SA`).
+2. `mw3410754` (Rank 201): 1U modular keystone patch panel with port identification labeling (`CC BY-NC-SA`).
+3. `mw2662996` (Rank 203): 3U front panel with 120mm fan mount aligned with HDD/SSD bays (`Standard Digital File License`).
+4. `mw2143043` (Rank 206): 2.5-inch SSD mount bracket attaching next to Pi in 2U 7 SBC holder (`Standard Digital File License`).
+5. `mw1938739` (Rank 209): 1U horizontal form-fitted cradle for HP T530 Thin Client (`MakerWorld Exclusive License`).
+6. `mw2514466` (Rank 210): 3U rack enclosure housing Jonsbo N1 5-bay aluminum HDD cage (`CC BY-NC-SA`).
+7. `mw3343137` (Rank 211): Rack mount bracket holding three HP Prodesk G4 power adapters (`Standard Digital File License`).
+8. `mw3228916` (Rank 212): 3U rack panel holding three SFX or SFX-L power supplies (`CC BY-NC-SA`).
+9. `mw3122060` (Rank 214): 4/3U (1.33U) mounting tray for GEEKOM A9 Max mini PC (`MakerWorld Exclusive License`).
+10. `mw3287703` (Rank 215): Cluster tray holding two ZimaBlade SBCs with SATA and power cable routing (`CC BY-NC-SA`).
+11. `mw3395354` (Rank 221): 1U 4-point supported drawer-style bracket for UniFi UCG-Fiber (`BY`).
+12. `mw1617138` (Rank 222): External side mount bracket for Arris SB6141 cable modem (`Standard Digital File License`).
+13. `mw2695637` (Rank 227): 10-inch rack mount for Banana Pi BPI-R3 router board (`BY`).
+14. `mw2607187` (Rank 228): 1U front ventilation panel with double-density IKEA Skadis pattern (`Standard Digital File License`).
+15. `mw1307431` (Rank 229): 1U shelf mounting three Raspberry Pi 5 boards side by side (`CC BY-NC-SA`).
+16. `mw2902750` (Rank 230): 1U side-projecting charging dock arm for Apple Watch charger puck (`Standard Digital File License`).
+17. `mw3208760` (Rank 232): Front slide-in multi-drive bay for 2.5-inch SATA hard drives and SSDs (`Standard Digital File License`).
+
+**11 Non-rack / incompatible models skipped (with reasons):**
+- `mw2681419` (Rank 202): "MINI Lab Rax Rack for Raspberry Pi 4B+" by Kyxie — Skipped: for 5-inch Mini Lab Rax.
+- `mw3084034` (Rank 204): "Kata4 Mini Lab Rax 5\" 1U Pi 5 Rack" by Kata4 — Skipped: for 5-inch Mini Lab Rax.
+- `mw2766848` (Rank 208): "Mini Lab Rax 1U RPi-4" by Tommy_S — Skipped: for 5-inch Mini Lab Rax.
+- `mw2784838` (Rank 213): "MINI Lab Rax Rack for TPLink TL-SG105 Switch" by Kyxie — Skipped: for 5-inch Mini Lab Rax.
+- `mw3122555` (Rank 216): "Rack Mount Bracket for Heltec V4 GPS Enclosure" by JAAS — Skipped: 19-inch rack bracket, not 10-inch Lab Rax.
+- `mw2530162` (Rank 218): "Mini Lab Rax 5\" 2U Pi 5 NAS & OLED Rack" by mklements — Skipped: for 5-inch Mini Lab Rax.
+- `mw2927807` (Rank 219): "Mini Lab Rax 2U RPi-4 w/ OLED" by Tommy_S — Skipped: for 5-inch Mini Lab Rax.
+- `mw2580734` (Rank 220): "Mini Lab Rax 5\" Frontplate" by sascha_hemi — Skipped: for 5-inch Mini Lab Rax.
+- `mw3293193` (Rank 223): "3.5\" Hard Drive Mounts for Mini Lab Rax" by Technology&Toys — Skipped: for 5-inch Mini Lab Rax.
+- `mw3066889` (Rank 224): "MINI Lab Rax Bottom and Top without LabRax logo" by Kyxie — Skipped: for 5-inch Mini Lab Rax.
+- `mw3181395` (Rank 225): "Mini Lab Rax (5\") Extension" by instagr0m — Skipped: for 5-inch Mini Lab Rax.
+
+**License breakdown across Batch 5 (17 records):**
+- 7 × `Standard Digital File License`
+- 6 × `CC BY-NC-SA`
+- 2 × `MakerWorld Exclusive License`
+- 2 × `BY` (Creative Commons Attribution)
+
+**Running total for T-13:** 105 new rack parts documented in `model-pages.json`, 27 models skipped (132 candidates checked). Total records in `model-pages.json` is now 184 (75 frame-extras + 109 candidates). All test suites and catalog validation pass.
+

@@ -1678,7 +1678,8 @@
    "fitNote": "painel lateral para o server rack LabRax na configuração de 8U, com padrão Skadis",
    "look": "shape",
    "lookNote": "Tall 8U side panel with IKEA SKÅDIS stadium-shaped slots. Drawn as side: skadis, u: 8.",
-   "confidence": "page"
+   "confidence": "page",
+   "profilesNote": "the page has no print profiles"
   },
   {
    "id": "mw3070181",
@@ -1945,7 +1946,8 @@
    "fitNote": "remix of Lab Rax 10\" Server Rack Bolted Version 5U with Multiboard sides",
    "look": "shape",
    "lookNote": "Deeper frame rails with integrated Multiboard side panels. Drawn as side: multiboard.",
-   "confidence": "page"
+   "confidence": "page",
+   "profilesNote": "the page has no print profiles"
   },
   {
    "id": "mw3212396",
@@ -2187,7 +2189,8 @@
    "fitNote": "mod/remix based on original .5U 12 Port Keystone Panel and Blind Badger top corner",
    "look": "shape",
    "lookNote": "Integrated 0.5U top corner bridge with 12 keystone port slots. Drawn with corner: 11.",
-   "confidence": "page"
+   "confidence": "page",
+   "profilesNote": "the page has no print profiles"
   },
   {
    "id": "mw2457279",
@@ -3394,7 +3397,7 @@
     }
    ],
    "choices": [],
-   "attaches": "depth",
+   "attaches": "posts",
    "sides": "both",
    "sizes": {
     "u": null,
@@ -3407,7 +3410,8 @@
    "fitNote": "Remix of mklements Lab Rax Bolted version.",
    "look": "ok",
    "lookNote": "Bolted bracket extension pieces that increase rack depth by 50mm.",
-   "confidence": "page"
+   "confidence": "page",
+   "pageNotes": "Depth extension pieces; extends rack depth by 50mm."
   },
   {
    "id": "mw2324594",
@@ -5445,7 +5449,8 @@
    "fitNote": "Remix of mklements 10\" Lab Rax for tall (23U) builds.",
    "look": "ok",
    "lookNote": "Cross-tie bar bracing rear or middle posts to stop sideways flex.",
-   "confidence": "page"
+   "confidence": "page",
+   "profilesNote": "the page has no print profiles"
   },
   {
    "id": "mw2381616",
@@ -5795,6 +5800,552 @@
    "fitNote": "Adapts 5\" Mini Lab Rax form factor into standard 10\" rack footprint.",
    "look": "ok",
    "lookNote": "3U front plate with center mounting rails accepting 5-inch modular trays.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2494015",
+   "new": true,
+   "what": "Top or bottom frame replacement plate for 180mm PC cooling fan",
+   "url": "https://makerworld.com/en/models/2494015",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - Bolted Version - 5U (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "180mm fan mount plate"
+    }
+   ],
+   "choices": [],
+   "attaches": "top",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Interchangeable between top and bottom placement on Lab Rax.",
+   "look": "ok",
+   "lookNote": "Large circular cut-out with four screw holes fitting 180mm fans onto frame envelope.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3410754",
+   "new": true,
+   "what": "1U modular keystone patch panel with port identification labeling",
+   "url": "https://makerworld.com/en/models/3410754",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "10-inch Keystone Patchpanel x16 ports (Mauker)"
+   ],
+   "profiles": [
+    {
+     "name": "0.24mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "1U modular keystone panel"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Remix of Mauker's 10-inch Keystone Patchpanel for Lab Rax.",
+   "look": "ok",
+   "lookNote": "1U faceplate with recessed label strips above keystone ports.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2662996",
+   "new": true,
+   "what": "3U front panel with 120mm fan mount aligned with HDD/SSD bays",
+   "url": "https://makerworld.com/en/models/2662996",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [
+    "10 inch rack 3U 120 mm fan with center mount (paia)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "3U 120mm HDD fan mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 3,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Remixed 120mm fan holder to better fit Lab Rax HDD bays.",
+   "look": "ok",
+   "lookNote": "3U faceplate holding a 120mm fan centered to blow directly across internal drive brackets.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2143043",
+   "new": true,
+   "what": "2.5-inch SSD mount bracket attaching next to Pi in 2U 7 SBC holder",
+   "url": "https://makerworld.com/en/models/2143043",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.4mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "2.5\" SSD bracket for SBC holder"
+    }
+   ],
+   "choices": [],
+   "attaches": "inside",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed to mount next to Pi in mklements 2U 7 SBC holder for Lab Rax.",
+   "look": "ok",
+   "lookNote": "Slim tray bolting to Pi sled holding a 2.5-inch drive vertically.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1938739",
+   "new": true,
+   "what": "1U horizontal form-fitted cradle for HP T530 Thin Client",
+   "url": "https://makerworld.com/en/models/1938739",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 4 walls, 15% infill",
+     "plates": null,
+     "prints": "HP T530 Thin Client mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for Lab Rax 10\" 3D printed rack.",
+   "look": "ok",
+   "lookNote": "1U faceplate cradle matching the curved front perimeter of the HP T530.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2514466",
+   "new": true,
+   "what": "3U rack enclosure housing Jonsbo N1 5-bay aluminum HDD cage",
+   "url": "https://makerworld.com/en/models/2514466",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 3 walls, 25% infill",
+     "plates": null,
+     "prints": "3U Jonsbo N1 HDD enclosure"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 3,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "Houses Jonsbo N1 5-bay drive cage, fan and backplane.",
+   "fitsLabRax": "stated",
+   "fitNote": "Custom 3U hard drive enclosure designed specifically for mklements Lab Rax.",
+   "look": "ok",
+   "lookNote": "3U box chassis sliding into rack rails with front ventilated drive bay slots.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3343137",
+   "new": true,
+   "what": "Rack mount bracket holding three HP Prodesk G4 power adapters",
+   "url": "https://makerworld.com/en/models/3343137",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "3x Prodesk G4 PSU mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Mount for three HP Prodesk G4 power adapters in a 10\" Lab Rax.",
+   "look": "ok",
+   "lookNote": "2U faceplate with three rectangular retention slots holding power brick adapters.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3228916",
+   "new": true,
+   "what": "3U rack panel holding three SFX or SFX-L power supplies",
+   "url": "https://makerworld.com/en/models/3228916",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "3x SFX PSU 3U mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 3,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Mounts 3 SFX or SFX-L PSUs in Lab Rax builds.",
+   "look": "ok",
+   "lookNote": "3U panel with three cutouts and screw hole patterns for SFX power supply brackets.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3122060",
+   "new": true,
+   "what": "4/3U (1.33U) mounting tray for GEEKOM A9 Max mini PC",
+   "url": "https://makerworld.com/en/models/3122060",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "4/3U GEEKOM A9 Max tray"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1.33,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed around Lab Rax ecosystem with 236.525mm horizontal hole spacing.",
+   "look": "ok",
+   "lookNote": "Custom 1.33U faceplate enclosing the 135x132x46.9mm GEEKOM chassis with front port cutouts.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3287703",
+   "new": true,
+   "what": "Cluster tray holding two ZimaBlade SBCs with SATA and power cable routing",
+   "url": "https://makerworld.com/en/models/3287703",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 12% infill",
+     "plates": null,
+     "prints": "dual ZimaBlade tray"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for 10\" rack homelab clusters, adapted for A1 Mini print bed.",
+   "look": "ok",
+   "lookNote": "1U shelf holding two ZimaBlade boards side by side with pass-through slots for SATA cables.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3395354",
+   "new": true,
+   "what": "1U 4-point supported drawer-style bracket for UniFi UCG-Fiber",
+   "url": "https://makerworld.com/en/models/3395354",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "BY",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "UCG-Fiber 1U bracket"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "1U bracket for UniFi Cloud Gateway Fiber on Lab Rax 10 inch rack (bolts to front and rear posts).",
+   "look": "ok",
+   "lookNote": "Drawer-style mount with rear legs securing the gateway at all four frame corners.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1617138",
+   "new": true,
+   "what": "External side mount bracket for Arris SB6141 cable modem",
+   "url": "https://makerworld.com/en/models/1617138",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "SB6141 modem side mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "side-panel",
+   "sides": "one",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "hardwareNote": "Needs two 3mm screws and longer 10/32 screws to mount to existing rack holes.",
+   "fitsLabRax": "stated",
+   "fitNote": "Side mount plate to mount a SB6141 modem to the side of 10\" Lab Rax rack.",
+   "look": "ok",
+   "lookNote": "Side-mounted bracket hanging the white SurfBoard modem on the exterior frame flank.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2695637",
+   "new": true,
+   "what": "10-inch rack mount for Banana Pi BPI-R3 router board",
+   "url": "https://makerworld.com/en/models/2695637",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "BY",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "Banana Pi R3 rack mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [
+    {
+     "part": "M3 brass insert",
+     "qty": 4
+    },
+    {
+     "part": "M3x6 bolt",
+     "qty": 4
+    }
+   ],
+   "hardwareNote": "Requires 4x M3 inserts, 4x M3 6mm standoffs, and 4x M3x6 screws.",
+   "fitsLabRax": "stated",
+   "fitNote": "Made for Lab Rax server rack.",
+   "look": "ok",
+   "lookNote": "1U tray with standoff bosses and front I/O ports opening for Banana Pi R3.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2607187",
+   "new": true,
+   "what": "1U front ventilation panel with double-density IKEA Skadis pattern",
+   "url": "https://makerworld.com/en/models/2607187",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "PETG, 04 nozzle, 1u",
+     "plates": null,
+     "prints": "1U Skadis front panel 0.4mm nozzle"
+    },
+    {
+     "name": "06 nozzle, 1u",
+     "plates": null,
+     "prints": "1U Skadis front panel 0.6mm nozzle"
+    }
+   ],
+   "choices": [
+    "nozzle: 0.4mm or 0.6mm"
+   ],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Made for Lab Rax by mklements in the same style as IKEA Skadis ventilation sides.",
+   "look": "ok",
+   "lookNote": "1U front cover panel perforated with miniature Skadis elongated oval peg holes.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1307431",
+   "new": true,
+   "what": "1U shelf mounting three Raspberry Pi 5 boards side by side",
+   "url": "https://makerworld.com/en/models/1307431",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "1U 3x Pi 5 shelf"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [
+    {
+     "part": "M2.5x8 bolt",
+     "qty": 12
+    },
+    {
+     "part": "M2.5 nut",
+     "qty": 12
+    }
+   ],
+   "hardwareNote": "Requires 12x M2.5x8mm button head screws, 12x M2.5 nuts, and 12x M2.5x6mm standoffs.",
+   "fitsLabRax": "stated",
+   "fitNote": "Designed to mount 3 Raspberry Pi 5s into 1U of rack space on 10\" rack.",
+   "look": "ok",
+   "lookNote": "1U shelf with 3 bays holding Raspberry Pi 5 boards horizontally with front port cutouts.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2902750",
+   "new": true,
+   "what": "1U side-projecting charging dock arm for Apple Watch charger puck",
+   "url": "https://makerworld.com/en/models/2902750",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 17% infill",
+     "plates": null,
+     "prints": "Apple Watch charger mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed specifically for Lab Rax 10\" Server Rack.",
+   "look": "ok",
+   "lookNote": "1U rack ear arm wrapping around the outer side post with a circular magnetic charger dock.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3208760",
+   "new": true,
+   "what": "Front slide-in multi-drive bay for 2.5-inch SATA hard drives and SSDs",
+   "url": "https://makerworld.com/en/models/3208760",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "2.5\" SATA HDD slots module"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Home LAB RACK 10 inch slots for SATA 2.5 HDD.",
+   "look": "ok",
+   "lookNote": "2U rack unit with multiple vertical hot-swap style drive guide caddies for 2.5\" drives.",
    "confidence": "page"
   }
  ]

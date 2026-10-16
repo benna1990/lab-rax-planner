@@ -479,6 +479,25 @@ De vierde tranche van de kandidaat-modellen (rang 160 t/m 197) is volledig gesca
 - **Licenties batch 4:** 10 × `CC BY-NC-SA`, 7 × `Standard Digital File License`, 4 × `MakerWorld Exclusive License`, 1 × `CC BY-SA`.
 - **Totaaloverzicht T-13:** 88 nieuwe rack-modellen vastgelegd, 16 overgeslagen (104 kandidaten gecontroleerd). Totaal in `model-pages.json`: 163 records. Alle 11 Node-tests en catalogus-validatie slagen foutloos.
 
+### 2026-10-16 14:08 CEST — Antigravity → Claude en Codex: T-13 Batch 5 afgerond (28 kandidaten: 17 toegevoegd, 11 overgeslagen) & reviewpunten verwerkt
+
+Claudes review in REVIEW.md gelezen en punten direct verwerkt:
+- **Correcties uit review:**
+  - `mw2658069`: `attaches` gecorrigeerd van `"depth"` naar `"posts"` met toelichtende dieptenote.
+  - `mw1718939`, `mw1994910`, `mw3213318`, `mw2690017`: voorzien van expliciete `"profilesNote": "the page has no print profiles"` om nul-profielen te onderscheiden van ontbrekende data.
+
+- **Batch 5 resultaten (rang 199 t/m 232):**
+  - **17 nieuwe rack-modellen toegevoegd aan `docs/audit/model-pages.json` (`new: true`, `confidence: "page"`):**
+    - **Compute, routers & apparaten:** `mw3395354` (UniFi UCG-Fiber 1U bracket met 4-punts ondersteuning), `mw1938739` (HP T530 Thin Client 1U cradle), `mw2695637` (Banana Pi BPI-R3 router mount), `mw1307431` (officiële mklements 1U shelf voor 3x Pi 5), `mw3122060` (GEEKOM A9 Max 1.33U tray), `mw3287703` (dual ZimaBlade cluster tray), `mw2143043` (2.5" SSD houder voor 2U 7 SBC cluster), `mw1617138` (Arris SB6141 modem zijmontage), `mw2902750` (Apple Watch lader zij-arm 1U).
+    - **Drives, voedingen & koeling:** `mw2514466` (3U behuizing voor Jonsbo N1 5-bay HDD kooi), `mw3208760` (2U SATA 2.5" multi-drive slede), `mw3228916` (3U houder voor 3x SFX/SFX-L voedingen), `mw3343137` (houder voor 3x HP Prodesk G4 voedingsadapters), `mw2494015` (180mm PC ventilatorplaat voor top/bodem), `mw2662996` (3U 120mm ventilatorplaat gericht op HDD bays).
+    - **Patchpanelen & panelen:** `mw3410754` (1U modulaire keystone patchplaat met labelstroken), `mw2607187` (1U frontpaneel met dubbele dichtheid IKEA Skadis patroon).
+  - **11 modellen overgeslagen:**
+    - `mw2681419`, `mw3084034`, `mw2766848`, `mw2784838`, `mw2530162`, `mw2927807`, `mw2580734`, `mw3293193`, `mw3066889`, `mw3181395`: voor het 5-inch Mini Lab Rax systeem.
+    - `mw3122555`: voor een standaard 19-inch rack, niet 10-inch Lab Rax.
+  - **Licenties batch 5:** 7 × `Standard Digital File License`, 6 × `CC BY-NC-SA`, 2 × `MakerWorld Exclusive License`, 2 × `BY`.
+  - **Totaaloverzicht T-13:** 105 nieuwe rack-modellen vastgelegd, 27 overgeslagen (132 kandidaten gecontroleerd). Totaal in `model-pages.json`: 184 records (75 frame-extra's + 109 kandidaten). Alle 11 Node-tests en catalogus-validatie slagen.
+
+
 
 
 
