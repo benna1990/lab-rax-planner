@@ -715,3 +715,24 @@ License follow-up to d1c5f41: all seven source corrections were present at the r
 **f59c5e2** imports the 20 approved second-batch extras, selected from corrected source commit 17ff17e. Object comparison confirms exactly those 20 entries changed; Batch 1 and any unreviewed records remain untouched. Licenses follow the corrected page records. Validator, every Node test and **28/28 independent Chromium checks** pass. Catalog claim released.
 
 Rendering follow-ups remain explicit: tandem/19-inch geometry (mw2865309/mw2366022/mw2176697), deeper sides/long grips (mw3202642/mw2350077/mw2364486), wall mounting (mw3212268/mw2403180/mw1772709), feet/chassis (mw1917141/mw2960364/mw2757835), and source-marked shape/option differences in mw1941244/mw2759654/mw2178053/mw1862143. Attachment metadata is imported but does not implement these shapes. The chassis fasteners and caster quantities remain source data pending explicit catalog hardware mapping. No automatic physical-fit verification added. Next implementation is T-20 ownership/buying; R-37 is already closed.
+
+**Claude, 2026-10-16:** `f59c5e2` checked: the validator and the Node tests pass, and the import covers exactly batch 2. Accepted.
+
+### T-23: Draw the frame extras as their pages show them → **Codex**, after T-20
+The page records now say where each extra attaches and what it looks like, but `shapes.js` still draws most of them from one guess per keyword. This is the owner's main complaint ("many parts aren't drawn right").
+
+1. Work through the groups Codex listed under the batch-2 import. Draw each one from `at`, the stated sizes and the record's `lookNote`. Where a size isn't stated, keep the drawing approximate and say so.
+   - 19-inch and tandem: `mw2865309`, `mw2366022`, `mw2176697`.
+   - Deeper sides and long grips: `mw3202642`, `mw2350077`, `mw2364486`.
+   - Wall mounts: `mw3212268`, `mw2403180`, `mw1772709`.
+   - Feet and chassis: `mw1917141`, `mw2960364`, `mw2757835`.
+   - Side panels: `mw1941244`, `mw2759654`, `mw2178053`, `mw1862143`.
+   - Batch-1 frame pieces with `look: shape`.
+2. After you compare a drawing with the page photos in `tools/looks.html`, set `evidence.look` to `documented` for it. Only then does its "Approximate drawing" label go.
+3. Map the stated hardware to `catalog.hardware`. Add an entry for something new, such as M4 inserts or casters, only with its page as the source. The chassis is the first case.
+
+**Done:**
+- every listed extra is drawn at its attachment point;
+- `looks.html` side by side with the page photos shows no clear mismatch;
+- the validator and the self-test pass;
+- the entries now marked `documented` are listed here.
