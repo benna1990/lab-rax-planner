@@ -38,7 +38,7 @@ A new device needs `size`, `color` and `io` (see [How parts look](#how-parts-loo
 | `license` | new entries | The model's licence as its page states it, e.g. `CC BY-NC-SA 4.0`. Required for every entry that isn't in `tools/catalog-baseline.json` (the catalog as it was on 15 October 2026); the validator checks it. Copy it from the page; don't guess. |
 | `labrax` | no | `true` when the page says it was made for or tested in Lab Rax. |
 | `fit` | no | `"labrax"` when the panel has the Lab Rax size instead of the EIA one: n × 44.45 − 2.45 mm high (42 for 1U), three 10 × 7 mm slots per U, and ½U panels 22.6 mm that turn over to fit the upper half of a U. Set on mklements' own Lab Rax parts; on another maker's part only when `tools/measure.mjs` says its panel is "like the Lab Rax panels". Without it the part is drawn at the EIA size, n × 44.45 − 0.79. |
-| `url` | yes | The original model page on MakerWorld or Printables. Never a mirror or re-upload. |
+| `url` | yes | The original model page on MakerWorld or Printables. Never a mirror or re-upload, and never with affiliate or tracking parameters (the validator rejects them). Shop affiliate links are the maintainer's only. |
 | `position` | no | `top` for parts that replace the top panel. |
 | `hardware` | no | Extra parts to buy: `[{ "part": "fan80", "qty": 2 }]`. |
 | `note` | no | One sentence the builder should know. |

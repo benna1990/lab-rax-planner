@@ -146,5 +146,22 @@ for (const g of cat.extras || []) {
 const res = JSON.parse(readFileSync(new URL('../resources.json', import.meta.url), 'utf8'));
 for (const g of res.groups || []) { if (!text(g.title)) errors.push('resources: every group needs a title'); for (const r of g.items || []) { const w = `resource ${r.title || '(untitled)'}`; if (!text(r.title) || !text(r.kind) || !text(r.about)) errors.push(`${w}: needs a title, a kind and an about`); if (!okUrl(r.url)) errors.push(`${w}: needs an https url`); } }
 
+// Affiliate links are the maintainer's only. The shop tags and partner templates in catalog.json must match
+// OWNER_SHOPS here, so a change to either shows up twice in a pull request. Links in the data never carry
+// affiliate or tracking parameters, and never go through link shorteners.
+const OWNER_SHOPS = { amazon: { tag: '' }, bol: { wrap: '' }, aliexpress: { wrap: '' } };
+for (const [k, s] of Object.entries(cat.shops || {})) {
+  if (k.startsWith('_')) continue;
+  for (const f of ['tag', 'wrap']) {
+    const want = (OWNER_SHOPS[k] || {})[f] || '', got = (s && s[f]) || '';
+    if (got !== want) errors.push(`shops.${k}.${f}: affiliate tags and partner links are the maintainer's only; only the maintainer changes them, here and in OWNER_SHOPS in tools/validate.mjs`);
+  }
+}
+const TRACKING = /[?&](tag|ref_?|aff(_?id)?|affiliate|affid|clickref|utm_[a-z]+|ascsubtag|linkCode|camp|creative|aff_fcid|aff_platform|sk|spm)=|\/\/(s\.click\.aliexpress\.com|partner\.bol\.com|amzn\.(to|eu)|a\.co|bit\.ly|tinyurl\.com)\//i;
+for (const f of ['catalog.json', 'resources.json', 'tips.json']) {
+  let src = ''; try { src = readFileSync(new URL('../' + f, import.meta.url), 'utf8'); } catch (e) { continue; }
+  for (const u of src.match(/https?:\/\/[^"\s]+/g) || []) if (TRACKING.test(u) && !Object.values(cat.shops || {}).some(s => s && s.url && u === s.url)) errors.push(`${f}: ${u} has an affiliate or tracking part; link to the plain page (shop affiliate tags are set only in "shops")`);
+}
+
 if (errors.length) { console.error(`catalog.json has ${errors.length} problem(s):\n- ` + errors.join('\n- ')); process.exit(1); }
 console.log(`catalog.json is valid: ${ids.size} parts, mounts and extras.`);

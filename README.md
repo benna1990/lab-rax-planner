@@ -157,12 +157,11 @@ Edit **`catalog.json`** and see [CONTRIBUTING.md](CONTRIBUTING.md) for the forma
 
 ## Shop and affiliate links
 
-Every item on the shopping list links to a search at each shop in `catalog.json` → `shops` (Amazon, bol and AliExpress to start with; `{q}` is the search text). To earn from the links:
+Every item on the shopping list links to a search at each shop in `catalog.json` → `shops` (Amazon, bol and AliExpress to start with; `{q}` is the search text).
 
-- **Amazon**: put your Associates tag in `shops.amazon.tag` (e.g. `yourname-21` for amazon.nl).
-- **Other shops**: put the deep-link template from their partner programme in `wrap`, with `{url}` where the product link goes.
+Affiliate links are the maintainer's. Only the maintainer sets the Amazon Associates tag (`shops.amazon.tag`) and the partner templates of other shops (`wrap`). `tools/validate.mjs` checks them against its own copy, `OWNER_SHOPS`, so any change has to be made in both places. The validator also rejects links in `catalog.json`, `resources.json` and `tips.json` that carry affiliate or tracking parameters, or that go through link shorteners. Pull requests that add or change affiliate links aren't accepted.
 
-When any tag or template is set, the planner and the build guide show an affiliate disclosure (and Amazon's own sentence when the Amazon tag is set). Hardware lives in `catalog.json` → `hardware`, with a spec, pack size, shop search text and, for fans, a quiet and a budget model. Handy extras and build tips come from `tips.json`.
+When a tag or template is set, the planner and the build guide show an affiliate disclosure, plus Amazon's own sentence when the Amazon tag is set. Hardware lives in `catalog.json` → `hardware`, with a spec, pack size, shop search text and, for fans, a quiet and a budget model. Handy extras and build tips come from `tips.json`.
 
 ## Credits and licenses
 
