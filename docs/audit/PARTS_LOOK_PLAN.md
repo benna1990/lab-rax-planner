@@ -98,3 +98,9 @@ Starts after T-9 and the T-3 integration.
 ## T-12: Measuring → **owner**, then **Codex**
 
 For parts whose page gives no sizes, the owner downloads the model file into `reference/`, named by catalog id. Codex measures it with `tools/measure.mjs`, and extends it for frame extras with each piece's size and where it touches the frame. Only the numbers go into the catalog.
+
+## T-13: Models missing from the catalog → **Antigravity**, after T-10
+
+A MakerWorld search for "lab rax" on 16 October 2026 gave 446 models. 133 of them are in the catalog; 12 of the 50 most relevant are not. The other 313 are listed in [model-candidates.json](model-candidates.json), most relevant first. It's a list of candidates, not checked: further down, many results may not be Lab Rax add-ons.
+
+For each candidate that is a rack part, write a page record in `model-pages.json` in the same format, with `"new": true` and a `"what"` line saying what it is. Skip the others, and list them in REVIEW.md with a reason. Codex adds the rack parts to the catalog with their licence. The validator requires a licence for every new entry.
