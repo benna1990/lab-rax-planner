@@ -157,6 +157,24 @@
       if (mods.handlesAt !== 'top-corners') fail('attachment point lost');
       return 'four source profiles, selected XL persisted, approximate drawing at top corners';
     });
+    await check('Automatic profiles follow the frame; explicit mismatches warn and source choices remain visible', async () => {
+      const set = value => { const p = $('[data-part-opt][data-key="mw1931511"]'); if (!p) fail('profile picker missing'); p.value = value; p.dispatchEvent(new W.Event('change', { bubbles: true })); };
+      $('[data-act="where"][data-v="sides"]').click();
+      $('#q').value = 'Side handles'; $('#q').dispatchEvent(new W.Event('input', { bubbles: true }));
+      $('[data-act="ver"][data-v="brass"]').click(); set('');
+      const row = () => T().printPack().find(p => /1931511/.test(p.url || ''));
+      if (!/Only Heatset/.test(row().name)) fail('automatic heat-set profile missing');
+      if (!row().subs.some(s => /open or closed/.test(s) && /blank side corners/.test(s))) fail('source choices absent from print list');
+      $('[data-act="ver"][data-v="bolted"]').click();
+      if (!/Only Normal Bolted/.test(row().name)) fail('automatic profile did not follow bolted frame');
+      set('only-heatset-parts-handles-and-corners');
+      if (!W.document.body.textContent.includes('Print profile does not match the frame')) fail('mismatch not warned');
+      if (!/Only Heatset/.test(row().name)) fail('explicit profile was overwritten');
+      set('');
+      if (W.document.body.textContent.includes('Print profile does not match the frame')) fail('warning remained after automatic correction');
+      if (T().state.optionChoices.mw1931511) fail('automatic choice stored as fixed profile');
+      return 'automatic heat-set/bolted, explicit mismatch warning, source choices in print list';
+    });
   } catch (e) { log(false, 'Self-test stopped', e.message); }
   finally { KEYS.forEach((k, i) => saved[i] == null ? localStorage.removeItem(k) : localStorage.setItem(k, saved[i])); }
   const bad = results.filter(x => !x).length;

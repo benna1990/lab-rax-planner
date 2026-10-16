@@ -41,3 +41,9 @@ assert.equal(c.find(x => x.id === 'cooling').state, 'warn');
 assert.match(c.find(x => x.id === 'estimated').title, /^1 part has/);
 
 console.log('Readiness checks passed: complete, empty, broken and warm builds.');
+
+// A mismatched print profile warns without preventing exports or changing the selection.
+c = run({ profileMismatches: ['Side handles · Only XL Bolted Parts'] });
+assert.equal(c.find(x => x.id === 'profile-frame').state, 'warn');
+assert.match(c.find(x => x.id === 'profile-frame').why, /Only XL Bolted Parts/);
+assert.ok(!run({ profileMismatches: [] }).some(x => x.id === 'profile-frame'));

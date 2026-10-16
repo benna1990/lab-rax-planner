@@ -48,7 +48,7 @@ const evShort = d => !d || !d.ev ? '' : 'Height ' + EV_LABEL[d.ev.height.state].
 function buildCatalog(c) {
   CAT = c; LIB = {}; SIZES = {}; PWDEV = {};
   // src: the catalog entry, for its heat, airflow and power fields
-  const add = (id, o, src) => { LIB[id] = Object.assign({ key: id, h2: o.u ? Math.round(o.u * 2) : 0 }, o, { watts: src.watts, wattsEst: !!src.wattsEstimated, fanDir: src.fanDir, vent: src.vent, at: src.at, fanAt: src.fanAt, pw: pwOf(src), fit: src.fit, options: src.options || [], ev: evidenceOf(src) }); };
+  const add = (id, o, src) => { LIB[id] = Object.assign({ key: id, h2: o.u ? Math.round(o.u * 2) : 0 }, o, { watts: src.watts, wattsEst: !!src.wattsEstimated, fanDir: src.fanDir, vent: src.vent, at: src.at, fanAt: src.fanAt, pw: pwOf(src), fit: src.fit, options: src.options || [], profileChoices: src.profileChoices || [], ev: evidenceOf(src) }); };
   (c.panels || []).forEach(g => g.items.forEach(i => add(i.id, { name: i.name, label: null, u: i.u, est: !!i.estimated, face: i.face || 'blank', shape: i.shape, url: i.url || null, author: i.author || '', hardware: i.hardware || [], group: g.group, tab: 'panels' }, i)));
   (c.devices || []).forEach(g => g.items.forEach(d => {
     const dev = d.size ? { device: d.device, size: d.size, color: d.color, io: d.io } : null;
@@ -179,8 +179,9 @@ let rackSide = 'front'; // the side new parts go to: the back while the Back vie
 
 function withOption(base, id) {
   if (!base) return base;
-  const opt = (base.options || []).find(o => o.id === id);
-  return opt ? Object.assign({}, base, { shape: Object.assign({}, base.shape, opt.shape), opt: opt.id, optionName: opt.name, optionNote: opt.note || '', variant: (base.variant || '') + ':' + opt.id }) : base;
+  const opts = base.options || [];
+  const opt = id ? opts.find(o => o.id === id) : opts.find(o => o.frame === state.version);
+  return opt ? Object.assign({}, base, { shape: Object.assign({}, base.shape, opt.shape), opt: opt.id, optionName: opt.name, optionNote: opt.note || '', optionFrame: opt.frame || null, optionExplicit: !!id, variant: (base.variant || '') + ':' + opt.id }) : base;
 }
 const catalogPart = key => withOption(LIB[key], state.optionChoices && state.optionChoices[key]);
 function lookHint(d) {
@@ -188,9 +189,11 @@ function lookHint(d) {
   const checked = d.ev?.look && ['verified', 'documented'].includes(d.ev.look.state);
   return '<span class="hint drawing-status">' + (checked ? 'Drawing compared with the model page' : 'Approximate drawing, see the model page') + '</span>';
 }
+const profileChoiceText = d => (d.profileChoices || []).length ? 'Within the model profile, choose: ' + d.profileChoices.join('; ') + '.' : '';
+const profileChoiceHint = d => profileChoiceText(d) ? '<small class="hint">' + esc(profileChoiceText(d)) + '</small>' : '';
 function optionPicker(d, it) {
   if (!d?.options?.length) return '';
-  return '<label class="hint profile-picker">Print profile <select class="field" data-part-opt="1" data-key="' + esc(d.key) + '"' + (it ? ' data-item="' + it.id + '"' : '') + ' aria-label="Print profile for ' + esc(d.name) + '"><option value="">Choose a print profile</option>' + d.options.map(o => '<option value="' + esc(o.id) + '"' + (d.opt === o.id ? ' selected' : '') + '>' + esc(o.name) + '</option>').join('') + '</select></label>' + (d.optionNote ? '<small class="hint">' + esc(d.optionNote) + '</small>' : '');
+  return '<label class="hint profile-picker">Print profile <select class="field" data-part-opt="1" data-key="' + esc(d.key) + '"' + (it ? ' data-item="' + it.id + '"' : '') + ' aria-label="Print profile for ' + esc(d.name) + '"><option value=""' + (!d.optionExplicit ? ' selected' : '') + '>Automatic: match the frame</option>' + d.options.map(o => '<option value="' + esc(o.id) + '"' + (d.optionExplicit && d.opt === o.id ? ' selected' : '') + '>' + esc(o.name) + '</option>').join('') + '</select></label>' + (d.optionNote ? '<small class="hint">' + esc((!d.optionExplicit ? d.optionName + '. ' : '') + d.optionNote) + '</small>' : '') + profileChoiceHint(d);
 }
 const info = it => {
   if (it.key === 'custom') return { custom: true, name: it.name, h2: it.h2, face: 'custom', url: it.url || null, hardware: [] };
@@ -887,14 +890,14 @@ function printPack() {
   if (h > 5) add(fr.extension.name, '4 joiners for ' + h + 'U', fr.extension.url, 1, 'mw');
   if (bottomPart()) { const d = bottomPart(); add(fullName(d), 'Replaces the bottom panel', d.url, 1, 'mw', variant(d), fp.top); }
   if (state.top) { const d = catalogPart(state.top); add(fullName(d), 'Replaces the top panel', d.url, 1, 'mw', variant(d), fp.top); }
-  state.extras.forEach(k => { const d = catalogPart(k); add(fullName(d), 'Frame extra' + (d.options.length && !d.opt ? ' · choose a print profile on the part' : ''), d.url, 1, 'mw', variant(d), fp.extra(d)); });
+  state.extras.forEach(k => { const d = catalogPart(k); add(fullName(d), 'Frame extra' + (profileChoiceText(d) ? ' · ' + profileChoiceText(d) : '') + (d.options.length && !d.opt ? ' · choose a print profile on the part' : ''), d.url, 1, 'mw', variant(d), fp.extra(d)); });
   let missing = 0;
   byPos().forEach(i => {
     const d = info(i);
     const col = i.color ? ' · ' + colorName(i.color) : '';
     if (i.key === 'gen') { add(i.name, genLabel(i.params) + ' · ' + uRange(i.pos2, d.h2) + atBack(i) + col + ' · in the build pack', null, 1, 'gen', null, itemPieces(i, d)); return; }
     if (!d.url) { if (d.custom) missing++; return; }
-    add(fullName(d), (i.label || shortName(d)) + ' · ' + uRange(i.pos2, d.h2) + atBack(i) + col + (slotText(i) ? ' · ' + slotText(i) : ''), d.url, 1, 'mw', variant(d), itemPieces(i, d));
+    add(fullName(d), (i.label || shortName(d)) + ' · ' + uRange(i.pos2, d.h2) + atBack(i) + col + (slotText(i) ? ' · ' + slotText(i) : '') + (profileChoiceText(d) ? ' · ' + profileChoiceText(d) : ''), d.url, 1, 'mw', variant(d), itemPieces(i, d));
   });
   // a page with several variants lists them, e.g. "½U ×2, 1U ×1", so it's clear which files to print
   out.forEach(x => {
@@ -1017,7 +1020,7 @@ function orderList() {
   const seenProfiles = new Set();
   for (const d of profileParts) {
     const key = d.key + ':' + (d.opt || ''); if (seenProfiles.has(key)) continue; seenProfiles.add(key);
-    out.push({ key: 'profile-' + key, group: 'print', name: 'Print profile: ' + d.name, spec: d.optionName ? d.optionName + (d.optionNote ? '. ' + d.optionNote : '') : 'Choose a print profile on the part before downloading its model.', qty: null, links: d.url ? [{ shop: 'Model profiles', url: d.url }] : [], buy: null });
+    out.push({ key: 'profile-' + key, group: 'print', name: 'Print profile: ' + d.name, spec: d.optionName ? d.optionName + (d.optionNote ? '. ' + d.optionNote : '') + (profileChoiceText(d) ? '. ' + profileChoiceText(d) : '') : 'Choose a print profile on the part before downloading its model.', qty: null, links: d.url ? [{ shop: 'Model profiles', url: d.url }] : [], buy: null });
   }
   const order = SHOP_GROUPS.map(g => g[0]);
   return out.sort((a, b) => order.indexOf(a.group) - order.indexOf(b.group));
@@ -1509,6 +1512,7 @@ function readyFacts(pk) {
     printer: pk.printer ? { name: bedName(pk.printer), bad: bedBad(pk).length, turned: pk.some(x => x.bed && x.bed.turned.length) } : null,
     cooling: { level: !a.Q ? 'none' : a.maxT <= RATED[0] ? 'cool' : a.maxT <= RATED[1] ? 'warm' : 'hot', maxT: a.maxT },
     power: window.LRPower.issues(powerModel()), estimated: pl.filter(i => info(i).est).length, noHardware: noHardwareParts().length,
+    profileMismatches: [...pl.map(info), ...state.extras.map(catalogPart), state.top && catalogPart(state.top), bottomPart()].filter(d => d && d.optionFrame && d.optionFrame !== state.version).map(d => fullName(d)),
     market: (window.LRMarket.regions[state.market] || {}).name
   };
 }

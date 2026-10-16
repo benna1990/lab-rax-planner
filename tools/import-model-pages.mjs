@@ -11,9 +11,10 @@ for (const page of source.pages || []) {
   if (page.license) part.license = page.license;
   part.evidence ||= {};
   if (page.fitsLabRax === 'stated') part.evidence.fit = { state: 'documented', source: page.url, date: page.date, note: page.fitNote || 'Creator states Lab Rax compatibility' };
-  part.evidence.look = { state: page.look === 'ok' ? 'documented' : 'estimated', source: page.url, date: page.date, note: page.lookNote || 'Drawing not yet compared with the source' };
+  part.evidence.look = { state: page.look === 'ok' ? 'documented' : 'estimated', source: page.url, date: page.date, note: page.look === 'ok' ? 'Drawing compared with the model page; dimensions are not independently measured.' : 'Where it attaches comes from the model page; shape and size are not measured.' };
   if (page.attaches && part.shape) part.shape.at = page.attaches;
-  if (page.profiles?.length) part.options = page.profiles.map(p => ({ id: p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''), name: p.name, shape: {}, note: [p.prints, p.plates != null ? p.plates + ' plates in this profile' : null, /all options/i.test(p.name) ? 'Bundle of alternatives: print only the variant matching your build.' : null].filter(Boolean).join('. ') }));
+  if (page.profiles?.length) part.options = page.profiles.map(p => ({ id: p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''), name: p.name, ...(/heat[ -]?set/i.test(p.name) ? { frame: 'brass' } : /bolted/i.test(p.name) ? { frame: 'bolted' } : {}), shape: {}, note: [p.prints, p.plates != null ? p.plates + ' plates in this profile' : null, /all options/i.test(p.name) ? 'Bundle of alternatives: print only the variant matching your build.' : null].filter(Boolean).join('. ') }));
+  if (page.choices?.length) part.profileChoices = page.choices.slice();
   // Hardware prose cannot safely be converted into catalog IDs or inferred quantities.
   changed.push(part.id);
 }

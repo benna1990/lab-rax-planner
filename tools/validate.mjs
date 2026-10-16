@@ -9,12 +9,14 @@ new Function('window', readFileSync(new URL('../shapes.js', import.meta.url), 'u
 const LS = win.LRShapes, deviceNames = new Set((cat.devices || []).flatMap(g => (g.items || []).map(d => d.device)));
 const look = (kind, o, where) => {
   if (o.shape != null) LS.check(kind, o.shape, n => deviceNames.has(n)).forEach(e => errors.push(`${where}: ${e}`));
+  if (o.profileChoices != null && (!Array.isArray(o.profileChoices) || o.profileChoices.some(x => typeof x !== 'string' || !x.trim()))) errors.push(`${where}: profileChoices must be an array of text`);
   if (o.options != null) {
     if (!Array.isArray(o.options) || !o.options.length) { errors.push(`${where}: options must be a nonempty array`); return; }
     const ids = new Set();
     for (const opt of o.options) {
       if (!opt || typeof opt.id !== 'string' || !/^[a-z0-9-]+$/.test(opt.id) || ids.has(opt.id) || typeof opt.name !== 'string' || !opt.name.trim()) { errors.push(`${where}: each option needs a unique id and name`); continue; }
       ids.add(opt.id);
+      if (opt.frame != null && !['brass', 'bolted'].includes(opt.frame)) errors.push(`${where}: option frame must be brass or bolted`);
       if (opt.note != null && typeof opt.note !== 'string') errors.push(`${where}: option note must be text`);
       if (opt.shape != null) LS.check(kind, Object.assign({}, o.shape, opt.shape), n => deviceNames.has(n)).forEach(e => errors.push(`${where} option ${opt.id}: ${e}`));
     }

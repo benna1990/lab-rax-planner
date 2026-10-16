@@ -6566,25 +6566,28 @@
        "state": "estimated",
        "source": "https://makerworld.com/en/models/1931511",
        "date": "2026-10-16",
-       "note": "The photos show a horizontal handle bolted to the side of each top corner piece, sticking out sideways, on both sides. We draw one flat grip in the middle of the side panel (shapes.js, handles: 'side'). There's no choice of profile, handle type or blank corners."
+       "note": "Where it attaches comes from the model page; shape and size are not measured."
       }
      },
      "options": [
       {
        "id": "only-normal-bolted-parts-handles-and-corners",
        "name": "Only Normal Bolted Parts (Handles and corners)",
+       "frame": "bolted",
        "shape": {},
        "note": "handles and side corner pieces for the bolted frame, normal bolt heads. 4 plates in this profile"
       },
       {
        "id": "only-xl-bolted-parts-handles-and-corners",
        "name": "Only XL Bolted Parts (Handles and corners)",
+       "frame": "bolted",
        "shape": {},
        "note": "handles and side corner pieces for the bolted frame, for larger M6 bolt heads. 4 plates in this profile"
       },
       {
        "id": "only-heatset-parts-handles-and-corners",
        "name": "Only Heatset Parts (Handles and Corners)",
+       "frame": "brass",
        "shape": {},
        "note": "handles and side corner pieces for the heat-set insert frame"
       },
@@ -6594,6 +6597,12 @@
        "shape": {},
        "note": "every variant. 9 plates in this profile. Bundle of alternatives: print only the variant matching your build."
       }
+     ],
+     "profileChoices": [
+      "handle: open or closed",
+      "bolt head: small (normal) or large (XL)",
+      "side corners: heat-set or bolted, matching the frame",
+      "optional blank side corners without handle holes (e.g. for the bottom)"
      ]
     },
     {
