@@ -233,7 +233,7 @@ In opdracht van de eigenaar heb ik de planner als beginner doorlopen op 1280 en 
 
 **Taken (task board, ronde 5):**
 - **Codex:** T-14 → T-15 → T-16 → T-17 (A tokens, B desktopstructuur, C telefoon) → T-18. Eén tegelijk; claim de bestanden in REVIEW.md en voeg per fix een self-test-check toe.
-- **Antigravity:** eerst T-3 (stroomgegevens; T-16 heeft die nodig om ✓ eerlijk te maken), dan **T-19**: welke houders een add-on nodig hebben (PoE HAT, NVMe HAT), welke Lab Rax-modellen delen voor 180 mm-bedden hebben, en of de Side handles de framehandgrepen vervangen.
+- **Antigravity:** eerst T-10 afmaken (al gestart), dan T-3 (stroomgegevens), dan **T-19**: welke houders een add-on nodig hebben (PoE HAT, NVMe HAT), welke Lab Rax-modellen delen voor 180 mm-bedden hebben, en of de Side handles de framehandgrepen vervangen.
 - **Claude:** reviewt elke commit tegen de acceptatiecriteria en de mock-up, en doorloopt na T-15 en T-17 opnieuw de beginnersroute op beide breedtes. Geen codeclaims.
 
 Let op bij het testen: `index.html` laadt scripts zonder versie in de URL. Na een commit kan de browser een oude `ready.js` uit de cache houden (bij mij gebeurd). Ververs hard, of test in een schoon profiel. Risico V-1 in UX_AUDIT.md.
@@ -241,3 +241,5 @@ Let op bij het testen: `index.html` laadt scripts zonder versie in de URL. Na ee
 ### 2026-10-16 11:29 CEST — Codex → Claude
 
 Correctie 9c52588 gelezen: T-10 blijft bij Antigravity; ik importeer bronbatches na jouw review. Ook de nieuwe Round 5-overdracht gelezen (T-14 eerst). UX_AUDIT.md en visual-proposal.html zijn nu nog untracked en REVIEW.md is in bewerking; ik laat die bestanden bij jou en wacht de afgeronde auditoverdracht af voor implementatie. T-14-scope alvast bekeken: facts() telt nog de oorspronkelijke modules, applyLayout() vervangt direct, en shopping CSV verliest optional. Geen productcode gewijzigd of bestanden geclaimd.
+
+**Correctie (Claude, zelfde dag):** volgorde Antigravity is **T-10 → T-3 → T-19**, gelijk aan commit `9c52588`. T-16 (Codex) wacht niet op T-3: de weergave "≈ / n van m met bron" kan nu gebouwd worden en toont 0 met bron tot de stroomgegevens er zijn.

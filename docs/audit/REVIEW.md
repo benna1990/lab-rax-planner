@@ -31,7 +31,7 @@ Claude sets these tasks; take one by writing your name in *Who works on what*. E
 - **Antigravity** (opening model pages and datasheets, which the others can't): T-3 now, then T-4, then T-5. Commit `docs/audit/power-inputs.json` in batches (the first 15–20 sourced devices first) so Codex can start on the integration.
 - **Claude**: reviews every commit within one watch round, answers findings, keeps the docs current and prepares the merge with the owner. No code claims this round.
 
-**Round 5 (2026-10-16): UX and visual audit.** Claude walked the planner as a beginner at 1280 and 375 px. The findings are R-17 to R-34 under *Open*; the reasoning, the visual review and the plan are in [UX_AUDIT.md](UX_AUDIT.md), and the mock-up is [visual-proposal.html](visual-proposal.html). Order: T-14 → T-15 → T-16 → T-17 → T-18 for **Codex**, one at a time; **Antigravity** does T-3 first, then T-19. Claude reviews every commit and reruns the beginner route after T-15 and T-17. The T-3 integration still goes first whenever Antigravity's batch is in.
+**Round 5 (2026-10-16): UX and visual audit.** Claude walked the planner as a beginner at 1280 and 375 px. The findings are R-17 to R-34 under *Open*; the reasoning, the visual review and the plan are in [UX_AUDIT.md](UX_AUDIT.md), and the mock-up is [visual-proposal.html](visual-proposal.html). Order: T-14 → T-15 → T-16 → T-17 → T-18 for **Codex**, one at a time; **Antigravity** goes on with T-10 (already started), then T-3, then T-19. Claude reviews every commit and reruns the beginner route after T-15 and T-17. The T-3 integration still goes first whenever Antigravity's batch is in.
 
 ### T-14: Correct counts, keep the user's rack (R-17, R-18, export half of R-30) → **Codex**
 Claim `app.js` and `tools/selftest.html`.
@@ -58,6 +58,7 @@ Claim `app.js`, `layout.js`, `ready.js` and `tools/selftest.html`.
 **Done:** the acceptance lines of R-19 to R-22 hold, with a self-test check for the UCG-Ultra + Flex Mini + Pi 5 wizard.
 
 ### T-16: Status only as strong as its data (R-23, R-26) → **Codex**
+No need to wait for T-3: build the "≈ / n of m sourced" display now; it shows 0 sourced until the power data lands.
 Claim `ready.js`, `app.js` and `index.html`.
 - Readiness ✓ for power, PoE and cooling only when the inputs are sourced; otherwise "≈" with "n of m sourced".
 - Library watt chips get "≈" when unsourced.
@@ -76,7 +77,7 @@ Each commit gets screenshots at 1280 and 375 in `output/`. **Done:** Claude comp
 ### T-18: No dead ends while finding and changing parts (R-27 to R-29, R-31, R-32) → **Codex**
 Claim `app.js`, `index.html` and `tools/selftest.html`. **Done:** the acceptance lines of those findings hold.
 
-### T-19: Mount add-ons and small beds, from the model pages → **Antigravity**, after T-3
+### T-19: Mount add-ons and small beds, from the model pages → **Antigravity**, after T-10 and T-3
 1. For every catalog mount whose page says it needs an add-on (a PoE HAT, an NVMe HAT, a particular supply), record `needs` in its page record in `model-pages.json`. Start with the Raspberry Pi mounts (`mw2319976` first).
 2. List the Lab Rax models whose page offers pieces for 180 mm beds (A1 mini, Prusa MINI).
 3. Say whether the Side handles (`mw1931511`) replace the base frame's handles or come in addition.
@@ -232,7 +233,7 @@ Claude reads this file at the start of every work session on the branch. Other d
   - In `catalog.json`, 0 entries have `evidence.power` and 5 have `evidence.height`.
 - **Expected:** a ✓ only for checks whose inputs are sourced. Otherwise "≈ adds up, from estimated wattages (0 of 5 sourced)", with the dashed "≈" style; watt chips marked "≈" when unsourced.
 - **Impact:** goal 4 of the product (tell checked from assumed) fails exactly where safety and money are involved: power supplies, PoE budgets.
-- **Accept:** no green ✓ on power, PoE or cooling while any input is unsourced; the count of sourced inputs is shown; `test-ready.mjs` covers it. → **T-16** (data: **T-3**)
+- **Accept:** no green ✓ on power, PoE or cooling while any input is unsourced; the count of sourced inputs is shown; `test-ready.mjs` covers it. → **T-16** (sourced values arrive later with **T-3**)
 
 ### R-24: On the first visit, the example poses as "Your build", and the four ways in vanish for good (S2, demonstrated)
 - **Route and width:** first visit; 1280 and 375.
