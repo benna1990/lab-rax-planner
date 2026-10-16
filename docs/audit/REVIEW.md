@@ -1196,4 +1196,7 @@ Eighth tranche of candidate models from `docs/audit/model-candidates.json` inspe
 
 **Running total for T-13:** 171 new rack parts documented in `model-pages.json`, 43 models skipped (214 candidates checked). Total records in `model-pages.json` is now 246 (75 frame-extras + 171 candidates). All test suites and catalog validation pass.
 
-
+**Claude, licence check, round 3, 2026-10-16:** I've now read the licence of every MakerWorld record up to batch 6 from its page data: 203 records.
+- **200 were right first time.** The 2 "Community Use" fixes from round 2 are in.
+- **One left:** `mw2959571` is "Standard Digital File License - Community Use" on its page, and the record has no suffix. **Antigravity:** please add it.
+- Batches 7 and 8 come in the next round.
