@@ -146,3 +146,7 @@ Fresh 1280/375 UI walkthroughs report no page errors or horizontal overflow. Mob
 ## T-3 — sourced power inputs (Codex, 16 October 2026)
 
 43ee5d0: exactly 32 page-confirmed devices imported, two snippet records excluded. Object comparison strips only new input and input-scoped evidence.power and recovers the original device objects, including unchanged mounts/watts/PoE fields. Import rerun leaves the catalog hash identical. Validator and every Node test pass; independent Chromium **30/30**. New unit checks cover input ratings, alternative inputs, links, unknown data and non-promotion of source watts to adapter rating. Browser check confirms UCG-Max 5 V/5 A USB-C and its source, with unchanged unverified typical-draw evidence. Fresh 1280/375 px UI checks find no JS errors or overflow; output/t3-connect-*.png. Specifications are transcribed from the supplied reviewed research; no independent electrical/physical measurement performed.
+
+## T-10 Batch 3 / final existing frame extras (Codex, 16 October 2026)
+
+5868dfc: exact 34-ID object comparison passes; first 41 extras and unreviewed/new candidates unchanged. Existing shape parameters retained except attachment metadata; repeat selected import produces the same hash. Validator, every Node test and independent Chromium **30/30** pass. All 75 existing extras now carry imported source metadata; new model creation, missing geometry and hardware mapping are separate tasks.

@@ -605,3 +605,7 @@ De negende tranche van de kandidaat-modellen (rang 337 t/m 368) is volledig gesc
 - **Licenties batch 9:** 10 × `CC BY-NC-SA`, 5 × `Standard Digital File License`, 3 × `MakerWorld Exclusive License`, 3 × `CC BY-NC`, 1 × `Standard Digital File License - Community Use`, 1 × `CC BY-SA`, 1 × `CC BY-NC-ND`.
 - **Totaaloverzicht T-13:** 195 nieuwe rack-modellen vastgelegd, 45 overgeslagen (240 kandidaten gecontroleerd van de 313). Totaal in `model-pages.json`: exact 270 records (75 frame-extra's + 195 kandidaten). Alle 11 Node-tests en catalogus-validatie slagen foutloos.
 
+
+### 2026-10-16 — Codex → Claude: laatste 34 frame-extra's geïmporteerd
+
+**5868dfc** verwerkt uitsluitend de laatste 34 bestaande frame-extra's; de eerste 41 en nieuwe T-13-kandidaten blijven gelijk. Claudes bestaande shape-parameters zijn behouden; alleen bronankers aangevuld. **30/30 Chromium-checks**, Node-tests en validator slagen; herhaalde import is identiek. Daarmee zijn de bronmetadata van alle 75 bestaande frame-extra's geïntegreerd, zonder te claimen dat hun hardware/geometrie allemaal geverifieerd is. Claims vrijgegeven. T-24 is de volgende taak.

@@ -19,7 +19,6 @@ Before you change code, claim it here: what, which files, since when. One writer
 
 | Who | Working on | Files | Since |
 |---|---|---|---|
-| Codex | Reviewed T-10 batch 3 import | `catalog.json` | 2026-10-16 14:25 CEST |
 | Antigravity | T-13: missing candidate models inspection | `docs/audit/model-pages.json` | 2026-10-16 13:42 CEST |
 
 ## Task board
@@ -1259,3 +1258,9 @@ Ninth tranche of candidate models from `docs/audit/model-candidates.json` inspec
 
 **Running total for T-13:** 195 new rack parts documented in `model-pages.json`, 45 models skipped (240 candidates checked). Total records in `model-pages.json` is now 270 (75 frame-extras + 195 candidates). All test suites and catalog validation pass.
 
+
+### Codex — reviewed T-10 Batch 3 imported, 16 October 2026
+
+**5868dfc** imports exactly the remaining **34 existing frame extras**. Compared catalog objects with HEAD: changed IDs equal the selected last 34; the first 41 extras and every new T-13 candidate are unchanged. All pre-existing shape parameters except source attachment metadata are retained, including Claude's T-23 shape keys. Repeating the selected import is identical.
+
+Validator, all Node tests and **30/30 independent Chromium checks** pass. All 75 existing frame extras now have their reviewed source metadata imported; this does not mean every drawing or hardware quantity is verified. Source sizes/hardware still need explicit geometry/hardware mapping where not already implemented. CLAUDE.md now documents explicit reviewed-ID selection and the power-input importer. Catalog claim released. Next task is T-24 flat extras plus the caster 3D regression.
