@@ -76,7 +76,8 @@ const slotP = (cx, cy, w, h) => rectP(cx - w / 2, cy - h / 2, w, h, Math.min(w, 
    cyl  {x,y,z,r,d,c}            axis along z, x/y its centre
    ext  {axis,pts,holes,at,d,c}  an extruded outline: axis 'z' pts (x,y) front at z=at going back; axis 'y' pts (x, back) from y=at
                                   up by d; axis 'x' pts (back, y) from x=at to the right by d (back = −z)
-   disc {x,y,z,r,d,tilt,c,dome}  a round device (access point): centre of its base, axis tilted from vertical towards the front
+   disc {x,y,z,r,d,tilt,c,dome}  a round device (access point): centre of its base, axis tilted from vertical towards the front;
+                                  r2 (optional) is the radius at the top, for a cone
    text {x,y,z,s,str,c}          SVG only
    lines {segs,z,c,sw}           SVG only (bristles and such) */
 const box = (x, y, z, w, h, d, c, r) => ({ t: 'box', x, y, z, w, h, d, c, r: r || 0 });
@@ -852,53 +853,138 @@ function compileTop(d, opts) {
 /* ---------- frame extras ----------
    An extra's shape says what it changes on the frame: { side: 'hex', fan: 80 }, { handles: 'stackable' }, { feet: 'big' },
    { drawer: true }, { logo: 'neopixel' }, { corner: 11 }, { depth: 50 }, { u: 6 }, { frame: 'lowprofile' }, { wall: true },
-   { inside: 'comb' }. frameMods() merges the extras in a build for the front and 3D views; extraScene() draws one for its card. */
+   { inside: 'comb' }. They also say how it looks and where it sits: { feet: 'big', foot: 'cone' } round feet, { feet: 'casters', chassis: 'blocks' }
+   corner blocks under the casters, { rails: 'counterbore' } bare posts with a column of counterbored holes, { side: 'asanoha' } or
+   { side: 'raisedhex' } patterned panels, { side: 'hex', mount: [180, 200] } mounting holes for those fans, { sides: 'open' } no side panel,
+   { hl: ['edges', 'sides'] } what to colour (base, top, posts, handles, edges = the side beams, sides = the side panels), { wall: 'cleat' |
+   'plate' | 'dock' }, { width: 482.6, hl: 'braces', bar: 'center' } a wider frame with its cross braces coloured, { tandem: 2 } racks side by side
+   sharing the middle posts, { joiner: 'post' | 'depth' | 'outer', u: 6 } how a build taller than 5U is joined at the seam: plates on the posts, a bar
+   between front and rear posts, or a bar across the outside of the side panels. frameMods() merges the extras in a build for the front and 3D views; extraScene() draws one for its card. */
 function frameMods(list) {
-  const m = { side: null, sideFan: 0, handles: 'plain', handlesAt: null, feet: 'plain', drawer: false, logo: null, corner: 0, depthAdd: 0, wall: false, edgeSwitch: false };
+  // feet stays plain | big | casters for the views that only know those; foot, chassis, wallStyle and sideMount say more
+  const m = { side: null, sideFan: 0, sideMount: null, handles: 'plain', handlesAt: null, feet: 'plain', foot: null, chassis: null, drawer: false, logo: null, corner: 0, depthAdd: 0, wall: false, wallStyle: null, edgeSwitch: false, width: 0, tandem: 0 };
   (list || []).forEach(d => {
     const s = d && d.shape || {};
     if (s.side || s.fan) { m.side = s.side || m.side || 'plain'; if (s.fan) m.sideFan = num(s.fan, 80); }
+    if (s.mount) m.sideMount = [].concat(s.mount).filter(v => typeof v === 'number');
     if (s.handles) { m.handles = s.handles; m.handlesAt = s.at || null; }
-    if (s.feet) m.feet = s.feet;
+    if (s.feet) { m.feet = s.feet; m.foot = s.foot || null; m.chassis = s.chassis || null; } // the last feet extra wins, with its own look
     if (s.drawer) m.drawer = true;
     if (s.logo) m.logo = s.logo;
     if (s.corner) m.corner = num(s.corner, 4);
     if (s.depth) m.depthAdd = Math.max(m.depthAdd, num(s.depth, 0));
-    if (s.wall) m.wall = true;
+    if (s.wall) { m.wall = true; m.wallStyle = typeof s.wall === 'string' ? s.wall : 'plain'; }
     if (s.edge === 'switch') m.edgeSwitch = true;
+    if (s.width) m.width = num(s.width, 0);
+    if (s.tandem) m.tandem = num(s.tandem, 0);
   });
   return m;
 }
-// a side panel pattern on the plane of a side, in (back, y) from the front bottom corner of the panel
-function sideHoles(side, fan, depth, height) {
+// Asanoha (hemp leaf), the Kumiko lattice: a triangular grid, each triangle cut in three by lines from its centre to its corners; the
+// cut-outs are those thirds, shrunk to leave a bar. s is the triangle side, bar the bar width, both in mm.
+function asanohaHoles(x0, y0, w, h, s, bar) {
+  const out = [], th = s * Math.sqrt(3) / 2, rows = Math.floor(h / th + 1e-6), f = 1 - bar / 2 / (s * .134);
+  const n = Math.max(1, Math.floor((w - s) / (s / 2) + 1e-6) + 1), ox = x0 + (w - ((n - 1) * s / 2 + s)) / 2, oy = y0 + (h - rows * th) / 2;
+  for (let r = 0; r < rows; r++) for (let j = 0; j < n; j++) {
+    const xj = ox + j * s / 2, yb = oy + r * th, yt = yb + th;
+    const tri = (j + r) % 2 === 0 ? [[xj, yb], [xj + s, yb], [xj + s / 2, yt]] : [[xj, yt], [xj + s, yt], [xj + s / 2, yb]];
+    const g = [(tri[0][0] + tri[1][0] + tri[2][0]) / 3, (tri[0][1] + tri[1][1] + tri[2][1]) / 3];
+    for (let k = 0; k < 3; k++) {
+      const a = tri[k], b = tri[(k + 1) % 3], c = [(a[0] + b[0] + g[0]) / 3, (a[1] + b[1] + g[1]) / 3];
+      out.push([g, a, b].map(q => [c[0] + (q[0] - c[0]) * f, c[1] + (q[1] - c[1]) * f]));
+    }
+  }
+  return out;
+}
+/* a side panel pattern on the plane of a side, in (back, y) from the front bottom corner of the panel. opts.mount lists fan sizes whose
+   four mounting holes are drilled through the pattern (the hex cells they would hit are left out). back: a second-colour plate behind the
+   cut-outs, rim: the width of a raised border (dual-tone panels). */
+function sideHoles(side, fan, depth, height, opts) {
   const holes = [], m = 14, studs = [];
+  let back = false, rim = 0;
   if (fan) { const fd = Math.min(fan, height - 16, depth - 30); holes.push(circP(depth / 2, height / 2, fd / 2 - 1.5)); return { holes, fan: { cx: depth / 2, cy: height / 2, d: fd } }; }
   if (side === 'hex' || side === 'honeycomb') ventHoles('hex', m, m, depth - 2 * m, height - 2 * m, { r: side === 'honeycomb' ? 11 : 7.5, wall: side === 'honeycomb' ? 4 : 2.6 }).forEach(h => holes.push(h));
+  else if (side === 'raisedhex') { ventHoles('hex', m, m, depth - 2 * m, height - 2 * m, { r: 4.6, wall: 1.6 }).forEach(h => holes.push(h)); back = true; rim = m - 3; }
+  else if (side === 'asanoha') asanohaHoles(m, m, depth - 2 * m, height - 2 * m, 28, 2.2).forEach(h => holes.push(h));
   else if (side === 'vent' || side === 'slots') ventHoles('hslots', m + 20, m + 8, depth - 2 * m - 40, height - 2 * m - 16, { sw: 4, pitch: 9 }).forEach(h => holes.push(h));
   else if (side === 'kumiko') { for (let x = m; x + 26 <= depth - m; x += 28) for (let y = m; y + 26 <= height - m; y += 28) holes.push([[x + 3, y + 1.5], [x + 23, y + 1.5], [x + 13, y + 11.5]], [[x + 24.5, y + 3], [x + 24.5, y + 23], [x + 14.5, y + 13]], [[x + 23, y + 24.5], [x + 3, y + 24.5], [x + 13, y + 14.5]], [[x + 1.5, y + 23], [x + 1.5, y + 3], [x + 11.5, y + 13]]); }
   else if (side === 'skadis') { for (let j = 0, y = m; y + 15 <= height - m; j++, y += 20) for (let x = m + (j % 2) * 20; x + 5 <= depth - m; x += 40) holes.push(slotP(x + 2.5, y + 7.5, 5, 15)); }
   else if (side === 'multiboard') { for (let x = m + 11; x <= depth - m - 11; x += 25) for (let y = m + 11; y <= height - m - 11; y += 25) holes.push(ngonP(x, y, 10, 8, Math.PI / 8)); }
   else if (side === 'grid') ventHoles('grid', m, m, depth - 2 * m, height - 2 * m, { r: 12, wall: 3.5 }).forEach(h => holes.push(h));
   else if (side === 'brick') { for (let x = m + 8; x <= depth - m - 8; x += 16) for (let y = m + 8; y <= height - m - 8; y += 16) studs.push([x, y]); }
-  return { holes, studs };
+  // fan mounting holes: the corners of a square of about .77 of the fan size (estimated: the pages give no hole spacing), round the middle
+  const mounts = [];
+  [].concat(opts && opts.mount || []).forEach(sz => { const q = Math.round(sz * .77) / 2; for (const dx of [-1, 1]) for (const dy of [-1, 1]) { const x = depth / 2 + dx * q, y = height / 2 + dy * q; if (x > m + 4 && x < depth - m - 4 && y > m + 4 && y < height - m - 4) mounts.push([x, y]); } });
+  if (mounts.length) {
+    const mid = h => [h.reduce((a, q) => a + q[0], 0) / h.length, h.reduce((a, q) => a + q[1], 0) / h.length];
+    const keep = holes.filter(h => { const c = mid(h); return mounts.every(q => Math.hypot(c[0] - q[0], c[1] - q[1]) > 9); });
+    holes.length = 0; keep.forEach(h => holes.push(h));
+    mounts.forEach(q => holes.push(circP(q[0], q[1], 2.6, 12)));
+  }
+  return { holes, studs, back, rim };
+}
+// Turns a scene a quarter turn clockwise about the viewing axis, (x, y) → (y, −x): a rack hanging on its side, its feet to the left.
+function turnQuarter(S) {
+  const rot = q => [q[1], -q[0]], swap = q => [q[1], q[0]];
+  const turned = p => {
+    if (p.t === 'box') return Object.assign({}, p, { x: p.y, y: -(p.x + p.w), w: p.h, h: p.w });
+    if (p.t === 'cyl') return Object.assign({}, p, { x: p.y, y: -p.x });
+    if (p.t === 'text') return Object.assign({}, p, { x: p.y, y: -p.x, rot: (p.rot || 0) + 90 });
+    if (p.t === 'lines') return Object.assign({}, p, { segs: p.segs.map(g => [g[1], -g[0], g[3], -g[2]]) });
+    if (p.t !== 'ext') return p;
+    if (p.axis === 'z') return Object.assign({}, p, { pts: p.pts.map(rot), holes: p.holes.map(h => h.map(rot)) });
+    if (p.axis === 'y') return Object.assign({}, p, { axis: 'x', pts: p.pts.map(rot), holes: p.holes.map(h => h.map(rot)) });
+    return Object.assign({}, p, { axis: 'y', at: -(p.at + p.d), pts: p.pts.map(swap), holes: p.holes.map(h => h.map(swap)) });
+  };
+  S.objs.forEach(ob => { ob.prims = ob.prims.map(turned); });
+}
+// Moves a scene sideways by dx mm.
+function shiftScene(S, dx) {
+  const moved = p => {
+    if (p.t === 'box' || p.t === 'cyl' || p.t === 'disc' || p.t === 'text') return Object.assign({}, p, { x: p.x + dx });
+    if (p.t === 'lines') return Object.assign({}, p, { segs: p.segs.map(g => [g[0] + dx, g[1], g[2] + dx, g[3]]) });
+    if (p.t !== 'ext') return p;
+    if (p.axis === 'x') return Object.assign({}, p, { at: p.at + dx });
+    const mv = q => [q[0] + dx, q[1]]; // axis z: (x, y); axis y: (x, back)
+    return Object.assign({}, p, { pts: p.pts.map(mv), holes: p.holes.map(h => h.map(mv)) });
+  };
+  S.objs.forEach(ob => { ob.prims = ob.prims.map(moved); });
+}
+// racks side by side, neighbours sharing a pair of posts; only the outer side of the last one gets a panel
+function tandemScene(sp, o) {
+  const n = clamp(Math.floor(num(sp.tandem, 2)), 2, 3), one = Object.assign({}, sp, { tandem: 0 }), dx = FRAME.outer - 2 * 3 - FRAME.post;
+  const out = { rack: true, objs: [], w: FRAME.outer + (n - 1) * dx, h: 0 };
+  for (let k = 0; k < n; k++) {
+    const sc = rackScene(k < n - 1 ? Object.assign({}, one, { sides: 'open' }) : one, o);
+    shiftScene(sc, k * dx - (n - 1) * dx / 2); out.objs.push(...sc.objs); out.h = sc.h;
+  }
+  return out;
 }
 /* A small Lab Rax for the extras' cards and anything else that needs the frame as primitives (3D side panels use sideHoles). */
 function rackScene(spec, o) {
   o = o || {};
   const sp = spec || {}, frame = o.frame || '#26282B', accent = o.accent || '#B5CF2A', S = scene();
-  const u = num(sp.u, 3), W = sp.frame === 'matx' ? 304 : FRAME.outer, D = FRAME.depth + num(sp.depth, 0), ih = u * U, post = FRAME.post, bot = sp.frame === 'lowprofile' ? 8 : FRAME.bottom, top = sp.frame === 'lowprofile' ? 18 : FRAME.top, ring = FRAME.ring;
-  const y0 = (sp.feet === 'casters' ? 46 : sp.feet === 'big' ? 14 : 8) + (sp.drawer ? 30 : 0), yT = y0 + bot + ih;
+  if (sp.tandem) return tandemScene(sp, o);
+  const u = num(sp.u, 3), W = sp.width ? clamp(num(sp.width, FRAME.outer), FRAME.outer, 600) : sp.frame === 'matx' ? 304 : FRAME.outer, D = FRAME.depth + num(sp.depth, 0), ih = u * U, post = FRAME.post, bot = sp.frame === 'lowprofile' ? 8 : FRAME.bottom, top = sp.frame === 'lowprofile' ? 18 : FRAME.top, ring = FRAME.ring;
+  const wallStyle = typeof sp.wall === 'string' ? sp.wall : sp.wall ? 'plain' : null;
+  const postX = sx => sx < 0 ? -W / 2 + 3 : W / 2 - 3 - post; // left edge of the posts on the left (-1) or right (1) side
+  const y0 = (sp.feet === 'casters' ? 46 : sp.feet === 'big' ? 14 : wallStyle === 'dock' ? 28 : 8) + (sp.drawer ? 30 : 0), yT = y0 + bot + ih;
   const B = (x, y, z, w, h, d, c, layer) => S.obj(layer == null ? 0 : layer).push(box(x, y, z, w, h, d, c));
   // dark inside, then the rings, posts and side panels
   B(-W / 2 + 8, y0 + bot, -D + 4, W - 16, ih, 2, '#0C0D0F');
-  const hl = k => sp.hl === k ? accent : frame;
-  B(-W / 2, y0, 0, ring, bot, D, hl('base')); B(W / 2 - ring, y0, 0, ring, bot, D, hl('base')); B(-W / 2 + ring, y0, 0, W - 2 * ring, bot, ring, frame); B(-W / 2 + ring, y0, -D + ring, W - 2 * ring, bot, ring, frame);
+  // what the extra changes is coloured: hl is one of base, top, posts, handles, edges (the side beams of both rings) and sides (the side panels), or a list of them
+  const hlOn = k => [].concat(sp.hl || []).includes(k), hl = k => hlOn(k) ? accent : frame, edgeC = k => hlOn('edges') || hlOn(k) ? accent : frame, brC = k => hlOn('braces') || hlOn(k) ? accent : frame;
+  B(-W / 2, y0, 0, ring, bot, D, edgeC('base')); B(W / 2 - ring, y0, 0, ring, bot, D, edgeC('base')); B(-W / 2 + ring, y0, 0, W - 2 * ring, bot, ring, brC('')); B(-W / 2 + ring, y0, -D + ring, W - 2 * ring, bot, ring, brC(''));
   for (const sx of [-1, 1]) for (const z of [0, -D + 20]) B(sx < 0 ? -W / 2 + 3 : W / 2 - 3 - post, y0 + bot, z, post, ih, 20, hl('posts'));
+  // rails with larger bolt heads: the posts bare, a column of counterbored holes (three per U, EIA spacing) in the front face of each
+  if (sp.rails) { const R = S.obj(2); for (const sx of [-1, 1]) for (const z of [0, -D + 20]) for (let k = 0; k < u; k++) for (const off of DIMS.holeY) { const hy = yT - k * U - off; R.push(cyl(sx * HOLE_X, hy, z + .12, 6.4, .1, shade(frame, -.4)), cyl(sx * HOLE_X, hy, z + .24, 3.4, .1, C.hole)); } }
   // front: a few panels so it reads as a rack
-  for (let i = 0; i < u; i++) { const P = S.obj(1); P.push(box(-125, y0 + bot + i * U + .4, 2.6, 250, U - .8, 3, shade(frame, .05), 1)); if (i === u - 1) ventHoles('hex', -100, y0 + bot + i * U + 7, 200, U - 14, {}).forEach(h => P.push(ext(h, [], 2.7, .1, C.hole))); else if (i === 0) { for (let k = 0; k < 5; k++) P.push(box(-95 + k * 40, y0 + bot + i * U + 8, 2.7, 30, U - 17, .1, C.hole, 2)); } }
+  const PW = sp.width ? W - 30 : 250, ns = sp.width ? Math.round(PW / 50) : 5; // panel width and number of slots in the bottom one: a wider frame has wider panels
+  if (!sp.rails) for (let i = 0; i < u; i++) { const P = S.obj(1); P.push(box(-PW / 2, y0 + bot + i * U + .4, 2.6, PW, U - .8, 3, shade(frame, .05), 1)); if (i === u - 1) ventHoles('hex', -PW / 2 + 25, y0 + bot + i * U + 7, PW - 50, U - 14, {}).forEach(h => P.push(ext(h, [], 2.7, .1, C.hole))); else if (i === 0) { for (let k = 0; k < ns; k++) P.push(box(-(ns * 40 - 10) / 2 + k * 40, y0 + bot + i * U + 8, 2.7, 30, U - 17, .1, C.hole, 2)); } }
   // top ring with the hex grille and logo, or the keystone corner
-  B(-W / 2, yT, 0, ring, top, D, hl('top'), 1); B(W / 2 - ring, yT, 0, ring, top, D, hl('top'), 1); B(-W / 2 + ring, yT, -D + ring, W - 2 * ring, top, ring, hl('top'), 1);
-  const F = S.obj(1); F.push(box(-W / 2 + ring, yT, 0, W - 2 * ring, top, ring, hl('top')));
+  B(-W / 2, yT, 0, ring, top, D, edgeC('top'), 1); B(W / 2 - ring, yT, 0, ring, top, D, edgeC('top'), 1); B(-W / 2 + ring, yT, -D + ring, W - 2 * ring, top, ring, brC('top'), 1);
+  const F = S.obj(1); F.push(box(-W / 2 + ring, yT, 0, W - 2 * ring, top, ring, brC('top')));
+  if (sp.bar === 'center') B(-10, yT + top - 5, 0, 20, 5, D, brC(''), 1); // a flat bar along the middle of the top, front brace to back brace
   const G = S.obj(2);
   if (sp.corner) { const n = Math.min(num(sp.corner, 11), 12); for (let i = 0; i < n; i++) G.push(box(-((n - 1) * 17.6) / 2 + i * 17.6 - 7.45, yT + top / 2 - 8.2, .1, 14.9, 16.4, .1, '#18191C'), box(-((n - 1) * 17.6) / 2 + i * 17.6 - 5.85, yT + top / 2 - 5.8, .2, 11.7, 9.8, .1, C.hole)); }
   else {
@@ -907,10 +993,26 @@ function rackScene(spec, o) {
   }
   if (sp.edge === 'switch') G.push(box(W / 2 - ring - 30, yT + top / 2 - 7, .4, 16, 14, .4, C.red, 3));
   // right side panel with its pattern (the left one is hidden)
-  const sh = sideHoles(sp.side, sp.fan, D - 40, ih + 8), SP = S.obj(2), side = sp.side || sp.fan ? frame : sp.sides === 'acrylic' ? '#2A3038' : frame;
-  SP.push(flat('x', rectP(20, y0 + bot - 4, D - 40, ih + 8, 2), sh.holes.map(h => h.map(([a, b]) => [a + 20, b + y0 + bot - 4])), W / 2 - 3, 3, side));
-  if (sh.fan) { const fx = 20 + sh.fan.cx, fy = y0 + bot - 4 + sh.fan.cy, r = sh.fan.d / 2 - 2; for (let k = 1; k <= 3; k++) SP.push(flat('x', circP(fx, fy, r * k / 3.2 + .8), [circP(fx, fy, r * k / 3.2 - .4)], W / 2 + .5, 1, C.metal)); SP.push(flat('x', circP(fx, fy, r * .36), [], W / 2 - 2, 1, '#2A2C30')); }
-  (sh.studs || []).forEach(([a, b]) => SP.push(flat('x', circP(a + 20, b + y0 + bot - 4, 4.8, 14), [], W / 2, 1.8, shade(frame, .08))));
+  const sh = sideHoles(sp.side, sp.fan, D - 40, ih + 8, { mount: sp.mount }), SP = S.obj(2), side = hlOn('sides') ? accent : sp.side || sp.fan ? frame : sp.sides === 'acrylic' ? '#2A3038' : frame;
+  const sx0 = 20, sy0 = y0 + bot - 4, sw = D - 40, shh = ih + 8;
+  if (sp.sides !== 'open') { // open: no printed side panel, the frame shows
+    if (sh.back) SP.push(flat('x', rectP(sx0 + sh.rim, sy0 + sh.rim, sw - 2 * sh.rim, shh - 2 * sh.rim, 1), [], W / 2 - 4.2, 1.2, shade(accent, -.25))); // the second colour, seen through the cut-outs
+    if (sp.joiner && u > 1) { // a build taller than 5U has two side panels with a seam at the joint (the upper one an extension)
+      const h1 = Math.min(5, u - 1) * U + 4;
+      SP.push(flat('x', rectP(sx0, sy0, sw, h1 - .6, 2), [], W / 2 - 3, 3, frame), flat('x', rectP(sx0, sy0 + h1 + .6, sw, shh - h1 - .6, 2), [], W / 2 - 3, 3, hlOn('sides') ? accent : frame));
+    } else
+    SP.push(flat('x', rectP(sx0, sy0, sw, shh, 2), sh.holes.map(h => h.map(([a, b]) => [a + 20, b + y0 + bot - 4])), W / 2 - 3, 3, side));
+    if (sh.rim) SP.push(flat('x', rectP(sx0, sy0, sw, shh, 2), [rectP(sx0 + sh.rim, sy0 + sh.rim, sw - 2 * sh.rim, shh - 2 * sh.rim, 1)], W / 2, 1.6, shade(side, .1))); // the raised border
+    if (sh.fan) { const fx = 20 + sh.fan.cx, fy = y0 + bot - 4 + sh.fan.cy, r = sh.fan.d / 2 - 2; for (let k = 1; k <= 3; k++) SP.push(flat('x', circP(fx, fy, r * k / 3.2 + .8), [circP(fx, fy, r * k / 3.2 - .4)], W / 2 + .5, 1, C.metal)); SP.push(flat('x', circP(fx, fy, r * .36), [], W / 2 - 2, 1, '#2A2C30')); }
+    (sh.studs || []).forEach(([a, b]) => SP.push(flat('x', circP(a + 20, b + y0 + bot - 4, 4.8, 14), [], W / 2, 1.8, shade(frame, .08))));
+  }
+  // joiners at the seam of a tall build (see the header): plates over the post joints, a bar from front to rear post, a bar across the outside of the side panels
+  if (sp.joiner) {
+    const jy = y0 + bot + Math.min(5, u - 1) * U, J = S.obj(2);
+    if (sp.joiner === 'post') for (const sx of [-1, 1]) for (const z of [0, -D + 20]) J.push(box(postX(sx), jy - 18, z + .6, post, 36, 2.4, accent));
+    else if (sp.joiner === 'depth') for (const sx of [-1, 1]) J.push(flat('x', rectP(10, jy - 8, D - 20, 16, 2), [], sx < 0 ? -W / 2 + 3 : W / 2 - 7, 4, accent));
+    else if (sp.joiner === 'outer') { J.push(flat('x', rectP(10, jy - 9, D - 20, 18, 2), [], W / 2, 3, accent)); for (const b of [18, D - 18]) J.push(flat('x', circP(b, jy, 4.5), [], W / 2 + 3, 1.6, C.steel)); }
+  }
   // handles on top, feet or casters below, a drawer in the base
   const hs = sp.handles || 'plain';
   if (hs === 'side') { // attachment is documented; the grip outline and size remain approximate
@@ -918,18 +1020,38 @@ function rackScene(spec, o) {
     const gy = at === 'top-corners' ? yT + top / 2 - 13 : at === 'bottom-corners' ? y0 + bot / 2 - 13 : y0 + bot + ih * .62;
     for (const sx of [-1, 1]) S.obj(2).push(flat('x', rectP(gz, gy, gl, 26, 10), [rectP(gz + 12, gy + 7, gl - 24, 12, 6)], sx < 0 ? -W / 2 - 12 : W / 2, 12, accent));
   } else if (hs !== 'none') for (const sx of [-1, 1]) {
-    const L = (D) * (hs === 'long' ? .7 : .53), H = hs === 'stackable' ? 26 : 34, z0 = -(D - L) / 2, leg = 14, sl = hs === 'stackable' ? 0 : .35, bar = 10;
+    const L = hs === 'long' && sp.depth ? FRAME.depth * FRAME.handleLen + num(sp.depth, 0) : (D) * (hs === 'long' ? .7 : .53), H = hs === 'stackable' ? 26 : 34, z0 = -(D - L) / 2, leg = 14, sl = hs === 'stackable' ? 0 : .35, bar = 10;
     const pts = [[-z0, 0], [-z0 + leg, 0], [-z0 + leg + (H - bar) * sl, H - bar], [-z0 + L - leg - (H - bar) * sl, H - bar], [-z0 + L - leg, 0], [-z0 + L, 0], [-z0 + L - H * sl, H], [-z0 + H * sl, H]];
-    S.obj(2).push(flat('x', hs === 'stackable' ? [[-z0, 0], [-z0 + L, 0], [-z0 + L, H], [-z0, H]].map(([a, b]) => [a, b + yT + top]) : pts.map(([a, b]) => [a, b + yT + top]), hs === 'stackable' ? [rectP(-z0 + 14, 6 + yT + top, L - 28, H - 14, 4)] : [], sx * (W / 2 - 23) - 6, 12, hs === 'side' || sp.hl === 'handles' || sp.handles && sp.handles !== 'plain' ? accent : frame));
+    S.obj(2).push(flat('x', hs === 'stackable' ? [[-z0, 0], [-z0 + L, 0], [-z0 + L, H], [-z0, H]].map(([a, b]) => [a, b + yT + top]) : pts.map(([a, b]) => [a, b + yT + top]), hs === 'stackable' ? [rectP(-z0 + 14, 6 + yT + top, L - 28, H - 14, 4)] : [], sx * (W / 2 - 23) - 6, 12, hs === 'side' || hlOn('handles') || sp.handles && sp.handles !== 'plain' ? accent : frame));
   }
   const ft = sp.feet || 'plain';
   for (const sx of [-1, 1]) for (const z of [-8, -(D - 30)]) {
-    const fx = sx < 0 ? -W / 2 + 6 : W / 2 - 34;
-    if (ft === 'casters') { S.obj(0).push(box(fx, y0 - 10, z, 28, 10, 22, '#3A3D42'), cyl(fx + 14, y0 - 28, z + 4, 16, 6, '#1A1B1E'), cyl(fx + 14, y0 - 28, z + 4.2, 6, .4, C.metal)); }
-    else S.obj(0).push(box(fx, y0 - (ft === 'big' ? 14 : 8), z, 28, ft === 'big' ? 14 : 8, 22, ft === 'big' ? accent : '#1A1B1E'));
+    const fx = sx < 0 ? -W / 2 + 6 : W / 2 - 34, cx = fx + 14, cz = z - 11, F0 = S.obj(0);
+    if (ft === 'casters' && sp.chassis === 'blocks') { // a base block under the frame corner, the caster's swivel plate, its fork, and a wheel rolling front to back
+      F0.push(flat('x', circP(-cz, 15, 15), [], cx - 5, 10, '#25272B'), flat('x', circP(-cz, 15, 8), [], cx - 5.2, 10.4, C.steel), flat('x', circP(-cz, 15, 2.6, 12), [], cx - 7.2, 14.4, C.metal)); // tyre, hub, axle
+      for (const k of [cx - 7.2, cx + 5]) F0.push(flat('x', rectP(-cz - 9, 7, 18, y0 - 14.5 - 7, 4), [], k, 2.2, C.steel));
+      F0.push(box(fx - 3, y0 - 14.5, z + 3, 34, 2.5, 28, C.steel), box(fx, y0 - 12, z, 28, 12, 22, accent)); // painted bottom to top: the block rests on the plate
+    }
+    else if (ft === 'casters') { F0.push(box(fx, y0 - 10, z, 28, 10, 22, '#3A3D42'), cyl(fx + 14, y0 - 28, z + 4, 16, 6, '#1A1B1E'), cyl(fx + 14, y0 - 28, z + 4.2, 6, .4, C.metal)); }
+    else if (sp.foot) F0.push({ t: 'disc', x: cx, y: y0 - 14, z: cz, r: sp.foot === 'cone' ? 11.5 : 14, r2: 14, d: 14, tilt: 0, c: accent }); // a round foot (a cone: narrower at the floor)
+    else if (wallStyle === 'dock') F0.push(box(cx - 12, 6, z, 24, 6, 22, accent), box(cx - 7, 12, z, 14, y0 - 12, 22, accent)); // adapter foot: a flange that slides into the bracket, and a neck
+    else F0.push(box(fx, y0 - (ft === 'big' ? 14 : 8), z, 28, ft === 'big' ? 14 : 8, 22, ft === 'big' ? accent : '#1A1B1E'));
   }
   if (sp.drawer) { S.obj(0).push(box(-W / 2 + 6, y0 - 30, 0, W - 12, 28, D - 20, frame, 2)); S.obj(2).push(box(-30, y0 - 19, 6, 60, 7, 6, accent, 3)); }
-  if (sp.wall) { S.obj(0).push(box(-W / 2 - 30, -10, -D - 2, W + 60, yT + top + 30, 6, '#D9DCDF')); }
+  if (wallStyle === 'plain') { S.obj(0).push(box(-W / 2 - 30, -10, -D - 2, W + 60, yT + top + 30, 6, '#D9DCDF')); }
+  else if (wallStyle) { // brackets: the part in the accent colour (the wall's half darker), the wall light
+    const wallC = '#D9DCDF', dark = shade(accent, -.4), W0 = S.obj(0), rearX = postX;
+    if (wallStyle === 'cleat') { // pairs of interlocking cleats on the rear posts and the wall, a spacer at the foot of each rear post
+      W0.push(box(-W / 2 - 60, -30, -D - 12, W + 120, yT + top + 90, 4, wallC));
+      for (const sx of [-1, 1]) W0.push(box(rearX(sx), yT - 28, -D - 6, post, 78, 6, dark), box(rearX(sx), yT - 36, -D, post, 44, 6, accent), box(rearX(sx), y0 + bot + 4, -D, post, 18, 12, accent));
+    } else if (wallStyle === 'plate') { // a plate on the wall, a slotted slide mount on each rear post, bolts at the foot of the rear as spacers
+      W0.push(box(-W / 2 - 60, -30, -D - 12, W + 120, yT + top + 90, 4, wallC), box(-80, yT - 110, -D - 8, 160, 180, 4, dark));
+      for (const sx of [-1, 1]) { const x = rearX(sx); W0.push(ext(rectP(x, yT - 70, post, 80, 2), [slotP(x + post / 2, yT - 30, 6, 40)], -D, 8, accent), cyl(x + post / 2, y0 + bot + 14, -D, 5.5, 12, C.steel)); }
+    } else if (wallStyle === 'dock') { // the rack on its side on the wall: the brackets that take the adapter feet, seen here under the feet
+      W0.push(box(-W / 2 - 50, -6, 40, W + 100, 6, D + 90, wallC));
+      for (const sx of [-1, 1]) { const bx = (sx < 0 ? -W / 2 + 20 : W / 2 - 20) - 17; W0.push(box(bx, 0, -4, 34, 5, D - 4, dark), box(bx, 5, -4, 4, 8, D - 4, dark), box(bx + 30, 5, -4, 4, 8, D - 4, dark)); }
+    }
+  }
   if (sp.inside) {
     const P = S.obj(2), k = sp.inside;
     if (k === 'comb' || k === 'guide') for (let i = 0; i < 6; i++) P.push(box(-W / 2 + 40 + i * 9, y0 + bot + 10, 10, 4, ih - 20, 14, accent, 1.5));
@@ -937,6 +1059,7 @@ function rackScene(spec, o) {
     else if (k === 'fans') { for (const sx of [-1, 1]) P.push(cyl(sx * 55, y0 + bot + ih / 2, 4, 38, 4, C.fan), cyl(sx * 55, y0 + bot + ih / 2, 4.2, 14, .4, '#2A2C30')); }
     else P.push(box(W / 2 - 70, y0 + bot + 12, 6, 50, 28, 6, accent, 3));
   }
+  if (wallStyle === 'dock') turnQuarter(S); // the page hangs the rack on its side, its feet against the wall
   return { rack: true, objs: S.objs, w: W, h: yT + top };
 }
 
@@ -956,7 +1079,7 @@ function discRims(p) {
   const t = p.tilt * Math.PI / 180, ax = [0, Math.cos(t), Math.sin(t)], v = [0, -Math.sin(t), Math.cos(t)], n = p.sq ? 5 : 2, rim = (h, r) => {
     const o = []; for (let i = 0; i < 48; i++) { const [cx, cy] = sup(i / 48 * Math.PI * 2, n); o.push([p.x + r * cx, p.y + ax[1] * h + r * cy * v[1], p.z + ax[2] * h + r * cy * v[2]]); } return o;
   };
-  const top = p.dome ? rim(p.d * .5, p.r) : rim(p.d, p.r), dome = p.dome ? rim(p.d, p.r * .78) : null;
+  const top = p.dome ? rim(p.d * .5, p.r) : rim(p.d, p.r2 == null ? p.r : p.r2), dome = p.dome ? rim(p.d, p.r * .78) : null;
   return { base: rim(0, p.r), top, dome, ring: p.ring ? rim(p.d + .2, p.r * .12) : null };
 }
 /* Turn the scene into SVG. mode 'front': straight-on orthographic; mode 'oblique': cabinet projection seen from the front, above and
@@ -1106,7 +1229,7 @@ function geoms(T, sc) {
         prof.push([0, p.d]);
         g = domeGeom(T, prof, p.r, p.sq ? 5 : 2);
         if (p.ring) { const rg = new T.TorusGeometry(p.r * .12, .9, 6, 32); rg.rotateX(Math.PI / 2); rg.translate(0, p.d + .2, 0); rg.rotateX(t); rg.translate(p.x, p.y, p.z); add(p.ring, rg); }
-      } else { g = new T.CylinderGeometry(p.r, p.r, p.d, 48); g.translate(0, p.d / 2, 0); }
+      } else { g = new T.CylinderGeometry(p.r2 == null ? p.r : p.r2, p.r, p.d, 48); g.translate(0, p.d / 2, 0); }
       g.rotateX(t); g.translate(p.x, p.y, p.z);
     }
     if (g) add(p.c, g);
@@ -1119,7 +1242,9 @@ function geoms(T, sc) {
 /* ---------- checking catalog entries (used by tools/validate.mjs) ---------- */
 const PART_KEYS = new Set(['row', 'rows', 'plate', 'plateR', 'shelf', 'rails', 'floor', 'depth', 'shelfW', 'gap', 'align', 'trayColor', 'sledColor']);
 const TOP_KEYS = new Set(['ap', 'tilt', 'plate', 'fan', 'n', 'grille']);
-const EXTRA_KEYS = new Set(['side', 'fan', 'handles', 'feet', 'drawer', 'logo', 'corner', 'depth', 'u', 'frame', 'wall', 'inside', 'edge', 'hl', 'at']);
+const EXTRA_KEYS = new Set(['side', 'fan', 'handles', 'feet', 'drawer', 'logo', 'corner', 'depth', 'u', 'frame', 'wall', 'inside', 'edge', 'hl', 'at', 'foot', 'chassis', 'rails', 'mount', 'sides', 'width', 'tandem', 'bar', 'joiner']);
+const SIDE_PATTERNS = ['plain', 'hex', 'honeycomb', 'raisedhex', 'asanoha', 'kumiko', 'vent', 'slots', 'skadis', 'multiboard', 'grid', 'brick'];
+const HL_PARTS = ['base', 'top', 'posts', 'handles', 'edges', 'sides', 'braces'];
 const PATTERNS = new Set(['hex', 'slots', 'vslots', 'hslots', 'round', 'perf', 'grid', 'diamond', 'y', 'crown', 'solid', 'mesh', 'gridfinity']);
 const isObj = v => v && typeof v === 'object' && !Array.isArray(v);
 function check(kind, shape, devName) {
@@ -1133,7 +1258,19 @@ function check(kind, shape, devName) {
     if (shape.plate != null && !PATTERNS.has(shape.plate)) err.push('shape.plate: unknown pattern "' + shape.plate + '"');
     return err;
   }
-  if (kind === 'extra') return err;
+  if (kind === 'extra') {
+    const oneOf = (k, list) => { if (shape[k] != null && !list.includes(shape[k])) err.push('shape.' + k + ' must be one of ' + list.join(', ')); };
+    oneOf('side', SIDE_PATTERNS); oneOf('feet', ['plain', 'big', 'casters']); oneOf('foot', ['round', 'cone']); oneOf('chassis', ['blocks']); oneOf('rails', ['counterbore']); oneOf('sides', ['open', 'acrylic']);
+    if (shape.wall != null && shape.wall !== true && !['cleat', 'plate', 'dock'].includes(shape.wall)) err.push('shape.wall must be true or one of cleat, plate, dock');
+    if (shape.hl != null && ![].concat(shape.hl).every(k => HL_PARTS.includes(k))) err.push('shape.hl must be one or a list of ' + HL_PARTS.join(', '));
+    if (shape.mount != null && ![].concat(shape.mount).every(v => typeof v === 'number' && v >= 40 && v <= 250)) err.push('shape.mount is a fan size or a list of fan sizes in mm, 40 to 250');
+    if (shape.width != null && !(typeof shape.width === 'number' && shape.width >= 280 && shape.width <= 600)) err.push('shape.width is the outside width of the frame in mm, 280 to 600');
+    if (shape.tandem != null && !(shape.tandem === 2 || shape.tandem === 3)) err.push('shape.tandem is the number of racks side by side, 2 or 3');
+    oneOf('bar', ['center']); oneOf('joiner', ['post', 'depth', 'outer']);
+    if (shape.foot != null && shape.feet !== 'big') err.push('shape.foot goes with feet: "big"');
+    if (shape.chassis != null && shape.feet !== 'casters') err.push('shape.chassis goes with feet: "casters"');
+    return err;
+  }
   if (shape.plate != null && !PATTERNS.has(shape.plate)) err.push('shape.plate: unknown pattern "' + shape.plate + '"');
   const rows = shape.rows || (shape.row ? [shape.row] : []);
   if (shape.row && shape.rows) err.push('shape: use row or rows, not both');
@@ -1191,8 +1328,11 @@ function lookOf(d) {
 /* A patterned side panel for the 3D view: the plate spans x 0–t, (back, y) from its front lower corner; out = +1 for the right side
    (the fan guard and studs stand out to +x), −1 for the left. */
 function sideScene(mods, depth, height, color, out) {
-  const S = scene(), t = 3, sh = sideHoles(mods.side, mods.sideFan, depth, height), P = S.obj(1), xo = out > 0 ? t : 0;
+  const S = scene(), t = 3, sh = sideHoles(mods.side, mods.sideFan, depth, height, { mount: mods.sideMount }), P = S.obj(1), xo = out > 0 ? t : 0;
+  // a dual-tone panel: a second-colour plate behind the cut-outs and a raised border (sh.back, sh.rim)
+  if (sh.back) P.push(flat('x', rectP(sh.rim, sh.rim, depth - 2 * sh.rim, height - 2 * sh.rim, 1), [], out > 0 ? -1.2 : t, 1.2, shade(color, lum(color) > .5 ? -.28 : .38)));
   P.push(flat('x', rectP(0, 0, depth, height, 2), sh.holes, 0, t, color));
+  if (sh.rim) P.push(flat('x', rectP(0, 0, depth, height, 2), [rectP(sh.rim, sh.rim, depth - 2 * sh.rim, height - 2 * sh.rim, 1)], out > 0 ? t : -1.6, 1.6, shade(color, lum(color) > .5 ? -.08 : .1)));
   if (sh.fan) {
     const { cx, cy, d } = sh.fan, r = d / 2 - 2, F = S.obj(0), fx = out > 0 ? -25 : t;
     F.push(flat('x', rectP(cx - d / 2, cy - d / 2, d, d, d * .06), [circP(cx, cy, d / 2 - 1.5)], fx, 25, C.fan));
@@ -1236,7 +1376,7 @@ window.LRShapes = {
   // 3D: a part's meshes with their geometry cached per part and colours (meshes are marked userData.cached)
   rackMeshes(T, d, o, mat) { return meshes(T, rackScene(d.shape || {}, o || {}), mat, 'x' + ckey(d, o || {})); },
   partMeshes(T, d, o, mat) { o = o || {}; const look = lookOf(d); return meshes(T, sceneFor(d, o), mat, 'p' + ckey(look, o) + '|' + (o.maxDepth || '')); },
-  sideMeshes(T, mods, depth, height, color, out, mat) { return meshes(T, sideScene(mods, depth, height, color, out), mat, 's' + [mods.side, mods.sideFan, Math.round(depth), Math.round(height), color, out].join('|')); },
+  sideMeshes(T, mods, depth, height, color, out, mat) { return meshes(T, sideScene(mods, depth, height, color, out), mat, 's' + [mods.side, mods.sideFan, (mods.sideMount || []).join('+'), Math.round(depth), Math.round(height), color, out].join('|')); },
   topMeshes(T, d, o, mat) { o = o || {}; return meshes(T, compileTop(d, o), mat, 't' + ckey(d, o)); }, TOKENS: Object.keys(TOK).concat(Object.keys(ALIAS)), MODULES: MODS,
   // library thumbnails: an oblique drawing of the part, the top mount or the extra
   thumb(sc, o) { return svg(sc, 'oblique', Object.assign(sc.top ? { pad: 3, kx: .36, ky: .62 } : sc.rack ? { pad: 3, kx: .5, ky: .36 } : { pad: 3 }, o)); },
@@ -1249,7 +1389,8 @@ window.LRShapes = {
   // an extra on a small rack, turned and cropped to show what it changes
   extraThumb(d, o) {
     const sp = d && d.shape || {}, oo = Object.assign({ frame: '#4A4E55' }, o);
-    const side = sp.side || sp.fan, focus = sp.handles || sp.logo || sp.corner || sp.edge ? 'top' : sp.feet || sp.drawer ? 'bottom' : null;
+    const edges = [].concat(sp.hl || []).includes('edges'), wallSide = typeof sp.wall === 'string' && sp.wall !== 'dock'; // the beams and a wall's cleats show side-on
+    const side = sp.side || sp.fan || edges || wallSide, focus = edges ? null : sp.handles || sp.logo || sp.corner || sp.edge ? 'top' : sp.feet || sp.drawer ? 'bottom' : null;
     const view = side ? { kx: .95, ky: .3 } : { kx: .5, ky: .36 }, r = toSVG(rackScene(sp, oo), 'oblique', Object.assign({ pad: 4 }, view, o));
     let vb = r.vb;
     if (focus === 'top') vb = [vb[0], vb[1], vb[2], vb[3] * .5];

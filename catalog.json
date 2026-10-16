@@ -6384,7 +6384,8 @@
      "name": "Extension side panels & post joiners",
      "shape": {
       "u": 6,
-      "hl": "posts",
+      "joiner": "post",
+      "hl": "sides",
       "at": "posts"
      },
      "author": "mklements",
@@ -6974,6 +6975,7 @@
      "name": "Deeper sides (+50 mm)",
      "shape": {
       "depth": 50,
+      "hl": "edges",
       "at": "side-panel"
      },
      "author": "Caraful",
@@ -6987,10 +6989,10 @@
        "note": "50mm deeper edge pieces, making the LabRax 50mm deeper (original 170mm, this is 220mm)"
       },
       "look": {
-       "state": "estimated",
+       "state": "documented",
        "source": "https://makerworld.com/en/models/2086724",
        "date": "2026-10-16",
-       "note": "Where it attaches comes from the model page; shape and size are not measured."
+       "note": "Drawn from the model page photos; sizes not measured."
       }
      },
      "options": [
@@ -7008,6 +7010,11 @@
      "shape": {
       "depth": 50,
       "u": 5,
+      "handles": "long",
+      "hl": [
+       "edges",
+       "sides"
+      ],
       "at": "side-panel"
      },
      "author": "malves257",
@@ -7021,10 +7028,10 @@
        "note": "adds an extra 50mm of depth to original side rails of mklements Lab Rax Bolted Version"
       },
       "look": {
-       "state": "estimated",
+       "state": "documented",
        "source": "https://makerworld.com/en/models/2467685",
        "date": "2026-10-16",
-       "note": "Where it attaches comes from the model page; shape and size are not measured."
+       "note": "Drawn from the model page photos; sizes not measured."
       }
      },
      "options": [
@@ -7051,6 +7058,8 @@
      "shape": {
       "depth": 90,
       "handles": "long",
+      "hl": "edges",
+      "sides": "open",
       "at": "top"
      },
      "author": "RDas",
@@ -7120,7 +7129,8 @@
      "name": "Sturdy long post joiner",
      "shape": {
       "u": 6,
-      "hl": "posts",
+      "joiner": "depth",
+      "sides": "open",
       "at": "posts"
      },
      "author": "Kiwiworks",
@@ -7134,10 +7144,10 @@
        "note": "designed to connect front and rear posts when building expanded Lab Rax (>5U)"
       },
       "look": {
-       "state": "estimated",
+       "state": "documented",
        "source": "https://makerworld.com/en/models/1839684",
        "date": "2026-10-16",
-       "note": "Where it attaches comes from the model page; shape and size are not measured."
+       "note": "Drawn from the model page photos; sizes not measured."
       }
      },
      "options": [
@@ -7164,7 +7174,7 @@
      "name": "Side panel connector & post joiner V2",
      "shape": {
       "u": 6,
-      "hl": "posts",
+      "joiner": "outer",
       "at": "posts"
      },
      "author": "Kiwiworks",
@@ -7178,10 +7188,10 @@
        "note": "connects lower and upper panels and posts when stacking Lab Rax beyond 5U"
       },
       "look": {
-       "state": "estimated",
+       "state": "documented",
        "source": "https://makerworld.com/en/models/1862122",
        "date": "2026-10-16",
-       "note": "Where it attaches comes from the model page; shape and size are not measured."
+       "note": "Drawn from the model page photos; sizes not measured."
       }
      },
      "options": [
@@ -7207,7 +7217,8 @@
      "id": "mw2865309",
      "name": "Tandem: two racks + 19″ converter",
      "shape": {
-      "u": 4,
+      "tandem": 2,
+      "u": 5,
       "hl": "top",
       "at": "top"
      },
@@ -7222,10 +7233,10 @@
        "note": "remix turning original 5U LabRax into a side-by-side tandem rack"
       },
       "look": {
-       "state": "estimated",
+       "state": "documented",
        "source": "https://makerworld.com/en/models/2865309",
        "date": "2026-10-16",
-       "note": "Where it attaches comes from the model page; shape and size are not measured."
+       "note": "Drawn from the model page photos; sizes not measured."
       }
      },
      "options": [
@@ -7241,8 +7252,10 @@
      "id": "mw2366022",
      "name": "19″ brace set (bolted)",
      "shape": {
+      "width": 482.6,
       "u": 4,
-      "hl": "posts",
+      "hl": "braces",
+      "bar": "center",
       "at": "posts"
      },
      "author": "RDas",
@@ -7256,10 +7269,10 @@
        "note": "19\" remix of the 10\" Lab Rax modular system using bolted posts"
       },
       "look": {
-       "state": "estimated",
+       "state": "documented",
        "source": "https://makerworld.com/en/models/2366022",
        "date": "2026-10-16",
-       "note": "Where it attaches comes from the model page; shape and size are not measured."
+       "note": "Drawn from the model page photos; sizes not measured."
       }
      },
      "options": [
@@ -7284,8 +7297,9 @@
      "id": "mw2176697",
      "name": "19″ cross members",
      "shape": {
+      "width": 482.6,
       "u": 4,
-      "hl": "posts",
+      "hl": "braces",
       "at": "posts"
      },
      "author": "STREUKANTE",
@@ -7299,10 +7313,10 @@
        "note": "Ein Mod für die Querteile des Lab Rax Racks in 19\" druckbar"
       },
       "look": {
-       "state": "estimated",
+       "state": "documented",
        "source": "https://makerworld.com/en/models/2176697",
        "date": "2026-10-16",
-       "note": "Where it attaches comes from the model page; shape and size are not measured."
+       "note": "Drawn from the model page photos; sizes not measured."
       }
      },
      "options": [
@@ -7319,6 +7333,11 @@
      "name": "KWS depth rack (260 mm)",
      "shape": {
       "depth": 20,
+      "hl": [
+       "edges",
+       "sides"
+      ],
+      "u": 5,
       "at": "side-panel"
      },
      "author": "matterlord1",
@@ -7332,10 +7351,10 @@
        "note": "extend a Lab Rax rack to 260mm of depth (KWS rack depth)"
       },
       "look": {
-       "state": "estimated",
+       "state": "documented",
        "source": "https://makerworld.com/en/models/3202642-lab-rax-kws-depth-rack",
        "date": "2026-10-16",
-       "note": "Where it attaches comes from the model page; shape and size are not measured."
+       "note": "Drawn from the model page photos; sizes not measured."
       }
      },
      "options": [
@@ -7366,10 +7385,10 @@
        "note": "longer handles for Deeper Sides for Lab Rax Bolted Version"
       },
       "look": {
-       "state": "estimated",
+       "state": "documented",
        "source": "https://makerworld.com/en/models/2364486-long-handles-for-longer-sides-lab-rax",
        "date": "2026-10-16",
-       "note": "Where it attaches comes from the model page; shape and size are not measured."
+       "note": "Drawn from the model page photos; sizes not measured."
       }
      },
      "options": [
@@ -7387,6 +7406,9 @@
      "label": "Pair with the long handles",
      "shape": {
       "depth": 50,
+      "hl": "edges",
+      "sides": "open",
+      "u": 5,
       "at": "side-panel"
      },
      "author": "obibi",
@@ -7400,10 +7422,10 @@
        "note": "deeper sides for Lab Rax Bolt Version, 50mm longer than original"
       },
       "look": {
-       "state": "estimated",
+       "state": "documented",
        "source": "https://makerworld.com/en/models/2350077-lab-rax-sides-50mm-longer-bolt-together-version",
        "date": "2026-10-16",
-       "note": "Where it attaches comes from the model page; shape and size are not measured."
+       "note": "Drawn from the model page photos; sizes not measured."
       }
      },
      "options": [
@@ -7561,6 +7583,7 @@
      "name": "Rails for larger bolt heads",
      "shape": {
       "hl": "posts",
+      "rails": "counterbore",
       "at": "posts"
      },
      "author": "Blind Badger",
@@ -7574,10 +7597,10 @@
        "note": "rails used by both bolted and heatset versions of Lab Rax"
       },
       "look": {
-       "state": "estimated",
+       "state": "documented",
        "source": "https://makerworld.com/en/models/1941244",
        "date": "2026-10-16",
-       "note": "Where it attaches comes from the model page; shape and size are not measured."
+       "note": "Drawn from the model page photos; sizes not measured."
       }
      },
      "options": [
@@ -7594,6 +7617,7 @@
      "name": "Feet for larger screw heads",
      "shape": {
       "feet": "big",
+      "foot": "round",
       "at": "feet"
      },
      "author": "Blind Badger",
@@ -7607,10 +7631,10 @@
        "note": "enlarged foot holes for Lab Rax 10\" and 6U bolted versions"
       },
       "look": {
-       "state": "estimated",
+       "state": "documented",
        "source": "https://makerworld.com/en/models/1917141",
        "date": "2026-10-16",
-       "note": "Where it attaches comes from the model page; shape and size are not measured."
+       "note": "Drawn from the model page photos; sizes not measured."
       }
      },
      "options": [
@@ -7627,6 +7651,7 @@
      "name": "Bigger feet",
      "shape": {
       "feet": "big",
+      "foot": "cone",
       "at": "feet"
      },
      "author": "fincrawmcq",
@@ -7640,10 +7665,10 @@
        "note": "remix of Lab Rax 10\" Server Rack Bolted Version 5U feet"
       },
       "look": {
-       "state": "estimated",
+       "state": "documented",
        "source": "https://makerworld.com/en/models/2960364",
        "date": "2026-10-16",
-       "note": "Where it attaches comes from the model page; shape and size are not measured."
+       "note": "Drawn from the model page photos; sizes not measured."
       }
      },
      "options": [
@@ -7659,7 +7684,7 @@
      "id": "mw3212268",
      "name": "Wall mounting cleats",
      "shape": {
-      "wall": true,
+      "wall": "cleat",
       "at": "wall"
      },
      "author": "mklements",
@@ -7673,10 +7698,10 @@
        "note": "official Lab Rax wall mounting cleats by creator mklements"
       },
       "look": {
-       "state": "estimated",
+       "state": "documented",
        "source": "https://makerworld.com/en/models/3212268",
        "date": "2026-10-16",
-       "note": "Where it attaches comes from the model page; shape and size are not measured."
+       "note": "Drawn from the model page photos; sizes not measured."
       }
      },
      "options": [
@@ -7701,7 +7726,7 @@
      "id": "mw2403180",
      "name": "Vertical wall mount system",
      "shape": {
-      "wall": true,
+      "wall": "dock",
       "at": "wall"
      },
      "author": "RDas",
@@ -7734,7 +7759,7 @@
      "id": "mw1772709",
      "name": "Wall mount",
      "shape": {
-      "wall": true,
+      "wall": "plate",
       "at": "wall"
      },
      "url": "https://makerworld.com/en/models/1772709-lab-rax-wallmount",
@@ -7747,10 +7772,10 @@
        "note": "created for Lab Rax to mount in electrical cabinet"
       },
       "look": {
-       "state": "estimated",
+       "state": "documented",
        "source": "https://makerworld.com/en/models/1772709-lab-rax-wallmount",
        "date": "2026-10-16",
-       "note": "Where it attaches comes from the model page; shape and size are not measured."
+       "note": "Drawn from the model page photos; sizes not measured."
       }
      },
      "options": [
@@ -7768,6 +7793,7 @@
      "label": "Needs 4 casters and M4 inserts",
      "shape": {
       "feet": "casters",
+      "chassis": "blocks",
       "at": "feet"
      },
      "author": "Pepe_Lopez",
@@ -7781,10 +7807,10 @@
        "note": "simple mobile chassis for 10-inch LabRax rack replacing original feet"
       },
       "look": {
-       "state": "estimated",
+       "state": "documented",
        "source": "https://makerworld.com/en/models/2757835",
        "date": "2026-10-16",
-       "note": "Where it attaches comes from the model page; shape and size are not measured."
+       "note": "Drawn from the model page photos; sizes not measured."
       }
      },
      "options": [
@@ -7883,7 +7909,11 @@
      "name": "Side panel for a 180/200 mm fan",
      "label": "Needs a 180 or 200 mm fan",
      "shape": {
-      "fan": 180,
+      "side": "hex",
+      "mount": [
+       180,
+       200
+      ],
       "u": 5,
       "at": "side-panel"
      },
@@ -7906,10 +7936,10 @@
        "note": "remix of 5U/4U side panels with integrated large fan mounting system for Lab Rax"
       },
       "look": {
-       "state": "estimated",
+       "state": "documented",
        "source": "https://makerworld.com/en/models/2759654",
        "date": "2026-10-16",
-       "note": "Where it attaches comes from the model page; shape and size are not measured."
+       "note": "Drawn from the model page photos; sizes not measured."
       }
      },
      "options": [
@@ -7928,7 +7958,7 @@
      "id": "mw2178053",
      "name": "Raised hex panel set (side, top, 120 mm fan)",
      "shape": {
-      "side": "hex",
+      "side": "raisedhex",
       "at": "side-panel"
      },
      "author": "463n7",
@@ -7952,10 +7982,10 @@
        "note": "designed specifically for the Labrax 3D-printed 10\" rack"
       },
       "look": {
-       "state": "estimated",
+       "state": "documented",
        "source": "https://makerworld.com/en/models/2178053",
        "date": "2026-10-16",
-       "note": "Where it attaches comes from the model page; shape and size are not measured."
+       "note": "Drawn from the model page photos; sizes not measured."
       }
      },
      "options": [
@@ -7974,7 +8004,8 @@
      "id": "mw1862143",
      "name": "Kumiko side panel, customizable",
      "shape": {
-      "side": "kumiko",
+      "side": "asanoha",
+      "u": 5,
       "at": "side-panel"
      },
      "author": "Kiwiworks",
@@ -7990,10 +8021,10 @@
        "note": "aesthetic side panel for Lab Rax-10 inch server rack"
       },
       "look": {
-       "state": "estimated",
+       "state": "documented",
        "source": "https://makerworld.com/en/models/1862143",
        "date": "2026-10-16",
-       "note": "Where it attaches comes from the model page; shape and size are not measured."
+       "note": "Drawn from the model page photos; sizes not measured."
       }
      },
      "options": [

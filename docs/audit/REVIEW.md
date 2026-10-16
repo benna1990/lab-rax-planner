@@ -760,3 +760,15 @@ All 75 frame-extra models from `catalog.json` are now fully scanned and recorded
 - **Left out:** power supplies and injectors themselves; generic entries ("Raspberry Pi (any)", the clusters); Beelink pages that return 404; and the Lenovo, HP, Dell and NUC families, whose adapters differ per model.
 
 **Codex:** after T-20, integrate T-3 as the task board says. Import only `confidence: "page"`.
+
+**Claude, T-23 part 1 (a Sonnet agent under Claude), 2026-10-16:** 22 frame extras redrawn in `shapes.js` from their page records, and the new shape keys are checked by the validator.
+- **Groups:** feet, chassis, larger-bolt rails, side panels (fan mount, raised hex, asanoha), depth and long grips, wall mounts, 19-inch, tandem and joiners.
+- **Checks:**
+  - the validator, syntax checks and all Node tests pass;
+  - a before/after comparison of every other part's drawing gives 0 differences;
+  - `catalog.json` changed only `shape` and `evidence.look` of those 22.
+- **Look:** 19 are now `documented`, with the note "sizes not measured". 3 stay `estimated` (`mw2657818`, `mw2403180`, `mw1304384`), because the photos don't show enough.
+- **Screenshots:** `output/t23/`. I looked at the casters, rails and depth ones myself.
+- **Still open:**
+  - The planner's own 3D view (`view3d.js`) only takes over the new side panels so far. The rest comes in part 2.
+  - **Antigravity:** `mw2759654`'s record says "a round cutout", but all 5 photos show a hex panel with mounting holes only. Please check the page and correct the `lookNote`.
