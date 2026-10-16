@@ -19,6 +19,7 @@ Before you change code, claim it here: what, which files, since when. One writer
 
 | Who | Working on | Files | Since |
 |---|---|---|---|
+| Codex | Reviewed T-10 batch 3 import | `catalog.json` | 2026-10-16 14:25 CEST |
 | Antigravity | T-13: missing candidate models inspection | `docs/audit/model-pages.json` | 2026-10-16 13:42 CEST |
 
 ## Task board
@@ -1212,3 +1213,49 @@ Connect now shows input type, recorded volts/amps, connector/class, source notes
 Validator, syntax, all Node tests and **30/30 independent Chromium checks** pass. New Connect tests cover sourced specs, alternatives, source links, omission of inferred watts and unknown inputs. Browser regression sees UCG-Max USB-C 5 V/5 A plus the source link and confirms its typical consumption evidence remains unverified. 1280/375 px example walkthroughs: no JS errors or document overflow; mobile Connect screenshot inspected (output/t3-connect-*.png). Long manufacturer condition notes are retained to avoid hiding family/model and alternate-input qualifications; UI condensation can be reviewed separately.
 
 T-20 acceptance read. Next per Claude's order: reviewed T-10 batch 3, then T-24. Input evidence alone must not be used as proof of typical watts during later T-16 work.
+
+### Antigravity — T-13 Batch 9: 26 Candidate Models Inspected (24 Added, 2 Skipped), 16 October 2026
+
+Ninth tranche of candidate models from `docs/audit/model-candidates.json` inspected (covering ranks 337 through 368):
+
+**24 Rack parts documented in `docs/audit/model-pages.json` (`new: true`, `confidence: "page"`):**
+1. `mw1668882` (Rank 337): 1U rack mount with rear support for Lenovo ThinkCentre Tiny M910q / M720q (`CC BY-NC-SA`).
+2. `mw2218827` (Rank 339): Pair of adaptor brackets mounting a 7-inch panel into a 10-inch server rack (`CC BY-NC`).
+3. `mw3065199` (Rank 340): Internal bracket housing a Tuya Zigbee temperature and humidity sensor (`CC BY-NC`).
+4. `mw3329944` (Rank 341): 1U rack mount for two X96 Mini or X96 Max Android/Armbian TV boxes (`Standard Digital File License`).
+5. `mw3045059` (Rank 342): 2U rack mount shelf with 2 keystone slots for Minisforum Venus 790M Pro (`Standard Digital File License - Community Use`).
+6. `mw2800206` (Rank 343): 1U 10-inch rack mount with keystone slot for UniFi Cloud Gateway Max (`Standard Digital File License`).
+7. `mw2711578` (Rank 344): 1U modular half-rack panel with 7 interchangeable slots for 10" rack (`CC BY-NC-SA`).
+8. `mw2981249` (Rank 345): 1U rack shelf for larger third-party Dell OptiPlex power supplies with keystone (`CC BY-NC-SA`).
+9. `mw1366063` (Rank 346): 1U rack mount for KeepLiNK 10-port gigabit switch with 8 PoE ports (`CC BY-SA`). Uses 4x M3 screws.
+10. `mw2282214` (Rank 348): 10-inch rack-mount plate for keepLINK 8x2.5G managed switch (`Standard Digital File License`).
+11. `mw2611574` (Rank 349): Raspberry Pi 5 + Radxa Penta SATA HAT + OLED sled for 2U 7 SBC Holder (`CC BY-NC-SA`). Uses 4x M2.5 standoffs.
+12. `mw1668952` (Rank 350): 1U rack mount with retention lid for TP-Link TL-SG108E switch (`CC BY-NC-SA`). Uses 2x M3 heat inserts and 2x M3x6 screws.
+13. `mw2335569` (Rank 352): 10-inch rack mount with antenna clearance for Minix NEO Z100 / Z350 Mini PC (`Standard Digital File License`). Uses 2x M3x6 inserts.
+14. `mw3424423` (Rank 353): 1U 10-inch rack mount bracket for Zyxel GS1200-8v3 gigabit switch (`CC BY-NC-SA`).
+15. `mw3403804` (Rank 354): 2U SBC-NUC-SBC hybrid holder for two SBCs and an Intel NUC8PNH in 10" rack (`MakerWorld Exclusive License`).
+16. `mw2042598` (Rank 355): Fold-flat side holder for Waveshare 7-inch (B) touchscreen on Lab Rax (`CC BY-NC-SA`).
+17. `mw2269003` (Rank 356): 1U rack mount for Apple TV 4K (3rd Gen) in Lab Rax 10" rack (`CC BY-NC-SA`).
+18. `mw2229702` (Rank 357): 10-inch rack mount for Futurebit SoloNode Bitcoin node (`CC BY-NC`).
+19. `mw3122809` (Rank 359): Clip-style rear mounting bracket for standard 35mm top-hat DIN rail on Lab Rax (`CC BY-NC-SA`).
+20. `mw3233414` (Rank 361): RakPak modular expansion panel system for 10-inch mini server racks (`Standard Digital File License`).
+21. `mw2870439` (Rank 364): 2U 10-inch decorative rack panel featuring the Linux kernel mascot Tux (`CC BY-NC-SA`).
+22. `mw2441397` (Rank 365): 10-inch micro-ATX motherboard tray modified specifically for Lab Rax (`CC BY-NC-ND`).
+23. `mw2394313` (Rank 366): 10-inch rack mount for Movistar HGU Mitrastar modem/router with 12 keystone slots (`MakerWorld Exclusive License`).
+24. `mw2778582` (Rank 368): Dell OptiPlex power supply mount clipping onto honeycomb side panel (`MakerWorld Exclusive License`).
+
+**2 Non-rack / incompatible models skipped (with reasons):**
+- `mw2144191` (Rank 351): "10 inch 8U Rack" by Q-Bot — Skipped: standalone custom printed 8U rack chassis, not compatible with mklements Lab Rax frame system.
+- `mw3317604` (Rank 358): "GL.iNet GL-MT3000 Beryl AX WiFi 5\" 1U Mini Rack" by applegeek_ — Skipped: for 5-inch Mini Lab Rax.
+
+**License breakdown across Batch 9 (24 records):**
+- 10 × `CC BY-NC-SA`
+- 5 × `Standard Digital File License`
+- 3 × `MakerWorld Exclusive License`
+- 3 × `CC BY-NC`
+- 1 × `Standard Digital File License - Community Use`
+- 1 × `CC BY-SA`
+- 1 × `CC BY-NC-ND`
+
+**Running total for T-13:** 195 new rack parts documented in `model-pages.json`, 45 models skipped (240 candidates checked). Total records in `model-pages.json` is now 270 (75 frame-extras + 195 candidates). All test suites and catalog validation pass.
+

@@ -8345,6 +8345,772 @@
    "look": "ok",
    "lookNote": "1U dual-bay horizontal tray with guide slots for quick-release PowerEdge drive caddies.",
    "confidence": "page"
+  },
+  {
+   "id": "mw1668882",
+   "new": true,
+   "what": "1U rack mount with rear support for Lenovo ThinkCentre Tiny M910q / M720q",
+   "url": "https://makerworld.com/en/models/1668882",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 3 walls, 15% infill",
+     "plates": null,
+     "prints": "Lenovo M910q 1U mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [
+    {
+     "part": "mounting screw",
+     "qty": 2
+    }
+   ],
+   "hardwareNote": "Uses 2 mounting screws to secure the Lenovo Tiny chassis.",
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for Lab Rax 10\" 1U.",
+   "look": "ok",
+   "lookNote": "1U horizontal bracket with rear support bracket securing the Lenovo Tiny PC.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2218827",
+   "new": true,
+   "what": "Pair of adaptor brackets mounting a 7-inch panel into a 10-inch server rack",
+   "url": "https://makerworld.com/en/models/2218827",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "7\" to 10\" panel adaptor pair"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Modelled to adapt a 7\" GeeekPi audio rack panel to 10\" Lab Rax rack.",
+   "look": "ok",
+   "lookNote": "Left and right wing extension ears bridging 7-inch panels to 10-inch Lab Rax mounting width.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3065199",
+   "new": true,
+   "what": "Internal bracket housing a Tuya Zigbee temperature and humidity sensor",
+   "url": "https://makerworld.com/en/models/3065199",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.16mm layer, 2 walls, 10% infill",
+     "plates": null,
+     "prints": "Tuya sensor bracket"
+    }
+   ],
+   "choices": [],
+   "attaches": "inside",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Created to install a Zigbee temp/humidity sensor inside a Lab Rax home lab.",
+   "look": "ok",
+   "lookNote": "Compact sensor housing cage snapping onto interior rack frame posts.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3329944",
+   "new": true,
+   "what": "1U rack mount for two X96 Mini or X96 Max Android/Armbian TV boxes",
+   "url": "https://makerworld.com/en/models/3329944",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 3 walls, 15% infill",
+     "plates": null,
+     "prints": "dual X96 1U rack mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "1U rack mount for 10-inch server racks.",
+   "look": "ok",
+   "lookNote": "1U faceplate framing two side-by-side square X96 mini ARM TV boxes with port access.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3045059",
+   "new": true,
+   "what": "2U rack mount shelf with 2 keystone slots for Minisforum Venus 790M Pro",
+   "url": "https://makerworld.com/en/models/3045059",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License - Community Use",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 4 walls, 20% infill",
+     "plates": null,
+     "prints": "Minisforum 790M Pro 2U shelf"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for 10\" server rack using the Lab Rax design by mklements.",
+   "look": "ok",
+   "lookNote": "2U cradle holding Minisforum mini PC on one side with two RJ45 keystone ports on the other.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2800206",
+   "new": true,
+   "what": "1U 10-inch rack mount with keystone slot for UniFi Cloud Gateway Max",
+   "url": "https://makerworld.com/en/models/2800206",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 3 walls, 5% infill",
+     "plates": null,
+     "prints": "UCG-Max 1U mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Fits standard 10\" racks including Lab Rax.",
+   "look": "ok",
+   "lookNote": "1U faceplate cradle supporting the UniFi UCG-Max gateway with single keystone port cutout.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2711578",
+   "new": true,
+   "what": "1U modular half-rack panel with 7 interchangeable slots for 10\" rack",
+   "url": "https://makerworld.com/en/models/2711578",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "2U 7 SBC Holder for 10\" Rack (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "1U 7-slot modular panel"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Remodel of mklements 7 SBC holder adapted to a 1U modular plate system.",
+   "look": "ok",
+   "lookNote": "1U frame with 7 modular rectangular sub-panel slots for connectors and tiny modules.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2981249",
+   "new": true,
+   "what": "1U rack shelf for larger third-party Dell OptiPlex power supplies with keystone",
+   "url": "https://makerworld.com/en/models/2981249",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Dell Optiplex PDU Rack 1U w/Ethernet Keystone Port (Brian Richmond)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "3rd party Dell PDU shelf"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Modified version of Brian Richmond's 10\" 1U shelf accommodating 51x126.5x32mm power bricks.",
+   "look": "ok",
+   "lookNote": "1U shelf holding up to 3 aftermarket Dell power bricks vertically with front keystone port.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1366063",
+   "new": true,
+   "what": "1U rack mount for KeepLiNK 10-port gigabit switch with 8 PoE ports",
+   "url": "https://makerworld.com/en/models/1366063",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 3 walls, 15% infill",
+     "plates": null,
+     "prints": "KeepLiNK 10-port switch 1U mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [
+    {
+     "part": "M3 screw",
+     "qty": 4
+    }
+   ],
+   "hardwareNote": "Requires 4 M3 screws to assemble.",
+   "fitsLabRax": "stated",
+   "fitNote": "1U mounts for a 10 inch rack.",
+   "look": "ok",
+   "lookNote": "1U faceplate framing the 10-port KeepLiNK metal switch with front port access.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2282214",
+   "new": true,
+   "what": "10-inch rack-mount plate for keepLINK 8x2.5G managed switch",
+   "url": "https://makerworld.com/en/models/2282214",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.28mm layer, 3 walls, 20% infill",
+     "plates": null,
+     "prints": "keepLINK 8x2.5G rack plate"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed to install a keepLINK 8x2.5G managed switch in a 10-inch rack flush with rack plane.",
+   "look": "ok",
+   "lookNote": "1U front faceplate with precision bezel fitting around the 8-port 2.5GbE switch.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2611574",
+   "new": true,
+   "what": "Raspberry Pi 5 + Radxa Penta SATA HAT + OLED sled for 2U 7 SBC Holder",
+   "url": "https://makerworld.com/en/models/2611574",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "2U 7 SBC Holder for 10\" Rack (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "Pi5 Penta SATA HAT OLED sled"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [
+    {
+     "part": "M2.5 hex standoff",
+     "qty": 4
+    }
+   ],
+   "hardwareNote": "Mounted using M2.5 hex standoffs.",
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for mklements 2U 7 SBC Holder for 10\" Rack.",
+   "look": "ok",
+   "lookNote": "Vertical slide-in sled accommodating the taller Pi 5 stack with top SATA HAT and front OLED cutout.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1668952",
+   "new": true,
+   "what": "1U rack mount with retention lid for TP-Link TL-SG108E switch",
+   "url": "https://makerworld.com/en/models/1668952",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "TL-SG108E 1U mount with lid"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [
+    {
+     "part": "M3 heat-set insert",
+     "qty": 2
+    },
+    {
+     "part": "M3x6mm screw",
+     "qty": 2
+    }
+   ],
+   "hardwareNote": "Requires 2x M3 heat inserts and 2x M3x6mm screws for securing the top lid.",
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for Lab Rax 10\" 1U.",
+   "look": "ok",
+   "lookNote": "1U faceplate cradle with top locking lid capturing the TP-Link managed switch.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2335569",
+   "new": true,
+   "what": "10-inch rack mount with antenna clearance for Minix NEO Z100 / Z350 Mini PC",
+   "url": "https://makerworld.com/en/models/2335569",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 4 walls, 15% infill",
+     "plates": null,
+     "prints": "Minix NEO 10\" rack mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1.5,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [
+    {
+     "part": "M3x6mm heat-set insert",
+     "qty": 2
+    }
+   ],
+   "hardwareNote": "Uses 2x M3x6mm heat inserts on back with two mini brackets to retain PC.",
+   "fitsLabRax": "stated",
+   "fitNote": "10\" rack mount for Minix fanless mini PCs.",
+   "look": "ok",
+   "lookNote": "Faceplate shelf with rear clamp brackets and top clearance for dual external Wi-Fi antennas.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3424423",
+   "new": true,
+   "what": "1U 10-inch rack mount bracket for Zyxel GS1200-8v3 gigabit switch",
+   "url": "https://makerworld.com/en/models/3424423",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.08mm layer, 4 walls, 15% crosshatch infill",
+     "plates": null,
+     "prints": "Zyxel GS1200-8v3 bracket"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Bracket allowing mounting of Zyxel GS1200-8 v3 switch into standard 10-inch rack.",
+   "look": "ok",
+   "lookNote": "1U faceplate framing the 8-port Zyxel desktop switch with side mounting ears.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3403804",
+   "new": true,
+   "what": "2U SBC-NUC-SBC hybrid holder for two SBCs and an Intel NUC8PNH in 10\" rack",
+   "url": "https://makerworld.com/en/models/3403804",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [
+    "2U 7 SBC Holder for 10\" Rack (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 3 walls, 25% infill",
+     "plates": null,
+     "prints": "2x SBC + NUC 2U holder"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Remix of mklements 2U 7 SBC Holder for 10\" Rack replacing center slots with Intel NUC bay.",
+   "look": "ok",
+   "lookNote": "2U panel with central horizontal bay for an Intel NUC flanked by two vertical SBC slots.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2042598",
+   "new": true,
+   "what": "Fold-flat side holder for Waveshare 7-inch (B) touchscreen on Lab Rax",
+   "url": "https://makerworld.com/en/models/2042598",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 3 walls, 15% infill",
+     "plates": null,
+     "prints": "Waveshare 7\" screen holder"
+    }
+   ],
+   "choices": [],
+   "attaches": "side-panel",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Holder for Waveshare 7inch (B) screen folding flat to the side of Lab Rax 10\" system.",
+   "look": "ok",
+   "lookNote": "Hinged arm brackets clipping into side panel and supporting a 7-inch LCD screen.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2269003",
+   "new": true,
+   "what": "1U rack mount for Apple TV 4K (3rd Gen) in Lab Rax 10\" rack",
+   "url": "https://makerworld.com/en/models/2269003",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "Apple TV 4K 1U mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for Lab Rax server rack; works great in 10\" Lab Rax.",
+   "look": "ok",
+   "lookNote": "1U faceplate with central pocket contoured to the square Apple TV 4K 3rd Gen chassis.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2229702",
+   "new": true,
+   "what": "10-inch rack mount for Futurebit SoloNode Bitcoin node",
+   "url": "https://makerworld.com/en/models/2229702",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 3 walls, 15% infill",
+     "plates": null,
+     "prints": "Futurebit SoloNode mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Created for 10 inch rack mount using 10-inch mini rack generator.",
+   "look": "ok",
+   "lookNote": "Heavy 2U faceplate cradle supporting the warm Futurebit SoloNode ASIC enclosure.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3122809",
+   "new": true,
+   "what": "Clip-style rear mounting bracket for standard 35mm top-hat DIN rail on Lab Rax",
+   "url": "https://makerworld.com/en/models/3122809",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "LabRax DIN rail bracket"
+    }
+   ],
+   "choices": [],
+   "attaches": "posts",
+   "sides": "both",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Clip-style bracket adding standard 35mm top-hat DIN rail to back of Lab Rax rack.",
+   "look": "ok",
+   "lookNote": "Rear post clamp brackets holding a metal DIN rail across the back for industrial power supplies and relays.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3233414",
+   "new": true,
+   "what": "RakPak modular expansion panel system for 10-inch mini server racks",
+   "url": "https://makerworld.com/en/models/3233414",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.24mm layer, 3 walls, 15% infill",
+     "plates": null,
+     "prints": "RakPak expansion panel"
+    }
+   ],
+   "choices": [],
+   "attaches": "side-panel",
+   "sides": "both",
+   "sizes": {
+    "u": 5,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for 10-inch mini server racks including Lab Rax.",
+   "look": "ok",
+   "lookNote": "Outward-projecting side extension framework providing external mounting space.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2870439",
+   "new": true,
+   "what": "2U 10-inch decorative rack panel featuring the Linux kernel mascot Tux",
+   "url": "https://makerworld.com/en/models/2870439",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "2U Tux rack panel"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "2U 10 inch rack panel for standard mini racks.",
+   "look": "ok",
+   "lookNote": "2U front blanking panel embossed with multi-color Linux penguin graphic.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2441397",
+   "new": true,
+   "what": "10-inch micro-ATX motherboard tray modified specifically for Lab Rax",
+   "url": "https://makerworld.com/en/models/2441397",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-ND",
+   "remixOf": [
+    "mATX Mount | 10-Inch Rack (Brady02)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "Labrax matx mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 3,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Modified to fit inside the Lab Rax rack for Asus mATX board.",
+   "look": "ok",
+   "lookNote": "Deep chassis tray with standoff positions sized for micro-ATX mainboard.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2394313",
+   "new": true,
+   "what": "10-inch rack mount for Movistar HGU Mitrastar modem/router with 12 keystone slots",
+   "url": "https://makerworld.com/en/models/2394313",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "Movistar HGU mount with patch panel"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 3,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "10 Inch rack mount for Movistar HGU Modem/Router Mitrastar GPT-2741gnac.",
+   "look": "ok",
+   "lookNote": "Combination rack bracket holding the vertical ISP modem alongside a 12-port keystone patch strip.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2778582",
+   "new": true,
+   "what": "Dell OptiPlex power supply mount clipping onto honeycomb side panel",
+   "url": "https://makerworld.com/en/models/2778582",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "Dell Optiplex PSU honeycomb mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "side-panel",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Conceived for Lab Rax 10\" server case with honeycomb walls.",
+   "look": "ok",
+   "lookNote": "Form-fitting holder bracket with rear prongs keying into honeycomb side wall mesh.",
+   "confidence": "page"
   }
  ]
 }
