@@ -61,6 +61,7 @@ function geomLog(doc, log) {
 
 async function make(d) {
   const JsPDF = await load();
+  const dims = d.dimensions || window.LRRack.dimensions, U = dims.u;
   const doc = new JsPDF({ unit: 'mm', format: 'a4' }), W = 210, M = 16, BOT = 275; // BOT: lowest baseline for content
   if (Array.isArray(window.__pdfGeom)) geomLog(doc, window.__pdfGeom);
   const ink = [22, 24, 27], muted = [106, 111, 118], line = [218, 221, 216], green = [23, 130, 74], warnC = [164, 78, 34];
@@ -79,9 +80,9 @@ async function make(d) {
 
   const faces = new Map(), img = async (key, make) => { if (!faces.has(key)) faces.set(key, await make().catch(() => null)); return faces.get(key); };
   // each panel at its own height in its slot, [mm from the top of the slot, height] (app.js plateBox): Lab Rax panels leave a seam
-  for (const it of d.items) if (!it.plate) it.plate = [.395, it.h2 * 44.45 / 2 - .79];
-  for (const it of d.items) if (it.face) it.img = await img(it.face, () => raster(it.face, 250, it.plate[1], 4, 'image/jpeg'));
-  if (d.cooling && d.cooling.map) for (const it of d.items) if (it.face && !it.back) it.grey = await img('grey:' + it.face, () => raster(it.face, 250, it.plate[1], 4, 'image/jpeg', true));
+  for (const it of d.items) if (!it.plate) it.plate = [dims.panelClearance / 2, it.h2 * U / 2 - dims.panelClearance];
+  for (const it of d.items) if (it.face) it.img = await img(it.face, () => raster(it.face, dims.panelWidth, it.plate[1], 4, 'image/jpeg'));
+  if (d.cooling && d.cooling.map) for (const it of d.items) if (it.face && !it.back) it.grey = await img('grey:' + it.face, () => raster(it.face, dims.panelWidth, it.plate[1], 4, 'image/jpeg', true));
   const qr = await qrFor(d.shareUrl);
   // A useful first page: budget, material and navigation rather than a decorative cover.
   const navigation=[];
@@ -113,12 +114,13 @@ async function make(d) {
   page();
 
   // Orthographic construction overview. Model-verified production dimensions are not available.
-  const U = 44.45, fp = d.frameParts;
+  const fp = d.frameParts;
   section('Technical overview', 'Front, rear, side and top / dimensions');
   let y2 = head('Technical overview', 35);
   doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...muted);
   text('Orthographic schematics in mm. Frame outlines are approximate; not cutting templates.', M, y2 + 1);
-  const dims = d.dimensions || {}, outerW = dims.outerWidth || 280, depth = dims.depth || 240;
+  const outerW = dims.outerWidth, depth = dims.depth;
+  const technicalPage = doc.getNumberOfPages();
   const k = Math.min(43 / outerW, 58 / (d.h * U + 35)), body = d.h * U * k;
   const cols = [M + 4, 80, 143], topY = 68;
   const label = (name, x, y) => { doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(...green); text(name, x, y); };
@@ -127,7 +129,7 @@ async function make(d) {
     doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(...muted); text(name, (x1+x2)/2, yy+4, {align:'center'});
   };
   const elevation = (x, rear) => {
-    const w = outerW*k, bay=222*k, post=(w-bay)/2;
+    const w = outerW*k, bay=dims.clearWidth*k, post=(w-bay)/2;
     label(rear?'REAR':'FRONT',x,61);
     doc.setFillColor(237, 240, 237); doc.setDrawColor(75, 86, 79); doc.setLineWidth(.3); doc.rect(x,topY,w,body+8,'FD');
     doc.setFillColor(255,255,255); doc.rect(x+post,topY+4,bay,body,'F');
@@ -136,12 +138,12 @@ async function make(d) {
       doc.setFont('helvetica','normal'); doc.setFontSize(5.5); doc.setTextColor(...muted); text(String(d.h-u),x-1.5,yy+1,{align:'right'});
     }
     doc.setFillColor(140,150,143);
-    for(let u=0;u<d.h;u++)for(const off of [6.35,22.225,38.1]){
-      const yy=topY+4+(u*U+off)*k;doc.circle(x+(w-236.525*k)/2,yy,.35,'F');doc.circle(x+(w+236.525*k)/2,yy,.35,'F');
+    for(let u=0;u<d.h;u++)for(const off of dims.holeY){
+      const yy=topY+4+(u*U+off)*k;doc.circle(x+(w-dims.holeSpacing*k)/2,yy,.35,'F');doc.circle(x+(w+dims.holeSpacing*k)/2,yy,.35,'F');
     }
     d.items.filter(it=>!!it.back===rear).forEach(it=>{
       const yy=topY+4+(it.pos2*U/2+it.plate[0])*k, hh=it.plate[1]*k;
-      if(it.img) doc.addImage(it.img,'JPEG',x+w/2-125*k,yy,250*k,hh,(rear?'techrear':'techfront')+[...faces.keys()].indexOf(it.face),'FAST');
+      if(it.img) doc.addImage(it.img,'JPEG',x+w/2-dims.panelWidth/2*k,yy,dims.panelWidth*k,hh,(rear?'techrear':'techfront')+[...faces.keys()].indexOf(it.face),'FAST');
       else {doc.setFillColor(...hex(it.color));doc.rect(x+post/2,yy,w-post,hh,'F');}
     });
     dimension(x,topY+body+14,x+w,'~ '+outerW+' outer');
@@ -179,9 +181,10 @@ async function make(d) {
     doc.setFont('helvetica','normal');doc.setFontSize(6);doc.setTextColor(...muted);text(it.back?'REAR':'FRONT',91,py+3.2);
     doc.setFontSize(8);doc.setTextColor(...ink);text(name,112,py);py+=hh;
   }
-  y2=Math.max(ty+depth*tk+(d.top?24:18),py+8);
+  // After placement continues onto another page, the previous page's top view no longer occupies space.
+  y2=doc.getNumberOfPages() === technicalPage ? Math.max(ty+depth*tk+(d.top?24:18),py+8) : py+8;
   y2=fit(y2,54);y2=head('Frame / key dimensions',y2);
-  const frameRows=[['Posts / side panels',fp.posts+' / '+fp.sides+(d.sides==='acrylic'?' acrylic':' printed')],['Other frame pieces','4 horizontals / 4 edges / 2 handles / 4 feet'],['Bay / mounting holes','222 mm clear / 236.525 mm hole centres'],['Bay height',(d.h*U).toFixed(1)+' mm nominal / '+d.h+'U']];
+  const frameRows=[['Posts / side panels',fp.posts+' / '+fp.sides+(d.sides==='acrylic'?' acrylic':' printed')],['Other frame pieces','4 horizontals / 4 edges / 2 handles / 4 feet'],['Bay / mounting holes',dims.clearWidth+' mm clear / '+dims.holeSpacing+' mm hole centres'],['Bay height',(d.h*U).toFixed(1)+' mm nominal / '+d.h+'U']];
   doc.setFont('helvetica','normal');doc.setFontSize(8);
   for(const [a,b] of frameRows){doc.setTextColor(...muted);text(a,M,y2);doc.setTextColor(...ink);text(b,M+50,y2);y2+=6;}
   doc.setTextColor(...muted);text(wrap('~ = estimated outer envelope. Verify top mounts, clearances and acrylic contours against the actual model. Not a cutting or load-rated drawing.',W-2*M),M,y2+3);
@@ -207,7 +210,7 @@ async function make(d) {
     stats.forEach(([name,value],i)=>{const x=M+i*45.5;doc.setFillColor(243,246,243);doc.roundedRect(x,y,41.5,24,2,2,'F');doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(...muted);text(name,x+4,y+7);doc.setFontSize(16);doc.setTextColor(...(i===1&&m.maxT>40?[164,78,34]:ink));text(value,x+4,y+17);});
     y+=34;
     const blue=[37,99,235], warm=[196,73,40];
-    const kk=Math.min(60/280,118/(m.h*U)), rw=280*kk, bay=222*kk, rx=M+13, ry=y+20, layerH=U/2*kk, bh=m.h*U*kk, post=(rw-bay)/2;
+    const kk=Math.min(60/outerW,118/(m.h*U)), rw=280*kk, bay=dims.clearWidth*kk, rx=M+13, ry=y+20, layerH=U/2*kk, bh=m.h*U*kk, post=(rw-bay)/2;
     doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(...ink);text('Air temperature and airflow',M,y);
     doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(...muted);text('Front view. Blue arrows: air in; orange: air out (m³/h).',M,y+4.5);
     doc.setFillColor(64,70,66);doc.roundedRect(rx,ry-3,rw,bh+6,1,1,'F');doc.setFillColor(250,250,250);doc.rect(rx+post,ry,bay,bh,'F');

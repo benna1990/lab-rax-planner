@@ -74,7 +74,8 @@
     await check('No errors while building', () => errors.length ? fail(errors.join('; ')) : true);
     await check('PDF at 10U, full: every text line inside the page', async () => { T().setHeight(10); for (const key of ['tiny1', 'fan40', 'keystone']) T().addItem({ key }); await wait(300); // fills the last 2½U
       W.document.querySelector('#finalize-build').close && W.document.querySelector('#finalize-build').close();
-      const f = await download('pdf', /download pdf/i), s = new TextDecoder('latin1').decode(f.buf), pages = (s.match(/\/Type \/Page\b/g) || []).length; const bad = []; let n = 0;
+      const f = await download('pdf', /download pdf/i); window.__lighterFixturePDF = Array.from(f.buf);
+      const s = new TextDecoder('latin1').decode(f.buf), pages = (s.match(/\/Type \/Page\b/g) || []).length; const bad = []; let n = 0;
       for (const blk of s.matchAll(/\bBT\b([\s\S]*?)\bET\b/g)) { let x = 0, y = 0; // the first Td in a text block is absolute, the next ones move from the line before
         for (const m of blk[1].matchAll(/(-?[\d.]+) (-?[\d.]+) Td/g)) { n++; x += +m[1]; y += +m[2]; if (x < 0 || x > 595.3 || y < 14 || y > 841.9) bad.push(x.toFixed(1) + ',' + y.toFixed(1) + ' ' + blk[1].slice(m.index, m.index + 80).replace(/\s+/g, ' ')); } }
       return n > 50 && !bad.length ? pages + ' pages, ' + n + ' text lines inside A4' : fail(bad.length + ' of ' + n + ' text lines outside the page: ' + bad.slice(0, 2).join(' | ')); });
@@ -85,12 +86,30 @@
       const over = []; for (let i = 0; i < txt.length; i++) for (let j = i + 1; j < txt.length; j++) { const a = txt[i], b = txt[j];
         if (a.page === b.page && Math.min(a.r, b.r) - Math.max(a.l, b.l) > .6 && Math.min(a.b, b.b) - Math.max(a.t, b.t) > .6) over.push('p' + a.page + ' “' + a.s + '” × “' + b.s + '”'); }
       const say = e => 'p' + e.page + ' ' + e.k + (e.s ? ' “' + e.s + '”' : '') + ' ' + [e.l, e.t, e.r, e.b].map(v => v.toFixed(1)).join(',');
-      return !out.length && !over.length ? txt.length + ' text lines, ' + (g.length - txt.length) + ' images and boxes, all inside; no overlap'
-        : fail((out.length ? out.length + ' outside: ' + out.slice(0, 3).map(say).join(' | ') + '. ' : '') + (over.length ? over.length + ' overlaps: ' + over.slice(0, 3).join(' | ') : '')); });
+      const margin = txt.filter(e => e.page > 1 && e.t < 26 && e.s !== 'MINI RACK PLANNER' && e.s !== 'Lab Rax · 10U');
+      return !out.length && !over.length && !margin.length ? txt.length + ' text lines, ' + (g.length - txt.length) + ' images and boxes, all inside; no overlap'
+        : fail((out.length ? out.length + ' outside: ' + out.slice(0, 3).map(say).join(' | ') + '. ' : '') + (over.length ? over.length + ' overlaps: ' + over.slice(0, 3).join(' | ') : '') + (margin.length ? ' content above header margin: ' + margin.map(say).join(' | ') : '')); });
     await check('A failed PDF is reported, not silently left out of the build pack', async () => { W.document.querySelector('#finalize-build').close && W.document.querySelector('#finalize-build').close(); const make = W.LRPdf.make; W.LRPdf.make = () => Promise.reject(new Error('test failure'));
       try { const f = await download('pack', /download/i); await wait(300); const st = W.document.getElementById('status').textContent; return /PDF is missing/.test(st) ? f.name + ': ' + st.slice(0, 70) + '…' : fail('status: ' + st); } finally { W.LRPdf.make = make; } });
     await load(link.slice(link.indexOf('#'))); hook();
     await check('Share link opens the same layout', () => { const got = items(); return got === want || fail('got ' + got); });
+    await check('Fuller 10U rack with front and rear parts: PDF content respects the header margin', async () => {
+      T().state.items.splice(0); T().setHeight(10);
+      const front = [['ucgmax1',0],['mw2117690',2],['sbc7',4],['fan40',8],['keystone',10],['tiny1',12],['fan40',14],['vent1',16],['mw2381776',18]];
+      for (const [key, pos] of front) T().addItem(Object.assign({ key }, key === 'sbc7' ? { fill: 4 } : {}), pos);
+      T().addItem({ key: 'fan40', side: 'back' }, 0); T().addItem({ key: 'vent1', side: 'back' }, 2);
+      await wait(300);
+      if (T().state.items.length !== 11 || T().state.items.filter(i => i.side === 'back').length !== 2 || T().state.items[0].pos2 !== 0) fail('full fixture placement differs: ' + JSON.stringify(T().state.items.map(i => [i.key, i.pos2, i.side])));
+      W.document.querySelector('#finalize-build')?.close(); W.__pdfGeom = [];
+      const f = await download('pdf', /download pdf/i), g = W.__pdfGeom; W.__pdfGeom = null;
+      window.__fullFixturePDF = Array.from(f.buf); // lets an independent browser runner render this exact fixture
+      const pages = (new TextDecoder('latin1').decode(f.buf).match(/\/Type \/Page\b/g) || []).length;
+      const bad = g.filter(e => e.page > 1 && e.k === 'text' && e.t < 26 && e.s !== 'MINI RACK PLANNER' && e.s !== 'Lab Rax · 10U');
+      const boxes = g.filter(e => e.page > 1 && e.k !== 'text' && (e.t < 26 || e.b > 280) && !(e.k === 'rect' && e.l === 16 && e.r === 18 && e.t === 14));
+      const outside = g.filter(e => e.k === 'text' ? e.l < 4 || e.r > 206 || e.t < 4 || e.b > 293 : e.l < -.5 || e.r > 210.5 || e.t < -.5 || e.b > 297.5);
+      const texts = g.filter(e => e.k === 'text'), overlap = texts.some((a, i) => texts.slice(i + 1).some(b => a.page === b.page && Math.min(a.r, b.r) - Math.max(a.l, b.l) > .6 && Math.min(a.b, b.b) - Math.max(a.t, b.t) > .6));
+      return pages <= 7 && !bad.length && !boxes.length && !outside.length && !overlap ? pages + ' pages; no content above the header margin; frame and power share the continuation page' : fail(outside.length + ' outside / overlap: ' + overlap + '; ' + pages + ' pages; ' + bad.length + ' text lines / ' + boxes.length + ' boxes cross the content margins');
+    });
   } catch (e) { log(false, 'Self-test stopped', e.message); }
   finally { KEYS.forEach((k, i) => saved[i] == null ? localStorage.removeItem(k) : localStorage.setItem(k, saved[i])); }
   const bad = results.filter(x => !x).length;

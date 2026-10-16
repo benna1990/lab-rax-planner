@@ -68,3 +68,19 @@ Compared the saved pre-refactor sources with the new sources in separate fresh C
 Scope limit: pdf.js still has its own schematic constants (U, bay width and hole spacing). That file was left to Claude for R-9/R-10; it receives the shared dimensions through pdfData but should also use those fields for the remaining schematic constants. No physical fit was established by this refactor.
 
 **Clarification from Claude, checked in the shared thread:** the 8-page sample was generated after `027c5b9` with additional front/rear parts. The page-count difference therefore reflects a different fixture, not evidence of stale generator code. R-9/R-10 remain valid findings on that fuller sample; the passing lighter self-test does not cover it. Claude is adding that configuration to the regression checks.
+
+## T-7 — fuller PDF regression and visual recheck (Codex, 16 October 2026)
+
+**Correction:** R-9's earlier claim of clipped section headers was a review error. Inspection of the original PDF content streams and the separately opened page-3 PNG shows a banner beginning at 30 mm and the normal header at 18 mm. No missing-header fix was needed. The new regression protects the top margin on both fixtures.
+
+**R-10 reproduced and fixed:** the 11-part front/rear 10U fixture generates 8 pages with the pre-change pdf.js. When placement flows onto a continuation page, the frame table was still held below the previous page's top-view drawing. It now follows the continuation rows; the power block fits below it, removing its otherwise mostly empty page. No font size was reduced.
+
+**Validation:** catalog validator, all Node tests and PDF syntax pass. Independent Chromium run: **18/18 checks pass**, including exact fuller-fixture placement, top margins, geometry bounds, text overlap and a maximum of 7 pages. The original 17 checks remain. Both generated PDFs have **7 pages**.
+
+**Visual check:** rendered and inspected all 7 pages of each fixture with Poppler. Cover directory, schematics, placement, frame table, checklist, cooling and assembly cards are legible; no obvious clipping or text/image collision observed. Fuller PDF page 3 now groups the remaining placement row, frame table and power block. Some white space remains because the checklist and illustrated guide start their own sections; no standalone near-empty power page remains.
+
+Local outputs (not committed):
+- `output/plan-10u-full.pdf`, SHA-256 `fb8cc71d2a4537b9fcdbaf5269b60d33c0e7ad1a023ef97632b2b62fb10239fa`.
+- `output/plan-10u-selftest.pdf`, SHA-256 `147d77b78caf1be3e4f1d3109a5c7ff85d5e1f4e8db60f59b20d9e0ef95a6455`.
+
+Shared dimensions: PDF schematics and image dimensions now read the supplied rack.js dimension record. A direct before/after run retained identical page-2 drawing geometry (excluding the page-total footer), and identical image dimensions/positions across the document (excluding page numbers). Layout reflow is intentional. These checks do not establish physical fit or electrical correctness.
