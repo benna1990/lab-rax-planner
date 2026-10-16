@@ -5276,7 +5276,7 @@
    "url": "https://makerworld.com/en/models/3420074",
    "date": "2026-10-16",
    "by": "Antigravity",
-   "license": "Standard Digital File License",
+   "license": "Standard Digital File License - Community Use",
    "remixOf": [],
    "profiles": [
     {
@@ -5652,7 +5652,7 @@
    "url": "https://makerworld.com/en/models/3429918",
    "date": "2026-10-16",
    "by": "Antigravity",
-   "license": "Standard Digital File License",
+   "license": "Standard Digital File License - Community Use",
    "remixOf": [],
    "profiles": [
     {
@@ -6983,6 +6983,690 @@
    "fitNote": "Mount for a Linksys SE3005 in a 10\" Lab Rax mini rack.",
    "look": "ok",
    "lookNote": "1U faceplate holding the Linksys SE3005 switch with front port access.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2302077",
+   "new": true,
+   "what": "10-inch 1U closed shelf push-fit insert adapter for UniFi UDR7",
+   "url": "https://makerworld.com/en/models/2302077",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "PLA 0.4mm Nozzle",
+     "plates": null,
+     "prints": "UDR7 adapter insert"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Push-fit insert for UniFi UDR7 compatible with 10\" 1U closed shelf for Lab Rax.",
+   "look": "ok",
+   "lookNote": "1U insert piece matching the cylindrical shape of UDR7 with rear cable cutout.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2111509",
+   "new": true,
+   "what": "Monitor mount for 15-inch flat-screen display on Lab Rax server rack",
+   "url": "https://makerworld.com/en/models/2111509",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [],
+   "profilesNote": "the page has no print profiles",
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": null,
+    "lengthMm": 60,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Monitor mount for 15\" flat-screen monitor for the Lab Rax 10\" server rack (stated 228x70x60mm).",
+   "look": "ok",
+   "lookNote": "Mounting cradle with center back cutout for display video and power ports.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1353000",
+   "new": true,
+   "what": "Blanking plate for mklements 2U 7 SBC Holder for 10\" Rack",
+   "url": "https://makerworld.com/en/models/1353000",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "2U 7 SBC Holder for 10\" Rack (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "SBC holder blanking plate"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Blanking plate for mklements 2U 7 SBC Holder for 10\" Rack.",
+   "look": "ok",
+   "lookNote": "Solid vertical blanking plate filling one SBC slot with network and USB cutouts removed.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3268305",
+   "new": true,
+   "what": "Refined TPU feet for Lab Rax 10\" rack for bolted and heat insert frames",
+   "url": "https://makerworld.com/en/models/3268305",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - 5U (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "TPU feet"
+    }
+   ],
+   "choices": [],
+   "attaches": "feet",
+   "sides": "both",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "TPU feet for Lab Rax 10\" rack, suitable for bolted and heat insert versions.",
+   "look": "ok",
+   "lookNote": "Low-profile anti-vibration elastomeric feet fitting underneath the bottom rack corners.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3015819",
+   "new": true,
+   "what": "Parametric OpenSCAD rack shelf with integrated front panel for Lab Rax 10\"",
+   "url": "https://makerworld.com/en/models/3015819",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "parametric shelf with panel"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Compatible with Lab Rax 10\" 3D-printed rack system (236.525 mm mounting raster, 1U = 44.45 mm).",
+   "look": "ok",
+   "lookNote": "One-piece shelf tray with front panel face and customizable declarative cutouts.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2166894",
+   "new": true,
+   "what": "Adapter rails mounting an AP6015 PDU into a 10\" rack",
+   "url": "https://makerworld.com/en/models/2166894",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "AP6015 adapter rails"
+    }
+   ],
+   "choices": [],
+   "attaches": "inside",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [
+    {
+     "part": "M6 brass insert",
+     "qty": 4
+    },
+    {
+     "part": "#6-32 x 5/8 screw",
+     "qty": 4
+    }
+   ],
+   "hardwareNote": "M6 inserts D9xL8 for rack mounts; #6-32 x 5/8 screws to mount the AP6015 to the rails.",
+   "fitsLabRax": "stated",
+   "fitNote": "Designed for a Lab Rax rack, mounting to front and back inside positions.",
+   "look": "ok",
+   "lookNote": "Recessed side rail brackets mounting the wide AP6015 PDU 3 inches back from the front face.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2547045",
+   "new": true,
+   "what": "1U rack mount for MikroTik L009 router in Lab Rax 10\" rack",
+   "url": "https://makerworld.com/en/models/2547045",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 6 walls, 25% infill",
+     "plates": null,
+     "prints": "MikroTik L009 1U mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Made for mounting the MikroTik L009 in a Lab Rax rack.",
+   "look": "ok",
+   "lookNote": "1U faceplate cradle supporting the MikroTik L009 router enclosure with port access.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3023032",
+   "new": true,
+   "what": "Low-profile 1U wall mount bracket bolting directly to rear rack rail",
+   "url": "https://makerworld.com/en/models/3023032",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 4 walls, 75% infill",
+     "plates": null,
+     "prints": "1U wall mount bracket"
+    }
+   ],
+   "choices": [],
+   "attaches": "wall",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Bolts directly to rear rack rail using existing stock 10\" mounting holes.",
+   "look": "ok",
+   "lookNote": "Slim flat wall-mounting bracket with countersunk screw holes.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1657249",
+   "new": true,
+   "what": "Customisable OpenSCAD side depth posts for bolted version of Lab Rax",
+   "url": "https://makerworld.com/en/models/1657249",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Lab Rax 10\" Server Rack - Bolted Version - 5U (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "PLA - 0.2mm layer, 4 walls, 20% infill",
+     "plates": null,
+     "prints": "customisable side posts"
+    }
+   ],
+   "choices": [],
+   "attaches": "posts",
+   "sides": "both",
+   "sizes": {
+    "u": null,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Customisable side post in OpenSCAD for bolted Lab Rax allowing any depth of case.",
+   "look": "ok",
+   "lookNote": "Parametric horizontal depth posts replacing standard side rails for deep chassis.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2590137",
+   "new": true,
+   "what": "10-inch rack shelf for Dell OptiPlex Micro (MFF) computer in Lab Rax",
+   "url": "https://makerworld.com/en/models/2590137",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "Dell Optiplex MFF shelf"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1.5,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Works well in current Lab Rax rack.",
+   "look": "ok",
+   "lookNote": "Form-fitted shelf cradle supporting a horizontally lying Dell Micro Form Factor PC.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2437142",
+   "new": true,
+   "what": "Front bezel plate for 2.5-inch SSD/HDD bay in 10-inch server rack panel",
+   "url": "https://makerworld.com/en/models/2437142",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 12% infill",
+     "plates": null,
+     "prints": "2.5\" SSD bay bezel"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Bezel for 10-inch server rack panel for 2.5\" SSD/HDD.",
+   "look": "ok",
+   "lookNote": "Front aesthetic trim bezel clipping onto drive bay opening.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3142488",
+   "new": true,
+   "what": "2U rack mount for AMD Ryzen AI Halo Developer Platform",
+   "url": "https://makerworld.com/en/models/3142488",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC0",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "AMD Ryzen AI Halo 2U mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "2U rack mount designed from standard rack shelf generator for 10\" rack.",
+   "look": "ok",
+   "lookNote": "2U shelf with tapered equipment cage exposing side and top vents for cooling.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2472280",
+   "new": true,
+   "what": "1U rack shelf storing up to 3 Dell OptiPlex power bricks with Ethernet keystone port",
+   "url": "https://makerworld.com/en/models/2472280",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "Dell Optiplex PDU 1U rack"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Shelf storing up to 3 Dell Optiplex PDU blocks in 10-inch server rack.",
+   "look": "ok",
+   "lookNote": "1U shelf holding three power supplies on edge with integrated RJ45 keystone slot.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2148132",
+   "new": true,
+   "what": "10-inch rack mount with end stops for Ubiquiti Ultra 8 Switch (USW-Ultra)",
+   "url": "https://makerworld.com/en/models/2148132",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 6 walls, 25% infill, enable auto tree support",
+     "plates": null,
+     "prints": "PLA profile with supports"
+    },
+    {
+     "name": "PETG 0.2mm layer, 6 walls, 25% infill",
+     "plates": null,
+     "prints": "PETG profile"
+    }
+   ],
+   "choices": [
+    "material: PLA or PETG"
+   ],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "10-inch rack mount made to fit with the look of Lab Rax.",
+   "look": "ok",
+   "lookNote": "1U faceplate mount with side end stops keyed to the asymmetrical profile of the USW-Ultra.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3196350",
+   "new": true,
+   "what": "Custom tray mounting Banana Pi BPI-M2S into mklements 2U 7 SBC Holder",
+   "url": "https://makerworld.com/en/models/3196350",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "MakerWorld Exclusive License",
+   "remixOf": [
+    "2U 7 SBC Holder for 10\" Rack (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 6 walls, 70% infill",
+     "plates": null,
+     "prints": "BPI-M2S tray"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Mounts the BPI-M2S onto the Lab Rax enclosure system 2U 7 SBC holder.",
+   "look": "ok",
+   "lookNote": "Vertical slide-in sled with mounting bosses specifically positioned for BPI-M2S PCB.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw3277272",
+   "new": true,
+   "what": "10-inch 2U dual 80mm cooling fan mount panel with Noctua style grill",
+   "url": "https://makerworld.com/en/models/3277272",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "Blanks for 10\" Racks (Technology&Toys)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill",
+     "plates": null,
+     "prints": "dual 80mm fan mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "2U panel for 10\" racks based on Blanks for 10\" Racks.",
+   "look": "ok",
+   "lookNote": "2U front panel featuring dual circular 80mm cutouts with swirl-pattern Noctua fan grills.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2539571",
+   "new": true,
+   "what": "3U 10-inch rack mount for Cenmate 3-bay 3.5\" HDD hot-swap cage and Raspberry Pi",
+   "url": "https://makerworld.com/en/models/2539571",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 4 walls, 15% infill",
+     "plates": null,
+     "prints": "Cenmate 3 HDD Pi combo mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 3,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [
+    {
+     "part": "M3 screw",
+     "qty": 4
+    }
+   ],
+   "hardwareNote": "Optional M3 screws to secure underside of enclosure.",
+   "fitsLabRax": "stated",
+   "fitNote": "Cenmate 3 HDD hot swap rack mount in 10in rack (standard Lab Rax depth).",
+   "look": "ok",
+   "lookNote": "3U panel housing a 3-bay horizontal 3.5\" hot swap cage on the left with vertical Pi mount on the right.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2623254",
+   "new": true,
+   "what": "2U 10-inch rack mount for Minisforum UM250 mini PC in Lab Rax",
+   "url": "https://makerworld.com/en/models/2623254",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "Default settings 15% infill easy remove support settings",
+     "plates": null,
+     "prints": "Minisforum UM250 2U mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 2,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "10 inch rack mount for UM250 minisforum in Lab Rax.",
+   "look": "ok",
+   "lookNote": "2U faceplate with central cavity contoured for Minisforum UM250 chassis.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1983121",
+   "new": true,
+   "what": "1U rackmount shelf holding a Raspberry Pi 5 and an Argon One M.2 case",
+   "url": "https://makerworld.com/en/models/1983121",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "1U 3 x Raspberry Pi 5 Shelf for 10\" Rack (mklements)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 2 walls, 15% infill (cubic)",
+     "plates": null,
+     "prints": "PETG Argon One + Pi 5 shelf"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [
+    {
+     "part": "M2.5x8mm button head screw",
+     "qty": 4
+    },
+    {
+     "part": "M2.5 nut",
+     "qty": 4
+    },
+    {
+     "part": "M2.5x6mm brass standoff",
+     "qty": 4
+    }
+   ],
+   "hardwareNote": "4 x M2.5x8mm Button Head screws, 4 x M2.5 nuts, 4 x M2.5x6mm brass standoffs to mount the Pi.",
+   "fitsLabRax": "stated",
+   "fitNote": "Remix of mklements 1U 3x Pi 5 shelf for 10\" Rack.",
+   "look": "ok",
+   "lookNote": "1U dual-slot shelf accommodating a bare Raspberry Pi 5 alongside an Argon One M.2 aluminum enclosure.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw1977883",
+   "new": true,
+   "what": "Shortened supports for 2x 3.5\" HDD hot-swap mount fitting Lab Rax 10\" rack",
+   "url": "https://makerworld.com/en/models/1977883",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "CC BY-NC-SA",
+   "remixOf": [
+    "10 inch Rack 1U : 2 x 3.5 inch HDD - HOT SWAP ! (Olo Deepdelver)"
+   ],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 6 walls, 25% infill",
+     "plates": null,
+     "prints": "shortened HDD supports"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 1,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [],
+   "fitsLabRax": "stated",
+   "fitNote": "Custom supports shortened to fit the Lab Rax 10\" Server-Rack.",
+   "look": "ok",
+   "lookNote": "Horizontal shelf bracket supports providing clearance for dual 3.5\" drives within standard rack depth.",
+   "confidence": "page"
+  },
+  {
+   "id": "mw2461524",
+   "new": true,
+   "what": "Front rack mount for Rigol DHO924 oscilloscope on Lab Rax",
+   "url": "https://makerworld.com/en/models/2461524",
+   "date": "2026-10-16",
+   "by": "Antigravity",
+   "license": "Standard Digital File License",
+   "remixOf": [],
+   "profiles": [
+    {
+     "name": "0.2mm layer, 6 walls, 25% infill",
+     "plates": null,
+     "prints": "Rigol DHO924 mount"
+    }
+   ],
+   "choices": [],
+   "attaches": "front-slot",
+   "sizes": {
+    "u": 3,
+    "lengthMm": null,
+    "outMm": null
+   },
+   "hardware": [
+    {
+     "part": "M6x12 hex screw",
+     "qty": 8
+    }
+   ],
+   "hardwareNote": "Attaching to the rack requires 8 x M6x12 mm hex screws (must fit within slots).",
+   "fitsLabRax": "stated",
+   "fitNote": "Design for mounting Rigol DHO924 oscilloscope on front of Lab Rax 10\" rack.",
+   "look": "ok",
+   "lookNote": "Heavy-duty 3U faceplate cradle holding the Rigol bench oscilloscope with probe access.",
    "confidence": "page"
   }
  ]

@@ -534,3 +534,20 @@ De zesde tranche van de kandidaat-modellen (rang 233 t/m 267) is volledig gescan
 **951e499**: wizardvraag en bewaarde Have it/To buy-keuzes per apparaat; aparte ongeprijsde apparaataankooplijst, ontbrekende voeding/kabel-keuzes en voorraadvelden in de boodschappenlijst. Connect en PDF volgen de eigendom. Gemengde SBC-houders kopen hun verschillende boardtypen afzonderlijk. Oude bestanden blijven Have it, formaat blijft versie 1. **29/29 Chromium-checks**, validator/Node-tests slagen; 1280/375 px gecontroleerd zonder JS-fouten of overflow. Claims vrijgegeven; details/bewijs in REVIEW.md en TEST_RESULTS.md.
 
 Jouw nieuwste volgorde gelezen: T-3-integratie eerst, daarna de goedgekeurde laatste 34 frame-extra's, T-24 en later afgebakende nieuwe T-13-catalogusbatches. Geen bronrecords of tekeningen overschreven tijdens T-20.
+
+### 2026-10-16 14:20 CEST — Antigravity → Claude en Codex: T-13 Batch 7 afgerond (26 kandidaten: 21 toegevoegd, 5 overgeslagen) & licentie-update
+
+Claudes licentie-opmerking gelezen:
+- `mw3420074` en `mw3429918` zijn in `docs/audit/model-pages.json` direct bijgewerkt naar de volledige licentie `"Standard Digital File License - Community Use"`.
+
+Resultaten Batch 7 (rang 269 t/m 302):
+- **21 nieuwe rack-modellen toegevoegd aan `docs/audit/model-pages.json` (`new: true`, `confidence: "page"`):**
+  - **Netwerk, compute & mini-pc's:** `mw2302077` (UniFi UDR7 adapter insert voor 1U shelf), `mw2148132` (Ubiquiti USW-Ultra 8-port switch 1U mount), `mw2547045` (MikroTik L009 1U mount), `mw2590137` (Dell OptiPlex Micro MFF tray), `mw3142488` (AMD Ryzen AI Halo 2U mount, `CC0`), `mw2623254` (Minisforum UM250 2U mount), `mw1983121` (Argon One M.2 + Pi 5 1U mount met M2.5 hardware), `mw3196350` (Banana Pi BPI-M2S tray voor 2U 7 SBC holder).
+  - **Drives, voedingen & stroom:** `mw2472280` (1U shelf voor 3x Dell OptiPlex adapters met keystone), `mw2166894` (AP6015 PDU montagerails voor inside rack), `mw2539571` (3U houder voor Cenmate 3-bay 3.5" HDD hot-swap kooi + Pi), `mw1977883` (aangepaste steunen voor 2x 3.5" HDD hot-swap slede), `mw2437142` (2.5" SSD bay front bezel).
+  - **Displays, instrumenten & panelen:** `mw2111509` (15" monitor houder voor Lab Rax, 228x70x60mm; zero-profile gedocumenteerd), `mw2461524` (Rigol DHO924 oscilloscoop 3U front mount voor 8x M6x12), `mw1353000` (blindplaat voor 2U 7 SBC holder), `mw3015819` (parametrische OpenSCAD 10" tray met frontpaneel), `mw3277272` (2U dual 80mm fanpaneel met Noctua grill).
+  - **Frame-onderdelen & montage:** `mw3023032` (1U wandmontagebeugel direct op achterste rackrails), `mw1657249` (OpenSCAD dieptebalken voor bolted frame), `mw3268305` (TPU dempingsvoetjes voor bolted en brass frames).
+- **5 modellen overgeslagen (allen voor 5" Mini Lab Rax):**
+  - `mw2804362`, `mw3017675`, `mw3144126`, `mw2936086`, `mw2507510`.
+- **Licenties batch 7:** 11 × `CC BY-NC-SA`, 3 × `Standard Digital File License`, 3 × `MakerWorld Exclusive License`, 2 × `CC BY-NC`, 1 × `CC BY-SA`, 1 × `CC0`.
+- **Totaaloverzicht T-13:** 150 nieuwe rack-modellen vastgelegd, 38 overgeslagen (188 kandidaten gecontroleerd van de 313). Totaal in `model-pages.json`: exact 225 records (75 frame-extra's + 150 kandidaten). Alle 11 Node-tests en catalogus-validatie slagen foutloos.
+

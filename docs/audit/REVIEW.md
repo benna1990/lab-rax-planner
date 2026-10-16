@@ -1105,3 +1105,50 @@ Latest sequencing read: after T-20, T-3 integration → reviewed T-10 batch 3 �
 - 66 match.
 - 2 lose a suffix: `mw3420074` and `mw3429918` are "Standard Digital File License **- Community Use**" on their pages. **Antigravity:** copy the licence in full, suffix included.
 - 36 records are still being read.
+
+*Antigravity, 16 October 2026:* `mw3420074` and `mw3429918` licences updated to `"Standard Digital File License - Community Use"` in `docs/audit/model-pages.json`.
+
+### Antigravity — T-13 Batch 7: 26 Candidate Models Inspected (21 Added, 5 Skipped), 16 October 2026
+
+Seventh tranche of candidate models from `docs/audit/model-candidates.json` inspected (covering ranks 269 through 302):
+
+**21 Rack parts documented in `docs/audit/model-pages.json` (`new: true`, `confidence: "page"`):**
+1. `mw2302077` (Rank 269): 10-inch 1U closed shelf push-fit insert adapter for UniFi UDR7 (`MakerWorld Exclusive License`).
+2. `mw2111509` (Rank 270): Monitor mount for 15-inch flat-screen display on Lab Rax server rack (`CC BY-NC-SA`). Confirmed zero-profile model (`profiles: []`, `profilesNote` added). Stated dimensions 228x70x60mm.
+3. `mw1353000` (Rank 272): Blanking plate for mklements 2U 7 SBC Holder for 10" Rack (`CC BY-NC-SA`).
+4. `mw3268305` (Rank 274): Refined TPU feet for Lab Rax 10" rack for bolted and heat insert frames (`Standard Digital File License`).
+5. `mw3015819` (Rank 278): Parametric OpenSCAD rack shelf with integrated front panel for Lab Rax 10" (`CC BY-SA`).
+6. `mw2166894` (Rank 279): Adapter rails mounting an AP6015 PDU into a 10" rack (`CC BY-NC`). Uses 4x M6 inserts and 4x #6-32 screws.
+7. `mw2547045` (Rank 280): 1U rack mount for MikroTik L009 router in Lab Rax 10" rack (`MakerWorld Exclusive License`).
+8. `mw3023032` (Rank 281): Low-profile 1U wall mount bracket bolting directly to rear rack rail (`CC BY-NC-SA`).
+9. `mw1657249` (Rank 285): Customisable OpenSCAD side depth posts for bolted version of Lab Rax (`CC BY-NC-SA`).
+10. `mw2590137` (Rank 287): 10-inch rack shelf for Dell OptiPlex Micro (MFF) computer in Lab Rax (`CC BY-NC-SA`).
+11. `mw2437142` (Rank 288): Front bezel plate for 2.5-inch SSD/HDD bay in 10-inch server rack panel (`CC BY-NC-SA`).
+12. `mw3142488` (Rank 289): 2U rack mount for AMD Ryzen AI Halo Developer Platform (`CC0`).
+13. `mw2472280` (Rank 291): 1U rack shelf storing up to 3 Dell OptiPlex power bricks with Ethernet keystone port (`CC BY-NC-SA`).
+14. `mw2148132` (Rank 292): 10-inch rack mount with end stops for Ubiquiti Ultra 8 Switch (USW-Ultra) (`Standard Digital File License`).
+15. `mw3196350` (Rank 295): Custom tray mounting Banana Pi BPI-M2S into mklements 2U 7 SBC Holder (`MakerWorld Exclusive License`).
+16. `mw3277272` (Rank 296): 10-inch 2U dual 80mm cooling fan mount panel with Noctua style grill (`CC BY-NC-SA`).
+17. `mw2539571` (Rank 298): 3U 10-inch rack mount for Cenmate 3-bay 3.5" HDD hot-swap cage and Raspberry Pi (`CC BY-NC-SA`). Optional M3 screws.
+18. `mw2623254` (Rank 299): 2U 10-inch rack mount for Minisforum UM250 mini PC in Lab Rax (`CC BY-NC`).
+19. `mw1983121` (Rank 300): 1U rackmount shelf holding a Raspberry Pi 5 and an Argon One M.2 case (`CC BY-NC-SA`). Uses 4x M2.5x8 screws, 4x M2.5 nuts, 4x M2.5x6 standoffs.
+20. `mw1977883` (Rank 301): Shortened supports for 2x 3.5" HDD hot-swap mount fitting Lab Rax 10" rack (`CC BY-NC-SA`).
+21. `mw2461524` (Rank 302): Front rack mount for Rigol DHO924 oscilloscope on Lab Rax (`Standard Digital File License`). Uses 8x M6x12 hex screws.
+
+**5 Non-rack / incompatible models skipped (with reasons):**
+- `mw2804362` (Rank 275): "LabRax Mini (5\") Shelf" by Dave MacRae — Skipped: for 5-inch Mini Lab Rax.
+- `mw3017675` (Rank 276): "Intel Nuc 7th Gen Server Rack for Lab Rax Mini" by LexGear — Skipped: for 5-inch Mini Lab Rax.
+- `mw3144126` (Rank 283): "Mini Lab Rax Verizon MoCA Mount (ASK-MAE340)" by Caleb — Skipped: for 5-inch Mini Lab Rax.
+- `mw2936086` (Rank 284): "Mini Lab Rax - Rasberry Pi 4 Rack" by Propella — Skipped: for 5-inch Mini Lab Rax.
+- `mw2507510` (Rank 293): "Mini Lab Rax 5\" 1U TPLink Litewave 5 Port Rack" by mklements — Skipped: for 5-inch Mini Lab Rax.
+
+**License breakdown across Batch 7 (21 records):**
+- 11 × `CC BY-NC-SA`
+- 3 × `Standard Digital File License`
+- 3 × `MakerWorld Exclusive License`
+- 2 × `CC BY-NC`
+- 1 × `CC BY-SA`
+- 1 × `CC0`
+
+**Running total for T-13:** 150 new rack parts documented in `model-pages.json`, 38 models skipped (188 candidates checked). Total records in `model-pages.json` is now 225 (75 frame-extras + 150 candidates). All test suites and catalog validation pass.
+
