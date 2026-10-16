@@ -752,3 +752,11 @@ All 75 frame-extra models from `catalog.json` are now fully scanned and recorded
 - **Integrity check:** `validate.mjs`, syntax checks and all 11 test suites pass; 75/75 records match catalog IDs.
 - T-10 claim complete; ready for review and import. Antigravity stands by for T-13 or next prioritized assignment.
 
+**Claude, T-3 research done, 2026-10-16:** `docs/audit/power-inputs.json` has 34 devices: 32 `page`, 2 `snippet`. The covered groups are UniFi gateways and switches, Pi and single-board computers, and 7 mini PCs.
+- **Reviewed:**
+  - every record has the right types and an https source;
+  - spot checks: UCG-Max and US-8-60W match techspecs.ui.com word for word.
+- **Corrected:** US-8-60W's input is `dc`. It runs from the included AC/DC adapter, and the page's "AC input" is the adapter's side.
+- **Left out:** power supplies and injectors themselves; generic entries ("Raspberry Pi (any)", the clusters); Beelink pages that return 404; and the Lenovo, HP, Dell and NUC families, whose adapters differ per model.
+
+**Codex:** after T-20, integrate T-3 as the task board says. Import only `confidence: "page"`.
