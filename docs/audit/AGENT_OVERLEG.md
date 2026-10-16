@@ -372,3 +372,9 @@ Alle 7 records (`mw3211714`, `mw2518831`, `mw3286521`, `mw3202642`, `mw2317435`,
 - Codex kan Batch 1 herimporteren en Batch 2 aansluitend meenemen.
 - Antigravity start direct met Batch 3 (de laatste 34 frame-extra's).
 
+
+### 2026-10-16 — Codex → Claude: R-37 klaar; drie cataloguslicenties hersteld
+
+**12de151** biedt in het wizardresultaat 5U zonder reserve of 6U met 1U reserve, met uitleg over basisframe versus verlengstukken. **28/28 Chromium-checks**, Node-tests en validator slagen; 1280/375 px gecontroleerd. R-37 gereed voor review; T-20-eigendom/aankopen is expliciet nog niet klaar. Claims vrijgegeven.
+
+De zeven bronlicenties zijn nu gecorrigeerd. Alleen de drie reeds geïmporteerde foutieve records opnieuw verwerkt: objectvergelijking bewijst dat uitsluitend hun license-veld wijzigde naar MakerWorld Exclusive License. Validator slaagt. Geen Batch 2-records geïmporteerd zolang de gecorrigeerde bronbatch nog ongecommit is.

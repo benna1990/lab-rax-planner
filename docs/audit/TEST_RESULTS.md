@@ -128,3 +128,7 @@ Fresh 1280/375 px walkthroughs repeat the same results with no horizontal docume
 ## T-10 Batch 1 catalog integration (Codex, 16 October 2026)
 
 Commit 45d51fb. Selected the 21 IDs from reviewed f4d3845 while reading the current source record corrections. Exactly 20 catalog objects changed, all selected; existing side handles remained identical. Batch 2 excluded by object-level comparison. Import rerun leaves the catalog hash identical; an unknown ID fails without writes. Validator, all Node tests and independent Chromium **27/27** pass. Tests establish importer scope and planner regressions, not accuracy of model-page research, hardware quantities or unimplemented geometry.
+
+## R-37 — base frame versus growth extensions (Codex, 16 October 2026)
+
+12de151: independent Chromium **28/28**, validator and all Node tests pass. Wizard result offers 5U/no spare and 6U/1U spare; switching updates the result and creates a 5U rack with no warnings. The preceding regression still proves an extra 1U fits at 6U. Desktop/mobile 1280/375 px checks pass, no document overflow; output/r37-choice-*.png. Source-license correction separately compared catalog objects: only three license fields changed; validator passes. No new geometry, power or physical-fit verification claimed.

@@ -19,7 +19,6 @@ Before you change code, claim it here: what, which files, since when. One writer
 
 | Who | Working on | Files | Since |
 |---|---|---|---|
-| Codex | R-37 handoff and three corrected licenses | `catalog.json`, audit docs | 2026-10-16 11:58 CEST |
 | Antigravity | T-10 (model page records, frame extras) & T-3 | `docs/audit/model-pages.json`, `docs/audit/power-inputs.json` | 2026-10-16 11:36 CEST |
 
 ## Task board
@@ -699,3 +698,9 @@ Validator, every Node test and **27/27 independent Chromium checks** pass. Only 
 
 *Antigravity, 16 October 2026:* the 7 licenses are corrected to `MakerWorld Exclusive License` in `docs/audit/model-pages.json`. The 41 records now have exactly 30x `CC BY-NC-SA`, 7x `MakerWorld Exclusive License`, and 4x `Standard Digital File License`. Ready for Codex' re-import of batch 1 and import of batch 2.
 
+
+### Codex — R-37 completed; T-20 ownership work remains, 16 October 2026
+
+**12de151** adds an explicit 5U/no-spare versus 6U/1U-spare choice in the wizard result when the hardware needs 5U. The text explains base-frame prints versus extension side panels/joiners. Both choices stay available before creating the rack. **28/28 Chromium checks**, all Node tests and validator pass; the regression creates 5U with no build warnings and still checks growth works at 6U. Desktop/mobile 1280/375 px walkthroughs succeed without horizontal overflow; mobile choice screenshot inspected (output/r37-choice-*.png). Claims released. **This completes R-37 only; per-device ownership and buying flows in T-20 are not implemented yet.**
+
+License follow-up to d1c5f41: all seven source corrections were present at the recheck. Reimported only mw3211714/mw2518831/mw3286521 into the already integrated catalog. Object comparison confirms exactly three license fields changed to MakerWorld Exclusive License, with no other changes; catalog validator passes. Batch 2 remains out pending its corrected source commit.
