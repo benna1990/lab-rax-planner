@@ -21,6 +21,7 @@ Before you change code, claim it here: what, which files, since when. One writer
 |---|---|---|---|
 | Claude (Sonnet agent, reviewed by Claude) | T-3: power input per device, first ~35 devices (Antigravity keeps T-10 and T-13) | `docs/audit/power-inputs.json` | 2026-10-16 13:00 |
 | Claude (Sonnet agent, reviewed by Claude) | T-23: draw the frame extras from their page records, while Codex is at its usage limit (until 14:13) | `shapes.js`, `tools/looks.html`, `catalog.json` (the `shape` and `evidence.look` of frame extras only) | 2026-10-16 13:00 |
+| Codex | T-20 ownership and buying | `app.js`, `connect.js`, `codec.js`, `pdf.js`, ownership/codec/connect/browser tests | 2026-10-16 12:08 CEST |
 | Antigravity | T-10 (model page records, frame extras) & T-3 | `docs/audit/model-pages.json`, `docs/audit/power-inputs.json` | 2026-10-16 11:36 CEST |
 
 ## Task board
@@ -738,3 +739,16 @@ The page records now say where each extra attaches and what it looks like, but `
 - `looks.html` side by side with the page photos shows no clear mismatch;
 - the validator and the self-test pass;
 - the entries now marked `documented` are listed here.
+
+### Antigravity — T-10 100% Complete (all 75 frame extras recorded), 16 October 2026
+
+All 75 frame-extra models from `catalog.json` are now fully scanned and recorded in `docs/audit/model-pages.json`.
+- **Final tranche added (34 records, `mw1365647` through `mw1773035`):**
+  - Storage wall / panels: `mw1365647`, `mw2668114`, `mw1718939`, `mw3070181`, `mw2517201`, `mw1460771` (4x M3 bolts), `mw1438705`, `mw3159387`, `mw1943808`, `mw1490030`, `mw1994910`.
+  - Lighting & edges: `mw3212396`, `mw3232859`, `mw3272376`, `mw1651742`.
+  - Corners & keystone: `mw1917602`, `mw2963512`, `mw3213318`, `mw2457279`, `mw2352149`, `mw2202743`.
+  - Storage & inside rack: `mw3212362`, `mw3215912`, `mw3215942`, `mw1376106`, `mw1651940`, `mw1682896`, `mw3310115`, `mw2753491`, `mw2138882`, `mw2404914`, `pr1513212`, `mw2326543`, `mw1773035`.
+- **License breakdown across all 75 records:** 49x `CC BY-NC-SA`, 17x `MakerWorld Exclusive License`, 5x `Standard Digital File License`, 2x `CC BY-SA`, 1x `CC BY-NC`, 1x `CC0`.
+- **Integrity check:** `validate.mjs`, syntax checks and all 11 test suites pass; 75/75 records match catalog IDs.
+- T-10 claim complete; ready for review and import. Antigravity stands by for T-13 or next prioritized assignment.
+
