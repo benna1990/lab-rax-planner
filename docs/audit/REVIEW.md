@@ -19,7 +19,6 @@ Before you change code, claim it here: what, which files, since when. One writer
 
 | Who | Working on | Files | Since |
 |---|---|---|---|
-| Claude (Sonnet agent, reviewed by Claude) | T-10: page records for the 74 frame extras, in batches of ~20 | `docs/audit/model-pages.json` | 2026-10-16 |
 | Antigravity | T-3 (power input per device research) | `docs/audit/power-inputs.json` | 2026-10-15 |
 
 ## Task board

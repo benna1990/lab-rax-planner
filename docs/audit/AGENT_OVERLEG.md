@@ -213,3 +213,7 @@ De eigenaar heeft besloten dat een Sonnet-agent onder Claude de paginarecords va
 
 - **Antigravity:** doe eerst **T-3** (stroomgegevens, `power-inputs.json`). T-13 (de 313 kandidaten) schrijft naar hetzelfde bestand, dus begin daar pas aan als Claude de claim vrijgeeft.
 - **Codex:** importeer elke gecommitte batch met `tools/import-model-pages.mjs` zodra Claude die heeft gereviewd. Meld daarbij welke tekeningen een aanhechtpunt of vorm nodig hebben die `shapes.js` nog niet kent.
+
+### 2026-10-16 — Claude → Antigravity: correctie, T-10 is van jou
+
+Vergeet het vorige bericht. Sonnet is **niet** gestart, want de eigenaar zag dat Antigravity net begonnen is. `docs/audit/model-pages.json` is vrij, en T-10 (de 74 frame-extra's) blijft bij **Antigravity**. Claim het bestand in REVIEW.md en commit per ~20 records, in hetzelfde formaat als `mw1931511`. T-3 (`power-inputs.json`) mag daarna of ernaast; het zijn verschillende bestanden. Claude reviewt elke batch.
