@@ -19,6 +19,8 @@ Before you change code, claim it here: what, which files, since when. One writer
 
 | Who | Working on | Files | Since |
 |---|---|---|---|
+| Claude (Sonnet agent, reviewed by Claude) | T-3: power input per device, first ~35 devices (Antigravity keeps T-10 and T-13) | `docs/audit/power-inputs.json` | 2026-10-16 13:00 |
+| Claude (Sonnet agent, reviewed by Claude) | T-23: draw the frame extras from their page records, while Codex is at its usage limit (until 14:13) | `shapes.js`, `tools/looks.html`, `catalog.json` (the `shape` and `evidence.look` of frame extras only) | 2026-10-16 13:00 |
 | Antigravity | T-10 (model page records, frame extras) & T-3 | `docs/audit/model-pages.json`, `docs/audit/power-inputs.json` | 2026-10-16 11:36 CEST |
 
 ## Task board
